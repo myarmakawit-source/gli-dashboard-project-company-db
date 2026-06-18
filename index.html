@@ -741,6 +741,8 @@ td.num.edit{border-bottom:1px dashed #E2DCCF!important}
 .glfun:hover{background:rgba(255,255,255,.3)}
 .glfun.on{background:#F2C200;color:#3B2A63}
 .gltbl td{padding:6px 8px;border-bottom:1px solid var(--line2);border-right:1px solid #F1EDE3;white-space:nowrap;max-width:340px;overflow:hidden;text-overflow:ellipsis;vertical-align:top}
+.gltbl td:hover{cursor:default}
+.gltip{position:fixed;z-index:100000;max-width:520px;background:#1F2937;color:#fff;font-size:12.5px;line-height:1.55;padding:9px 13px;border-radius:9px;box-shadow:0 10px 30px rgba(0,0,0,.34);white-space:normal;word-break:break-word;pointer-events:none;border:1px solid rgba(255,255,255,.14);display:none}
 .gltbl td.num{text-align:right;font-variant-numeric:tabular-nums}
 .gltbl tr:nth-child(even) td{background:var(--rowz)}
 .gltbl td.pos{color:var(--pos);font-weight:700}.gltbl td.negv{color:var(--neg);font-weight:700}
@@ -1353,7 +1355,7 @@ select.ppin{cursor:pointer}
 @media(max-width:640px){.ppgrid2{grid-template-columns:1fr}.pp30bar{flex-direction:column;align-items:flex-start}}
 
 </style>
-<nav class="modnav" role="tablist" aria-label="Modules"><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false">Overall</button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false">Tracking</button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true">BP</button><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false">GL</button><button class="modtab" data-mod="wht" role="tab" aria-selected="false">WHT</button><button class="modtab" data-mod="vat" role="tab" aria-selected="false">VAT</button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false">DOC</button><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false">UP</button><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false">MN</button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false">PT</button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false">AD</button><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v7.05</span></nav>
+<nav class="modnav" role="tablist" aria-label="Modules"><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false">Overall</button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false">Tracking</button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true">BP</button><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false">GL</button><button class="modtab" data-mod="wht" role="tab" aria-selected="false">WHT</button><button class="modtab" data-mod="vat" role="tab" aria-selected="false">VAT</button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false">DOC</button><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false">UP</button><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false">MN</button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false">PT</button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false">AD</button><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v7.06</span></nav>
 <header>
 <div class="letter"><svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0E5C52"></rect><path d="M15 43 L27 31 L35 37 L49 21" fill="none" stroke="#D9A441" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="49" cy="21" r="3.7" fill="#D9A441"></circle><text x="32" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#9FCFC4" letter-spacing="2.5">GLI</text></svg>
 <div class="brand"><div class="brandL"><div class="th">GRANDLINE INNOVATION <span class="th-co">COMPANY LIMITED</span></div><span class="ho">Head Office</span></div><div class="brandR"><div class="addr">333 Soi Lat Phrao 64 Yaek 12, Lat Phrao Road, Wang Thong Lang Sub-District, Wang Thong Lang District, Bangkok 10310</div><div class="taxid">Tax ID · 0105553002230</div></div></div>
@@ -3345,7 +3347,7 @@ function _glHead(){var vis=_glVisCols();var s=_glColgroup()+'<thead><tr>';for(va
     s+='<th><div class="glth"><span class="glsort" data-c="'+c+'" title="Click to sort">'+col.l+arrow+'</span><button class="glfun'+(GLFIL[''+c]?' on':'')+'" data-c="'+c+'" type="button" title="Filter">▼</button><span class="glrz" data-c="'+c+'" title="Drag to resize"></span></div></th>';}
   return s+'</tr></thead>';}
 function _glCell(r,c){
-  if(c===0)return '<td title="'+_eatt(r[0]+' '+r[1])+'"><b>'+esc(r[0])+'</b> '+esc(r[1])+'</td>';
+  if(c===0)return '<td><b>'+esc(r[0])+'</b> '+esc(r[1])+'</td>';
   if(c===1)return '<td>'+(r[2]||'')+'</td>';
   if(c===2)return '<td>'+_glDmy(r[3])+'</td>';
   if(c===6)return '<td>'+_glDmy(r[7])+'</td>';
@@ -3354,7 +3356,6 @@ function _glCell(r,c){
   if(c===16)return '<td class="num">'+(r[17]?fmt(r[17]):'')+'</td>';
   if(c===17){var net=(r[16]||0)-(r[17]||0);return '<td class="num '+(net>0.004?'pos':net<-0.004?'negv':'')+'">'+(Math.abs(net)>0.004?fmt(net):'')+'</td>';}
   if(c===18)return '<td class="num">'+fmt(r[18])+'</td>';
-  if(c===4||c===7||c===14)return '<td title="'+_eatt(r[c+1])+'">'+esc(r[c+1])+'</td>';
   return '<td>'+esc(r[c+1])+'</td>';}
 function _glRowsHtml(a,z){var vis=_glVisCols(),vn=vis.length,s='';var paint=(GLHLPAINT!==-2);for(var i=a;i<z;i++){var r=GLVIEW[i];var hk=_glRowKey(r);var ci=GLHL[hk];var hka=' data-hk="'+_eatt(hk)+'"';var tr=(ci!=null)?('<tr class="glhl'+(paint?' glpaintable':'')+'" style="--hl:'+_GLHLC[ci].bg+'"'+hka+'>'):('<tr'+(paint?' class="glpaintable"':'')+hka+'>');s+=tr;for(var k=0;k<vn;k++)s+=_glCell(r,vis[k]);s+='</tr>';}return s;}
 function _glRebuildTable(){var sc=document.getElementById('glScroll');if(!sc)return;var tbl=sc.querySelector('.gltbl');if(!tbl)return;var savedScroll=sc.scrollTop;tbl.style.width=_glTotalW()+'px';var initN=Math.min(GLVIEW.length,80);var vc=_glVisCols().length;var body=GLVIEW.length?_glRowsHtml(0,initN):'<tr><td colspan="'+vc+'" class="glnone">No rows match the filter</td></tr>';tbl.innerHTML=_glHead()+'<tbody id="glBody">'+body+'</tbody>';_glVSSetupAt(savedScroll);}
@@ -3534,6 +3535,13 @@ function _glDocClose(e){var d=document.getElementById('glDrop');
   if(d.contains(e.target)||(e.target.classList&&e.target.classList.contains('glfun')))return;
   document.removeEventListener('mousedown',_glDocClose);_glCloseDrop();}
 function _glBind(){var pg=document.getElementById('page-gl');if(!pg||pg._gb)return;pg._gb=1;
+  var _tip=null;
+  function _glShowTip(td,e){var txt=(td.textContent||'').replace(/\s+/g,' ').trim();if(!txt){_glHideTip();return;}if(!_tip){_tip=document.createElement('div');_tip.className='gltip';document.body.appendChild(_tip);}_tip.textContent=txt;_tip.style.display='block';_glPosTip(e);}
+  function _glPosTip(e){if(!_tip)return;var pad=15,x=e.clientX+pad,y=e.clientY+pad,w=_tip.offsetWidth,h=_tip.offsetHeight,vw=window.innerWidth,vh=window.innerHeight;if(x+w>vw-8)x=Math.max(8,e.clientX-w-pad);if(y+h>vh-8)y=Math.max(8,e.clientY-h-pad);_tip.style.left=x+'px';_tip.style.top=y+'px';}
+  function _glHideTip(){if(_tip)_tip.style.display='none';}
+  pg.addEventListener('mouseover',function(e){var td=e.target&&e.target.closest?e.target.closest('.gltbl td'):null;if(td&&td.scrollWidth>td.clientWidth+1){_glShowTip(td,e);}else{_glHideTip();}});
+  pg.addEventListener('mousemove',function(e){if(!_tip||_tip.style.display!=='block')return;var td=e.target&&e.target.closest?e.target.closest('.gltbl td'):null;if(td&&td.scrollWidth>td.clientWidth+1){_glPosTip(e);}else{_glHideTip();}});
+  pg.addEventListener('mouseleave',function(){_glHideTip();});
   pg.addEventListener('pointerdown',function(e){var g=e.target&&e.target.closest?e.target.closest('.glrz'):null;if(!g)return;e.preventDefault();e.stopPropagation();
     var c=+g.getAttribute('data-c');var w=_glLoadColW();var startX=e.clientX,startW=w[c]||60;
     var tbl=pg.querySelector('.gltbl');var cols=tbl?tbl.getElementsByTagName('col'):null;var _di=_glVisCols().indexOf(c);var col=(cols&&_di>=0&&cols[_di])?cols[_di]:null;
