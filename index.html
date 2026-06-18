@@ -9,7 +9,8 @@
 --brand:#0E5C52;--brand-d:#0A463E;--brand-t:#E6F0EC;--gold:#A8741A;--gold-d:#8A5E12;--gold-t:#F7EFDD;
 --pos:#15803D;--pos-bg:#E8F3EC;--neg:#B42318;--neg-bg:#FBEAE6;--blue:#1D5FAE;--blue-bg:#E7EFF8;--rowz:#F6F3EC;}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Sarabun',sans-serif;background:linear-gradient(177deg,#FCFBF7 0%,#FAF8F3 22%,#F7F4ED 100%);background-attachment:fixed;color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;padding:16px 18px;min-height:100vh}
+body{font-family:'Sarabun',sans-serif;background:linear-gradient(177deg,#FCFBF7 0%,#FAF8F3 22%,#F7F4ED 100%);background-attachment:fixed;color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;padding:12px 18px;min-height:100vh}
+.doc>header{display:none}
 html{scrollbar-width:thin;scrollbar-color:#D0C9B9 transparent}
 *{scrollbar-width:thin;scrollbar-color:#D0C9B9 transparent}
 ::-webkit-scrollbar{width:11px;height:11px}
@@ -58,7 +59,7 @@ h1{font-size:26px;font-weight:800;letter-spacing:.025em;line-height:1.5;text-tra
 .glmissf{font-size:12.5px;color:#7C2D12;line-height:1.7}
 .glreimp{display:inline-flex;align-items:center;gap:5px;background:#6D28D9;color:#fff;border-radius:8px;padding:5px 12px;font-weight:700;cursor:pointer;font-size:12.5px;margin:0 3px;box-shadow:0 2px 6px rgba(109,40,217,.3)}
 .glreimp:hover{background:#5B21B6}
-.modhero{margin:16px 0 6px;border-radius:12px;padding:11px 18px;display:flex;align-items:center;gap:13px;color:#fff;background:linear-gradient(108deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,0) 40%,rgba(0,0,0,.13) 100%),var(--mh,#0E5C52);box-shadow:0 6px 18px -7px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.16)}
+.modhero{margin:8px 0 6px;border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:13px;color:#fff;background:linear-gradient(108deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,0) 40%,rgba(0,0,0,.13) 100%),var(--mh,#0E5C52);box-shadow:0 6px 18px -7px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.16)}
 .modhero .mh-ic{min-width:30px;height:30px;padding:0 8px;border-radius:8px;background:rgba(255,255,255,.20);border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.20);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;font-family:'IBM Plex Mono',monospace;letter-spacing:.06em;flex:none}
 .modhero .mh-t{font-size:16.5px;font-weight:800;letter-spacing:.02em;line-height:1.2;text-transform:uppercase}
 .modhero .mh-s{font-size:11px;opacity:.92;font-weight:600;margin-top:2px;letter-spacing:.01em}
@@ -96,7 +97,7 @@ section{margin:30px 0}
 .sechead{display:flex;align-items:baseline;gap:11px;margin-bottom:4px}
 .secnum{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#fff;background:var(--gold);font-weight:600;width:24px;height:24px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;flex:none}
 h2{font-size:19px;font-weight:700;letter-spacing:-.01em}
-.secsub{font-size:13px;color:var(--ink2);margin:7px 0 14px;max-width:920px}
+.secsub{font-size:12.5px;color:var(--ink2);margin:6px 0 10px;max-width:920px;line-height:1.5}
 .unitnote{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:right;margin-bottom:6px}
 table{width:100%;border-collapse:collapse;font-size:13.5px}
 thead th{background:var(--ink);color:#fff;font-weight:600;font-size:12px;padding:10px 13px;text-align:right;white-space:nowrap}
@@ -1354,8 +1355,40 @@ select.ppin{cursor:pointer}
 .ppbtns{display:flex;gap:9px;margin-top:18px;justify-content:flex-end}
 @media(max-width:640px){.ppgrid2{grid-template-columns:1fr}.pp30bar{flex-direction:column;align-items:flex-start}}
 
+
+/* ===== SIDEBAR (v7.07): top nav -> left sidebar ===== */
+body{padding-left:276px}
+.modnav.sidebar{position:fixed;left:0;top:0;bottom:0;width:256px;height:100vh;margin:0;padding:0;border-radius:0;gap:0;display:flex;flex-direction:column;align-items:stretch;overflow-y:auto;overflow-x:hidden;z-index:60;background:linear-gradient(187deg,#0A463E 0%,#0E5C52 55%,#0A463E 100%);box-shadow:2px 0 24px -6px rgba(10,70,62,.45)}
+.modnav.sidebar::-webkit-scrollbar{width:7px}
+.modnav.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:4px}
+.modnav.sidebar::-webkit-scrollbar-track{background:transparent}
+.sbbrand{display:flex;align-items:center;gap:11px;padding:18px 16px 15px;border-bottom:1px solid rgba(255,255,255,.10);flex:0 0 auto}
+.sbbrand .sblogo{width:40px;height:40px;border-radius:11px;flex:0 0 auto;box-shadow:0 4px 11px rgba(0,0,0,.30)}
+.sbbrand .sbname{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+.sbbrand .sbn1{font-weight:800;font-size:17px;color:#fff;letter-spacing:.01em}
+.sbbrand .sbn2{font-size:9.5px;color:rgba(255,255,255,.56);letter-spacing:.17em;text-transform:uppercase;margin-top:3px}
+.modnav.sidebar .curuser{margin:13px 13px 3px;align-self:stretch;display:flex;align-items:center;gap:9px;justify-content:flex-start;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);border-radius:12px;padding:9px 12px;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;line-height:1.2;transition:background .14s,border-color .14s}
+.modnav.sidebar .curuser:hover{background:rgba(255,255,255,.12)}
+.modnav.sidebar .curuser.on{background:rgba(255,255,255,.09);border-color:rgba(94,234,212,.45);color:#fff;box-shadow:none}
+.modnav.sidebar .curuser .cupos{display:block;font-weight:500;color:rgba(255,255,255,.62);font-size:10px;margin-top:1px;white-space:normal;line-height:1.3}
+.curuser .cuav{flex:0 0 auto;font-size:15px;line-height:1}
+.curuser .cutxt{display:flex;flex-direction:column;min-width:0;line-height:1.22;white-space:normal}
+.curuser .cuname{font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
+.sbmenu{display:flex;flex-direction:column;gap:2px;padding:6px 11px 8px;flex:1 1 auto}
+.sbsec{font-size:9px;font-weight:800;letter-spacing:.15em;color:rgba(255,255,255,.36);text-transform:uppercase;padding:13px 11px 5px}
+.modnav.sidebar .modtab{display:flex;align-items:center;gap:11px;width:100%;flex:0 0 auto;border:none;cursor:pointer;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;letter-spacing:0;color:rgba(255,255,255,.76);background:transparent;padding:9px 12px;border-radius:10px;text-align:left;white-space:normal;line-height:1.3;transition:background .14s,color .14s,box-shadow .14s}
+.modnav.sidebar .modtab .sbic{font-size:16px;width:22px;text-align:center;flex:0 0 auto;line-height:1.1}
+.modnav.sidebar .modtab .sblbl{flex:1;min-width:0}
+.modnav.sidebar .modtab:hover{color:#fff;background:rgba(255,255,255,.10)}
+.modnav.sidebar .modtab.active{color:#fff;background:rgba(255,255,255,.15);font-weight:700;box-shadow:inset 3px 0 0 0 #5EEAD4,0 3px 9px rgba(0,0,0,.18)}
+.sbfoot{margin-top:auto;flex:0 0 auto;padding:11px 14px 15px;border-top:1px solid rgba(255,255,255,.10);display:flex;flex-direction:column;gap:10px}
+.sbfrow{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.modnav.sidebar .appver{align-self:flex-start;color:rgba(255,255,255,.40);font-size:10px;padding:0;letter-spacing:.05em;width:auto}
+.modnav.sidebar .navwarn,.modnav.sidebar .tknotif,.modnav.sidebar .safeshield{position:relative;margin:0;flex:0 0 auto}
+.modnav.sidebar .authout{margin:0}
+@media(max-width:900px){body{padding-left:18px}.modnav.sidebar{position:relative;width:auto;height:auto;bottom:auto;flex-direction:column;margin:0 0 16px;border-radius:12px}.sbmenu{flex-direction:row;flex-wrap:wrap;gap:4px}.sbsec{width:100%;padding:8px 6px 2px}.modnav.sidebar .modtab{width:auto;flex:0 0 auto}.sbfoot{flex-direction:row;flex-wrap:wrap;margin-top:8px}}
 </style>
-<nav class="modnav" role="tablist" aria-label="Modules"><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false">Overall</button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false">Tracking</button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true">BP</button><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false">GL</button><button class="modtab" data-mod="wht" role="tab" aria-selected="false">WHT</button><button class="modtab" data-mod="vat" role="tab" aria-selected="false">VAT</button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false">DOC</button><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false">UP</button><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false">MN</button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false">PT</button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false">AD</button><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v7.06</span></nav>
+<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"/><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"/><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="20" r="4.6" fill="#FBBF24"/></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">📒</span><span class="sblbl">General Ledger</span></button><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">🧾</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🧮</span><span class="sblbl">Value Added Tax</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">🖥️</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false"><span class="sbic">📝</span><span class="sblbl">Audit Log · Activity</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v7.08</span></div></nav>
 <header>
 <div class="letter"><svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0E5C52"></rect><path d="M15 43 L27 31 L35 37 L49 21" fill="none" stroke="#D9A441" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="49" cy="21" r="3.7" fill="#D9A441"></circle><text x="32" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#9FCFC4" letter-spacing="2.5">GLI</text></svg>
 <div class="brand"><div class="brandL"><div class="th">GRANDLINE INNOVATION <span class="th-co">COMPANY LIMITED</span></div><span class="ho">Head Office</span></div><div class="brandR"><div class="addr">333 Soi Lat Phrao 64 Yaek 12, Lat Phrao Road, Wang Thong Lang Sub-District, Wang Thong Lang District, Bangkok 10310</div><div class="taxid">Tax ID · 0105553002230</div></div></div>
@@ -3709,8 +3742,8 @@ function renderPt(){loadPt();var w=document.getElementById('ptWrap');if(!w)retur
   w.innerHTML=cur+tbl;_ptBind();_updUserChip();}
 function _updUserChip(){var el=document.getElementById('curUserChip');if(!el)return;loadPt();var u=_ptFind(_curUserId);
   el.hidden=false;
-  if(u){el.classList.add('on');el.innerHTML='👤 '+esc(_ptName(u))+(u.pos?' <span class="cupos">· '+esc(u.pos)+'</span>':'');}
-  else{el.classList.remove('on');el.innerHTML='👤 <span class="cupos">select user</span>';}
+  if(u){el.classList.add('on');el.innerHTML='<span class="cuav">👤</span><span class="cutxt"><span class="cuname">'+esc(_ptName(u))+'</span>'+(u.pos?'<span class="cupos">'+esc(u.pos)+'</span>':'')+'</span>';}
+  else{el.classList.remove('on');el.innerHTML='<span class="cuav">👤</span><span class="cutxt"><span class="cuname">select user</span></span>';}
   if(!el._b){el._b=1;el.addEventListener('click',function(){var b=document.querySelector('.modtab[data-mod="pt"]');if(b)b.click();});}if(typeof _tkUpdNotif==='function')_tkUpdNotif();}
 function _ptBind(){var pg=document.getElementById('page-pt');if(!pg||pg._pb)return;pg._pb=1;
   pg.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target&&e.target.id==='ptCode'){e.preventDefault();_ptTryUnlock();}});
