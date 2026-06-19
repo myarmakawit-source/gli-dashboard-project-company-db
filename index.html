@@ -690,6 +690,9 @@ td.num.edit{border-bottom:1px dashed #E2DCCF!important}
 .glchip-x:hover{color:#fff;background:var(--neg)}
 .glfic{display:inline-flex;width:19px;height:19px;border-radius:5px;color:#fff;font-size:11px;font-weight:800;align-items:center;justify-content:center;flex:none}
 .glchip-add{border:1px dashed #7FCABF;background:#F1FAF8;color:#0A463E;font-family:'Sarabun',sans-serif;font-size:12px;font-weight:700;padding:6px 12px;border-radius:10px;cursor:pointer}
+.glchip-bake{border:1px solid #0E5C52;background:#0E5C52;color:#fff}
+.glchip-bake:hover{filter:brightness(1.12)}
+.glchip-bake:disabled{opacity:.6;cursor:wait}
 .glchip-add:hover{border-color:#0E5C52;background:#F3EFFC}
 #glStatus{font-size:12px;color:#0E5C52;font-weight:700}
 .glquick{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
@@ -1388,7 +1391,7 @@ body{padding-left:276px}
 .modnav.sidebar .authout{margin:0}
 @media(max-width:900px){body{padding-left:18px}.modnav.sidebar{position:relative;width:auto;height:auto;bottom:auto;flex-direction:column;margin:0 0 16px;border-radius:12px}.sbmenu{flex-direction:row;flex-wrap:wrap;gap:4px}.sbsec{width:100%;padding:8px 6px 2px}.modnav.sidebar .modtab{width:auto;flex:0 0 auto}.sbfoot{flex-direction:row;flex-wrap:wrap;margin-top:8px}}
 </style>
-<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"/><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"/><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="20" r="4.6" fill="#FBBF24"/></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">📒</span><span class="sblbl">General Ledger</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">🧾</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🧮</span><span class="sblbl">Value Added Tax</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">🖥️</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false"><span class="sbic">📝</span><span class="sblbl">Audit Log · Activity</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v7.22</span></div></nav>
+<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"/><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"/><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="20" r="4.6" fill="#FBBF24"/></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">📒</span><span class="sblbl">General Ledger</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">🧾</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🧮</span><span class="sblbl">Value Added Tax</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">🖥️</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false"><span class="sbic">📝</span><span class="sblbl">Audit Log · Activity</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v7.23</span></div></nav>
 <header>
 <div class="letter"><svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0E5C52"></rect><path d="M15 43 L27 31 L35 37 L49 21" fill="none" stroke="#D9A441" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="49" cy="21" r="3.7" fill="#D9A441"></circle><text x="32" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#9FCFC4" letter-spacing="2.5">GLI</text></svg>
 <div class="brand"><div class="brandL"><div class="th">GRANDLINE INNOVATION <span class="th-co">COMPANY LIMITED</span></div><span class="ho">Head Office</span></div><div class="brandR"><div class="addr">333 Soi Lat Phrao 64 Yaek 12, Lat Phrao Road, Wang Thong Lang Sub-District, Wang Thong Lang District, Bangkok 10310</div><div class="taxid">Tax ID · 0105553002230</div></div></div>
@@ -3911,6 +3914,48 @@ function _glCloudDownload(man,id){
      });
    }).catch(function(e){_glDlBusy=false;_glDlStatus('\u26a0 Could not download GL from the cloud: '+((e&&e.message)||e));return false;});
 }
+/* ===== EMBED GL DATA INTO THE HTML FILE (self-contained: any device sees the data with no Excel upload and no cloud) ===== */
+function _glBootEmbedded(){
+  try{
+    if(typeof window.__GLI_EMBEDDED_GL__!=='string'||!window.__GLI_EMBEDDED_GL__.length)return Promise.resolve(false);
+    if(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length)return Promise.resolve(false);
+    var bin=atob(window.__GLI_EMBEDDED_GL__);var len=bin.length;var bytes=new Uint8Array(len);for(var i=0;i<len;i++)bytes[i]=bin.charCodeAt(i);
+    var blob=new Blob([bytes]);
+    return _glGunzip(blob,'gzip').then(function(txt){
+      var obj=JSON.parse(txt);var rows=(obj&&obj.rows)?obj.rows:obj;if(!Array.isArray(rows)||!rows.length)return false;
+      GLROWS=rows;var mt=(obj&&obj.meta)||{};
+      GLMETA={src:mt.src||'(embedded data)',ts:mt.ts||new Date().toISOString(),n:rows.length,na:mt.na||(typeof _glCountAccts==='function'?_glCountAccts(rows):0)};
+      if(typeof _glFindFile==='function'&&!_glFindFile('_embedded')){GLFILES.unshift({id:'_embedded',name:GLMETA.src,ts:Date.now(),n:rows.length,na:GLMETA.na,cloud:null,embedded:true});}
+      GLACTIVE='_embedded';try{_glSaveActive();}catch(e){}
+      if(typeof _glAfterIngest==='function')_glAfterIngest();
+      return true;
+    }).catch(function(){return false;});
+  }catch(e){return Promise.resolve(false);}
+}
+function _glBootEmbeddedSoon(){try{setTimeout(function(){if(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length)return;_glBootEmbedded().then(function(ok){if(ok){var pg=document.querySelector('.page:not([hidden])');var id=pg?pg.id:'';if(id==='page-fs'&&typeof renderFs==='function')renderFs();else if(id==='page-gl'&&typeof renderGl==='function')renderGl();else if(typeof refreshAgg==='function'){try{refreshAgg();}catch(e){}}}});},1600);}catch(e){}}
+function _glBakeIntoFile(){
+  if(typeof GLROWS==='undefined'||!GLROWS||!GLROWS.length){alert('เครื่องนี้ยังไม่มีข้อมูล GL ให้ฝัง \u2014 กรุณาเปิดบนเครื่อง/เบราว์เซอร์ที่โหลดไฟล์ GL ไว้แล้ว แล้วจึงกดฝังข้อมูล');return;}
+  if(!confirm('ระบบจะสร้างไฟล์ index.html ใหม่ที่ \u201c\u0e1d\u0e31\u0e07\u201d ข้อมูล GL ปัจจุบัน ('+GLROWS.length.toLocaleString()+' แถว) ลงในไฟล์เลย\n\nนำไฟล์นี้ขึ้น GitHub แทนไฟล์เดิม \u2192 เปิดเครื่องไหนก็เห็นข้อมูลทันที ไม่ต้องโหลด Excel หรือพึ่งคลาวด์\n\nดำเนินการต่อ?'))return;
+  var btn=document.getElementById('glBake');if(btn){btn.disabled=true;btn.textContent='\u23f3 กำลังฝังข้อมูล\u2026';}
+  var payload=JSON.stringify({rows:GLROWS,meta:{src:(GLMETA&&GLMETA.src)||'(embedded data)',ts:(GLMETA&&GLMETA.ts)||new Date().toISOString(),n:GLROWS.length,na:(GLMETA&&GLMETA.na)||0}});
+  _glGzip(payload).then(function(g){
+    return new Promise(function(res,rej){var fr=new FileReader();fr.onload=function(){res((''+fr.result).split(',')[1]||'');};fr.onerror=function(){rej(new Error('read fail'));};fr.readAsDataURL(g.blob);}).then(function(b64){
+      var inject='<scr'+'ipt>window.__GLI_EMBEDDED_GL__="'+b64+'";<\/scr'+'ipt>';
+      return fetch(location.href,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('http '+r.status);return r.text();}).catch(function(){return '<!DOCTYPE html>\n'+document.documentElement.outerHTML;}).then(function(html){
+        var re=new RegExp('<scr'+'ipt>window\\.__GLI_EMBEDDED_GL__=[\\s\\S]*?<\\/scr'+'ipt>\\n?');
+        html=html.replace(re,'');
+        if(html.indexOf('</head>')>=0)html=html.replace('</head>',inject+'\n</head>');
+        else if(html.indexOf('<body')>=0)html=html.replace('<body',inject+'\n<body');
+        else html=inject+'\n'+html;
+        var sizeMB=(html.length/1048576).toFixed(1);
+        var blob=new Blob([html],{type:'text/html'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='index.html';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(url);a.remove();},1500);
+        if(btn){btn.disabled=false;btn.textContent='\ud83d\udcbe ฝังข้อมูลลงไฟล์';}
+        if(typeof gliLog==='function')gliLog('Baked GL into file',GLROWS.length.toLocaleString()+' rows \u00b7 ~'+sizeMB+' MB');
+        alert('\u2705 สร้างไฟล์ index.html ที่ฝังข้อมูล GL แล้ว\n\u2022 '+GLROWS.length.toLocaleString()+' แถว (ไฟล์ ~'+sizeMB+' MB)\n\nวิธีใช้: นำไฟล์ index.html นี้ขึ้น GitHub แทนไฟล์เดิม \u2192 push \u2192 Ctrl+Shift+R\n\u2192 เปิดเครื่องไหน/เบราว์เซอร์ไหนก็เห็นข้อมูลทันที โดยไม่ต้องโหลดไฟล์ Excel และไม่ต้องพึ่งคลาวด์');
+      });
+    });
+  }).catch(function(e){if(btn){btn.disabled=false;btn.textContent='\ud83d\udcbe ฝังข้อมูลลงไฟล์';}alert('ฝังข้อมูลไม่สำเร็จ: '+((e&&e.message)||e)+'\n(ถ้าเปิดไฟล์แบบ file:// บางเบราว์เซอร์จะอ่านไฟล์ตัวเองไม่ได้ \u2014 ลองเปิดผ่าน GitHub Pages แล้วกดฝังอีกครั้ง)');});
+}
 function renderGl(){var w=document.getElementById('glWrap');if(!w)return;
   if(!GLFILES.length&&!_glMigChecked){_glMigChecked=true;w.innerHTML='<div class="glnone">Loading GL\u2026</div>';_glMigrateLegacy().then(function(){renderGl();});_glBind();return;}
   if(!GLFILES.length){
@@ -4037,6 +4082,7 @@ function _glBind(){var pg=document.getElementById('page-gl');if(!pg||pg._gb)retu
     var fsw=cl('.glhlfsw');if(fsw){var fv=fsw.getAttribute('data-filter');if(fv==='all'){GLHLFILTER=null;}else{var fvn=+fv;GLHLFILTER=(GLHLFILTER===fvn?null:fvn);}GLSHOW=300;renderGl();return;}
     if(GLHLPAINT!==-2){var trp=cl('tr[data-hk]');if(trp){var hk=trp.getAttribute('data-hk');if(GLHLPAINT===-1){delete GLHL[hk];}else{if(GLHL[hk]===GLHLPAINT)delete GLHL[hk];else GLHL[hk]=GLHLPAINT;}_glHlSave();_glVSRender();return;}}
     if(cl('#glAddFile')){var fa=document.getElementById('glFileInput');if(fa)fa.click();return;}
+    if(cl('#glBake')){_glBakeIntoFile();return;}
     if(cl('#glSyncNow')){var _af=_glActiveFile();if(_af){_glDlStatus('\u2601 Uploading to the cloud\u2026');_glCloudUpload(_af.id).then(function(ok){_glDlStatus(ok?'\u2713 Uploaded to the cloud':'\u26a0 Upload failed \u2014 check your connection');renderGl();});}return;}
     var colB=cl('#glCols');if(colB){_glOpenColMenu(colB);return;}
     if(cl('#glPurge')){_glPurge();return;}
@@ -4076,7 +4122,7 @@ function _glChipBar(){var s='<div class="glfiles">';
       +'<span class="glchip-nm">'+esc(f.name||('File '+(i+1)))+'</span>'
       +'<span class="glchip-ct">'+(f.n||0).toLocaleString()+'</span>'
       +'<span class="glchip-x" data-del="'+_eatt(f.id)+'" title="Remove this file">\u00d7</span></div>';}
-  s+='<button class="glchip-add" id="glAddFile" type="button" title="Upload another GL file">+ Add file</button></div>';
+  s+='<button class="glchip-add" id="glAddFile" type="button" title="Upload another GL file">+ Add file</button>'+(GLROWS&&GLROWS.length?'<button class="glchip-add glchip-bake" id="glBake" type="button" title="ฝังข้อมูล GL ลงในไฟล์ HTML \u2014 เปิดเครื่องไหนก็มีข้อมูล ไม่ต้องโหลดไฟล์/พึ่งคลาวด์">\ud83d\udcbe ฝังข้อมูลลงไฟล์</button>':'')+'</div>';
   return s;}
 function _glOpenColMenu(btn){_glCloseDrop();var pg=document.getElementById('page-gl');if(!pg)return;
   var vis=_glLoadColVis();
@@ -5046,6 +5092,7 @@ function _stoGuardUpd(opts){opts=opts||{};
     try{window.addEventListener('online',function(){_stoGuardUpd();_autoMigrateSoon();});}catch(e){}
   }
   if(document.readyState!=='loading')mount();else document.addEventListener('DOMContentLoaded',mount);
+  try{_glBootEmbeddedSoon();}catch(e){}
   try{_backupSlimRewrite();}catch(e){}
 })();
 
@@ -5638,10 +5685,12 @@ function _fsDateKey(v){ var d=_fsParseDate(v); if(d)return d.getTime(); return 9
 function _fsYearEnd(y){ var yy=+y; return new Date(yy,11,31,23,59,59); }
 function _fsEnsureGL(cb){
   if(typeof GLROWS!=='undefined' && GLROWS && GLROWS.length){cb(true);return;}
+  var done=false, fin=function(ok){if(done)return;done=true;cb(ok);};
+  var tryEmbedded=function(){ if(typeof _glBootEmbedded==='function'){ try{_glBootEmbedded().then(function(ok){fin(!!(ok&&typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length));}).catch(function(){fin(false);}); return;}catch(e){} } fin(false); };
   if(typeof _glLoadIdb==='function' && typeof GLACTIVE!=='undefined' && GLACTIVE){
-    try{var p=_glLoadIdb(GLACTIVE); if(p&&p.then){p.then(function(){cb(!!(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length));}).catch(function(){cb(false);}); return;}}catch(e){}
+    try{var p=_glLoadIdb(GLACTIVE); if(p&&p.then){p.then(function(){ if(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length)fin(true); else tryEmbedded(); }).catch(tryEmbedded); return;}}catch(e){}
   }
-  cb(false);
+  tryEmbedded();
 }
 function _fsActiveName(){
   try{ if(typeof _glActiveFile==='function'){var f=_glActiveFile(); if(f&&(f.name||f.fname))return f.name||f.fname;} }catch(e){}
@@ -6159,7 +6208,7 @@ function renderFs(){ var w=document.getElementById('fsWrap'); if(!w)return;
 
 /* ---------- EXCEL EXPORT ---------- */
 function _fsExport(){
-  if(typeof XLSX==='undefined'){alert('ไลบรารี Excel ยังโหลดไม่เสร็จ — รอสักครู่แล้วลองใหม่');return;}
+  if(typeof XLSX==='undefined'){alert('Excel library not loaded');return;}
   var wb=XLSX.utils.book_new(); var Y=(_fsYear==='ALL')?'ALL':(+_fsYear+543); function num(ws){try{var rng=XLSX.utils.decode_range(ws['!ref']);for(var R=1;R<=rng.e.r;R++)for(var C=0;C<=rng.e.c;C++){var c=ws[XLSX.utils.encode_cell({r:R,c:C})];if(c&&typeof c.v==='number'){c.t='n';c.z='#,##0.00';}}}catch(e){}}
   // TB
   var tba=[['Code','Account','FS line','Category','Opening','Debit','Credit','Ending(natural)']];
