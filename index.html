@@ -1365,6 +1365,108 @@ select.ppin{cursor:pointer}
 .ppbtns{display:flex;gap:9px;margin-top:18px;justify-content:flex-end}
 @media(max-width:640px){.ppgrid2{grid-template-columns:1fr}.pp30bar{flex-direction:column;align-items:flex-start}}
 
+/* ===== P.P.30 Summary — report redesign (v7.57) ===== */
+.v30wrap{padding:2px 0}
+.v30mast{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;border-bottom:2.5px solid var(--brand);padding-bottom:13px;margin-bottom:16px;flex-wrap:wrap}
+.v30kk{font-size:10.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.v30h1{margin:.14em 0 .06em;font-size:22px;font-weight:800;letter-spacing:-.01em;color:var(--ink);line-height:1.12}
+.v30sub{font-size:12.5px;color:var(--muted)}
+.v30seal{text-align:right;flex:0 0 auto}
+.v30seal-b{font-family:'IBM Plex Mono',monospace;font-size:21px;font-weight:600;color:var(--brand);border:2px solid var(--brand);border-radius:9px;padding:4px 11px;display:inline-block}
+.v30seal-t{font-size:10px;color:var(--muted);margin-top:4px}
+.v30drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;border:2px dashed #cfd9c9;border-radius:13px;padding:16px;cursor:pointer;background:linear-gradient(135deg,var(--brand-t),#fff);transition:.18s;margin-bottom:11px}
+.v30drop:hover{border-color:var(--brand);background:linear-gradient(135deg,#dcebe3,#fff)}
+.v30drop-ic{font-size:23px;color:var(--brand);line-height:1}
+.v30drop-t{font-size:13.5px;font-weight:700;color:var(--brand-d)}
+.v30drop-s{font-size:11.5px;color:var(--muted)}
+.v30diag{font-size:12px;border-radius:9px;padding:8px 13px;margin-bottom:14px;background:var(--gold-t);border:1px solid #ecd9ab;color:var(--gold-d)}
+.v30diag b{font-family:'IBM Plex Mono',monospace}
+.v30diaghint{opacity:.75;font-size:10.5px}
+.v30yearbar{display:flex;align-items:center;gap:9px;margin-bottom:16px}
+.v30ylab{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.v30ynav{width:30px;height:30px;border:1px solid var(--line);background:var(--card);border-radius:8px;cursor:pointer;color:var(--brand);font-size:12px;transition:.15s}
+.v30ynav:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+.v30ysel{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer}
+.v30grid{display:grid;grid-template-columns:240px 1fr;gap:18px;align-items:start}
+.v30colist{display:flex;flex-direction:column;gap:7px}
+.v30coitem{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:11px 13px;cursor:pointer;transition:.15s;border-left:3px solid transparent;width:100%;font-family:inherit}
+.v30coitem:hover{border-color:#cfe0d8;background:#fbfaf6}
+.v30coitem.on{border-color:var(--brand);border-left:3px solid var(--brand);background:var(--brand-t);box-shadow:0 6px 18px -12px rgba(14,92,82,.5)}
+.v30coitem-nm{font-size:13px;font-weight:700;color:var(--ink);line-height:1.3}
+.v30coitem-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px}
+.v30coitem-id{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted)}
+.v30coitem-meta b{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:999px}
+.v30full{background:var(--pos-bg);color:var(--pos)}
+.v30part{background:var(--gold-t);color:var(--gold-d)}
+.v30none{background:#f0ece1;color:var(--muted)}
+.v30panel{min-width:0}
+.v30empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:13px;background:var(--card);border:1px solid var(--line);border-radius:13px}
+.v30co-head{background:linear-gradient(110deg,var(--brand),var(--brand-d));color:#fff;border-radius:13px 13px 0 0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.v30co-nm{font-size:17px;font-weight:700}
+.v30co-id{font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;line-height:1.55}
+.v30co-id span{opacity:.7;font-family:'Sarabun',sans-serif;font-size:10.5px;margin-right:5px}
+.v30stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--card);border:1px solid var(--line);border-top:0}
+.v30stat{padding:13px 16px;border-right:1px solid var(--line2)}
+.v30stat:last-child{border-right:0}
+.v30stat-k{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.v30stat-v{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;margin-top:3px;color:var(--ink);letter-spacing:-.01em}
+.v30stat-v.pos{color:var(--pos)}
+.v30stat-v.neg{color:var(--neg)}
+.v30stat-s{font-size:10px;color:var(--muted);margin-top:2px}
+.v30stat.accent{background:linear-gradient(150deg,var(--pos-bg),#fff)}
+.v30scroll{overflow-x:auto;border:1px solid var(--line);border-top:0;background:var(--card)}
+.v30tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:820px}
+.v30tbl thead th{background:var(--rowz);color:var(--brand-d);font-weight:700;font-size:10px;letter-spacing:.03em;text-transform:uppercase;text-align:right;padding:9px 12px;border-bottom:2px solid var(--line);white-space:nowrap;vertical-align:bottom}
+.v30tbl thead th.l{text-align:left}
+.v30tbl thead th.c{text-align:center}
+.v30tbl thead th i{display:block;font-family:'IBM Plex Mono',monospace;font-style:normal;font-size:8.5px;color:var(--gold);font-weight:600;margin-top:1px}
+.v30tbl tbody td{padding:9px 12px;border-bottom:1px solid var(--line2);text-align:right;font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;color:var(--ink)}
+.v30tbl tbody td.l{text-align:left;font-family:'Sarabun',sans-serif}
+.v30tbl tbody td.c{text-align:center}
+.v30tbl tbody td.b{font-weight:600;color:var(--brand-d)}
+.v30tbl tbody td.cf{color:var(--pos);font-weight:600}
+.v30tbl tbody td.np{color:var(--neg)}
+.v30tbl tbody tr:hover{background:#fbfaf5}
+.v30mo{font-weight:700;color:var(--ink);white-space:nowrap}
+.v30blank td{color:#bfb893}
+.v30na{text-align:center;color:#c4bd9c;font-family:'Sarabun',sans-serif;font-style:italic}
+.v30na2{color:#c4bd9c;font-family:'Sarabun',sans-serif;font-size:11px}
+.v30tbl tfoot td{padding:10px 12px;border-top:2px solid var(--brand);background:#f7f4ec;font-family:'IBM Plex Mono',monospace;font-weight:600;text-align:right;color:var(--ink)}
+.v30tbl tfoot td.l{text-align:left;font-family:'Sarabun',sans-serif;font-weight:700;color:var(--brand-d)}
+.v30tbl tfoot td.cf{color:var(--pos)}
+.v30tbl tfoot td.np{color:var(--neg)}
+.v30pill{display:inline-block;font-family:'Sarabun',sans-serif;font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.v30pill.over{background:var(--pos-bg);color:var(--pos);border:1px solid #bfe0cb}
+.v30pill.pay{background:var(--neg-bg);color:var(--neg);border:1px solid #f0c9c5}
+.v30pill.zero{background:#f0ece1;color:var(--muted)}
+.v30tag-add{font-family:'Sarabun',sans-serif;font-size:9.5px;font-weight:600;background:var(--blue-bg);color:var(--blue);padding:1px 6px;border-radius:5px}
+.v30tag-late{font-family:'Sarabun',sans-serif;font-size:9.5px;font-weight:600;background:var(--neg-bg);color:var(--neg);padding:1px 6px;border-radius:5px}
+.v30add{width:26px;height:26px;border:1px dashed var(--brand);background:var(--brand-t);color:var(--brand);border-radius:7px;cursor:pointer;font-size:15px;line-height:1;transition:.15s}
+.v30add:hover{background:var(--brand);color:#fff}
+.v30fb,.v30ed,.v30del{width:26px;height:26px;border:1px solid var(--line);background:var(--card);border-radius:7px;cursor:pointer;font-size:12px;transition:.15s;margin:0 1px}
+.v30fb:hover{border-color:var(--blue);color:var(--blue)}
+.v30ed:hover{border-color:var(--gold);color:var(--gold-d)}
+.v30del:hover{border-color:var(--neg);color:var(--neg)}
+.v30nofile{color:#c4bd9c}
+.v30act{white-space:nowrap}
+.v30chain{background:var(--card);border:1px solid var(--line);border-top:1px dashed var(--line);border-radius:0 0 13px 13px;padding:18px 20px}
+.v30chain h3{margin:0 0 3px;font-size:13.5px;font-weight:700;color:var(--brand-d)}
+.v30chain-cap{font-size:11.5px;color:var(--muted);margin-bottom:16px}
+.v30flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.v30node{flex:0 0 auto;text-align:center;padding:0 3px}
+.v30node-l{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:5px}
+.v30node-a{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;padding:8px 13px;border-radius:8px;background:var(--brand-t);color:var(--brand-d);border:1px solid #cfe6d8}
+.v30node.open .v30node-a{background:var(--gold-t);color:var(--ink);border-color:#ecd9ab}
+.v30node.close .v30node-a{background:var(--brand);color:#fff;border-color:var(--brand)}
+.v30op{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 5px;min-width:66px}
+.v30op-a{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;color:var(--pos)}
+.v30op-s{font-size:9px;color:var(--muted)}
+.v30op-arr{color:var(--gold);font-size:14px;line-height:1;margin-top:1px}
+@media(max-width:880px){.v30grid{grid-template-columns:1fr}.v30stats{grid-template-columns:repeat(2,1fr)}.v30stat:nth-child(2){border-right:0}.v30stat{border-bottom:1px solid var(--line2)}}
+@media(max-width:560px){.v30mast{flex-direction:column;align-items:flex-start}.v30seal{text-align:left}}
+@media(prefers-reduced-motion:no-preference){.v30stat,.v30co-head{animation:v30rise .4s cubic-bezier(.2,.7,.2,1) both}@keyframes v30rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}}
+
+
 
 /* ===== SIDEBAR (v7.07): top nav -> left sidebar ===== */
 body{padding-left:276px}
@@ -1398,7 +1500,7 @@ body{padding-left:276px}
 .modnav.sidebar .authout{margin:0}
 @media(max-width:900px){body{padding-left:18px}.modnav.sidebar{position:relative;width:auto;height:auto;bottom:auto;flex-direction:column;margin:0 0 16px;border-radius:12px}.sbmenu{flex-direction:row;flex-wrap:wrap;gap:4px}.sbsec{width:100%;padding:8px 6px 2px}.modnav.sidebar .modtab{width:auto;flex:0 0 auto}.sbfoot{flex-direction:row;flex-wrap:wrap;margin-top:8px}}
 </style>
-<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"/><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"/><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="20" r="4.6" fill="#FBBF24"/></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">📒</span><span class="sblbl">General Ledger</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab" data-mod="tfrs" role="tab" aria-selected="false"><span class="sbic">📚</span><span class="sblbl">TFRS Thailand</span></button><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><button class="modtab" data-mod="line" role="tab" aria-selected="false"><span class="sbic">💬</span><span class="sblbl">LINE Slips · Cash</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false"><span class="sbic">📝</span><span class="sblbl">Audit Log · Activity</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v7.56</span></div></nav>
+<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"/><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"/><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="20" r="4.6" fill="#FBBF24"/></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">📒</span><span class="sblbl">General Ledger</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab" data-mod="tfrs" role="tab" aria-selected="false"><span class="sbic">📚</span><span class="sblbl">TFRS Thailand</span></button><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><button class="modtab" data-mod="line" role="tab" aria-selected="false"><span class="sbic">💬</span><span class="sblbl">LINE Slips · Cash</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false"><span class="sbic">📝</span><span class="sblbl">Audit Log · Activity</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v7.57</span></div></nav>
 <header>
 <div class="letter"><svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0E5C52"></rect><path d="M15 43 L27 31 L35 37 L49 21" fill="none" stroke="#D9A441" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="49" cy="21" r="3.7" fill="#D9A441"></circle><text x="32" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#9FCFC4" letter-spacing="2.5">GLI</text></svg>
 <div class="brand"><div class="brandL"><div class="th">GRANDLINE INNOVATION <span class="th-co">COMPANY LIMITED</span></div><span class="ho">Head Office</span></div><div class="brandR"><div class="addr">333 Soi Lat Phrao 64 Yaek 12, Lat Phrao Road, Wang Thong Lang Sub-District, Wang Thong Lang District, Bangkok 10310</div><div class="taxid">Tax ID · 0105553002230</div></div></div>
@@ -2210,7 +2312,8 @@ function _vPP30EditRec(id){loadVatPP30();var r=null;for(var i=0;i<VATPP30.length
 function _vPP30DelRec(id){loadVatPP30();var r=null;for(var i=0;i<VATPP30.length;i++)if(VATPP30[i].id===id){r=VATPP30[i];break;}if(!r)return;if(!confirm('ลบรายการ ภ.พ.30 นี้ ('+_VPP30MONF[(r.month||1)-1]+' '+r.beYear+')?'))return;VATPP30=VATPP30.filter(function(x){return x.id!==id;});saveVatPP30();renderVat();}
 function _vPP30ViewFile(id){loadVatPP30();for(var i=0;i<VATPP30.length;i++)if(VATPP30[i].id===id){var f=VATPP30[i].file;if(f&&_fCanView(f))_fileView(f);else alert('ไม่มีไฟล์แนบ');return;}}
 /* ---- summary view ---- */
-function _vPP30View(){loadVatPP30();
+function _vPP30SeedGLR(){try{if(localStorage.getItem('gli_pp30_seed_glr_v1'))return;var cos=(typeof WHTPAYER!=='undefined'&&WHTPAYER)?WHTPAYER:[];var glr=null;for(var i=0;i<cos.length;i++){if((cos[i].taxid||'').replace(/\D/g,'')==='0993000444558'){glr=cos[i];break;}}if(!glr)for(var j=0;j<cos.length;j++){if(/GLR/i.test(cos[j].name||'')){glr=cos[j];break;}}if(!glr)return;loadVatPP30();var have={};VATPP30.forEach(function(r){if(r.co===glr.id&&(+r.beYear)===2569)have[r.month]=1;});var seed=[{month:1,sales:17758726.77,outputVat:1243110.88,purchases:19443154.18,inputVat:1361020.80,overpaid:117909.92,carried:65579.08,overpaidCarry:183489.00,ref:'P300034909745',receipt:'69007700874',filedDate:'23/02/2569',dln:'ภพ3000006000020204503302569022303000429'},{month:2,sales:5723495.32,outputVat:400644.68,purchases:15865799.43,inputVat:1110605.97,overpaid:709961.29,carried:183489.00,overpaidCarry:893450.29,ref:'P300035657394',receipt:'69011560458',filedDate:'23/03/2569',dln:'ภพ3000006000020204503302569032303000360'}];var added=0;seed.forEach(function(d){if(have[d.month])return;VATPP30.push({id:'pp_seed_glr_'+d.month,co:glr.id,coName:glr.name,month:d.month,beYear:2569,normal:true,onTime:true,sales:d.sales,salesZero:'',salesExempt:'',outputVat:d.outputVat,purchases:d.purchases,inputVat:d.inputVat,payable:'',overpaid:d.overpaid,carried:d.carried,mustPay:'',overpaidCarry:d.overpaidCarry,surcharge:'',penalty:'',ref:d.ref,receipt:d.receipt,filedDate:d.filedDate,dln:d.dln,file:null,ts:Date.now()});added++;});if(added)saveVatPP30();localStorage.setItem('gli_pp30_seed_glr_v1','1');}catch(e){}}
+function _vPP30View(){loadVatPP30();_vPP30SeedGLR();
   var cos=(typeof WHTPAYER!=='undefined'&&WHTPAYER&&WHTPAYER.length)?WHTPAYER:((typeof VATCO!=='undefined'&&VATCO)?VATCO:[]);
   var ydata={};VATPP30.forEach(function(r){if(r.beYear)ydata[+r.beYear]=1;});
   var dataYears=Object.keys(ydata).map(Number).sort(function(a,b){return b-a;});
@@ -2218,34 +2321,59 @@ function _vPP30View(){loadVatPP30();
   var years=Object.keys(yset).map(Number).sort(function(a,b){return b-a;});
   if(_vPP30Year==null||years.indexOf(_vPP30Year)<0)_vPP30Year=dataYears.length?dataYears[0]:curBE;
   if(_vPP30Sel==null||!cos.some(function(c){return c.id===_vPP30Sel;}))_vPP30Sel=cos.length?cos[0].id:null;
-  var h='<div class="pp30wrap"><div class="pp30bar"><div class="pp30barL"><span class="pp30baric">📋</span><div><div class="pp30bart">สรุปแบบ ภ.พ.30 (ที่ยื่นแล้ว)</div><div class="pp30bars">เลือกบริษัทด้านซ้าย · ดูสรุปรายเดือน (12 เดือน) · วางไฟล์ PDF หรือดึงจาก MN เพื่ออ่านอัตโนมัติ</div></div></div></div>';
-  h+='<label class="pp30drop" id="pp30Drop"><input id="pp30File" type="file" accept="application/pdf,.pdf" multiple hidden><div class="pp30dropic">⬇</div><div class="pp30dropt">วางไฟล์ ภ.พ.30 (PDF) ที่นี่ หรือคลิกเพื่อเลือก</div><div class="pp30drops">รองรับหลายไฟล์ · ระบบอ่านยอดขาย/ภาษีขาย/ภาษีซื้อ/สุทธิ ฯลฯ ให้อัตโนมัติ</div></label>';
-  h+='<div id="pp30Diag" class="pp30diag">⬆️ ตัวอ่าน ภ.พ.30 <b>v7.56</b> · พร้อมรับไฟล์ — วางไฟล์ PDF แล้วสถานะการอ่านจะแสดงตรงนี้ <span class="pp30diaghint">(ถ้าหลัง deploy เลขนี้ไม่ใช่ v7.53 แปลว่ายังเป็นไฟล์เก่าใน cache → กด Ctrl+Shift+R)</span></div>';
+  var h='<div class="v30wrap">';
+  h+='<div class="v30mast"><div class="v30mast-l"><div class="v30kk">รายงานภาษีมูลค่าเพิ่ม · สรุปรายเดือน</div><div class="v30h1">สรุปแบบ ภ.พ.30 — แยกตามบริษัท</div><div class="v30sub">ภาษีขาย · ภาษีซื้อ · ภาษีสุทธิ และเครดิตภาษีซื้อยกไป (ตามที่ยื่นแล้ว)</div></div><div class="v30seal"><div class="v30seal-b">ภ.พ.30</div><div class="v30seal-t">Value Added Tax</div></div></div>';
+  h+='<label class="v30drop" id="pp30Drop"><input id="pp30File" type="file" accept="application/pdf,.pdf" multiple hidden><span class="v30drop-ic">⬇</span><span class="v30drop-t">วางไฟล์ ภ.พ.30 (PDF) ที่นี่ หรือคลิกเพื่อเลือก — เพิ่มลงสรุปอัตโนมัติ</span><span class="v30drop-s">รองรับหลายไฟล์ · อ่านยอดขาย / ภาษีขาย / ยอดซื้อ / ภาษีซื้อ / ยกมา / ยกไป ให้</span></label>';
+  h+='<div id="pp30Diag" class="v30diag">⬆️ ตัวอ่าน ภ.พ.30 <b>v7.57</b> · พร้อมรับไฟล์ — วางไฟล์ PDF แล้วสถานะการอ่านจะแสดงตรงนี้ <span class="v30diaghint">(หลัง deploy ถ้าเลขนี้ไม่ใช่ v7.57 = ไฟล์เก่าใน cache → กด Ctrl+Shift+R)</span></div>';
   var yopts='';years.forEach(function(y){yopts+='<option value="'+y+'"'+(y===_vPP30Year?' selected':'')+'>'+y+' / '+(y-543)+'</option>';});
-  h+='<div class="pp30yearbar"><span class="pp30ylab">ปีภาษี (พ.ศ.)</span><button class="pp30ynav" id="pp30YPrev" type="button" title="ปีก่อน">◀</button><select id="pp30Year" class="pp30ysel">'+yopts+'</select><button class="pp30ynav" id="pp30YNext" type="button" title="ปีถัดไป">▶</button></div>';
-  h+='<div class="pp30grid2"><div class="pp30colist">';
-  if(!cos.length){h+='<div class="pp30empty">ไม่พบรายชื่อบริษัท — ตั้งค่าบริษัทในโมดูล WHT ก่อน</div>';}
+  h+='<div class="v30yearbar"><span class="v30ylab">ปีภาษี (พ.ศ.)</span><button class="v30ynav" id="pp30YPrev" type="button" title="ปีก่อน">◀</button><select id="pp30Year" class="v30ysel">'+yopts+'</select><button class="v30ynav" id="pp30YNext" type="button" title="ปีถัดไป">▶</button></div>';
+  h+='<div class="v30grid"><div class="v30colist">';
+  if(!cos.length){h+='<div class="v30empty">ไม่พบรายชื่อบริษัท — ตั้งค่าบริษัทในโมดูล WHT ก่อน</div>';}
   cos.forEach(function(c){var filed=VATPP30.filter(function(r){return r.co===c.id&&(+r.beYear)===_vPP30Year&&r.normal!==false;}).length;var on=c.id===_vPP30Sel;
-    h+='<button class="pp30coitem'+(on?' on':'')+'" data-pp30co="'+_eatt(c.id)+'" type="button"><div class="pp30coitemnm">'+esc(c.name||'(ไม่มีชื่อ)')+'</div><div class="pp30coitemmeta">'+esc(c.taxid||'-')+' · <b class="'+(filed>=12?'pp30full':(filed?'pp30part':'pp30none'))+'">'+filed+'</b>/12 เดือน</div></button>';});
-  h+='</div><div class="pp30monthwrap">';
+    h+='<button class="v30coitem'+(on?' on':'')+'" data-pp30co="'+_eatt(c.id)+'" type="button"><div class="v30coitem-nm">'+esc(c.name||'(ไม่มีชื่อ)')+'</div><div class="v30coitem-meta"><span class="v30coitem-id">'+esc(c.taxid||'-')+'</span><b class="'+(filed>=12?'v30full':(filed?'v30part':'v30none'))+'">'+filed+'/12</b></div></button>';});
+  h+='</div><div class="v30panel">';
   var selCo=null;for(var ci=0;ci<cos.length;ci++)if(cos[ci].id===_vPP30Sel){selCo=cos[ci];break;}
-  if(!selCo){h+='<div class="pp30empty">เลือกบริษัทด้านซ้ายเพื่อดูสรุป ภ.พ.30 รายเดือน</div>';}
-  else{var byMonth={};VATPP30.forEach(function(r){if(r.co===_vPP30Sel&&(+r.beYear)===_vPP30Year){(byMonth[r.month]=byMonth[r.month]||[]).push(r);}});
-    h+='<div class="pp30mhead">🏢 '+esc(selCo.name||'')+' <span class="pp30myr">ปีภาษี '+_vPP30Year+'</span></div>';
-    h+='<div class="pp30scroll"><table class="pp30tbl"><thead><tr><th>เดือนภาษี</th><th class="rt">ยอดขาย</th><th class="rt">ภาษีขาย</th><th class="rt">ยอดซื้อ</th><th class="rt">ภาษีซื้อ</th><th class="rt">ภาษีสุทธิ</th><th class="rt">ชำระ/ยกไป</th><th>สถานะ</th><th>ไฟล์</th><th></th></tr></thead><tbody>';
-    var tOut=0,tIn=0,tNet=0;
-    for(var mo=1;mo<=12;mo++){var recs=byMonth[mo]||[];
-      if(!recs.length){h+='<tr class="pp30blank"><td class="pp30mo">'+_VPP30MON[mo-1]+' '+_vPP30Year+'</td><td class="pp30na" colspan="7">— ยังไม่มีข้อมูล —</td><td></td><td class="pp30act"><button class="pp30addmo" data-pp30add="'+_eatt(_vPP30Sel)+'|'+mo+'|'+_vPP30Year+'" type="button" title="เพิ่มข้อมูลเดือนนี้">+</button></td></tr>';}
-      else{recs.forEach(function(r){var net=_vPP30Net(r);var st=_vPP30Settle(r);tOut+=(+r.outputVat||0);tIn+=(+r.inputVat||0);tNet+=net;
-        var stTxt=st?(st.pay?'<span class="pp30pay">ชำระ '+_ppNum(st.v)+'</span>':'<span class="pp30cf">ยกไป '+_ppNum(st.v)+'</span>'):'<span class="pp30zero">—</span>';
-        h+='<tr><td class="pp30mo">'+_VPP30MON[mo-1]+' '+_vPP30Year+(r.normal===false?' <span class="pp30add">เพิ่มเติม</span>':'')+'</td>'
-          +'<td class="rt">'+(r.sales!=null?_ppNum(r.sales):'—')+'</td><td class="rt b">'+(r.outputVat!=null?_ppNum(r.outputVat):'—')+'</td>'
-          +'<td class="rt">'+(r.purchases!=null?_ppNum(r.purchases):'—')+'</td><td class="rt b">'+(r.inputVat!=null?_ppNum(r.inputVat):'—')+'</td>'
-          +'<td class="rt '+(net>0?'np':(net<0?'nn':''))+'">'+_ppNum(net)+'</td><td class="rt">'+stTxt+'</td>'
-          +'<td>'+(r.onTime===false?'<span class="pp30late">เกินกำหนด</span>':'<span class="pp30ok">ในกำหนด</span>')+'</td>'
-          +'<td>'+(r.file&&_fCanView(r.file)?'<button class="pp30fb" data-pp30v="'+r.id+'" type="button" title="เปิดดูไฟล์ ภ.พ.30">📄</button>':'<span class="pp30nofile">—</span>')+'</td>'
-          +'<td class="pp30act"><button class="pp30ed" data-pp30e="'+r.id+'" type="button" title="แก้ไข">✎</button><button class="pp30del" data-pp30d="'+r.id+'" type="button" title="ลบ">✕</button></td></tr>';});}}
-    h+='</tbody><tfoot><tr><td>รวม</td><td class="rt"></td><td class="rt b">'+_ppNum(tOut)+'</td><td class="rt"></td><td class="rt b">'+_ppNum(tIn)+'</td><td class="rt '+(tNet>0?'np':(tNet<0?'nn':''))+'">'+_ppNum(tNet)+'</td><td colspan="4"></td></tr></tfoot></table></div>';}
+  if(!selCo){h+='<div class="v30empty">เลือกบริษัทด้านซ้ายเพื่อดูสรุป ภ.พ.30 รายเดือน</div>';}
+  else{
+    var byMonth={};VATPP30.forEach(function(r){if(r.co===_vPP30Sel&&(+r.beYear)===_vPP30Year){byMonth[r.month]=r;}});
+    var filled=[];for(var fmo=1;fmo<=12;fmo++)if(byMonth[fmo])filled.push(fmo);
+    var tSales=0,tPur=0,tOut=0,tIn=0,tPay=0;
+    filled.forEach(function(mo){var r=byMonth[mo];tSales+=(+r.sales||0);tPur+=(+r.purchases||0);tOut+=(+r.outputVat||0);tIn+=(+r.inputVat||0);var st=_vPP30Settle(r);if(st&&st.pay)tPay+=st.v;});
+    var closingCF=null;if(filled.length){var lastR=byMonth[filled[filled.length-1]];var lst=_vPP30Settle(lastR);closingCF=(lst&&!lst.pay)?lst.v:(lastR.overpaidCarry!=null&&lastR.overpaidCarry!==''?+lastR.overpaidCarry:null);}
+    h+='<div class="v30co-head"><div class="v30co-nm">'+esc(selCo.name||'')+'</div><div class="v30co-id"><div><span>เลขผู้เสียภาษี</span>'+esc(selCo.taxid||'-')+'</div><div><span>ปีภาษี</span>'+_vPP30Year+' / '+(_vPP30Year-543)+'</div></div></div>';
+    h+='<div class="v30stats">';
+    h+='<div class="v30stat"><div class="v30stat-k">ยอดขายรวม</div><div class="v30stat-v">'+_ppNum(tSales)+'</div><div class="v30stat-s">'+filled.length+' เดือนที่ยื่น</div></div>';
+    h+='<div class="v30stat"><div class="v30stat-k">ยอดซื้อรวม</div><div class="v30stat-v">'+_ppNum(tPur)+'</div><div class="v30stat-s">ภาษีซื้อ '+_ppNum(tIn)+'</div></div>';
+    h+='<div class="v30stat"><div class="v30stat-k">ภาษีที่ต้องชำระ (สะสม)</div><div class="v30stat-v'+(tPay>0?' neg':'')+'">'+_ppNum(tPay)+'</div><div class="v30stat-s">'+(tPay>0?'มีภาษีต้องชำระ':'ไม่มีภาษีต้องชำระ')+'</div></div>';
+    h+='<div class="v30stat accent"><div class="v30stat-k">เครดิตภาษีซื้อยกไป</div><div class="v30stat-v pos">'+(closingCF!=null?_ppNum(closingCF):'—')+'</div><div class="v30stat-s">'+(filled.length?'ณ สิ้น '+_VPP30MON[filled[filled.length-1]-1]+' '+_vPP30Year:'ยังไม่มีข้อมูล')+'</div></div>';
+    h+='</div>';
+    h+='<div class="v30scroll"><table class="v30tbl"><thead><tr><th class="l">เดือนภาษี</th><th>ยอดขาย<i>ช่อง 1</i></th><th>ภาษีขาย<i>ช่อง 5</i></th><th>ยอดซื้อ<i>ช่อง 6</i></th><th>ภาษีซื้อ<i>ช่อง 7</i></th><th>สุทธิเดือนนี้<i>ช่อง 8/9</i></th><th>ยกมา<i>ช่อง 10</i></th><th>ยกไป<i>ช่อง 12</i></th><th class="l">สถานะ</th><th class="c">ไฟล์</th><th class="c"></th></tr></thead><tbody>';
+    for(var mo=1;mo<=12;mo++){var r=byMonth[mo];
+      if(!r){h+='<tr class="v30blank"><td class="l v30mo">'+_VPP30MON[mo-1]+' '+_vPP30Year+'</td><td class="v30na" colspan="7">— ยังไม่มีข้อมูล —</td><td class="l v30na2">รออัปโหลด</td><td class="c"></td><td class="c"><button class="v30add" data-pp30add="'+_eatt(_vPP30Sel)+'|'+mo+'|'+_vPP30Year+'" type="button" title="เพิ่มข้อมูลเดือนนี้">+</button></td></tr>';}
+      else{var net=_vPP30Net(r);var st=_vPP30Settle(r);
+        var cfPrev=(r.carried!=null&&r.carried!=='')?+r.carried:null;
+        var cfNext=(r.overpaidCarry!=null&&r.overpaidCarry!=='')?+r.overpaidCarry:null;
+        var stTxt=st?(st.pay?'<span class="v30pill pay">ชำระ '+_ppNum(st.v)+'</span>':'<span class="v30pill over">ชำระเกิน · ยกไป</span>'):'<span class="v30pill zero">—</span>';
+        h+='<tr><td class="l v30mo">'+_VPP30MON[mo-1]+' '+_vPP30Year+(r.normal===false?' <span class="v30tag-add">เพิ่มเติม</span>':'')+(r.onTime===false?' <span class="v30tag-late">เกินกำหนด</span>':'')+'</td>'
+          +'<td>'+(r.sales!=null&&r.sales!==''?_ppNum(r.sales):'—')+'</td><td class="b">'+(r.outputVat!=null&&r.outputVat!==''?_ppNum(r.outputVat):'—')+'</td>'
+          +'<td>'+(r.purchases!=null&&r.purchases!==''?_ppNum(r.purchases):'—')+'</td><td class="b">'+(r.inputVat!=null&&r.inputVat!==''?_ppNum(r.inputVat):'—')+'</td>'
+          +'<td class="'+(net>0?'np':(net<0?'cf':''))+'">'+(net<0?'+'+_ppNum(-net):_ppNum(net))+'</td>'
+          +'<td>'+(cfPrev!=null?_ppNum(cfPrev):'—')+'</td><td class="cf">'+(cfNext!=null?_ppNum(cfNext):'—')+'</td>'
+          +'<td class="l">'+stTxt+'</td>'
+          +'<td class="c">'+(r.file&&_fCanView(r.file)?'<button class="v30fb" data-pp30v="'+r.id+'" type="button" title="เปิดดูไฟล์ ภ.พ.30">📄</button>':'<span class="v30nofile">—</span>')+'</td>'
+          +'<td class="c v30act"><button class="v30ed" data-pp30e="'+r.id+'" type="button" title="แก้ไข">✎</button><button class="v30del" data-pp30d="'+r.id+'" type="button" title="ลบ">✕</button></td></tr>';}}
+    var tNet=tOut-tIn;
+    h+='</tbody><tfoot><tr><td class="l">รวม (ที่มีข้อมูล)</td><td>'+_ppNum(tSales)+'</td><td class="b">'+_ppNum(tOut)+'</td><td>'+_ppNum(tPur)+'</td><td class="b">'+_ppNum(tIn)+'</td><td class="'+(tNet>0?'np':(tNet<0?'cf':''))+'">'+(tNet<0?'+'+_ppNum(-tNet):_ppNum(tNet))+'</td><td></td><td class="cf">'+(closingCF!=null?_ppNum(closingCF):'—')+'</td><td colspan="3"></td></tr></tfoot></table></div>';
+    var chainMonths=filled.filter(function(mo){var r=byMonth[mo];return (r.overpaidCarry!=null&&r.overpaidCarry!=='')||(r.overpaid!=null&&r.overpaid!=='');});
+    if(chainMonths.length){
+      var firstR=byMonth[chainMonths[0]];var opening=(firstR.carried!=null&&firstR.carried!=='')?+firstR.carried:0;
+      h+='<div class="v30chain"><h3>เครดิตภาษีซื้อยกไปสะสม (Carry-forward credit)</h3><div class="v30chain-cap">ภาษีซื้อมากกว่าภาษีขาย → เกิดเครดิตสะสมที่ขอคืน (ค.10 / พร้อมเพย์) หรือยกไปใช้เดือนถัดไปได้</div><div class="v30flow">';
+      h+='<div class="v30node open"><div class="v30node-l">ยกมาต้นงวด</div><div class="v30node-a">'+_ppNum(opening)+'</div></div>';
+      chainMonths.forEach(function(mo,ix){var r=byMonth[mo];var add=(r.overpaid!=null&&r.overpaid!=='')?+r.overpaid:0;var close=(r.overpaidCarry!=null&&r.overpaidCarry!=='')?+r.overpaidCarry:(opening+add);var isLast=(ix===chainMonths.length-1);
+        h+='<div class="v30op"><div class="v30op-a">+'+_ppNum(add)+'</div><div class="v30op-s">'+_VPP30MON[mo-1]+'</div><div class="v30op-arr">→</div></div><div class="v30node'+(isLast?' close':'')+'"><div class="v30node-l">สิ้น '+_VPP30MON[mo-1]+'</div><div class="v30node-a">'+_ppNum(close)+'</div></div>';});
+      h+='</div></div>';
+    }
+  }
   h+='</div></div></div>';return h;}
 function _vPP30Stat(html,kind){var el=document.getElementById('pp30Diag');if(!el)return;el.className='pp30diag'+(kind?' '+kind:'');el.innerHTML=html;}
 function _vPP30BindView(){var drop=document.getElementById('pp30Drop'),inp=document.getElementById('pp30File');
