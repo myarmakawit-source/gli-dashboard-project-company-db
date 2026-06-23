@@ -1365,14 +1365,14 @@ select.ppin{cursor:pointer}
 .ppbtns{display:flex;gap:9px;margin-top:18px;justify-content:flex-end}
 @media(max-width:640px){.ppgrid2{grid-template-columns:1fr}.pp30bar{flex-direction:column;align-items:flex-start}}
 
-/* ===== P.P.30 Summary — report redesign (v7.57) ===== */
+/* ===== P.P.30 Summary — report redesign (v7.58) ===== */
 .v30wrap{padding:2px 0}
 .v30mast{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;border-bottom:2.5px solid var(--brand);padding-bottom:13px;margin-bottom:16px;flex-wrap:wrap}
 .v30kk{font-size:10.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
 .v30h1{margin:.14em 0 .06em;font-size:22px;font-weight:800;letter-spacing:-.01em;color:var(--ink);line-height:1.12}
 .v30sub{font-size:12.5px;color:var(--muted)}
 .v30seal{text-align:right;flex:0 0 auto}
-.v30seal-b{font-family:'IBM Plex Mono',monospace;font-size:21px;font-weight:600;color:var(--brand);border:2px solid var(--brand);border-radius:9px;padding:4px 11px;display:inline-block}
+.v30seal-b{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:21px;font-weight:600;color:var(--brand);border:2px solid var(--brand);border-radius:9px;padding:4px 11px;display:inline-block}
 .v30seal-t{font-size:10px;color:var(--muted);margin-top:4px}
 .v30drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;border:2px dashed #cfd9c9;border-radius:13px;padding:16px;cursor:pointer;background:linear-gradient(135deg,var(--brand-t),#fff);transition:.18s;margin-bottom:11px}
 .v30drop:hover{border-color:var(--brand);background:linear-gradient(135deg,#dcebe3,#fff)}
@@ -1380,13 +1380,13 @@ select.ppin{cursor:pointer}
 .v30drop-t{font-size:13.5px;font-weight:700;color:var(--brand-d)}
 .v30drop-s{font-size:11.5px;color:var(--muted)}
 .v30diag{font-size:12px;border-radius:9px;padding:8px 13px;margin-bottom:14px;background:var(--gold-t);border:1px solid #ecd9ab;color:var(--gold-d)}
-.v30diag b{font-family:'IBM Plex Mono',monospace}
+.v30diag b{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 .v30diaghint{opacity:.75;font-size:10.5px}
 .v30yearbar{display:flex;align-items:center;gap:9px;margin-bottom:16px}
 .v30ylab{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .v30ynav{width:30px;height:30px;border:1px solid var(--line);background:var(--card);border-radius:8px;cursor:pointer;color:var(--brand);font-size:12px;transition:.15s}
 .v30ynav:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
-.v30ysel{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer}
+.v30ysel{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:13px;font-weight:500;padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer}
 .v30grid{display:grid;grid-template-columns:240px 1fr;gap:18px;align-items:start}
 .v30colist{display:flex;flex-direction:column;gap:7px}
 .v30coitem{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:11px 13px;cursor:pointer;transition:.15s;border-left:3px solid transparent;width:100%;font-family:inherit}
@@ -1394,8 +1394,8 @@ select.ppin{cursor:pointer}
 .v30coitem.on{border-color:var(--brand);border-left:3px solid var(--brand);background:var(--brand-t);box-shadow:0 6px 18px -12px rgba(14,92,82,.5)}
 .v30coitem-nm{font-size:13px;font-weight:700;color:var(--ink);line-height:1.3}
 .v30coitem-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px}
-.v30coitem-id{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted)}
-.v30coitem-meta b{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:999px}
+.v30coitem-id{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;color:var(--muted)}
+.v30coitem-meta b{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:999px}
 .v30full{background:var(--pos-bg);color:var(--pos)}
 .v30part{background:var(--gold-t);color:var(--gold-d)}
 .v30none{background:#f0ece1;color:var(--muted)}
@@ -1403,13 +1403,13 @@ select.ppin{cursor:pointer}
 .v30empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:13px;background:var(--card);border:1px solid var(--line);border-radius:13px}
 .v30co-head{background:linear-gradient(110deg,var(--brand),var(--brand-d));color:#fff;border-radius:13px 13px 0 0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .v30co-nm{font-size:17px;font-weight:700}
-.v30co-id{font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;line-height:1.55}
+.v30co-id{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:12px;text-align:right;line-height:1.55}
 .v30co-id span{opacity:.7;font-family:'Sarabun',sans-serif;font-size:10.5px;margin-right:5px}
 .v30stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--card);border:1px solid var(--line);border-top:0}
 .v30stat{padding:13px 16px;border-right:1px solid var(--line2)}
 .v30stat:last-child{border-right:0}
 .v30stat-k{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
-.v30stat-v{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;margin-top:3px;color:var(--ink);letter-spacing:-.01em}
+.v30stat-v{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:17px;font-weight:600;margin-top:3px;color:var(--ink);letter-spacing:-.01em}
 .v30stat-v.pos{color:var(--pos)}
 .v30stat-v.neg{color:var(--neg)}
 .v30stat-s{font-size:10px;color:var(--muted);margin-top:2px}
@@ -1419,8 +1419,8 @@ select.ppin{cursor:pointer}
 .v30tbl thead th{background:var(--rowz);color:var(--brand-d);font-weight:700;font-size:10px;letter-spacing:.03em;text-transform:uppercase;text-align:right;padding:9px 12px;border-bottom:2px solid var(--line);white-space:nowrap;vertical-align:bottom}
 .v30tbl thead th.l{text-align:left}
 .v30tbl thead th.c{text-align:center}
-.v30tbl thead th i{display:block;font-family:'IBM Plex Mono',monospace;font-style:normal;font-size:8.5px;color:var(--gold);font-weight:600;margin-top:1px}
-.v30tbl tbody td{padding:9px 12px;border-bottom:1px solid var(--line2);text-align:right;font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;color:var(--ink)}
+.v30tbl thead th i{display:block;font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-style:normal;font-size:8.5px;color:var(--gold);font-weight:600;margin-top:1px}
+.v30tbl tbody td{padding:9px 12px;border-bottom:1px solid var(--line2);text-align:right;font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;color:var(--ink)}
 .v30tbl tbody td.l{text-align:left;font-family:'Sarabun',sans-serif}
 .v30tbl tbody td.c{text-align:center}
 .v30tbl tbody td.b{font-weight:600;color:var(--brand-d)}
@@ -1431,7 +1431,7 @@ select.ppin{cursor:pointer}
 .v30blank td{color:#bfb893}
 .v30na{text-align:center;color:#c4bd9c;font-family:'Sarabun',sans-serif;font-style:italic}
 .v30na2{color:#c4bd9c;font-family:'Sarabun',sans-serif;font-size:11px}
-.v30tbl tfoot td{padding:10px 12px;border-top:2px solid var(--brand);background:#f7f4ec;font-family:'IBM Plex Mono',monospace;font-weight:600;text-align:right;color:var(--ink)}
+.v30tbl tfoot td{padding:10px 12px;border-top:2px solid var(--brand);background:#f7f4ec;font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-weight:600;text-align:right;color:var(--ink)}
 .v30tbl tfoot td.l{text-align:left;font-family:'Sarabun',sans-serif;font-weight:700;color:var(--brand-d)}
 .v30tbl tfoot td.cf{color:var(--pos)}
 .v30tbl tfoot td.np{color:var(--neg)}
@@ -1455,11 +1455,11 @@ select.ppin{cursor:pointer}
 .v30flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
 .v30node{flex:0 0 auto;text-align:center;padding:0 3px}
 .v30node-l{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:5px}
-.v30node-a{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;padding:8px 13px;border-radius:8px;background:var(--brand-t);color:var(--brand-d);border:1px solid #cfe6d8}
+.v30node-a{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:15px;font-weight:600;padding:8px 13px;border-radius:8px;background:var(--brand-t);color:var(--brand-d);border:1px solid #cfe6d8}
 .v30node.open .v30node-a{background:var(--gold-t);color:var(--ink);border-color:#ecd9ab}
 .v30node.close .v30node-a{background:var(--brand);color:#fff;border-color:var(--brand)}
 .v30op{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 5px;min-width:66px}
-.v30op-a{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;color:var(--pos)}
+.v30op-a{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;font-weight:600;color:var(--pos)}
 .v30op-s{font-size:9px;color:var(--muted)}
 .v30op-arr{color:var(--gold);font-size:14px;line-height:1;margin-top:1px}
 @media(max-width:880px){.v30grid{grid-template-columns:1fr}.v30stats{grid-template-columns:repeat(2,1fr)}.v30stat:nth-child(2){border-right:0}.v30stat{border-bottom:1px solid var(--line2)}}
@@ -1500,7 +1500,7 @@ body{padding-left:276px}
 .modnav.sidebar .authout{margin:0}
 @media(max-width:900px){body{padding-left:18px}.modnav.sidebar{position:relative;width:auto;height:auto;bottom:auto;flex-direction:column;margin:0 0 16px;border-radius:12px}.sbmenu{flex-direction:row;flex-wrap:wrap;gap:4px}.sbsec{width:100%;padding:8px 6px 2px}.modnav.sidebar .modtab{width:auto;flex:0 0 auto}.sbfoot{flex-direction:row;flex-wrap:wrap;margin-top:8px}}
 </style>
-<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"/><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"/><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="20" r="4.6" fill="#FBBF24"/></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">📒</span><span class="sblbl">General Ledger</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab" data-mod="tfrs" role="tab" aria-selected="false"><span class="sbic">📚</span><span class="sblbl">TFRS Thailand</span></button><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><button class="modtab" data-mod="line" role="tab" aria-selected="false"><span class="sbic">💬</span><span class="sblbl">LINE Slips · Cash</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false"><span class="sbic">📝</span><span class="sblbl">Audit Log · Activity</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v7.57</span></div></nav>
+<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"/><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"/><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="20" r="4.6" fill="#FBBF24"/></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">📒</span><span class="sblbl">General Ledger</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab" data-mod="tfrs" role="tab" aria-selected="false"><span class="sbic">📚</span><span class="sblbl">TFRS Thailand</span></button><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><button class="modtab" data-mod="line" role="tab" aria-selected="false"><span class="sbic">💬</span><span class="sblbl">LINE Slips · Cash</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false"><span class="sbic">📝</span><span class="sblbl">Audit Log · Activity</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v7.58</span></div></nav>
 <header>
 <div class="letter"><svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0E5C52"></rect><path d="M15 43 L27 31 L35 37 L49 21" fill="none" stroke="#D9A441" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="49" cy="21" r="3.7" fill="#D9A441"></circle><text x="32" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#9FCFC4" letter-spacing="2.5">GLI</text></svg>
 <div class="brand"><div class="brandL"><div class="th">GRANDLINE INNOVATION <span class="th-co">COMPANY LIMITED</span></div><span class="ho">Head Office</span></div><div class="brandR"><div class="addr">333 Soi Lat Phrao 64 Yaek 12, Lat Phrao Road, Wang Thong Lang Sub-District, Wang Thong Lang District, Bangkok 10310</div><div class="taxid">Tax ID · 0105553002230</div></div></div>
@@ -2185,12 +2185,180 @@ function _vPP30Net(r){if(r.payable!=null&&r.payable!=='')return +r.payable;if(r.
 function _vPP30Settle(r){if(r.mustPay!=null&&r.mustPay!=='')return {v:+r.mustPay,pay:true};if(r.overpaidCarry!=null&&r.overpaidCarry!=='')return {v:+r.overpaidCarry,pay:false};return null;}
 /* ---- pdf.js lazy loader ---- */
 function _loadPdfjs(){if(_pdfjsP)return _pdfjsP;var V='3.11.174';var MAIN=['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/'+V+'/pdf.min.js','https://cdn.jsdelivr.net/npm/pdfjs-dist@'+V+'/build/pdf.min.js','https://unpkg.com/pdfjs-dist@'+V+'/build/pdf.min.js'];var WORK=['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/'+V+'/pdf.worker.min.js','https://cdn.jsdelivr.net/npm/pdfjs-dist@'+V+'/build/pdf.worker.min.js','https://unpkg.com/pdfjs-dist@'+V+'/build/pdf.worker.min.js'];function _setW(lib){function tw(i){if(i>=WORK.length){try{lib.GlobalWorkerOptions.workerSrc=WORK[0];}catch(e){}return Promise.resolve();}return fetch(WORK[i]).then(function(r){if(!r.ok)throw 0;return r.text();}).then(function(code){try{lib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(new Blob([code],{type:'application/javascript'}));}catch(e){}}).catch(function(){return tw(i+1);});}return tw(0);}_pdfjsP=new Promise(function(res,rej){if(window.pdfjsLib){_setW(window.pdfjsLib).then(function(){res(window.pdfjsLib);});return;}var i=0;function tm(){if(i>=MAIN.length){rej(new Error('โหลดตัวอ่าน PDF (pdf.js) ไม่สำเร็จจากทุก CDN — ตรวจสอบอินเทอร์เน็ต/ไฟร์วอลล์'));return;}var sc=document.createElement('script');sc.src=MAIN[i++];sc.onload=function(){if(window.pdfjsLib){_setW(window.pdfjsLib).then(function(){res(window.pdfjsLib);});}else{tm();}};sc.onerror=function(){try{sc.parentNode.removeChild(sc);}catch(e){}tm();};document.head.appendChild(sc);}tm();});return _pdfjsP;}
-function _vParsePP30(buf){
-  var _to;function st(m){try{_vPP30Stat(m,'wait');}catch(e){}}
-  var TO=new Promise(function(_r,rej){_to=setTimeout(function(){rej(new Error('หมดเวลา 25 วินาที — ตัวอ่าน PDF (pdf.js worker) จาก CDN โหลด/ตอบสนองไม่ได้ (มักเกิดจากเครือข่ายบล็อก cdnjs.cloudflare.com)'));},25000);});
-  var P=_loadPdfjs().then(function(L){st('🔧 โหลดตัวอ่าน PDF สำเร็จ — กำลังเปิดเอกสาร…');return L.getDocument({data:buf}).promise;}).then(function(pdf){st('📄 เปิดเอกสารแล้ว — กำลังอ่านหน้า 1…');return pdf.getPage(1);}).then(function(page){st('🔡 อ่านหน้าแล้ว — กำลังสกัดข้อความ…');var H=page.getViewport({scale:1}).height;return page.getTextContent({disableCombineTextItems:true}).then(function(tc){var items=tc.items.map(function(it){var tr=it.transform;return {s:it.str||'',x:tr[4],y:H-tr[5],w:it.width||0};});return _vPP30Extract(items,H);});});
-  return Promise.race([P,TO]).then(function(r){clearTimeout(_to);return r;},function(e){clearTimeout(_to);throw e;});
+// ============ Native ภ.พ.30 PDF parser (no CDN, browser-native) ============
+// Returns {taxid, beYear, month, L:{1..16}, _diag, _raw} via DecompressionStream
+const _VPP30MONF_JS=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const _VPP30_BOXY={1:463,2:447,3:431,4:415,5:398,6:378,7:357,8:336,9:319,10:303,11:287,12:270,13:229,14:213,15:197,16:181};
+
+async function _vInflate(u8){
+  // zlib/deflate -> bytes, using native DecompressionStream
+  for(const fmt of ['deflate','deflate-raw']){
+    try{
+      const ds=new DecompressionStream(fmt);
+      const ab=await new Response(new Blob([u8]).stream().pipeThrough(ds)).arrayBuffer();
+      return new Uint8Array(ab);
+    }catch(e){}
+  }
+  return u8;
 }
+function _latin1(u8){var s='';for(var i=0;i<u8.length;i++)s+=String.fromCharCode(u8[i]);return s;}
+
+async function _vPP30NativeParse(buf){
+  const u8=new Uint8Array(buf);
+  const S=_latin1(u8); // latin1 view for object scanning
+  // 1. object map: "N G obj ... endobj"
+  const objs={}; // id -> {bodyStr, bodyStart, bodyEnd}
+  const reObj=/(\d+)\s+\d+\s+obj([\s\S]*?)endobj/g; let m;
+  while((m=reObj.exec(S))){objs[+m[1]]={s:m.index+m[0].indexOf('obj')+3,e:m.index+m[0].length-6,body:m[2]};}
+  function rawStreamBytes(o){
+    // find 'stream\r?\n' within object body region, return Uint8Array of compressed bytes + whether flate
+    const head=S.slice(o.s, o.s+400);
+    const mm=/stream\r?\n/.exec(S.slice(o.s));
+    if(!mm) return null;
+    const start=o.s+mm.index+mm[0].length;
+    const endIdx=S.indexOf('endstream', start);
+    let end=endIdx;
+    // trim trailing EOL
+    let bytes=u8.subarray(start, end);
+    // strip up to 2 trailing newline bytes
+    let en=bytes.length; while(en>0 && (bytes[en-1]===10||bytes[en-1]===13)) en--;
+    bytes=bytes.subarray(0,en);
+    const flate=/\/FlateDecode/.test(S.slice(o.s, start));
+    return {bytes, flate};
+  }
+  async function streamData(o){
+    if(!o) return null;
+    const r=rawStreamBytes(o); if(!r) return null;
+    return r.flate? await _vInflate(r.bytes) : r.bytes;
+  }
+  // 2. fonts -> ToUnicode CMaps
+  const fonts={};
+  function parseCMap(str){
+    const map={};
+    let mm;
+    const reBfc=/beginbfchar([\s\S]*?)endbfchar/g;
+    while((mm=reBfc.exec(str))){
+      const seg=mm[1]; let c; const reP=/<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>/g;
+      while((c=reP.exec(seg))){const g=parseInt(c[1],16),u=parseInt(c[2],16); if(u>=0x20&&u<=0xFFFF)map[g]=String.fromCharCode(u);}
+    }
+    const reBfr=/beginbfrange([\s\S]*?)endbfrange/g;
+    while((mm=reBfr.exec(str))){
+      const seg=mm[1]; let c; const reR=/<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>/g;
+      while((c=reR.exec(seg))){let s=parseInt(c[1],16),e=parseInt(c[2],16),u=parseInt(c[3],16); const lim=Math.min(e-s+1,3000); for(let k=0;k<lim;k++){if(u+k>=0x20&&u+k<=0xFFFF)map[s+k]=String.fromCharCode(u+k);}}
+    }
+    return map;
+  }
+  for(const id in objs){
+    const fm=/\/Font\s*<<([\s\S]*?)>>/.exec(objs[id].body);
+    if(fm){
+      let nm; const reF=/\/(F\d+)\s+(\d+)\s+\d+\s+R/g;
+      while((nm=reF.exec(fm[1]))){
+        const fo=objs[+nm[2]];
+        if(fo){
+          const tu=/\/ToUnicode\s+(\d+)\s+\d+\s+R/.exec(fo.body);
+          if(tu){const cd=await streamData(objs[+tu[1]]); if(cd)fonts[nm[1]]=parseCMap(_latin1(cd));}
+        }
+      }
+    }
+  }
+  // 3. page content
+  let pageBody=null;
+  for(const id in objs){const b=objs[id].body; if(/\/Type/.test(b)&&/\/Page[^s]/.test(b+' ')&&!/\/Pages/.test(b)){pageBody=b;break;}}
+  if(!pageBody){for(const id in objs){if(/\/Type\s*\/Page\b/.test(objs[id].body)&&!/\/Pages/.test(objs[id].body)){pageBody=objs[id].body;break;}}}
+  let contentBytes=new Uint8Array(0);
+  if(pageBody){
+    const cm2=/\/Contents\s*(\[[^\]]*\]|\d+\s+\d+\s+R)/.exec(pageBody);
+    if(cm2){
+      const refs=[]; let r; const reRef=/(\d+)\s+\d+\s+R/g;
+      while((r=reRef.exec(cm2[1])))refs.push(+r[1]);
+      const parts=[];
+      for(const rid of refs){const d=await streamData(objs[rid]); if(d){parts.push(d);parts.push(new Uint8Array([10]));}}
+      let tot=0; parts.forEach(p=>tot+=p.length);
+      contentBytes=new Uint8Array(tot); let off=0; parts.forEach(p=>{contentBytes.set(p,off);off+=p.length;});
+    }
+  }
+  // 4. char-scan content stream
+  const D=contentBytes, N=D.length;
+  const chars=[]; let font='F1', x=0, y=0, seq=0, i=0, guard=0;
+  const ops=[];
+  function readStr(i){
+    let depth=1; i++; const out=[];
+    while(i<N&&depth>0){
+      const c=D[i];
+      if(c===0x5C){const n=i+1<N?D[i+1]:0;
+        if(n===0x28||n===0x29||n===0x5C){out.push(n);i+=2;continue;}
+        if(n===0x6E){out.push(10);i+=2;continue;}
+        if(n===0x72){out.push(13);i+=2;continue;}
+        if(n===0x74){out.push(9);i+=2;continue;}
+        if(n>=0x30&&n<=0x37){let o=String.fromCharCode(n);i+=2;let k=0;while(i<N&&D[i]>=0x30&&D[i]<=0x37&&k<2){o+=String.fromCharCode(D[i]);i++;k++;}out.push(parseInt(o,8)&0xFF);continue;}
+        out.push(n);i+=2;continue;}
+      if(c===0x28){depth++;out.push(c);i++;continue;}
+      if(c===0x29){depth--;if(depth===0){i++;break;}out.push(c);i++;continue;}
+      out.push(c);i++;
+    }
+    return [out,i];
+  }
+  function decode(bytes,f){
+    const cm=fonts[f]||{}; let r='';
+    for(let j=0;j+1<bytes.length;j+=2){const g=(bytes[j]<<8)|bytes[j+1]; const ch=cm[g]; if(ch)r+=ch;}
+    return r;
+  }
+  const isDelim=c=>c===32||c===9||c===13||c===10||c===47||c===91||c===93||c===40||c===41||c===60||c===62;
+  while(i<N){
+    guard++; if(guard>6000000)break;
+    const c=D[i];
+    if(c===32||c===9||c===13||c===10){i++;continue;}
+    if(c===0x28){const rs=readStr(i);ops.push(['s',rs[0]]);i=rs[1];continue;}
+    if(c===0x5B||c===0x5D){i++;continue;}
+    if(c===0x3C){const j=_u8IndexOf(D,0x3E,i);const hx=j>0?_latin1(D.subarray(i+1,j)):'';i=j>0?j+1:N;const clean=hx.replace(/[^0-9A-Fa-f]/g,'');const arr=[];for(let k=0;k+1<clean.length;k+=2)arr.push(parseInt(clean.substr(k,2),16));ops.push(['s',arr]);continue;}
+    if(c===0x2F){let j=i+1;while(j<N&&!isDelim(D[j]))j++;ops.push(['n',_latin1(D.subarray(i+1,j))]);i=j;continue;}
+    let j=i;while(j<N&&!isDelim(D[j]))j++;const tok=_latin1(D.subarray(i,j));i=j;
+    if(/^-?[\d.]+$/.test(tok)){ops.push(['#',parseFloat(tok)]);continue;}
+    if(tok==='Tf'){for(let k=ops.length-1;k>=0;k--){if(ops[k][0]==='n'){font=ops[k][1];break;}}}
+    else if(tok==='Tm'){const nums=ops.filter(o=>o[0]==='#').map(o=>o[1]);if(nums.length>=6){x=nums[nums.length-2];y=nums[nums.length-1];}}
+    else if(tok==='Td'||tok==='TD'){const nums=ops.filter(o=>o[0]==='#').map(o=>o[1]);if(nums.length>=2){x+=nums[nums.length-2];y+=nums[nums.length-1];}}
+    else if(tok==='Tj'||tok==='TJ'||tok==="'"||tok==='"'){for(let k=0;k<ops.length;k++){if(ops[k][0]==='s'){const t=decode(ops[k][1],font);for(const ch of t){chars.push([ch,x,y,seq++]);}}}}
+    ops.length=0;
+  }
+  // 5. extract fields
+  return _vPP30FromChars(chars);
+}
+function _u8IndexOf(u8,byte,from){for(let i=from;i<u8.length;i++)if(u8[i]===byte)return i;return -1;}
+
+function _vPP30FromChars(chars){
+  // rows by rounded y
+  const rows={};
+  for(const c of chars){const yb=Math.round(c[2]);(rows[yb]||(rows[yb]=[])).push([c[1],c[3],c[0]]);}
+  for(const yb in rows)rows[yb].sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+  const ys=Object.keys(rows).map(Number).sort((a,b)=>b-a);
+  const lines=ys.map(yb=>[yb,rows[yb].map(c=>c[2]).join('')]);
+  const flat=lines.map(l=>l[1]).join('\n');
+  const nc=flat.replace(/[,\s]/g,'');
+  const taxid=(nc.match(/\d{13}/)||[''])[0];
+  const yrm=nc.match(/25\d{2}/); const beYear=yrm?+yrm[0]:null;
+  // month via ü near month-name first char
+  const monthPos={};
+  for(const yb of ys){const row=rows[yb];const txt=row.map(c=>c[2]).join('');
+    for(let mi=0;mi<12;mi++){const idx=txt.indexOf(_VPP30MONF_JS[mi]);if(idx>=0&&monthPos[mi+1]===undefined)monthPos[mi+1]=[row[idx][0],yb];}}
+  const us=[];for(const c of chars)if(c[0]==='ü')us.push([c[1],c[2]]);
+  let month=null,bestd=1e9;
+  for(const mi in monthPos){const mx=monthPos[mi][0],my=monthPos[mi][1];
+    for(const u of us){const ux=u[0],uy=u[1];if(Math.abs(my-uy)<7&&ux<mx&&(mx-ux)<55){const d=(mx-ux)+Math.abs(my-uy)*2;if(d<bestd){bestd=d;month=+mi;}}}}
+  // money -> boxes by nearest reference y
+  const L={};
+  for(const [yb,txt] of lines){
+    let mm; const reM=/\d[\d,]*\.\d{2}/g;
+    while((mm=reM.exec(txt))){
+      const v=parseFloat(mm[0].replace(/,/g,''));
+      // nearest box
+      let bb=null,bd=1e9;for(const b in _VPP30_BOXY){const d=Math.abs(_VPP30_BOXY[b]-yb);if(d<bd){bd=d;bb=+b;}}
+      if(bd<11 && L[bb]===undefined) L[bb]=v;
+    }
+  }
+  const vl=Object.keys(L).length;
+  return {taxid:taxid||'',beYear:beYear,month:month,L:L,_diag:{vl:vl,it:chars.length,ch:chars.length},_raw:flat.slice(0,4000)};
+}
+function _vParsePP30(buf){var _to;function st(m){try{_vPP30Stat(m,'wait');}catch(e){}}if(typeof DecompressionStream==='undefined')return Promise.reject(new Error('เบราว์เซอร์นี้เก่าเกินไป (ไม่รองรับ DecompressionStream) — กรุณาใช้ Chrome/Edge/Firefox/Safari รุ่นใหม่ หรือกรอกข้อมูลเอง'));st('🔧 กำลังอ่าน PDF ในเครื่อง (offline ไม่ใช้ CDN)…');var P=_vPP30NativeParse(buf).then(function(r){r.branch=r.branch||'';r.company=r.company||'';st('🔡 อ่านข้อความในเอกสารเสร็จ — กำลังจับคู่ช่อง ภ.พ.30…');return r;});var TO=new Promise(function(_r,rej){_to=setTimeout(function(){rej(new Error('หมดเวลา 20 วินาที — อ่าน PDF ไม่สำเร็จ'));},20000);});return Promise.race([P,TO]).then(function(r){clearTimeout(_to);return r;},function(e){clearTimeout(_to);throw e;});}
 function _vPP30Extract(items,H){
   items=items.filter(function(i){return i&&(''+i.s).trim()!=='';});
   var full=items.map(function(i){return i.s;}).join(' ');var flat=full.replace(/\s+/g,'');
@@ -2251,7 +2419,7 @@ function _vPP30Diag(list){var d={n:list.length,idb:0,u:0,p:0,d:0,idbFound:0};lis
 function _vPP30ImportFromMN(){var list=_vPP30CollectMN();if(!list.length){alert('ไม่พบไฟล์ ภ.พ.30 (PDF) ในโมดูล MN — กรุณาแนบไฟล์แบบ ภ.พ.30 ในงาน P.P.30 (Value Added Tax) ของโมดูล MN ก่อน');return;}if(!confirm('พบไฟล์ ภ.พ.30 ในโมดูล MN จำนวน '+list.length+' ไฟล์\nระบบจะอ่านและเปิดให้ตรวจทาน/บันทึกสรุปทีละไฟล์ — ดำเนินการต่อ?'))return;var btn=document.getElementById('pp30ImportMN');if(btn){btn.disabled=true;btn.textContent='⏳ กำลังอ่านไฟล์จาก MN…';}Promise.all(list.map(function(it){return _fileToBlob(it.file).then(function(b){return {ok:!!b,blob:b,it:it};}).catch(function(){return {ok:false,it:it};});})).then(function(res){if(btn){btn.disabled=false;btn.textContent='📥 อ่าน ภ.พ.30 จาก MN (Accounting Routine)';}var files=[];res.forEach(function(r){if(r.ok&&r.blob){var nm=(r.it.file.n)||'pp30.pdf';var _f;try{_f=new File([r.blob],nm,{type:'application/pdf'});}catch(e){_f=r.blob;try{_f.name=nm;}catch(_e){}}files.push({file:_f,mnco:r.it.co,mo:r.it.mo,yr:r.it.yr});}});var failed=res.length-files.length;if(!files.length){_vPP30Diag(list).then(function(dg){var cloud=Math.max(dg.u,dg.p);var hint;if(dg.idb>0&&dg.idbFound===0&&cloud===0)hint='ไฟล์ไม่มีสำเนาบนคลาวด์ (น่าจะแนบตอนออฟไลน์ หรือ Firebase ไม่ทำงานตอนแนบ) และไม่พบสำเนาในเครื่องนี้\n→ เปิดแอปบนเครื่อง/เบราว์เซอร์ที่แนบไฟล์ครั้งแรก รอให้ sync ขึ้นคลาวด์ แล้วลองใหม่ หรือแนบไฟล์ใหม่อีกครั้งในเครื่องนี้';else if(cloud>0&&dg.idbFound===0)hint='ไฟล์มีสำเนาบนคลาวด์ แต่ดึงมาอ่านไม่ได้ — ตรวจสอบว่าออนไลน์และเชื่อม Firebase อยู่ แล้วลองใหม่';else hint='ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต/Firebase แล้วลองใหม่';alert('อ่านไฟล์จาก MN ไม่สำเร็จ ('+dg.n+' ไฟล์)\n\n[วินิจฉัยที่เก็บไฟล์]\n• สำเนาในเครื่อง (IndexedDB): อ้างอิง '+dg.idb+' · พบจริง '+dg.idbFound+'\n• สำเนาบนคลาวด์ (Firebase .u/.p): '+cloud+'\n• base64 ฝังในข้อมูล: '+dg.d+'\n\nสาเหตุที่เป็นไปได้: '+hint);});return;}if(failed>0)alert('อ่านได้ '+files.length+'/'+res.length+' ไฟล์ — อีก '+failed+' ไฟล์อ่านไม่ได้ (อาจยังไม่ sync ขึ้นคลาวด์) จะดำเนินการกับไฟล์ที่อ่านได้ก่อน');_vPP30Q=files.slice();_vPP30HandleNext();});}
 function _vPP30DropFiles(fileList){var files=Array.prototype.slice.call(fileList||[]).filter(function(f){return /\.pdf$/i.test(f.name)||f.type==='application/pdf';});if(!files.length){alert('กรุณาวางไฟล์ PDF ของแบบ ภ.พ.30');return;}_vPP30Q=files.slice();_vPP30HandleNext();}
 function _vPP30MergeMN(p,mnm){if(!p||!mnm)return;try{var up=(typeof _upFind==='function')?_upFind(mnm.mnco):null;if(up){if(!p.taxid&&up.tax)p.taxid=up.tax;if(!p.company&&up.name)p.company=up.name;if(!p._co){var wp=(typeof _vMatchCo==='function')?_vMatchCo(up.tax):'';if(wp)p._co=wp;}}if((!p.month||p.month===0)&&mnm.mo)p.month=+mnm.mo;if((p.beYear==null||p.beYear==='')&&mnm.yr){var y=+mnm.yr;if(y&&y<2400)y+=543;p.beYear=y;}}catch(e){}}
-function _vPP30HandleNext(){if(!_vPP30Q.length)return;var _qi=_vPP30Q.shift();var file=(_qi&&_qi.file)?_qi.file:_qi;var _mnm=(_qi&&_qi.file)?_qi:null;var MAX=15*1024*1024;if(file.size>MAX){alert('ไฟล์ใหญ่เกิน 15 MB: '+file.name+' — กรุณาบีบอัด PDF ก่อน');_vPP30HandleNext();return;}try{_vPP30Stat('📥 รับไฟล์: <b>'+esc(file.name)+'</b> ('+Math.round((file.size||0)/1024)+' KB) — กำลังโหลดตัวอ่าน PDF แล้วอ่านข้อมูล…','wait');}catch(_e){}var frA=new FileReader();frA.onload=function(){var _buf=frA.result;var _id=_idbId(file.name);var _meta={n:file.name,idb:_id,sz:file.size||0};try{_idbPut(_id,file).catch(function(){});}catch(ee){}try{if(typeof firebase!=='undefined'&&firebase.initializeApp){_stPut(file,'vat_pp30').then(function(cloud){_meta.u=cloud.u;_meta.p=cloud.p;if(typeof _fileResaveSoon==='function')_fileResaveSoon();}).catch(function(){});}}catch(ee){}var _isImg=/\.(jpe?g|png|webp|gif|bmp|heic|heif|tiff?)$/i.test(file.name||'')||/^image\//.test(file.type||'');if(_isImg){var _pi={L:{},month:0,beYear:'',taxid:'',company:'',normal:true,onTime:true};_vPP30MergeMN(_pi,_mnm);_vPP30OpenModal(_pi,_meta,'\u0e44\u0e1f\u0e25\u0e4c\u0e23\u0e39\u0e1b\u0e20\u0e32\u0e1e (\u0e44\u0e21\u0e48\u0e43\u0e0a\u0e48 PDF) \u2014 \u0e23\u0e30\u0e1a\u0e1a\u0e40\u0e15\u0e34\u0e21\u0e1a\u0e23\u0e34\u0e29\u0e31\u0e17/\u0e40\u0e14\u0e37\u0e2d\u0e19/\u0e1b\u0e35\u0e08\u0e32\u0e01 MN \u43cd\u2014 \u0e01\u0e23\u0e38\u0e13\u0e32\u0e01\u0e23\u0e2d\u0e01\u0e22\u0e2d\u0e14\u0e08\u0e32\u0e01\u0e20\u0e32\u0e1e');return;}_vParsePP30(_buf).then(function(p){try{console.log('[PP30] parsed',{taxid:p.taxid,branch:p.branch,month:p.month,beYear:p.beYear,company:p.company,values:p.L,diag:p._diag});console.log('[PP30] raw text:\n'+(p._raw||'(empty)'));}catch(_e){}try{var _vl=(p._diag&&p._diag.vl)||0;var _ok=_vl>0&&!!p.taxid;_vPP30Stat((_ok?'✅':'⚠️')+' อ่านไฟล์เสร็จ — เลขผู้เสียภาษี <b>'+(p.taxid||'—')+'</b> · เดือน <b>'+(p.month||'—')+'</b> · ปี <b>'+(p.beYear||'—')+'</b> · ค่าเงิน <b>'+_vl+'</b> ช่อง · ข้อความ '+((p._diag&&p._diag.it)||0)+' ชิ้น<br>📋 เปิดหน้าต่างตรวจทานแล้ว — <b>ต้องกดปุ่ม 💾 บันทึกลงตาราง</b> ข้อมูลจึงจะขึ้นในตารางเดือน',_ok?'ok':'wait');}catch(_e){}_vPP30MergeMN(p,_mnm);_vPP30OpenModal(p,_meta,'');}).catch(function(ex){try{_vPP30Stat('❌ อ่านไฟล์อัตโนมัติไม่สำเร็จ: '+esc((ex&&ex.message)||'unknown')+'<br>ตัวอ่าน PDF โหลดจาก CDN — ตรวจอินเทอร์เน็ตแล้วลองใหม่ หรือเปิด Console (F12) คัดลอก log <b>[PP30]</b> ส่งให้ผู้พัฒนา','err');}catch(_e){}var _p={L:{},month:0,beYear:'',taxid:'',company:'',normal:true,onTime:true};_vPP30MergeMN(_p,_mnm);_vPP30OpenModal(_p,_meta,(ex&&ex.message)||'อ่านไฟล์อัตโนมัติไม่สำเร็จ — ระบบเติมบริษัท/เดือนจาก MN — กรุณาตรวจตัวเลข');});};frA.onerror=function(){alert('อ่านไฟล์ไม่ได้: '+file.name);_vPP30HandleNext();};frA.readAsArrayBuffer(file);}
+function _vPP30HandleNext(){if(!_vPP30Q.length)return;var _qi=_vPP30Q.shift();var file=(_qi&&_qi.file)?_qi.file:_qi;var _mnm=(_qi&&_qi.file)?_qi:null;var MAX=15*1024*1024;if(file.size>MAX){alert('ไฟล์ใหญ่เกิน 15 MB: '+file.name+' — กรุณาบีบอัด PDF ก่อน');_vPP30HandleNext();return;}try{_vPP30Stat('📥 รับไฟล์: <b>'+esc(file.name)+'</b> ('+Math.round((file.size||0)/1024)+' KB) — กำลังอ่านข้อมูลจากไฟล์ (offline)…','wait');}catch(_e){}var frA=new FileReader();frA.onload=function(){var _buf=frA.result;var _id=_idbId(file.name);var _meta={n:file.name,idb:_id,sz:file.size||0};try{_idbPut(_id,file).catch(function(){});}catch(ee){}try{if(typeof firebase!=='undefined'&&firebase.initializeApp){_stPut(file,'vat_pp30').then(function(cloud){_meta.u=cloud.u;_meta.p=cloud.p;if(typeof _fileResaveSoon==='function')_fileResaveSoon();}).catch(function(){});}}catch(ee){}var _isImg=/\.(jpe?g|png|webp|gif|bmp|heic|heif|tiff?)$/i.test(file.name||'')||/^image\//.test(file.type||'');if(_isImg){var _pi={L:{},month:0,beYear:'',taxid:'',company:'',normal:true,onTime:true};_vPP30MergeMN(_pi,_mnm);_vPP30OpenModal(_pi,_meta,'\u0e44\u0e1f\u0e25\u0e4c\u0e23\u0e39\u0e1b\u0e20\u0e32\u0e1e (\u0e44\u0e21\u0e48\u0e43\u0e0a\u0e48 PDF) \u2014 \u0e23\u0e30\u0e1a\u0e1a\u0e40\u0e15\u0e34\u0e21\u0e1a\u0e23\u0e34\u0e29\u0e31\u0e17/\u0e40\u0e14\u0e37\u0e2d\u0e19/\u0e1b\u0e35\u0e08\u0e32\u0e01 MN \u43cd\u2014 \u0e01\u0e23\u0e38\u0e13\u0e32\u0e01\u0e23\u0e2d\u0e01\u0e22\u0e2d\u0e14\u0e08\u0e32\u0e01\u0e20\u0e32\u0e1e');return;}_vParsePP30(_buf).then(function(p){try{console.log('[PP30] parsed',{taxid:p.taxid,branch:p.branch,month:p.month,beYear:p.beYear,company:p.company,values:p.L,diag:p._diag});console.log('[PP30] raw text:\n'+(p._raw||'(empty)'));}catch(_e){}try{var _vl=(p._diag&&p._diag.vl)||0;var _ok=_vl>0&&!!p.taxid;_vPP30Stat((_ok?'✅':'⚠️')+' อ่านไฟล์เสร็จ — เลขผู้เสียภาษี <b>'+(p.taxid||'—')+'</b> · เดือน <b>'+(p.month||'—')+'</b> · ปี <b>'+(p.beYear||'—')+'</b> · ค่าเงิน <b>'+_vl+'</b> ช่อง · ข้อความ '+((p._diag&&p._diag.it)||0)+' ชิ้น<br>📋 เปิดหน้าต่างตรวจทานแล้ว — <b>ต้องกดปุ่ม 💾 บันทึกลงตาราง</b> ข้อมูลจึงจะขึ้นในตารางเดือน',_ok?'ok':'wait');}catch(_e){}_vPP30MergeMN(p,_mnm);_vPP30OpenModal(p,_meta,'');}).catch(function(ex){try{_vPP30Stat('❌ อ่านไฟล์อัตโนมัติไม่สำเร็จ: '+esc((ex&&ex.message)||'unknown')+'<br>อ่านอัตโนมัติไม่ได้ — กรุณากรอกข้อมูลในตารางด้านล่างเอง (กดช่องแล้วพิมพ์ได้เลย) หรือเปิด Console (F12) คัดลอก log <b>[PP30]</b> ส่งผู้พัฒนา','err');}catch(_e){}var _p={L:{},month:0,beYear:'',taxid:'',company:'',normal:true,onTime:true};_vPP30MergeMN(_p,_mnm);_vPP30OpenModal(_p,_meta,(ex&&ex.message)||'อ่านไฟล์อัตโนมัติไม่สำเร็จ — ระบบเติมบริษัท/เดือนจาก MN — กรุณาตรวจตัวเลข');});};frA.onerror=function(){alert('อ่านไฟล์ไม่ได้: '+file.name);_vPP30HandleNext();};frA.readAsArrayBuffer(file);}
 /* ---- verification modal ---- */
 function _vPP30EnsureModal(){if(document.getElementById('vPP30Modal'))return;var m=document.createElement('div');m.id='vPP30Modal';m.className='pmodal';m.hidden=true;m.innerHTML='<div class="pmodal-bd"></div><div class="pmodal-card vpp30card"><button class="pmodal-x" aria-label="Close">×</button><div class="pmodal-body" id="vPP30Body"></div></div>';document.body.appendChild(m);m.querySelector('.pmodal-bd').addEventListener('click',_vPP30CloseModal);m.querySelector('.pmodal-x').addEventListener('click',_vPP30CloseModal);
   m.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('[data-pp]'):null;if(!b)return;var a=b.getAttribute('data-pp');if(a==='save')_vPP30SaveModal();else if(a==='cancel')_vPP30CloseModal();else if(a==='viewfile')_vPP30ModalViewFile();});}
@@ -2324,7 +2492,7 @@ function _vPP30View(){loadVatPP30();_vPP30SeedGLR();
   var h='<div class="v30wrap">';
   h+='<div class="v30mast"><div class="v30mast-l"><div class="v30kk">รายงานภาษีมูลค่าเพิ่ม · สรุปรายเดือน</div><div class="v30h1">สรุปแบบ ภ.พ.30 — แยกตามบริษัท</div><div class="v30sub">ภาษีขาย · ภาษีซื้อ · ภาษีสุทธิ และเครดิตภาษีซื้อยกไป (ตามที่ยื่นแล้ว)</div></div><div class="v30seal"><div class="v30seal-b">ภ.พ.30</div><div class="v30seal-t">Value Added Tax</div></div></div>';
   h+='<label class="v30drop" id="pp30Drop"><input id="pp30File" type="file" accept="application/pdf,.pdf" multiple hidden><span class="v30drop-ic">⬇</span><span class="v30drop-t">วางไฟล์ ภ.พ.30 (PDF) ที่นี่ หรือคลิกเพื่อเลือก — เพิ่มลงสรุปอัตโนมัติ</span><span class="v30drop-s">รองรับหลายไฟล์ · อ่านยอดขาย / ภาษีขาย / ยอดซื้อ / ภาษีซื้อ / ยกมา / ยกไป ให้</span></label>';
-  h+='<div id="pp30Diag" class="v30diag">⬆️ ตัวอ่าน ภ.พ.30 <b>v7.57</b> · พร้อมรับไฟล์ — วางไฟล์ PDF แล้วสถานะการอ่านจะแสดงตรงนี้ <span class="v30diaghint">(หลัง deploy ถ้าเลขนี้ไม่ใช่ v7.57 = ไฟล์เก่าใน cache → กด Ctrl+Shift+R)</span></div>';
+  h+='<div id="pp30Diag" class="v30diag">⬆️ ตัวอ่าน ภ.พ.30 <b>v7.58</b> · พร้อมรับไฟล์ — วางไฟล์ PDF แล้วสถานะการอ่านจะแสดงตรงนี้ <span class="v30diaghint">(หลัง deploy ถ้าเลขนี้ไม่ใช่ v7.57 = ไฟล์เก่าใน cache → กด Ctrl+Shift+R)</span></div>';
   var yopts='';years.forEach(function(y){yopts+='<option value="'+y+'"'+(y===_vPP30Year?' selected':'')+'>'+y+' / '+(y-543)+'</option>';});
   h+='<div class="v30yearbar"><span class="v30ylab">ปีภาษี (พ.ศ.)</span><button class="v30ynav" id="pp30YPrev" type="button" title="ปีก่อน">◀</button><select id="pp30Year" class="v30ysel">'+yopts+'</select><button class="v30ynav" id="pp30YNext" type="button" title="ปีถัดไป">▶</button></div>';
   h+='<div class="v30grid"><div class="v30colist">';
