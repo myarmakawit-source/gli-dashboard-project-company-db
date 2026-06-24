@@ -1370,7 +1370,7 @@ select.ppin{cursor:pointer}
 .v30mast{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;border-bottom:2.5px solid var(--brand);padding-bottom:13px;margin-bottom:16px;flex-wrap:wrap}
 .v30kk{font-size:10.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
 .v30h1{margin:.14em 0 .06em;font-size:22px;font-weight:800;letter-spacing:-.01em;color:var(--ink);line-height:1.12}
-.v30sub{font-size:12.5px;color:var(--muted)}
+.v30sub{font-size:12.5px;color:var(--muted)}.v30mast-r{display:flex;align-items:flex-end;gap:13px;flex:0 0 auto}.v30upbtn{display:inline-flex;align-items:center;gap:7px;cursor:pointer;background:var(--brand);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:700;font-family:inherit;box-shadow:0 1px 2px rgba(0,0,0,.12);transition:background .15s,transform .1s;white-space:nowrap}.v30upbtn:hover{background:var(--brand-d)}.v30upbtn:active{transform:translateY(1px)}.v30upbtn-ic{font-size:14px}.v30dash{background:linear-gradient(180deg,var(--brand-t),var(--card));border:1px solid var(--line);border-radius:12px;padding:13px 15px 15px;margin-bottom:14px}.v30dash-hd{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:11px;flex-wrap:wrap;gap:6px}.v30dash-t{font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--brand-d);text-transform:uppercase}.v30dash-y{font-size:11.5px;color:var(--muted);font-weight:600}.v30dash-cards{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}@media(max-width:1100px){.v30dash-cards{grid-template-columns:repeat(3,1fr)}}@media(max-width:680px){.v30dash-cards{grid-template-columns:repeat(2,1fr)}}.v30dc{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 11px}.v30dc-k{font-size:9.5px;font-weight:700;letter-spacing:.02em;color:var(--muted);text-transform:uppercase;line-height:1.25;min-height:2.4em}.v30dc-v{font-size:16.5px;font-weight:800;color:var(--ink);line-height:1.15;margin-top:3px}.v30dc-v.num{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:15px}.v30dc-v.pos{color:var(--pos)}.v30dc-v.neg{color:var(--neg)}.v30dc-s{font-size:9.5px;color:var(--muted);margin-top:2px}
 .v30seal{text-align:right;flex:0 0 auto}
 .v30seal-b{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size:21px;font-weight:600;color:var(--brand);border:2px solid var(--brand);border-radius:9px;padding:4px 11px;display:inline-block}
 .v30seal-t{font-size:10px;color:var(--muted);margin-top:4px}
@@ -1502,7 +1502,7 @@ body{padding-left:276px}
 .modnav.sidebar .authout{margin:0}
 @media(max-width:900px){body{padding-left:18px}.modnav.sidebar{position:relative;width:auto;height:auto;bottom:auto;flex-direction:column;margin:0 0 16px;border-radius:12px}.sbmenu{flex-direction:row;flex-wrap:wrap;gap:4px}.sbsec{width:100%;padding:8px 6px 2px}.modnav.sidebar .modtab{width:auto;flex:0 0 auto}.sbfoot{flex-direction:row;flex-wrap:wrap;margin-top:8px}}
 </style>
-<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"/><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"/><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="20" r="4.6" fill="#FBBF24"/></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">📒</span><span class="sblbl">General Ledger</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab" data-mod="tfrs" role="tab" aria-selected="false"><span class="sbic">📚</span><span class="sblbl">TFRS Thailand</span></button><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><button class="modtab" data-mod="line" role="tab" aria-selected="false"><span class="sbic">💬</span><span class="sblbl">LINE Slips · Cash</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false"><span class="sbic">📝</span><span class="sblbl">Audit Log · Activity</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v7.63</span></div></nav>
+<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"/><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"/><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="20" r="4.6" fill="#FBBF24"/></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">📒</span><span class="sblbl">General Ledger</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab" data-mod="tfrs" role="tab" aria-selected="false"><span class="sbic">📚</span><span class="sblbl">TFRS Thailand</span></button><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><button class="modtab" data-mod="line" role="tab" aria-selected="false"><span class="sbic">💬</span><span class="sblbl">LINE Slips · Cash</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false"><span class="sbic">📝</span><span class="sblbl">Audit Log · Activity</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v7.65</span></div></nav>
 <header>
 <div class="letter"><svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0E5C52"></rect><path d="M15 43 L27 31 L35 37 L49 21" fill="none" stroke="#D9A441" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="49" cy="21" r="3.7" fill="#D9A441"></circle><text x="32" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#9FCFC4" letter-spacing="2.5">GLI</text></svg>
 <div class="brand"><div class="brandL"><div class="th">GRANDLINE INNOVATION <span class="th-co">COMPANY LIMITED</span></div><span class="ho">Head Office</span></div><div class="brandR"><div class="addr">333 Soi Lat Phrao 64 Yaek 12, Lat Phrao Road, Wang Thong Lang Sub-District, Wang Thong Lang District, Bangkok 10310</div><div class="taxid">Tax ID · 0105553002230</div></div></div>
@@ -2491,10 +2491,11 @@ function _vPP30View(){loadVatPP30();_vPP30SeedGLR();
   var years=Object.keys(yset).map(Number).sort(function(a,b){return b-a;});
   if(_vPP30Year==null||years.indexOf(_vPP30Year)<0)_vPP30Year=dataYears.length?dataYears[0]:curBE;
   if(_vPP30Sel==null||!cos.some(function(c){return c.id===_vPP30Sel;}))_vPP30Sel=cos.length?cos[0].id:null;
+  var _agS=0,_agO=0,_agI=0,_agF=0,_agC=0;cos.forEach(function(c){var _rs=VATPP30.filter(function(r){return r.co===c.id&&(+r.beYear)===_vPP30Year&&r.normal!==false;});if(_rs.length)_agC++;_rs.forEach(function(r){_agS+=(+r.sales||0);_agO+=(+r.outputVat||0);_agI+=(+r.inputVat||0);_agF++;});});var _agN=_agO-_agI;
   var h='<div class="v30wrap">';
-  h+='<div class="v30mast"><div class="v30mast-l"><div class="v30kk">รายงานภาษีมูลค่าเพิ่ม · สรุปรายเดือน</div><div class="v30h1">สรุปแบบ ภ.พ.30 — แยกตามบริษัท</div><div class="v30sub">ภาษีขาย · ภาษีซื้อ · ภาษีสุทธิ และเครดิตภาษีซื้อยกไป (ตามที่ยื่นแล้ว)</div></div><div class="v30seal"><div class="v30seal-b">ภ.พ.30</div><div class="v30seal-t">Value Added Tax</div></div></div>';
-  h+='<label class="v30drop" id="pp30Drop"><input id="pp30File" type="file" accept="application/pdf,.pdf" multiple hidden><span class="v30drop-ic">⬇</span><span class="v30drop-t">วางไฟล์ ภ.พ.30 (PDF) ที่นี่ หรือคลิกเพื่อเลือก — เพิ่มลงสรุปอัตโนมัติ</span><span class="v30drop-s">รองรับหลายไฟล์ · อ่านยอดขาย / ภาษีขาย / ยอดซื้อ / ภาษีซื้อ / ยกมา / ยกไป ให้</span></label>';
-  h+='<div id="pp30Diag" class="v30diag">⬆️ ตัวอ่าน ภ.พ.30 <b>v7.63</b> · พร้อมรับไฟล์ — วางไฟล์ PDF แล้วสถานะการอ่านจะแสดงตรงนี้ <span class="v30diaghint">(หลัง deploy ถ้าเลขนี้ไม่ใช่ v7.57 = ไฟล์เก่าใน cache → กด Ctrl+Shift+R)</span></div>';
+  h+='<div class="v30mast"><div class="v30mast-l"><div class="v30kk">VALUE ADDED TAX · MONTHLY SUMMARY</div><div class="v30h1">P.P.30 Summary — by Company</div><div class="v30sub">Output VAT · Input VAT · Net payable · Carried-forward credit (as filed) · สรุปแบบ ภ.พ.30 รายเดือน แยกตามบริษัท</div></div><div class="v30mast-r"><label class="v30upbtn" id="pp30Drop" title="แนบไฟล์ ภ.พ.30 (PDF) — อ่านในเครื่อง"><input id="pp30File" type="file" accept="application/pdf,.pdf" multiple hidden><span class="v30upbtn-ic">⬆</span><span>Attach P.P.30 (PDF)</span></label><div class="v30seal"><div class="v30seal-b">ภ.พ.30</div><div class="v30seal-t">Value Added Tax</div></div></div></div>';
+  h+='<div class="v30dash"><div class="v30dash-hd"><div class="v30dash-t">ภาพรวมทั้งหมด · Portfolio Overview</div><div class="v30dash-y">ปีภาษี '+_vPP30Year+' / '+(_vPP30Year-543)+'</div></div><div class="v30dash-cards">'+'<div class="v30dc"><div class="v30dc-k">บริษัท · Companies</div><div class="v30dc-v">'+cos.length+'</div><div class="v30dc-s">ยื่นแล้ว '+_agC+' บริษัท</div></div>'+'<div class="v30dc"><div class="v30dc-k">งวดที่ยื่น · Filed</div><div class="v30dc-v">'+_agF+'</div><div class="v30dc-s">เดือน-บริษัท</div></div>'+'<div class="v30dc"><div class="v30dc-k">ยอดขายรวม · Total Sales</div><div class="v30dc-v num">'+_ppNum(_agS)+'</div><div class="v30dc-s">บาท</div></div>'+'<div class="v30dc"><div class="v30dc-k">ภาษีขายรวม · Output VAT</div><div class="v30dc-v num">'+_ppNum(_agO)+'</div></div>'+'<div class="v30dc"><div class="v30dc-k">ภาษีซื้อรวม · Input VAT</div><div class="v30dc-v num">'+_ppNum(_agI)+'</div></div>'+'<div class="v30dc"><div class="v30dc-k">ภาษีสุทธิ · Net (Out−In)</div><div class="v30dc-v num '+(_agN>=0?'neg':'pos')+'">'+(_agN>=0?'':'−')+_ppNum(Math.abs(_agN))+'</div><div class="v30dc-s">'+(_agN>=0?'ต้องชำระ':'เครดิต')+'</div></div>'+'</div></div>';
+  h+='<div id="pp30Diag" class="v30diag">⬆️ ตัวอ่าน ภ.พ.30 <b>v7.65</b> · อ่านในเครื่อง (offline) ไม่ต้องต่อเน็ต — คลิกปุ่ม “Attach P.P.30 (PDF)” มุมขวาบน <span class="v30diaghint">(ถ้าเลขนี้ไม่ใช่ v7.64 = cache เก่า → Ctrl+Shift+R)</span></div>';
   var yopts='';years.forEach(function(y){yopts+='<option value="'+y+'"'+(y===_vPP30Year?' selected':'')+'>'+y+' / '+(y-543)+'</option>';});
   h+='<div class="v30yearbar"><span class="v30ylab">ปีภาษี (พ.ศ.)</span><button class="v30ynav" id="pp30YPrev" type="button" title="ปีก่อน">◀</button><select id="pp30Year" class="v30ysel">'+yopts+'</select><button class="v30ynav" id="pp30YNext" type="button" title="ปีถัดไป">▶</button></div>';
   h+='<div class="v30grid"><div class="v30colist">';
@@ -3385,10 +3386,10 @@ function _whtHandlePdf(file){
         var R=_whtParseLines(lines);
         if(!R.ok||!R.rows.length){_whtUpStatus('err','ไม่พบรายการในไฟล์นี้ — รองรับเฉพาะ “ใบต่อ ภ.ง.ด.3 / 53” (PDF) จากโปรแกรมยื่นภาษีของกรมสรรพากร');return;}
         _whtLastParse=R;_whtLastFile=file.name;
-        _whtApplyParsed(R);
+        var _T=_whtApplyParsed(R)||{pnd:R.pnd,month:R.period.month,beYear:R.period.beYear};
         var sb=R.rows.reduce(function(a,r){return a+r.base;},0),stx=R.rows.reduce(function(a,r){return a+r.tax;},0);
         var ok=Math.abs(sb-(R.totals.base||sb))<0.05&&Math.abs(stx-(R.totals.tax||stx))<0.05;
-        _whtUpStatus(ok?'ok':'warn','นำเข้าสำเร็จ '+R.rows.length+' รายการ · '+(R.pnd==='3'?'ภ.ง.ด.3':'ภ.ง.ด.53')+' · งวด '+_whtMonShort(R.period.month)+'/'+(R.period.beYear||'')+(ok?' · ยอดรวมตรงกับ PDF ✓':' · ⚠ ยอดรวมไม่ตรงกับ PDF โปรดตรวจสอบ'));
+        _whtUpStatus(ok?'ok':'warn','นำเข้าสำเร็จ '+R.rows.length+' รายการ → ลงงวดที่เลือก: '+(_T.pnd==='3'?'ภ.ง.ด.3':'ภ.ง.ด.53')+' · '+_whtMonShort(_T.month)+'/'+(_T.beYear||'')+(ok?' · ยอดรวมตรงกับ PDF ✓':' · ⚠ ยอดรวมไม่ตรงกับ PDF โปรดตรวจสอบ'));
       }).catch(function(ex){_whtUpStatus('err','อ่านไฟล์ไม่สำเร็จ: '+((ex&&ex.message)||ex));});
     };
     rd.readAsArrayBuffer(file);
@@ -3397,6 +3398,11 @@ function _whtHandlePdf(file){
 /* ===== map parsed result into WHTPAYER / WHTCO / WHTTX ===== */
 function _whtApplyParsed(R){
   var uid=function(p){return p+Date.now().toString(36)+Math.floor(Math.random()*1e5).toString(36);};
+  var _hasMo=(_wMonth>=1&&_wMonth<=12),_hasPnd=(_wPnd==='3'||_wPnd==='53');
+  var _tPnd=_hasPnd?_wPnd:R.pnd;
+  var _tYear=(typeof _wYear==='number'&&_wYear)?_wYear:((+R.period.year)||new Date().getFullYear());
+  var _tMonth=_hasMo?_wMonth:(R.period.month||0);
+  var _reDate=function(d){if(!_hasMo)return d;var ss=''+(d||'');var day=ss.length>=10?ss.slice(8,10):'01';if(!/^[0-3][0-9]$/.test(day))day='01';return _tYear+'-'+('0'+_tMonth).slice(-2)+'-'+day;};
   // payer
   var pid,exp=WHTPAYER.find(function(p){return (''+(p.taxid||''))===(''+(R.payer.taxid||''));});
   if(exp){pid=exp.id;if(R.payer.name)exp.name=R.payer.name;if(R.payer.branch)exp.branch=R.payer.branch;if(R.payer.addr&&!exp.addr)exp.addr=R.payer.addr;}
@@ -3409,19 +3415,20 @@ function _whtApplyParsed(R){
     else{var cid=uid('wc');WHTCO.push({id:cid,name:r.name||'(ผู้รับเงิน)',taxid:r.taxid||'',branch:r.branch||'00000',addr:r.addr||''});coOf[r.taxid]=cid;}
   });
   // drop existing tx for same payer + pnd + year(+month) so re-upload is idempotent — filed rows are protected
-  var yr=String(R.period.year||''),mo=R.period.month||0;
+  var yr=String(_tYear||''),mo=_tMonth||0;
   var _ftIn=(R.filing&&R.filing.type)||'n';
-  var _samePer=function(t){if((t.payer||'wp01')!==pid)return false;if(t.pnd!==R.pnd)return false;
+  var _samePer=function(t){if((t.payer||'wp01')!==pid)return false;if(t.pnd!==_tPnd)return false;
     if(yr&&String((''+t.date).slice(0,4))!==yr)return false;
     if(mo&&(+(''+t.date).slice(5,7))!==mo)return false;return true;};
   if(_ftIn!=='a'&&WHTTX.some(function(t){return _samePer(t)&&t.fs;})){
     alert('งวดนี้มีรายการที่ "ยื่นแล้ว" — อัปโหลดทับไม่ได้ ยกเว้นไฟล์เป็นใบยื่นเพิ่มเติม (ให้คุณ NETNAPHA ยกเลิกสถานะยื่นก่อนหากต้องการแทนที่)');return;}
   WHTTX=WHTTX.filter(function(t){if(!_samePer(t))return true;return !!t.fs;});
   // add parsed tx (filing status rides on each record => syncs via Firebase wt:WHTTX)
-  R.rows.forEach(function(r,i){var cc=(''+(r.cond||'')).trim();if(!/^[123]$/.test(cc))cc='1';WHTTX.push({id:uid('wt')+i,payer:pid,coId:coOf[r.taxid],date:r.date,pnd:R.pnd,income:r.income||'',cat:_whtCatOf(r.income),cert:'',desc:'',vch:'',base:r.base,rate:r.rate,tax:r.tax,cond:cc,docno:'',ft:R.filing.type||'n',fr:R.filing.round||0,fs:0});});_whtMig();
-  curPayer=pid;curWco=null;_wAddOpen=false;_wPnd=R.pnd;_wYear=+yr||new Date().getFullYear();_wMonth=mo;
+  R.rows.forEach(function(r,i){var cc=(''+(r.cond||'')).trim();if(!/^[123]$/.test(cc))cc='1';WHTTX.push({id:uid('wt')+i,payer:pid,coId:coOf[r.taxid],date:_reDate(r.date),pnd:_tPnd,income:r.income||'',cat:_whtCatOf(r.income),cert:'',desc:'',vch:'',base:r.base,rate:r.rate,tax:r.tax,cond:cc,docno:'',ft:R.filing.type||'n',fr:R.filing.round||0,fs:0});});_whtMig();
+  curPayer=pid;curWco=null;_wAddOpen=false;_wPnd=_tPnd;_wYear=_tYear;_wMonth=_tMonth;
   saveWp();saveWco();saveWtx();
   renderWht();
+  return {pnd:_tPnd,month:_tMonth,beYear:(_tYear+543)};
 }
 /* ===== left panel (upload) renderer ===== */
 function renderWhtUpload(){
@@ -8505,7 +8512,7 @@ function injectStyle(){
    '.tfrs-ansk{background:var(--paper);border:1px solid var(--gold);border-left:3px solid var(--gold);border-radius:8px;padding:10px 12px;margin-bottom:6px}',
    '.tfrs-ansk-h{font-size:11px;font-weight:700;color:var(--gold-d);margin-bottom:5px}',
    '.tfrs-ansk-b{font-size:13px;line-height:1.65;color:var(--ink)}',
-   '.tfrs-ansk-b mark,.tfrs-fulltext mark{background:#F6EEDD;color:var(--gold-d);padding:0 1px;border-radius:2px}',
+   '.tfrs-ansk-b mark,.tfrs-fulltext mark{background:#F6EEDD;color:var(--gold-d);padding:0 1px;border-radius:2px}','.tfrs-ans-span{background:#FDE68A;color:#5b3a00;border-radius:3px;padding:0 2px;-webkit-box-decoration-break:clone;box-decoration-break:clone;box-shadow:inset 0 -0.45em 0 rgba(217,119,6,.28)}','.tfrs-ansk-b mark.tfrs-hl-yt,.tfrs-fulltext mark.tfrs-hl-yt{background:transparent;color:#7c2d12;font-weight:800;text-decoration:underline;text-decoration-color:#d97706;text-underline-offset:2px;padding:0;border-radius:0}','.tfrs-ansk-b mark.tfrs-hl-g,.tfrs-fulltext mark.tfrs-hl-g,.tfrs-hit .sn mark.tfrs-hl-g{background:#A7F3D0;color:#065f46;padding:0 2px;border-radius:3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}','.tfrs-hllegend{display:flex;gap:16px;align-items:center;font-size:11px;color:var(--ink2);margin:1px 0 9px;flex-wrap:wrap}','.tfrs-hllegend .lg{display:inline-flex;align-items:center;gap:5px}','.tfrs-hllegend .sw{width:13px;height:13px;border-radius:3px;display:inline-block;flex:0 0 auto}','.tfrs-hllegend .sw.y{background:#FDE68A;box-shadow:inset 0 -3px 0 rgba(217,119,6,.4)}','.tfrs-hllegend .sw.g{background:#A7F3D0}',
    '.tfrs-pgchip{background:var(--blue-bg);color:var(--blue);border-radius:6px;padding:2px 9px;font-size:11.5px;font-weight:600;cursor:pointer}.tfrs-pgchip:hover{background:var(--blue);color:#fff}',
    '.tfrs-fulltext{margin-top:8px}.tfrs-fulltext summary{cursor:pointer;color:var(--muted);font-size:12px;font-weight:600}'
   ].join('');
@@ -8660,7 +8667,7 @@ function clearAll(kind){
 function doSearch(){
   var q=document.getElementById('tfrsQ').value.trim();if(!q)return;
   if(!T.IDX.ready||!T.IDX.N){document.getElementById('tfrsResults').innerHTML='<div class="tfrs-empty">ยังไม่มีมาตรฐานในคลัง — โหลด PDF ก่อน</div>';return;}
-  CURQUERY=q;RES=T.search(q,8,FILTER);
+  CURQUERY=q;RES=T.search(q,8,FILTER);var _qt=q.toLowerCase().split(/[\s,]+/).filter(function(x){return x&&x.length>=2;});
   var box=document.getElementById('tfrsResults');
   if(!RES.length){box.innerHTML='<div class="tfrs-empty">ไม่พบข้อความที่ตรงกับคำถาม ลองใช้คำสำคัญอื่น</div>';return;}
   box.innerHTML='<div style="font-size:11.5px;color:var(--muted);margin-bottom:8px">พบ '+RES.length+' รายการที่เกี่ยวข้อง (เรียงตามความเกี่ยวข้อง) — คลิกเพื่อเปิดหน้านั้น</div>'+
@@ -8668,7 +8675,7 @@ function doSearch(){
      return '<div class="tfrs-hit'+(isLaw?' law':'')+'" data-i="'+i+'"><div class="hd"><span class="tfrs-badge '+bcls+'">'+esc(h.stdId||'?')+'</span>'+
        '<span style="font-size:12px;color:var(--ink2)">'+esc(h.stdTitle||h.name)+'</span>'+
        '<span class="pg">หน้า '+h.page+'</span><span class="sc">score '+h.score+'</span></div>'+
-       '<div class="sn">'+esc(h.snippet)+'</div></div>';}).join('');
+       '<div class="sn">'+_hlMark(esc(h.snippet),_qt,'tfrs-hl-g')+'</div></div>';}).join('');
   box.querySelectorAll('.tfrs-hit').forEach(function(el){el.addEventListener('click',function(){
     box.querySelectorAll('.tfrs-hit').forEach(function(x){x.classList.remove('active');});el.classList.add('active');
     var h=RES[+el.getAttribute('data-i')];openDoc(h.docId,h.page,h.stdId+' — '+(h.stdTitle||h.name),h.text);});});
@@ -8705,21 +8712,35 @@ function _hl(str,terms){
     str=str.replace(re,'\u0001$1\u0002');}
   return str.replace(/\u0001/g,'<mark>').replace(/\u0002/g,'</mark>');
 }
+function _hlMark(str,terms,cls){
+  if(!terms||!terms.length)return str;
+  var ts=terms.slice().sort(function(a,b){return b.length-a.length;});
+  for(var i=0;i<ts.length;i++){var t=ts[i];if(!t||t.length<2)continue;
+    var re=new RegExp('('+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+    str=str.replace(re,'\u0001$1\u0002');}
+  return str.replace(/\u0001/g,'<mark class="'+(cls||'')+'">').replace(/\u0002/g,'</mark>');
+}
+function _hl2(escFull,escAns,terms){
+  var idx=(escAns&&escAns.length>=8)?escFull.indexOf(escAns):-1;
+  if(idx<0)return _hlMark(escFull,terms,'tfrs-hl-g');
+  var b=escFull.slice(0,idx),a=escFull.slice(idx,idx+escAns.length),c=escFull.slice(idx+escAns.length);
+  return _hlMark(b,terms,'tfrs-hl-g')+'<span class="tfrs-ans-span">'+_hlMark(a,terms,'tfrs-hl-yt')+'</span>'+_hlMark(c,terms,'tfrs-hl-g');
+}
 function renderAnalysis(pageText,query,docId){
   var box=document.getElementById('tfrsAnalysis');if(!box)return;
   var a=T.analyzePage(pageText);
   var ex=T.smartExcerpt(pageText,query||'');var terms=(ex&&ex.terms)||[];
-  var h='<div style="margin-top:12px"><div class="tfrs-h" style="margin-bottom:6px">วิเคราะห์เชิงโครงสร้าง (อัจฉริยะ)</div>';
+  var h='<div style="margin-top:12px"><div class="tfrs-h" style="margin-bottom:6px">วิเคราะห์เชิงโครงสร้าง (อัจฉริยะ)</div><div class="tfrs-hllegend"><span class="lg"><span class="sw y"></span>คำตอบ / สำคัญมาก</span><span class="lg"><span class="sw g"></span>ข้อความที่เกี่ยวข้อง</span></div>';
   if(query&&ex&&ex.text&&ex.score>0){
     h+='<div class="tfrs-ansk"><div class="tfrs-ansk-h">★ ส่วนที่ตอบคำถามมากที่สุดในหน้านี้'+(ex.paraNo?(' · ย่อหน้า/มาตรา '+esc(ex.paraNo)):'')+'</div>'+
-       '<div class="tfrs-ansk-b">'+_hl(esc(ex.text.trim()),terms)+'</div></div>';
+       '<div class="tfrs-ansk-b"><span class="tfrs-ans-span">'+_hlMark(esc(ex.text.trim()),terms,'tfrs-hl-yt')+'</span></div></div>';
   }
   if(a.sections.length)h+='<div style="margin-top:8px;font-size:12px;color:var(--ink2)">หน้านี้ว่าด้วย: <span class="tfrs-sect" style="display:inline-flex">'+a.sections.map(function(s){return '<span class="tfrs-tag">'+esc(s)+'</span>';}).join('')+'</span></div>';
   if(a.xrefs.length)h+='<div style="margin-top:6px;font-size:12px;color:var(--ink2)">อ้างอิงไขว้: <span class="tfrs-sect" style="display:inline-flex">'+a.xrefs.map(function(x){return '<span class="tfrs-tag x" data-xref="'+esc(x)+'">'+esc(x)+'</span>';}).join('')+'</span></div>';
   var rel=[];for(var i=0;i<RES.length;i++){if(RES[i].docId===docId&&RES[i].page!==CURPAGE)rel.push(RES[i]);}
   if(rel.length)h+='<div style="margin-top:6px;font-size:12px;color:var(--ink2)">หน้าอื่นในฉบับนี้ที่เกี่ยวข้อง: <span class="tfrs-sect" style="display:inline-flex">'+rel.slice(0,8).map(function(r){return '<span class="tfrs-pgchip" data-relpg="'+r.page+'">หน้า '+r.page+'</span>';}).join('')+'</span></div>';
   var prev=(pageText||'').replace(/\n{2,}/g,'\n').trim();
-  if(prev)h+='<details class="tfrs-fulltext"><summary>ข้อความทั้งหน้า (หน้า '+CURPAGE+')</summary><div class="tfrs-note" style="max-height:300px;overflow:auto;white-space:pre-wrap;margin-top:6px">'+_hl(esc(prev.slice(0,2200)),terms)+(prev.length>2200?' …':'')+'</div></details>';
+  if(prev)h+='<details class="tfrs-fulltext"'+((query&&ex&&ex.score>0)?' open':'')+'><summary>ข้อความทั้งหน้า (หน้า '+CURPAGE+') — <b style="color:#b45309">เหลือง</b>=คำตอบ · <b style="color:#047857">เขียว</b>=เกี่ยวข้อง</summary><div class="tfrs-note" style="max-height:340px;overflow:auto;white-space:pre-wrap;margin-top:6px">'+_hl2(esc(prev.slice(0,2200)),esc((ex&&ex.text?ex.text.trim():'')),terms)+(prev.length>2200?' …':'')+'</div></details>';
   h+='<div id="tfrsAIout"></div></div>';
   box.innerHTML=h;
   box.querySelectorAll('[data-xref]').forEach(function(el){el.addEventListener('click',function(){
