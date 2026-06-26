@@ -9521,4 +9521,42 @@ window.renderTfrs=renderTfrs;
 .glvch.glvch-ro .glVoucherTa{background:#f4f7f6;color:#41514c;cursor:default;border-style:dashed;}
 .glvch-hint{margin-top:4px;font-size:10px;color:#8a9a95;font-weight:600;font-family:'Sarabun',sans-serif;letter-spacing:.2px;}
 </style>
+<script id="gliPersistStorage">
+/* ============================================================
+   v7.96: PERSISTENT STORAGE — ขอให้เบราว์เซอร์ "ห้าม evict" IndexedDB
+   ภาคผนวกล้วน (additive only) · ไม่แตะ/ไม่ลบของเดิม · ไม่มี per-user gating · ทุกผู้ใช้ทำงานเหมือนกัน
+   ได้ผลบน Chrome/Firefox/Edge/Android (storage ที่ persisted แล้วจะไม่ถูก evict ตอนพื้นที่ใกล้เต็ม)
+   iOS/Safari ไม่เคารพคำสั่งนี้กับกฎ 7 วัน → ต้อง "Add to Home Screen" (PWA) ถึงจะทนกว่า
+   ปลอดภัย: feature-detect + try/catch · เครื่องที่ไม่รองรับ = no-op เงียบ ๆ
+   ============================================================ */
+(function(){
+  function _gliReqPersist(){
+    try{
+      if(!navigator.storage || typeof navigator.storage.persist!=='function'){
+        try{console.log('[GLI storage] เบราว์เซอร์นี้ไม่รองรับ Persistent Storage API — ข้าม');}catch(_){}
+        return;
+      }
+      var _chk = (typeof navigator.storage.persisted==='function') ? navigator.storage.persisted() : Promise.resolve(false);
+      _chk.then(function(already){
+        if(already){
+          try{console.log('[GLI storage] ✅ persistent storage เปิดอยู่แล้ว — IndexedDB จะไม่ถูก evict');}catch(_){}
+          return;
+        }
+        navigator.storage.persist().then(function(granted){
+          try{
+            if(granted) console.log('[GLI storage] ✅ ขอ persistent storage สำเร็จ — IndexedDB จะไม่ถูก evict อีก');
+            else console.log('[GLI storage] ⚠️ เบราว์เซอร์ยังไม่อนุญาต persistent storage (ใช้เกณฑ์ engagement) — ลองบุ๊กมาร์ก/ใช้บ่อยขึ้น หรือ Add to Home Screen เพื่อให้ได้รับอนุญาต');
+          }catch(_){}
+        }).catch(function(){});
+      }).catch(function(){});
+    }catch(_e){}
+  }
+  try{
+    if(typeof document!=='undefined'){
+      if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(_gliReqPersist, 1500); });
+      else setTimeout(_gliReqPersist, 1500);
+    }
+  }catch(_e){}
+})();
+</script>
 </body></html>
