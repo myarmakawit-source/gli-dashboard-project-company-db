@@ -1221,6 +1221,136 @@ h1{ background:var(--g-aurora) !important;
 ::selection{ background:rgba(45,215,196,.30); }
 ::-moz-selection{ background:rgba(45,215,196,.30); }
 </style>
+
+<style id="shelfVault">
+/* =====================================================================
+   Document Vault → ระบบชั้นวางเอกสาร (Shelf Board)
+   scope #page-cfb · พื้นหลังเรียบ · ป้ายชั้นแก้ชื่อเองได้ · เพิ่มชั้นได้
+   · ลากไฟล์/กดเพิ่มได้ · ไฟล์แสดงเป็นไอคอนชนิดไฟล์ "ขนาดเท่ากัน"
+   ===================================================================== */
+
+#page-cfb #docWrap{ background:transparent; }
+
+/* ---------- แถบบน: หัวข้อ + ปุ่มเพิ่มชั้น ---------- */
+#page-cfb .shbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+#page-cfb .shbar-t{ font-size:15px; font-weight:800; color:#1C2535; display:flex; align-items:center; gap:9px; }
+#page-cfb .shbar-c{ font-size:11.5px; font-weight:700; color:#0C8B7D; background:#E6F6F2; border:1px solid #BFE7DE; border-radius:999px; padding:3px 11px; }
+#page-cfb .shAddBtn{
+  display:inline-flex; align-items:center; gap:7px; cursor:pointer; font-size:12.5px; font-weight:700; color:#fff;
+  background:linear-gradient(135deg,#0C8B7D,#13A294); border:none; border-radius:10px; padding:9px 16px;
+  box-shadow:0 4px 12px -4px rgba(12,139,125,.5); transition:filter .15s, transform .15s;
+}
+#page-cfb .shAddBtn:hover{ filter:brightness(1.07); transform:translateY(-1px); }
+#page-cfb .shAddBtn:active{ transform:translateY(0); }
+
+/* ---------- ชั้นวางแต่ละชั้น ---------- */
+#page-cfb .shelf{ background:#fff; border:1px solid #E7EAF3; border-radius:14px; margin-bottom:13px; box-shadow:0 3px 12px -7px rgba(28,37,53,.12); overflow:hidden; }
+/* ป้ายชั้น (แก้ชื่อได้) */
+#page-cfb .shelf-hd{ display:flex; align-items:center; gap:10px; padding:10px 13px; border-bottom:1px solid #EEF0F7; background:linear-gradient(180deg,#FAFBFE,#F4F6FC); }
+#page-cfb .shtag{ display:inline-flex; align-items:center; gap:8px; flex:1 1 auto; min-width:0; }
+#page-cfb .shtag .shdot{ width:9px; height:9px; border-radius:3px; background:#0C8B7D; flex:0 0 auto; box-shadow:0 0 0 3px rgba(12,139,125,.15); }
+#page-cfb .shName{
+  flex:0 1 auto; min-width:90px; max-width:440px; width:auto; font-size:13.5px; font-weight:800; color:#1C2535;
+  background:transparent; border:1.5px solid transparent; border-radius:8px; padding:4px 9px; transition:.15s; font-family:'Sarabun',sans-serif;
+}
+#page-cfb .shName:hover{ border-color:#DCE1EC; background:#fff; }
+#page-cfb .shName:focus{ outline:none; border-color:#0C8B7D; background:#fff; box-shadow:0 0 0 3px rgba(12,139,125,.13); }
+#page-cfb .shedit{ font-size:11px; color:#AEB6C6; opacity:0; transition:.15s; white-space:nowrap; }
+#page-cfb .shelf-hd:hover .shedit{ opacity:1; }
+#page-cfb .shcount{ font-size:11px; font-weight:700; color:#7A859C; background:#EEF1F7; border-radius:999px; padding:2px 10px; flex:0 0 auto; }
+#page-cfb .shDel{ flex:0 0 auto; width:28px; height:28px; border:none; border-radius:8px; cursor:pointer; background:transparent; color:#AEB6C6; font-size:14px; opacity:0; transition:.15s; display:inline-flex; align-items:center; justify-content:center; }
+#page-cfb .shelf-hd:hover .shDel{ opacity:1; }
+#page-cfb .shDel:hover{ background:#FDECEC; color:#E25555; }
+
+/* ตัวชั้น (วางไฟล์) — เป็น .dmcell เพื่อรับ drag-drop จาก handler เดิม */
+#page-cfb .shelf-body.dmcell{ display:flex; flex-wrap:wrap; gap:13px; align-content:flex-start; padding:15px 14px; min-height:98px; background:#fff; transition:background .15s, box-shadow .15s; }
+#page-cfb .shelf-body.dmcell.drag{ background:#F0FBF8; box-shadow:inset 0 0 0 2px #0C8B7D; }
+
+/* ===== ไอคอนไฟล์ — ขนาดเท่ากันทุกอัน ===== */
+#page-cfb .shtile{ width:90px; display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; }
+#page-cfb .shsq{
+  width:74px; height:74px; border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:31px; line-height:1;
+  cursor:pointer; position:relative; overflow:hidden; border:1px solid #ECEEF6; box-shadow:0 2px 6px -3px rgba(28,37,53,.18); transition:transform .15s, box-shadow .15s;
+}
+#page-cfb .shtile:hover .shsq{ transform:translateY(-3px); box-shadow:0 10px 18px -7px rgba(28,37,53,.28); }
+#page-cfb .shsq.pdf{ background:linear-gradient(160deg,#FFF1F1,#FBDCDC); color:#D7382F; }
+#page-cfb .shsq.xls{ background:linear-gradient(160deg,#EBFAF1,#D2F1DD); color:#1B8A4B; }
+#page-cfb .shsq.doc{ background:linear-gradient(160deg,#EDF3FF,#D7E5FE); color:#2D6BE0; }
+#page-cfb .shsq.ppt{ background:linear-gradient(160deg,#FFF2E8,#FCDFC8); color:#D9722C; }
+#page-cfb .shsq.txt{ background:linear-gradient(160deg,#F3F5F9,#E4E8F0); color:#5A647C; }
+#page-cfb .shsq.zip{ background:linear-gradient(160deg,#F4EEFC,#E5D6F6); color:#8B53D8; }
+#page-cfb .shsq.img{ background:#EEF1F6; color:#5A647C; }
+#page-cfb .shsq.img img{ width:100%; height:100%; object-fit:cover; }
+#page-cfb .shext{ position:absolute; bottom:5px; right:5px; font-size:8px; font-weight:800; letter-spacing:.3px; background:rgba(255,255,255,.94); color:inherit; border-radius:5px; padding:1px 4px; box-shadow:0 1px 2px rgba(0,0,0,.13); }
+#page-cfb .shfn{ font-size:10.5px; font-weight:600; color:#3A4456; text-align:center; line-height:1.25; max-width:100%; word-break:break-word; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+/* ปุ่ม ดู/ดาวน์โหลด/ลบ — โผล่ตอน hover */
+#page-cfb .shtile .dfacts{ position:absolute; top:-8px; right:6px; display:flex; gap:3px; opacity:0; transform:translateY(-2px); transition:.14s; z-index:3; }
+#page-cfb .shtile:hover .dfacts{ opacity:1; transform:translateY(0); }
+#page-cfb .shtile .dfb{ width:23px; height:23px; border:none; border-radius:7px; cursor:pointer; font-size:11px; background:#fff; color:#56617B; box-shadow:0 2px 6px rgba(28,37,53,.24); display:inline-flex; align-items:center; justify-content:center; padding:0; }
+#page-cfb .shtile .dfb:hover{ background:#0C8B7D; color:#fff; }
+#page-cfb .shtile .dfb.rem:hover{ background:#E25555; color:#fff; }
+
+/* ===== ไทล์เพิ่มไฟล์ (โลโก้รอลากไฟล์ / กดเพิ่ม) ===== */
+#page-cfb .shadd{ width:90px; display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; }
+#page-cfb .shadd .shaddsq{ width:74px; height:74px; border-radius:15px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; border:2px dashed #CFD6E4; background:#FAFBFE; color:#9AA4B8; transition:.15s; }
+#page-cfb .shadd:hover .shaddsq{ border-color:#0C8B7D; background:#F0FBF8; color:#0C8B7D; }
+#page-cfb .shadd .shaddic{ font-size:26px; line-height:1; }
+#page-cfb .shadd .shaddtx{ font-size:10px; font-weight:700; }
+#page-cfb .shadd input[type=file]{ display:none; }
+
+/* ไม่มีชั้นเลย */
+#page-cfb .shempty{ text-align:center; color:#9AA4B8; font-size:12.5px; padding:32px 12px; border:2px dashed #E1E6EF; border-radius:14px; background:#FAFBFE; }
+</style>
+<style id="modulePolish">
+/* =====================================================================
+   WHT + VAT — ปรับ Layout/แสดงผลให้เรียบร้อย ดูดีขึ้น
+   scope #page-wht / #page-vat · additive · ไม่แตะ markup/JS
+   ===================================================================== */
+
+/* ---------- ทั้งสองโมดูล: คำอธิบายหัวข้อ (secsub) อ่านง่ายขึ้น ---------- */
+#page-wht .secsub, #page-vat .secsub{
+  text-transform:none !important; letter-spacing:0 !important; font-size:12.5px !important;
+  color:#5A647C !important; line-height:1.55 !important; font-weight:500 !important;
+  font-family:'Sarabun',sans-serif !important;
+}
+
+/* ============================ VAT ============================ */
+/* แถบหัวรายงาน ขาย/ซื้อ — ลดความจัด ให้นุ่มเรียบ */
+#page-vat .vreg{ box-shadow:0 5px 18px -10px rgba(28,37,53,.16) !important; border-radius:14px !important; overflow:hidden; }
+#page-vat .vreg.sell{ border-color:#CFEDE1 !important; }
+#page-vat .vreg.buy{ border-color:#F0E2BF !important; }
+#page-vat .vreg.sell .vreghd{ background:linear-gradient(180deg,#ECF8F3,#DDF1E9) !important; border-bottom:2px solid #38B89E !important; }
+#page-vat .vreg.buy .vreghd{ background:linear-gradient(180deg,#FBF4E4,#F4E8CE) !important; border-bottom:2px solid #DBA844 !important; }
+/* หัวคอลัมน์ตาราง — โทนอ่อนลง อ่านสบาย */
+#page-vat .vreg.sell .vtbl thead th{ background:#ECF7F1 !important; color:#0C7A5E !important; }
+#page-vat .vreg.buy .vtbl thead th{ background:#FAF1DF !important; color:#996C13 !important; }
+#page-vat .vreg.sell .vtbl tbody tr:nth-child(even){ background:rgba(56,184,158,.055) !important; }
+#page-vat .vreg.buy .vtbl tbody tr:nth-child(even){ background:rgba(219,168,68,.065) !important; }
+#page-vat .vreg.sell .vtbl tbody tr:hover{ background:#ECF8F3 !important; }
+#page-vat .vreg.buy .vtbl tbody tr:hover{ background:#FBF4E4 !important; }
+#page-vat .vreg.sell .vtbl tbody td{ border-bottom-color:#E5F2EB !important; }
+#page-vat .vreg.buy .vtbl tbody td{ border-bottom-color:#F3E9D0 !important; }
+/* ระยะห่างตารางสบายตา */
+#page-vat .vtbl thead th{ padding:10px 12px !important; font-size:10.5px !important; }
+#page-vat .vtbl tbody td{ padding:9px 12px !important; }
+/* การ์ดสรุป — เงานุ่มขึ้น */
+#page-vat .vsum{ gap:12px !important; margin-bottom:16px !important; }
+#page-vat .vsbox{ box-shadow:0 4px 15px -8px rgba(28,37,53,.14) !important; border-radius:14px !important; }
+
+/* ============================ WHT ============================ */
+/* การ์ดทะเบียน + ตาราง */
+#page-wht .whtupcard{ box-shadow:0 5px 18px -10px rgba(28,37,53,.14) !important; border-color:#E7EAF3 !important; border-radius:14px !important; }
+#page-wht .wrtbl thead th{
+  background:#F4F6FC !important; color:#56617B !important; border-bottom:1px solid #E5EAF4 !important;
+  font-size:10.5px !important; letter-spacing:.3px !important; padding:10px 11px !important;
+}
+#page-wht .wrtbl th.pnh{ color:#C0564C !important; }   /* คอลัมน์ ภ.ง.ด. แยกชัดแต่ไม่จัด */
+#page-wht .wrtbl th.pnh .thsub{ color:#9AA4B8 !important; }
+#page-wht .wrtbl tbody td{ border-bottom:1px solid #F0F2F9 !important; padding:9px 11px !important; }
+#page-wht .wrtbl tbody tr:nth-child(even){ background:#FAFBFE !important; }
+#page-wht .wrtbl tbody tr:hover{ background:#EFF5FF !important; }
+#page-wht .wrfiling{ gap:7px !important; }
+</style>
 </head><body><div class="doc">
 <style id="tkCss">
 .tkwrap{padding:2px 0}
@@ -3522,8 +3652,8 @@ function _tsTouch(k){if(_squelchPush)return;_TS[k]=Date.now();_tsSave();}
 (function(){var has=false;try{has=!!localStorage.getItem('gli_ts');}catch(e){}
   if(!has){var dt=0;try{dt=+localStorage.getItem('gli_savedt')||0;}catch(e){}
     if(dt){['n','v','r','c','a','pm','wp','wc','wt','up','mn','pt','bf'].forEach(function(k){_TS[k]=dt;});_tsSave();}}})();
-function cloudPush(){if(_squelchPush)return;if(!_pushAllowed())return;try{localStorage.setItem('gli_savedt',String(Date.now()));}catch(_te){}if(typeof _mcqPopState!=='undefined'&&_mcqPopState){_mqPushPending=1;return;}if(_MODE==='local')return;if(_pushT)clearTimeout(_pushT);_setSync('saving');_pushT=setTimeout(function(){var pkt={n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?DOCFILES:{},pt:PTDATA,tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],bf:BCFSET,gl:{files:(typeof GLFILES!=='undefined'?GLFILES:[]),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS,_t:Date.now(),_by:_cid};_lastSig=_stateSig(_pktSlim(pkt));try{if(_MODE==='firebase'&&_fdb){_fdb.set(_encPkt(_pktSlim(pkt))).then(function(){_setSync('saved');}).catch(function(){_setSync('error');});}else if(_SS){var pr=_SS.set(GLI_KEY,JSON.stringify(pkt),true);if(pr&&pr.then){pr.then(function(){_setSync('saved');}).catch(function(){_setSync('error');});}else{_setSync('saved');}}}catch(e){_setSync('error');}},500);}
-function cloudPushNow(){if(!_pushAllowed())return;try{localStorage.setItem('gli_savedt',String(Date.now()));}catch(_te){}if(_MODE!=='firebase'||!_fdb)return;if(_pushT){clearTimeout(_pushT);_pushT=null;}_setSync('saving');var pkt={n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?DOCFILES:{},pt:PTDATA,tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],bf:BCFSET,gl:{files:(typeof GLFILES!=='undefined'?GLFILES:[]),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS,_t:Date.now(),_by:_cid};_lastSig=_stateSig(_pktSlim(pkt));try{_fdb.set(_encPkt(_pktSlim(pkt))).then(function(){_setSync('saved');}).catch(function(){_setSync('error');});}catch(e){_setSync('error');}}
+function cloudPush(){if(_squelchPush)return;if(!_pushAllowed())return;try{localStorage.setItem('gli_savedt',String(Date.now()));}catch(_te){}if(typeof _mcqPopState!=='undefined'&&_mcqPopState){_mqPushPending=1;return;}if(_MODE==='local')return;if(_pushT)clearTimeout(_pushT);_setSync('saving');_pushT=setTimeout(function(){var pkt={n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?DOCFILES:{},pt:PTDATA,tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],bf:BCFSET,gl:{files:(typeof GLFILES!=='undefined'?GLFILES:[]),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS,_t:Date.now(),_by:_cid};_lastSig=_stateSig(_pktSlim(pkt));try{if(_MODE==='firebase'&&_fdb){_fdb.set(_encPkt(_pktSlim(pkt))).then(function(){_setSync('saved');}).catch(function(_e){_setSync('error');try{window._lastSyncErr=(_e&&(_e.code||_e.message))||(''+_e);window._lastSyncErrT=Date.now();if(window.console&&console.error)console.error('[GLI sync error]',window._lastSyncErr);}catch(_x){}});}else if(_SS){var pr=_SS.set(GLI_KEY,JSON.stringify(pkt),true);if(pr&&pr.then){pr.then(function(){_setSync('saved');}).catch(function(_e){_setSync('error');try{window._lastSyncErr=(_e&&(_e.code||_e.message))||(''+_e);window._lastSyncErrT=Date.now();if(window.console&&console.error)console.error('[GLI sync error]',window._lastSyncErr);}catch(_x){}});}else{_setSync('saved');}}}catch(e){_setSync('error');}},500);}
+function cloudPushNow(){if(!_pushAllowed())return;try{localStorage.setItem('gli_savedt',String(Date.now()));}catch(_te){}if(_MODE!=='firebase'||!_fdb)return;if(_pushT){clearTimeout(_pushT);_pushT=null;}_setSync('saving');var pkt={n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?DOCFILES:{},pt:PTDATA,tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],bf:BCFSET,gl:{files:(typeof GLFILES!=='undefined'?GLFILES:[]),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS,_t:Date.now(),_by:_cid};_lastSig=_stateSig(_pktSlim(pkt));try{_fdb.set(_encPkt(_pktSlim(pkt))).then(function(){_setSync('saved');}).catch(function(_e){_setSync('error');try{window._lastSyncErr=(_e&&(_e.code||_e.message))||(''+_e);window._lastSyncErrT=Date.now();if(window.console&&console.error)console.error('[GLI sync error]',window._lastSyncErr);}catch(_x){}});}catch(e){_setSync('error');}}
 function cloudPull(){if(!_SS||_pulling||_editing)return;_pulling=true;var pr;try{pr=_SS.get(GLI_KEY,true);}catch(e){_pulling=false;return;}if(!pr||!pr.then){_pulling=false;return;}pr.then(function(res){_pulling=false;if(!res||!res.value)return;var s;try{s=JSON.parse(res.value);}catch(e){return;}var sig=_stateSig(s);if(sig===_lastSig)return;if(s._by===_cid){_lastSig=sig;return;}_lastSig=sig;_applyState(s);view();refreshAgg();_setSync('synced');}).catch(function(){_pulling=false;});}function _setSync(st){var el=document.getElementById('syncind');if(!el)return;var m={live:'\u2601 Live \u00b7 \u0e43\u0e0a\u0e49\u0e23\u0e48\u0e27\u0e21',saving:'\u27f3 \u0e01\u0e33\u0e25\u0e31\u0e07\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u2026',saved:'\u2713 \u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e41\u0e25\u0e49\u0e27',synced:'\u2713 \u0e2d\u0e31\u0e1b\u0e40\u0e14\u0e15\u0e25\u0e48\u0e32\u0e2a\u0e38\u0e14',error:'\u26a0 \u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e44\u0e21\u0e48\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08',local:'\u25cb \u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e19\u0e35\u0e49\u0e40\u0e17\u0e48\u0e32\u0e19\u0e31\u0e49\u0e19'};el.textContent=m[st]||m.live;el.className='syncind s-'+st;if((st==='saved'||st==='synced')&&_SS){clearTimeout(_revT);_revT=setTimeout(function(){_setSync('live');},2200);}}function _startSync(){_initFirebase(function(ok){if(ok){_MODE='firebase';_setSync('live');_fbListen();if(!_glSyncBooted){_glSyncBooted=1;try{setInterval(_glAutoSyncTick,25000);window.addEventListener('online',function(){setTimeout(_glAutoSyncTick,1500);});}catch(e){}}setTimeout(_glAutoSyncTick,2500);setTimeout(_glAutoSyncTick,9000);}else if(_SS){_MODE='artifact';_setSync('live');cloudPull();setInterval(cloudPull,3000);}else{_MODE='local';_setSync('local');}});}
 try{window.addEventListener('pagehide',function(){if(_pushT&&_MODE==='firebase'&&_fdb){try{clearTimeout(_pushT);_pushT=null;var pkt={n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?DOCFILES:{},pt:PTDATA,tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],bf:BCFSET,gl:{files:(typeof GLFILES!=='undefined'?GLFILES:[]),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS,_t:Date.now(),_by:_cid};_fdb.set(_encPkt(_pktSlim(pkt)));}catch(e){}}});}catch(e){}
 /* ===== SYNC SAFETY (fix recurring data loss): seed/empty must never overwrite real cloud data ===== */
@@ -3537,7 +3667,7 @@ function _localPkt(){return {n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:W
 function _localScore(){return _dataScore(_localPkt());}
 function _pushAllowed(){return _userTouched||_cloudApplied;}
 function _backupSave(st,why){try{if(!st)return;var sc=_dataScore(st);if(sc<=0)return;var prev=0;try{prev=+(JSON.parse(localStorage.getItem('gli_backup')||'{}')._score)||0;}catch(_e){}if(sc>=prev)localStorage.setItem('gli_backup',JSON.stringify({_score:sc,_t:Date.now(),_why:why||'',pkt:st},_stripB64));}catch(e){}}
-window.gliDiag=function(){var bk={};try{bk=JSON.parse(localStorage.getItem('gli_backup')||'{}');}catch(e){}var r={mode:_MODE,localScore:_localScore(),backupScore:bk._score||0,cloudApplied:_cloudApplied};try{console.log('[GLI]',JSON.stringify(r));}catch(e){}return r;};
+window.gliDiag=function(){var bk={};try{bk=JSON.parse(localStorage.getItem('gli_backup')||'{}');}catch(e){}var r={mode:_MODE,localScore:_localScore(),backupScore:bk._score||0,cloudApplied:_cloudApplied,lastSyncErr:(typeof window!=='undefined'?window._lastSyncErr:null)||null};try{console.log('[GLI]',JSON.stringify(r));}catch(e){}return r;};
 window.gliRestoreBackup=function(){try{var bk=JSON.parse(localStorage.getItem('gli_backup')||'null');if(!bk||!bk.pkt){alert('ไม่พบ backup ในเครื่องนี้');return;}_squelchPush=true;_applyState(bk.pkt,true);_squelchPush=false;_cloudApplied=true;_userTouched=true;_lastSig=null;cloudPushNow();view();refreshAgg();alert('กู้ข้อมูลจาก backup สำเร็จ (score '+(bk._score||0)+') และ sync ขึ้น cloud แล้ว');}catch(e){alert('กู้ข้อมูลล้มเหลว: '+(e&&e.message||e));}};
 window.gliForcePush=function(){_userTouched=true;_cloudApplied=true;_lastSig=null;cloudPushNow();alert('ส่งข้อมูลในเครื่องนี้ขึ้น cloud แล้ว');};
 /* ===== Manual Save (ปุ่มบันทึก + Ctrl+S) ===== */
@@ -9005,4 +9135,136 @@ window.renderTfrs=renderTfrs;
 
 </script>
 <script>/* v7.91: ensure restored module renders on initial load (module scripts load after main showMod boot) */try{(function(){var sv="ov";try{sv=localStorage.getItem("gli_module")||"ov";}catch(e){}if(["fs","wpb","tfrs","line"].indexOf(sv)>=0&&typeof showMod==="function"){showMod(sv);}})();}catch(e){}</script>
+<script id="shelfBoardJS">
+/* Document Vault — Shelf Board engine.
+   เก็บไฟล์ใน DOCFILES['__shelves__'][shelfId] (reuse pipeline ฝัง/ซิงก์/เปิด/ลบ เดิม)
+   เก็บชื่อชั้นใน DOCFILES['__shelfMeta__'].list = [{id,name}] (ซิงก์ผ่าน saveDocf เดิม)
+   override window.renderDoc → วาดชั้นวางลง #docWrap */
+(function(){
+  var SCO='__shelves__', SMETA='__shelfMeta__';
+  function _uid(){ return 's'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+  function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function _shEnsure(){
+    try{ if(typeof loadDocf==='function') loadDocf(); }catch(e){}
+    try{ if(typeof DOCFILES==='undefined'||!DOCFILES) window.DOCFILES={}; }catch(e){ try{window.DOCFILES={};}catch(_){} }
+    if(!DOCFILES[SCO]) DOCFILES[SCO]={};
+    if(!DOCFILES[SMETA] || !Array.isArray(DOCFILES[SMETA].list)){
+      DOCFILES[SMETA]={ list:[
+        {id:_uid(), name:'งบการเงิน'},
+        {id:_uid(), name:'เอกสารธนาคาร'},
+        {id:_uid(), name:'เอกสารอื่น ๆ'}
+      ]};
+      DOCFILES[SMETA].list.forEach(function(s){ if(!DOCFILES[SCO][s.id]) DOCFILES[SCO][s.id]=[]; });
+      try{ if(typeof saveDocf==='function') saveDocf(); }catch(e){}
+    }
+    return DOCFILES[SMETA].list;
+  }
+  function _shList(){ return _shEnsure(); }
+  function _shSave(){ try{ if(typeof saveDocf==='function') saveDocf(); }catch(e){} }
+  function _shFiles(id){ try{ return (DOCFILES[SCO] && DOCFILES[SCO][id]) || []; }catch(e){ return []; } }
+
+  function _shAdd(){
+    var list=_shList(); var s={id:_uid(), name:'ชั้นวางใหม่'}; list.push(s);
+    if(!DOCFILES[SCO][s.id]) DOCFILES[SCO][s.id]=[];
+    _shSave(); renderDocShelf();
+    setTimeout(function(){ var inp=document.querySelector('.shName[data-sh="'+s.id+'"]'); if(inp){ inp.focus(); inp.select(); } },30);
+  }
+  function _shRename(id,name){
+    var list=_shList(); for(var i=0;i<list.length;i++){ if(list[i].id===id){ list[i].name=(name||'').replace(/\s+/g,' ').trim()||'ชั้นวาง'; break; } }
+    _shSave();
+  }
+  function _shDel(id){
+    var run=function(){
+      try{ _shFiles(id).forEach(function(f){ if(f){ if(f.p&&typeof _stDel==='function')_stDel(f.p); if(f.idb&&typeof _idbDel==='function')_idbDel(f.idb); if(typeof _delTombAdd==='function')_delTombAdd(f); } }); }catch(e){}
+      if(DOCFILES[SCO]) try{ delete DOCFILES[SCO][id]; }catch(e){}
+      var list=_shList(); for(var i=0;i<list.length;i++){ if(list[i].id===id){ list.splice(i,1); break; } }
+      _shSave(); renderDocShelf();
+      try{ if(typeof _mnToast==='function') _mnToast('ลบชั้นวางแล้ว ✓'); }catch(e){}
+    };
+    var n=_shFiles(id).length;
+    var msg = n ? ('ลบชั้นวางนี้พร้อมไฟล์ '+n+' รายการ?') : 'ลบชั้นวางนี้?';
+    try{ if(typeof _uiConfirm==='function'){ _uiConfirm(msg, run); return; } }catch(e){}
+    if(confirm(msg)) run();
+  }
+
+  function _shFileTile(id, f, i){
+    var name=(f&&f.n)||'file';
+    var ext=(name.indexOf('.')>=0 ? name.split('.').pop() : '').toLowerCase();
+    var cls='txt', emo='📄';
+    if(ext==='pdf'){cls='pdf';emo='📕';}
+    else if(/^(xls|xlsx|xlsm|xlsb|csv)$/.test(ext)){cls='xls';emo='📗';}
+    else if(/^(doc|docx|rtf)$/.test(ext)){cls='doc';emo='📘';}
+    else if(/^(ppt|pptx)$/.test(ext)){cls='ppt';emo='📙';}
+    else if(/^(zip|rar|7z|gz)$/.test(ext)){cls='zip';emo='🗜️';}
+    else if(/^(png|jpg|jpeg|gif|webp|bmp|svg|heic)$/.test(ext)){cls='img';emo='🖼️';}
+    var inner=emo;
+    try{ if(cls==='img' && typeof _fThumbSrc==='function'){ var t=_fThumbSrc(f); if(t) inner='<img src="'+t+'" alt="">'; } }catch(e){}
+    var extb = ext ? '<span class="shext">'+_esc(ext.toUpperCase().slice(0,4))+'</span>' : '';
+    var canV=false; try{ canV=(typeof _fCanView==='function')?_fCanView(f):false; }catch(e){}
+    var open = canV ? 'v' : 'd';
+    var acts='<span class="dfacts">'
+      + (canV?'<button class="dfb" type="button" title="ดู" data-act="v" data-co="'+SCO+'" data-cat="'+id+'" data-i="'+i+'">👁</button>':'')
+      + '<button class="dfb" type="button" title="ดาวน์โหลด" data-act="d" data-co="'+SCO+'" data-cat="'+id+'" data-i="'+i+'">⬇</button>'
+      + '<button class="dfb rem" type="button" title="ลบ" data-act="r" data-co="'+SCO+'" data-cat="'+id+'" data-i="'+i+'">✕</button>'
+      + '</span>';
+    return '<div class="shtile">'
+      + '<div class="shsq '+cls+'" role="button" title="'+_esc(name)+'" data-act="'+open+'" data-co="'+SCO+'" data-cat="'+id+'" data-i="'+i+'">'+inner+extb+'</div>'
+      + acts
+      + '<div class="shfn" title="'+_esc(name)+'">'+_esc(name)+'</div>'
+      + '</div>';
+  }
+
+  function renderDocShelf(){
+    var w=document.getElementById('docWrap'); if(!w) return;
+    var list=_shList();
+    var total=0; list.forEach(function(s){ total += _shFiles(s.id).length; });
+    var html='<div class="shbar"><div class="shbar-t">🗄️ ชั้นวางเอกสาร <span class="shbar-c">'+total+' ไฟล์ · '+list.length+' ชั้น</span></div>'
+           + '<button class="shAddBtn" type="button">＋ เพิ่มชั้นวาง</button></div>';
+    if(!list.length){ html+='<div class="shempty">ยังไม่มีชั้นวาง — กด “＋ เพิ่มชั้นวาง” เพื่อเริ่ม</div>'; }
+    list.forEach(function(s){
+      var files=_shFiles(s.id), tiles='';
+      files.forEach(function(f,i){ tiles+=_shFileTile(s.id,f,i); });
+      tiles+='<label class="shadd" title="ลากไฟล์มาวาง หรือกดเพื่อเพิ่ม">'
+           + '<span class="shaddsq"><span class="shaddic">＋</span><span class="shaddtx">เพิ่มไฟล์</span></span>'
+           + '<input type="file" multiple data-co="'+SCO+'" data-cat="'+s.id+'"></label>';
+      html+='<div class="shelf">'
+          + '<div class="shelf-hd">'
+          +   '<span class="shtag"><span class="shdot"></span>'
+          +     '<input class="shName" data-sh="'+s.id+'" value="'+_esc(s.name)+'" spellcheck="false" maxlength="60">'
+          +     '<span class="shedit">✎ คลิกเพื่อแก้ชื่อ</span></span>'
+          +   '<span class="shcount">'+files.length+' ไฟล์</span>'
+          +   '<button class="shDel" type="button" data-sh="'+s.id+'" title="ลบชั้นวาง">🗑</button>'
+          + '</div>'
+          + '<div class="shelf-body dmcell" data-co="'+SCO+'" data-cat="'+s.id+'">'+tiles+'</div>'
+          + '</div>';
+    });
+    w.innerHTML=html;
+    try{ var hint=document.querySelector('#page-cfb .mnhint'); if(hint) hint.innerHTML='จัดเก็บเอกสารแบบ <b>ชั้นวาง</b> — สร้างและตั้งชื่อชั้นเองได้ · <b>ลากไฟล์</b> ลงชั้น หรือกดปุ่มเพิ่ม · ไฟล์ถูกฝังและ <b>ซิงก์ทุกอุปกรณ์</b> อัตโนมัติ · คลิกไฟล์เพื่อดู/ดาวน์โหลด'; var mhs=document.querySelector('#modHero .mh-s'); if(mhs) mhs.textContent='ชั้นวางเอกสาร · ตั้งชื่อชั้นเอง · ลาก/กดเพิ่มไฟล์ · ซิงก์ทุกอุปกรณ์'; }catch(e){}
+    try{ if(typeof _docBindOnce==='function') _docBindOnce(); }catch(e){}
+    _shBindOnce();
+  }
+
+  var _shBound=false;
+  function _shBindOnce(){
+    if(_shBound) return; var w=document.getElementById('docWrap'); if(!w) return; _shBound=true;
+    w.addEventListener('click',function(e){
+      var t=e.target; if(!t||!t.closest) return;
+      var add=t.closest('.shAddBtn'); if(add){ e.preventDefault(); _shAdd(); return; }
+      var del=t.closest('.shDel'); if(del){ e.preventDefault(); _shDel(del.getAttribute('data-sh')); return; }
+      var sq=t.closest('.shsq'); if(sq && sq.getAttribute('data-act')){ e.preventDefault(); try{ _docFileAct(sq.getAttribute('data-act'), sq.getAttribute('data-co'), sq.getAttribute('data-cat'), +sq.getAttribute('data-i')); }catch(_e){} return; }
+    });
+    w.addEventListener('change',function(e){
+      var inp=e.target; if(inp && inp.classList && inp.classList.contains('shName')){ _shRename(inp.getAttribute('data-sh'), inp.value); }
+    });
+    w.addEventListener('keydown',function(e){
+      var inp=e.target; if(inp && inp.classList && inp.classList.contains('shName') && (e.key==='Enter'||e.keyCode===13)){ e.preventDefault(); inp.blur(); }
+    });
+  }
+
+  try{ window.renderDoc = renderDocShelf; }catch(e){}
+  try{ window._shAddShelf=_shAdd; }catch(e){}
+  try{ var pg=document.getElementById('page-cfb'); if(pg && !pg.hidden){ renderDocShelf(); } }catch(e){}
+})();
+</script>
 </body></html>
