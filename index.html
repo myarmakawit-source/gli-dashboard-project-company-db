@@ -1094,6 +1094,133 @@ td.num.edit{border-bottom:1px dashed #E2DCCF!important}
 @media(max-width:640px){.stbrkk{flex-basis:120px}.stpanel{padding:14px}}
 </style>
 
+
+<style id="cuteTheme">
+/* ===================================================================
+   Grandline · "Soft Aurora" — การปรับสีให้สดใส น่ารัก และเล่นไล่สีมากขึ้น
+   เพิ่มแบบ additive ทั้งหมด: ไม่ลบ/แก้กฎเดิม ไม่แตะ JS แสดงผลเหมือนกันทุกคน
+   วางไว้ท้าย <head> จึงชนะ cascade เหนือ :root ทั้งสองชุด
+   =================================================================== */
+
+/* 1) จานสี — คงจิตวิญญาณ teal ของแบรนด์ แต่สดขึ้น + ระบบพาสเทลที่เข้ากัน */
+:root{
+  /* neutrals — นุ่ม สะอาด อมฟ้าอ่อน ๆ */
+  --paper:#F5F7FC; --card:#FFFFFF;
+  --ink:#1C2535; --ink2:#566179; --muted:#94A0B6;
+  --line:#E9ECF6; --line2:#F2F4FB; --rowz:#F6F8FD;
+  /* brand — teal สดใหม่ (ยังเข้มพออ่านบนพื้นขาว) */
+  --brand:#0C8B7D; --brand-d:#0A6A60; --brand-t:#DDF5F0;
+  /* honey — แทนทองสีขุ่นเดิม ให้สว่าง อบอุ่น น่ารักขึ้น */
+  --gold:#C5881F; --gold-d:#9C6912; --gold-t:#FBF1DA;
+  /* status — โทนเป็นมิตร */
+  --pos:#16A34A; --pos-bg:#DEF7E7;
+  --neg:#E03952; --neg-bg:#FEE7EB;
+  --blue:#3B82F6; --blue-bg:#E5EEFF;
+  --mn:#3B82F6; --mn-t:#E5EEFF; --mn-d:#2563EB;
+  --pink:#EC4899; --pink-t:#FCE7F3; --pink-d:#D6337E;
+  /* gradient tokens ใหม่ (ใช้กับการตกแต่งด้านล่าง) */
+  --g-brand:linear-gradient(135deg,#0C8B7D 0%,#16B39E 58%,#3FD7C4 100%);
+  --g-aurora:linear-gradient(105deg,#0C8B7D 0%,#10A89A 36%,#23ADC6 64%,#5C8FE0 100%);
+  --g-side:linear-gradient(184deg,#0C7E72 0%,#0A625A 56%,#0F8B7C 100%);
+  --g-honey:linear-gradient(135deg,#E7AC40 0%,#C5881F 100%);
+  --g-rose:linear-gradient(135deg,#F76E86 0%,#E03952 100%);
+  --g-sky:linear-gradient(135deg,#5EA0F7 0%,#3B82F6 100%);
+  --g-grape:linear-gradient(135deg,#A07BF0 0%,#7C3AED 100%);
+  --g-slate:linear-gradient(135deg,#8794AC,#5A6B85);
+  --shadow-soft:0 7px 24px -9px rgba(12,139,125,.22),0 2px 8px -4px rgba(28,37,53,.10);
+}
+
+/* 2) พื้นหลังหน้า — ไล่สีพาสเทลนุ่ม ๆ + ดวงสีจาง ๆ ให้มีมิติ */
+body{
+  background:
+    radial-gradient(1150px 640px at 6% -8%, rgba(45,215,196,.14), transparent 60%),
+    radial-gradient(1050px 700px at 106% 10%, rgba(124,140,237,.12), transparent 60%),
+    radial-gradient(960px 720px at 50% 118%, rgba(245,168,118,.10), transparent 62%),
+    linear-gradient(168deg,#F1FBF8 0%,#F5F7FC 46%,#F8F4FB 100%) !important;
+  background-attachment:fixed !important;
+}
+
+/* 3) Sidebar + แถบ Command header (ใช้ .modnav/.modhero) — ไล่สีเข้มขึ้น */
+.modnav{ background:var(--g-aurora) !important;
+  box-shadow:0 11px 28px -11px rgba(12,110,98,.42),0 3px 10px -4px rgba(28,37,53,.14) !important; }
+.modnav.sidebar{ background:var(--g-side) !important;
+  box-shadow:6px 0 28px -13px rgba(10,90,80,.42) !important; }
+.modnav.sidebar .modtab.active{
+  background:linear-gradient(90deg,rgba(94,234,212,.28),rgba(255,255,255,.05)) !important;
+  box-shadow:inset 3px 0 0 0 #5EEAD4, 0 4px 13px -4px rgba(0,0,0,.24) !important; }
+.modnav.sidebar .modtab:hover{ background:rgba(255,255,255,.12) !important; }
+
+/* แถบหัวโมดูล .modhero — ไล่สีจากเฉดของโมดูลนั้น ๆ (รองรับ color-mix; ถ้าไม่รองรับจะ fallback ของเดิม) */
+.modhero{
+  background:
+    linear-gradient(108deg,rgba(255,255,255,.17) 0%,rgba(255,255,255,0) 42%,rgba(0,0,0,.12) 100%),
+    linear-gradient(120deg, color-mix(in srgb, var(--mh,#0C8B7D) 76%, #ffffff) 0%, var(--mh,#0C8B7D) 52%, color-mix(in srgb, var(--mh,#0C8B7D) 82%, #000000) 132%) !important;
+  box-shadow:0 9px 24px -10px rgba(12,90,80,.40),inset 0 1px 0 rgba(255,255,255,.20) !important;
+}
+/* หน้า Overall = ฮีโร่ ใช้ aurora เต็ม ๆ ให้จำได้ */
+#page-ov .modhero{
+  background:
+    linear-gradient(108deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,0) 46%,rgba(0,0,0,.10) 100%),
+    var(--g-aurora) !important;
+}
+
+/* 4) หัวเรื่อง h1 — ไล่สี aurora */
+h1{ background:var(--g-aurora) !important;
+  box-shadow:0 8px 22px -7px rgba(12,110,98,.45) !important; }
+
+/* 5) การ์ดสรุป KPI (.hubkpi) — แต้มสีพาสเทลตามความหมาย + แถบ accent ไล่สี + ตัวเลขไล่สี */
+.hubkpi{ border-color:#EAEEF7 !important; box-shadow:var(--shadow-soft) !important; }
+.hubkpi:hover{ box-shadow:0 13px 32px -11px rgba(12,139,125,.28) !important; }
+.hubkpi{ background:linear-gradient(162deg,#F1FCF9 0%,#FFFFFF 72%) !important; }
+.hubkpi.warn{ background:linear-gradient(162deg,#FFF7E9 0%,#FFFFFF 72%) !important; }
+.hubkpi.info{ background:linear-gradient(162deg,#EFF5FF 0%,#FFFFFF 72%) !important; }
+.hubkpi.ok{   background:linear-gradient(162deg,#F2FCF6 0%,#FFFFFF 72%) !important; }
+/* แถบ accent ซ้าย (::before เดิม) → ไล่สี */
+.hubkpi::before{ width:4px !important; background:var(--g-brand) !important; }
+.hubkpi.warn::before{ background:var(--g-honey) !important; }
+.hubkpi.info::before{ background:var(--g-sky) !important; }
+.hubkpi.ok::before{   background:linear-gradient(180deg,#34D399,#16A34A) !important; }
+/* ตัวเลข KPI ไล่สี (ตัวใหญ่ หนา จึงยังอ่านชัด) */
+.hubkpiv{ background:linear-gradient(135deg,#0A6A60,#16B39E);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.hubkpi.warn .hubkpiv{ background:linear-gradient(135deg,#9C6912,#E0A53A);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
+.hubkpi.info .hubkpiv{ background:linear-gradient(135deg,#1D4ED8,#5EA0F7);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
+.hubkpi.ok .hubkpiv{ background:linear-gradient(135deg,#15803D,#34D399);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
+
+/* 6) ป้ายภาษีในปฏิทิน (CIT/WHT/VAT/SBT/SSO/DBD) → พิลล์ไล่สีลูกกวาด */
+.gCIT{ background:var(--g-rose) !important; }
+.gWHT{ background:var(--g-sky) !important; }
+.gVAT{ background:var(--g-brand) !important; }
+.gSBT{ background:var(--g-grape) !important; }
+.gSSO{ background:var(--g-honey) !important; }
+.gDBD{ background:var(--g-slate) !important; }
+.hubcalg{ box-shadow:0 2px 7px -2px rgba(28,37,53,.24) !important; }
+
+/* 7) พิลล์สถานะวันครบกำหนด → ชิปไล่สีนุ่ม ๆ */
+.hubcalu.od,.hubcalu.u1{ background:linear-gradient(135deg,#FFE0E5,#FFD2D9) !important; color:#CE2A46 !important; }
+.hubcalu.u2{ background:linear-gradient(135deg,#FFEAD6,#FFDCC0) !important; color:#C2410C !important; }
+.hubcalu.u3{ background:linear-gradient(135deg,#FBF3C8,#FCEBA8) !important; color:#A16207 !important; }
+.hubcalu.u4{ background:linear-gradient(135deg,#DBF6EC,#C7F0DE) !important; color:#0C7A5E !important; }
+
+/* 8) ปุ่ม → ไล่สี */
+.adbtn.pri{ background:var(--g-brand) !important; border-color:transparent !important;
+  box-shadow:0 6px 16px -6px rgba(12,139,125,.50) !important; }
+.adbtn.pri:hover{ filter:brightness(1.05); background:var(--g-brand) !important; }
+.authbtn{ background:var(--g-aurora) !important;
+  box-shadow:0 9px 20px -7px rgba(12,110,98,.50) !important; }
+.authbtn:hover{ filter:brightness(1.06); }
+.authsetupbtn{ background:linear-gradient(135deg,#E9FBF6,#DBF5EE) !important; }
+
+/* 9) Scrollbar + การไฮไลต์ข้อความ ให้น่ารักเข้าธีม */
+::-webkit-scrollbar-thumb{ background:linear-gradient(180deg,#3FD7C4,#0C8B7D) !important;
+  border-radius:9px; border:3px solid transparent; background-clip:content-box; }
+::-webkit-scrollbar-thumb:hover{ background:linear-gradient(180deg,#16B39E,#0A6A60) !important; background-clip:content-box; }
+::selection{ background:rgba(45,215,196,.30); }
+::-moz-selection{ background:rgba(45,215,196,.30); }
+</style>
 </head><body><div class="doc">
 <style id="tkCss">
 .tkwrap{padding:2px 0}
