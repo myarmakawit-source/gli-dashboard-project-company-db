@@ -1137,7 +1137,6 @@ body{
     radial-gradient(1050px 700px at 106% 10%, rgba(124,140,237,.12), transparent 60%),
     radial-gradient(960px 720px at 50% 118%, rgba(245,168,118,.10), transparent 62%),
     linear-gradient(168deg,#F1FBF8 0%,#F5F7FC 46%,#F8F4FB 100%) !important;
-  background-attachment:fixed !important;
 }
 
 /* 3) Sidebar + แถบ Command header (ใช้ .modnav/.modhero) — ไล่สีเข้มขึ้น */
@@ -9269,7 +9268,7 @@ window.renderTfrs=renderTfrs;
 </script>
 <style id="glMascotCss">
 /* ===== น้อง Grandline v2 — แว่นกลม · ลากย้ายได้ · คลิกให้กำลังใจ (ออกแบบเอง 100%) ===== */
-#glMascot{ position:fixed; right:16px; bottom:16px; width:116px; height:132px; z-index:55; --glm:#0C8B7D; --glm-d:#0A6E63; pointer-events:none; -webkit-user-select:none; user-select:none; touch-action:none; }
+#glMascot{ position:fixed; right:16px; bottom:16px; width:116px; height:132px; z-index:55; --glm:#0C8B7D; --glm-d:#0A6E63; pointer-events:none; -webkit-user-select:none; user-select:none; touch-action:none; transform:translateZ(0); contain:layout style paint; }
 #glMascot .glm-bub{
   position:absolute; right:2px; top:-4px; transform:translateY(6px) scale(.9); transform-origin:bottom right;
   background:#fff; color:#2A2E3A; font-family:'Sarabun',sans-serif; font-size:10.5px; font-weight:700; line-height:1.3;
@@ -9282,10 +9281,10 @@ window.renderTfrs=renderTfrs;
 #glMascot .glm-prop{
   position:absolute; left:0; top:30px; width:32px; height:32px; border-radius:10px; background:#fff; border:2px solid var(--glm);
   box-shadow:0 5px 13px -4px rgba(28,37,53,.36); display:flex; align-items:center; justify-content:center; font-size:17px; z-index:4;
-  animation:glm-prop 3.2s ease-in-out infinite; pointer-events:none;
+  animation:glm-prop 3.2s ease-in-out infinite; pointer-events:none; will-change:transform;
 }
-#glMascot .glm-char{ position:absolute; left:50%; bottom:0; width:104px; height:114px; margin-left:-52px; pointer-events:auto; cursor:grab; animation:glm-bob 3.4s ease-in-out infinite; transform-origin:50% 100%; }
-#glMascot .glm-char svg{ width:100%; height:100%; display:block; overflow:visible; filter:drop-shadow(0 7px 9px rgba(28,37,53,.2)); }
+#glMascot .glm-char{ position:absolute; left:50%; bottom:0; width:104px; height:114px; margin-left:-52px; pointer-events:auto; cursor:grab; animation:glm-bob 3.4s ease-in-out infinite; transform-origin:50% 100%; will-change:transform; }
+#glMascot .glm-char svg{ width:100%; height:100%; display:block; overflow:visible; }
 #glMascot.grab .glm-char{ cursor:grabbing; animation-play-state:paused; }
 #glMascot.hop .glm-char{ animation:glm-hop .72s ease; }
 #glMascot.pop .glm-char{ animation:glm-pop .55s ease; }
@@ -9295,6 +9294,7 @@ window.renderTfrs=renderTfrs;
 @keyframes glm-blink{ 0%,92%,100%{ transform:scaleY(1);} 96%{ transform:scaleY(.08);} }
 @keyframes glm-hop{ 0%{ transform:translateY(0);} 18%{ transform:translateY(-16px) rotate(-4deg);} 40%{ transform:translateY(0) rotate(0);} 56%{ transform:translateY(-9px) rotate(3deg);} 76%{ transform:translateY(0);} 100%{ transform:translateY(0);} }
 @keyframes glm-pop{ 0%{ transform:scale(1);} 35%{ transform:scale(1.2);} 70%{ transform:scale(.94);} 100%{ transform:scale(1);} }
+#glMascot.glm-pause .glm-char,#glMascot.glm-pause .glm-prop,#glMascot.glm-pause .glm-eye{ animation-play-state:paused !important; }
 @media (max-width:720px){ #glMascot{ transform:scale(.8); transform-origin:bottom right; } }
 @media print{ #glMascot{ display:none !important; } }
 </style>
@@ -9339,7 +9339,7 @@ window.renderTfrs=renderTfrs;
     if(document.getElementById('glMascot')) return;
     _d=document.createElement('div'); _d.id='glMascot';
     _d.innerHTML='<div class="glm-prop">🧭</div>'+SVG+'<div class="glm-bub">น้อง Grandline 👋</div>';
-    document.body.appendChild(_d);
+    document.body.appendChild(_d); try{ document.addEventListener('visibilitychange',function(){ if(_d)_d.classList.toggle('glm-pause',document.hidden); }); }catch(e){}
     try{ var sp=JSON.parse(localStorage.getItem('gli_mascotPos')||'null'); if(sp&&typeof sp.left==='number') clampPos(sp.left,sp.top); }catch(e){}
     var ch=_d.querySelector('.glm-char');
     var dragging=false,moved=false,sx=0,sy=0,ox=0,oy=0;
