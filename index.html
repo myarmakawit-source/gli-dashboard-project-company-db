@@ -9367,4 +9367,95 @@ window.renderTfrs=renderTfrs;
   if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',function(){ setTimeout(init,350); }); } else { setTimeout(init,350); }
 })();
 </script>
+<style id="glPetsCss">
+/* ===== แมวอ้วน + หมาอ้วน · จิ้มแล้วเล่นด้วย (ออกแบบเอง 100% · เบา GPU layer) ===== */
+.gpet{ position:fixed; width:96px; height:96px; z-index:54; pointer-events:none; touch-action:none; transform:translateZ(0); will-change:transform; -webkit-user-select:none; user-select:none; }
+.gpet .pet-body{ position:absolute; inset:0; pointer-events:auto; cursor:pointer; transform-origin:50% 92%; animation:pet-breathe 3.6s ease-in-out infinite; will-change:transform; }
+.gpet .pet-body svg{ width:100%; height:100%; display:block; overflow:visible; }
+.gpet.grab .pet-body{ cursor:grabbing; animation-play-state:paused; }
+.gpet.glm-pause .pet-body,.gpet.glm-pause .pet-eye,.gpet.glm-pause .pet-tail{ animation-play-state:paused !important; }
+.pet-tail{ transform-box:fill-box; transform-origin:0% 100%; animation:pet-tail 2.6s ease-in-out infinite; }
+.pet-eye{ transform-origin:center; animation:pet-blink 5s infinite; }
+.gpet.play-bounce .pet-body{ animation:pet-bounce .62s ease; }
+.gpet.play-wiggle .pet-body{ animation:pet-wiggle .62s ease; }
+.gpet.play-spin .pet-body{ animation:pet-spin .72s ease; }
+.gpet.play-squish .pet-body{ animation:pet-squish .52s ease; }
+.gpet.wag .pet-tail{ animation:pet-wag .24s ease-in-out infinite; }
+.gpet .pet-bub{ position:absolute; left:50%; top:-12px; transform:translate(-50%,6px) scale(.9); transform-origin:bottom center; background:#fff; color:#2A2E3A; font-family:'Sarabun',sans-serif; font-size:11px; font-weight:700; padding:4px 11px; border-radius:11px; border:1.6px solid var(--pc,#F0A24E); box-shadow:0 6px 15px -6px rgba(28,37,53,.32); white-space:nowrap; opacity:0; transition:opacity .2s ease, transform .2s ease; pointer-events:none; z-index:3; }
+.gpet .pet-bub::after{ content:''; position:absolute; left:50%; margin-left:-5px; bottom:-7px; width:10px; height:10px; background:#fff; border-right:1.6px solid var(--pc,#F0A24E); border-bottom:1.6px solid var(--pc,#F0A24E); transform:rotate(45deg); }
+.gpet.show-bub .pet-bub{ opacity:1; transform:translate(-50%,0) scale(1); }
+.pet-heart{ position:absolute; font-size:15px; pointer-events:none; animation:pet-heart 1.05s ease-out forwards; z-index:4; }
+@keyframes pet-breathe{ 0%,100%{ transform:scale(1) translateY(0);} 50%{ transform:scale(1.035) translateY(-2px);} }
+@keyframes pet-tail{ 0%,100%{ transform:rotate(-9deg);} 50%{ transform:rotate(9deg);} }
+@keyframes pet-wag{ 0%,100%{ transform:rotate(-24deg);} 50%{ transform:rotate(24deg);} }
+@keyframes pet-blink{ 0%,93%,100%{ transform:scaleY(1);} 96.5%{ transform:scaleY(.1);} }
+@keyframes pet-bounce{ 0%{transform:translateY(0);} 30%{transform:translateY(-22px);} 55%{transform:translateY(0);} 72%{transform:translateY(-9px);} 100%{transform:translateY(0);} }
+@keyframes pet-wiggle{ 0%,100%{transform:rotate(0);} 20%{transform:rotate(-13deg);} 60%{transform:rotate(13deg);} 80%{transform:rotate(-6deg);} }
+@keyframes pet-spin{ 0%{transform:rotate(0) scale(1);} 50%{transform:rotate(180deg) scale(.9);} 100%{transform:rotate(360deg) scale(1);} }
+@keyframes pet-squish{ 0%{transform:scale(1,1);} 40%{transform:scale(1.16,.8);} 70%{transform:scale(.93,1.1);} 100%{transform:scale(1,1);} }
+@keyframes pet-heart{ 0%{transform:translateY(0) scale(.6); opacity:0;} 25%{opacity:1; transform:translateY(-12px) scale(1.1);} 100%{transform:translateY(-48px) scale(.9); opacity:0;} }
+@media (max-width:720px){ .gpet{ transform:scale(.76) translateZ(0); } }
+@media print{ .gpet{ display:none !important; } }
+</style>
+<script id="glPetsJs">
+(function(){
+  var CAT='<svg viewBox="0 0 100 100"><path class="pet-tail" d="M78 72 q18 -2 14 -22 q-2 -10 -10 -10" fill="none" stroke="#D9822B" stroke-width="9" stroke-linecap="round"/>'
+   +'<path d="M50 26 C74 26 86 44 86 64 C86 84 70 94 50 94 C30 94 14 84 14 64 C14 44 26 26 50 26 Z" fill="#F0A24E" stroke="#C9772A" stroke-width="2.6"/>'
+   +'<ellipse cx="50" cy="70" rx="20" ry="18" fill="#FCEBD2"/>'
+   +'<path d="M30 40 q6 4 0 9 M70 40 q-6 4 0 9" fill="none" stroke="#D9822B" stroke-width="3" stroke-linecap="round"/>'
+   +'<path d="M28 32 L24 15 L40 26 Z" fill="#F0A24E" stroke="#C9772A" stroke-width="2.4"/><path d="M72 32 L76 15 L60 26 Z" fill="#F0A24E" stroke="#C9772A" stroke-width="2.4"/>'
+   +'<path d="M29 28 L27 20 L35 25 Z" fill="#F7C9A0"/><path d="M71 28 L73 20 L65 25 Z" fill="#F7C9A0"/>'
+   +'<g class="pet-eye"><ellipse cx="40" cy="52" rx="4" ry="5.5" fill="#3D3A4D"/><ellipse cx="60" cy="52" rx="4" ry="5.5" fill="#3D3A4D"/></g>'
+   +'<circle cx="41.5" cy="50" r="1.4" fill="#fff"/><circle cx="61.5" cy="50" r="1.4" fill="#fff"/>'
+   +'<circle cx="30" cy="61" r="4" fill="#FFB1BE" opacity=".55"/><circle cx="70" cy="61" r="4" fill="#FFB1BE" opacity=".55"/>'
+   +'<path d="M47 60 L53 60 L50 63 Z" fill="#E58BA0"/><path d="M50 63 q-3 4 -7 2 M50 63 q3 4 7 2" fill="none" stroke="#3D3A4D" stroke-width="1.6" stroke-linecap="round"/>'
+   +'<path d="M21 56 l13 1 M21 62 l13 -1 M79 56 l-13 1 M79 62 l-13 -1" stroke="#C9772A" stroke-width="1.3" stroke-linecap="round" fill="none"/>'
+   +'<ellipse cx="38" cy="92" rx="7" ry="5" fill="#FCEBD2" stroke="#C9772A" stroke-width="2"/><ellipse cx="62" cy="92" rx="7" ry="5" fill="#FCEBD2" stroke="#C9772A" stroke-width="2"/></svg>';
+  var DOG='<svg viewBox="0 0 100 100"><path class="pet-tail" d="M80 74 q16 -4 12 -18" fill="none" stroke="#A8794A" stroke-width="9" stroke-linecap="round"/>'
+   +'<path d="M50 28 C73 28 85 45 85 64 C85 84 70 94 50 94 C30 94 15 84 15 64 C15 45 27 28 50 28 Z" fill="#C99A66" stroke="#9A6F42" stroke-width="2.6"/>'
+   +'<ellipse cx="50" cy="72" rx="19" ry="16" fill="#EFD9B8"/>'
+   +'<path d="M26 34 q-14 4 -12 24 q8 4 14 -6 Z" fill="#A8794A" stroke="#8A6038" stroke-width="2.2"/><path d="M74 34 q14 4 12 24 q-8 4 -14 -6 Z" fill="#A8794A" stroke="#8A6038" stroke-width="2.2"/>'
+   +'<g class="pet-eye"><ellipse cx="41" cy="50" rx="4" ry="5.5" fill="#3D3A4D"/><ellipse cx="59" cy="50" rx="4" ry="5.5" fill="#3D3A4D"/></g>'
+   +'<circle cx="42.5" cy="48" r="1.4" fill="#fff"/><circle cx="60.5" cy="48" r="1.4" fill="#fff"/>'
+   +'<circle cx="31" cy="58" r="4" fill="#FFB1BE" opacity=".5"/><circle cx="69" cy="58" r="4" fill="#FFB1BE" opacity=".5"/>'
+   +'<ellipse cx="50" cy="64" rx="15" ry="12" fill="#EFD9B8"/>'
+   +'<ellipse cx="50" cy="57" rx="5" ry="3.6" fill="#3D3A4D"/>'
+   +'<path d="M50 60 q-6 6 -10 3 M50 60 q6 6 10 3" fill="none" stroke="#8A6038" stroke-width="1.8" stroke-linecap="round"/>'
+   +'<path d="M46 66 q4 8 8 0 Z" fill="#F58BA0"/>'
+   +'<ellipse cx="38" cy="92" rx="7" ry="5" fill="#EFD9B8" stroke="#9A6F42" stroke-width="2"/><ellipse cx="62" cy="92" rx="7" ry="5" fill="#EFD9B8" stroke="#9A6F42" stroke-width="2"/></svg>';
+  var PETS={ cat:{color:'#F0A24E',svg:CAT,tail:false,say:['เหมียว~ 🐾','ครืดๆ 😺','ลูบอีกสิ 💛','เล่นด้วย 🧶','งับ! 😼','สบายจัง 😽'],sup:'รักที่สุดเลย 😻💕'},
+              dog:{color:'#C99A66',svg:DOG,tail:true,say:['โฮ่ง! 🐶','วู้ฟ วู้ฟ! 🦴','เล่นๆ 🐾','หางกระดิก~ 💛','แง้ก! 😆','รักเลย ❤️'],sup:'ฟินสุดๆ 🐶💕'} };
+  var PLAYS=['play-bounce','play-wiggle','play-spin','play-squish'], HEARTS=['❤️','💛','✨','🐾','💕'];
+  function place(d,left,top){ var w=d.offsetWidth,h=d.offsetHeight; left=Math.max(2,Math.min((window.innerWidth||1000)-w-2,left)); top=Math.max(2,Math.min((window.innerHeight||700)-h-2,top)); d.style.left=left+'px'; d.style.top=top+'px'; d.style.bottom='auto'; }
+  function mk(id,cfg,baseLeft){
+    if(document.getElementById('gpet-'+id)) return;
+    var d=document.createElement('div'); d.id='gpet-'+id; d.className='gpet'; d.style.setProperty('--pc',cfg.color); d.style.left=baseLeft+'px'; d.style.bottom='14px';
+    d.innerHTML='<div class="pet-bub"></div><div class="pet-body">'+cfg.svg+'</div>';
+    document.body.appendChild(d);
+    try{ var sp=JSON.parse(localStorage.getItem('gli_pet_'+id)||'null'); if(sp&&typeof sp.left==='number') place(d,sp.left,sp.top); }catch(e){}
+    var body=d.querySelector('.pet-body'), pokes=0, bubT=null;
+    function bubble(t,ms){ var b=d.querySelector('.pet-bub'); if(b)b.textContent=t; d.classList.add('show-bub'); if(bubT)clearTimeout(bubT); bubT=setTimeout(function(){d.classList.remove('show-bub');},ms||1600); }
+    function heart(){ var h=document.createElement('div'); h.className='pet-heart'; h.textContent=HEARTS[Math.floor(Math.random()*HEARTS.length)]; h.style.left=(28+Math.random()*40)+'px'; h.style.top=(18+Math.random()*22)+'px'; d.appendChild(h); setTimeout(function(){ if(h.parentNode)h.parentNode.removeChild(h); },1100); }
+    function play(){
+      pokes++; d.classList.remove('play-bounce','play-wiggle','play-spin','play-squish'); void d.offsetWidth;
+      var anim=PLAYS[Math.floor(Math.random()*PLAYS.length)]; d.classList.add(anim); if(cfg.tail)d.classList.add('wag');
+      var dur=anim==='play-spin'?760:640;
+      setTimeout(function(){ d.classList.remove(anim); if(cfg.tail)d.classList.remove('wag'); },dur);
+      if(pokes%5===0){ bubble(cfg.sup,2100); for(var i=0;i<5;i++)(function(k){ setTimeout(heart,k*95); })(i); }
+      else { bubble(cfg.say[Math.floor(Math.random()*cfg.say.length)],1500); heart(); if(Math.random()<.5) setTimeout(heart,120); }
+    }
+    var dragging=false,moved=false,sx,sy,ox,oy;
+    body.addEventListener('pointerdown',function(e){ dragging=true; moved=false; var r=d.getBoundingClientRect(); sx=e.clientX; sy=e.clientY; ox=r.left; oy=r.top; try{body.setPointerCapture(e.pointerId);}catch(_e){} d.classList.add('grab'); });
+    window.addEventListener('pointermove',function(e){ if(!dragging)return; var dx=e.clientX-sx,dy=e.clientY-sy; if(!moved&&(Math.abs(dx)>4||Math.abs(dy)>4))moved=true; if(moved)place(d,ox+dx,oy+dy); });
+    window.addEventListener('pointerup',function(e){ if(!dragging)return; dragging=false; d.classList.remove('grab'); if(moved){ try{var r=d.getBoundingClientRect(); localStorage.setItem('gli_pet_'+id,JSON.stringify({left:r.left,top:r.top}));}catch(_e){} } else { play(); } });
+  }
+  function init(){
+    var narrow=(window.innerWidth||1000)<760;
+    try{ mk('cat',PETS.cat, narrow?10:238); mk('dog',PETS.dog, narrow?104:336); }catch(e){}
+    try{ document.addEventListener('visibilitychange',function(){ var hid=document.hidden; ['cat','dog'].forEach(function(id){ var d=document.getElementById('gpet-'+id); if(d)d.classList.toggle('glm-pause',hid); }); }); }catch(e){}
+    try{ window.addEventListener('resize',function(){ ['cat','dog'].forEach(function(id){ var d=document.getElementById('gpet-'+id); if(d&&d.style.top){ var r=d.getBoundingClientRect(); place(d,r.left,r.top); } }); }); }catch(e){}
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',function(){ setTimeout(init,420); }); } else { setTimeout(init,420); }
+})();
+</script>
 </body></html>
