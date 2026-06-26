@@ -1350,6 +1350,59 @@ h1{ background:var(--g-aurora) !important;
 #page-wht .wrtbl tbody tr:hover{ background:#EFF5FF !important; }
 #page-wht .wrfiling{ gap:7px !important; }
 </style>
+<style id="gliGlowCss">
+/* ============================================================
+   GLI · Glow / "เรืองแสง" — LOGO · USER · หัวข้อทุก Module
+   ภาคผนวกล้วน ๆ (additive only) · ไม่แก้/ไม่ลบของเดิม · ไม่มี per-user gating
+   เรนเดอร์เหมือนกันทุกผู้ใช้ทุกเครื่อง · เคารพ prefers-reduced-motion (มี global rule เดิมอยู่แล้ว)
+   ============================================================ */
+
+/* —— Keyframes (เฉดมิ้นต์ #5EEAD4 + แต้มอำพัน #FBBF24 ให้เข้าธีมแบรนด์) —— */
+@keyframes gliLogoGlow{
+  0%,100%{ filter:drop-shadow(0 0 3px rgba(94,234,212,.55)) drop-shadow(0 0 7px rgba(94,234,212,.22)); }
+  50%    { filter:drop-shadow(0 0 6px rgba(94,234,212,.90)) drop-shadow(0 0 14px rgba(251,191,36,.32)); }
+}
+@keyframes gliTextGlow{
+  0%,100%{ text-shadow:0 0 5px rgba(94,234,212,.40); }
+  50%    { text-shadow:0 0 11px rgba(94,234,212,.78), 0 0 3px rgba(255,255,255,.45); }
+}
+@keyframes gliChipGlow{
+  0%,100%{ box-shadow:0 0 7px 0 rgba(94,234,212,.30), 0 0 0 1px rgba(94,234,212,.16); }
+  50%    { box-shadow:0 0 17px 1px rgba(94,234,212,.58), 0 0 0 1px rgba(94,234,212,.34); }
+}
+@keyframes gliHeroGlow{
+  0%,100%{ box-shadow:0 0 9px 0 rgba(94,234,212,.30), 0 0 0 1px rgba(94,234,212,.12); }
+  50%    { box-shadow:0 0 24px 2px rgba(94,234,212,.62), 0 0 0 1px rgba(94,234,212,.28); }
+}
+@keyframes gliIcGlow{
+  0%,100%{ box-shadow:inset 0 1px 0 rgba(255,255,255,.20), 0 0 5px 0 rgba(94,234,212,.34); }
+  50%    { box-shadow:inset 0 1px 0 rgba(255,255,255,.20), 0 0 14px 1px rgba(94,234,212,.74); }
+}
+
+/* —— 1) LOGO : โลโก้ + ชื่อ "Grandline" ในแถบข้าง —— */
+.sbbrand .sblogo{ animation:gliLogoGlow 2.4s ease-in-out infinite; will-change:filter; }
+.sbbrand .sbn1{ animation:gliTextGlow 2.6s ease-in-out infinite; }
+
+/* —— 2) USER : ชิปผู้ใช้ปัจจุบัน (#curUserChip) ในแถบข้าง —— */
+.modnav.sidebar .curuser{ position:relative; z-index:0; }
+.modnav.sidebar .curuser::after{
+  content:""; position:absolute; inset:-1px; border-radius:13px;
+  pointer-events:none; z-index:-1;
+  animation:gliChipGlow 2.8s ease-in-out infinite;
+}
+.modnav.sidebar .curuser .cuname{ animation:gliTextGlow 2.6s ease-in-out infinite; }
+.modnav.sidebar .curuser .cuav{ animation:gliTextGlow 3.1s ease-in-out infinite; }
+
+/* —— 3) หัวข้อทุก Module : แถบ .modhero (#modHero — ใช้ซ้ำทุกโมดูล) —— */
+.modhero{ position:relative; z-index:0; }
+.modhero::after{
+  content:""; position:absolute; inset:-2px; border-radius:14px;
+  pointer-events:none; z-index:-1;
+  animation:gliHeroGlow 2.6s ease-in-out infinite;
+}
+.modhero .mh-ic{ animation:gliIcGlow 2.6s ease-in-out infinite; }
+.modhero .mh-t{ animation:gliTextGlow 2.6s ease-in-out infinite; }
+</style>
 </head><body><div class="doc">
 <style id="tkCss">
 .tkwrap{padding:2px 0}
@@ -5603,8 +5656,10 @@ function _mcqSlot(co,si,slot,lab,arr,foc,ro){arr=arr||[];var h='<div class="mcqs
   if(ro){h+=(arr.length?'':'<div class="mcqslotro">— ว่าง · รอแนบที่ฝั่ง JV —</div>');}
   else{h+='<div class="mcqslotdz" data-mcq="set:p'+slot+':'+si+'" title="Drag &amp; drop or click"><span class="mcqslotdzi">⬇</span>'+(arr.length?'เพิ่มไฟล์':'ลาก/คลิกเพื่อแนบ')+'</div>';}
   h+='</div>';return h;}
+(function(){function _glSaveVoucher(co,si,val){try{var nm=(typeof _mnUser!=='undefined')?(''+_mnUser).replace(/\s+/g,' ').trim().toUpperCase():'';if(nm!=='CHONTIDA DOUNGKHAM')return;si=parseInt(si,10);if(isNaN(si))return;var r=null;for(var i=0;i<MNCHQ.length;i++){if(MNCHQ[i]&&(''+MNCHQ[i].co)===(''+co)){r=MNCHQ[i];break;}}if(!r)return;if(!Array.isArray(r.gliSets))r.gliSets=[];while(r.gliSets.length<=si)r.gliSets.push({});if(!r.gliSets[si]||typeof r.gliSets[si]!=='object')r.gliSets[si]={};r.gliSets[si].gTxt=val;clearTimeout(window._glVchT);window._glVchT=setTimeout(function(){try{saveMnChq();}catch(_e){}},500);}catch(_e){}}
+try{document.addEventListener('input',function(e){var t=e.target;if(t&&t.classList&&t.classList.contains('glVoucherTa')){_glSaveVoucher(t.getAttribute('data-co'),t.getAttribute('data-si'),t.value);}},true);}catch(_e){}})();
 function _mcqSetsBox(r,idx){var co=r.co;var _gli=(_mcqPopState&&_mcqPopState.row==='gli');var _row=_gli?'gli':'jv';var focK=_mcqSlotKey(_row,idx);
-  if(_gli){_mcqMig(r);var JV=Array.isArray(r.jvSets)?r.jvSets:[];var GS=Array.isArray(r.gliSets)?r.gliSets:[];var jvSlots=[{k:'c',l:'🧾 รับเช็ค <span class="mcqfromjv">จาก JV</span>'},{k:'v',l:'📄 ใบกำกับภาษี <span class="mcqfromjv">จาก JV</span>'}];var glSlots=[{k:'i',l:'🧾 ใบแจ้งหนี้'},{k:'r',l:'📄 ใบกำกับภาษี / ใบเสร็จรับเงิน'},{k:'g',l:'📋 Voucher GLI'}];var _pr='แนบเอกสารฝั่ง GLI: ใบแจ้งหนี้ → ใบกำกับภาษี/ใบเสร็จรับเงิน → Voucher GLI · (รับเช็ค + ใบกำกับภาษี ฝั่ง JV แสดงเป็นข้อมูลอ้างอิงอัตโนมัติ live)';var _emp='ยังไม่มีชุดเอกสาร — กด “＋ เพิ่มชุด” เพื่อเริ่มแนบ ใบแจ้งหนี้ + ใบกำกับภาษี/ใบเสร็จรับเงิน + Voucher GLI ฝั่ง GLI';var N=Math.max(GS.length,JV.length);var h='<div class="mcqsetswrap"><div class="mcqsetshd"><span class="mcqsetstt">📎 ชุดเอกสาร · Document Sets</span><span class="mcqsetssub">'+_pr+'</span></div>';if(!N){h+='<div class="mcqsetsempty">'+_emp+'</div>';}for(var si=0;si<N;si++){var gs=GS[si]||{};var js=JV[si];h+='<div class="mcqset"><div class="mcqsethd"><span class="mcqsetno">Set '+(si+1)+'</span>'+(js?'<span class="mcqsetlink">⛓ อ้างอิง JV Set '+(si+1)+'</span>':'')+'<input class="mcqsetdesc mcqsetdesc-ro" data-mcqdesc="'+si+'" type="text" readonly title="อ้างอิงจาก JV — แก้ที่ฝั่ง JV" placeholder="— (อ้างอิงจาก JV)" value="'+(''+((JV[si]&&JV[si].desc)||'')).replace(/[&<>"]/g,function(c){return '&#'+c.charCodeAt(0)+';';})+'"><button class="mcqsetdel" data-mcq="set:del:'+si+'" type="button" title="ลบชุดนี้ (เฉพาะฝั่ง GLI)">✕ ลบชุด</button></div><div class="mcqsetcols">';var first=true;if(js){jvSlots.forEach(function(sl){if(!first)h+='<div class="mcqsetarrow">→</div>';first=false;h+=_mcqSlot(co,si,sl.k,sl.l,(js[sl.k]||[]),focK===sl.k,true);});}glSlots.forEach(function(sl){if(!first)h+='<div class="mcqsetarrow">→</div>';first=false;h+=_mcqSlot(co,si,sl.k,sl.l,(gs[sl.k]||[]),focK===sl.k,false);});h+='</div></div>';}h+='<button class="mcqsetadd" data-mcq="set:add" type="button">＋ เพิ่มชุด (Add Set)</button></div>';return h;}
+  if(_gli){_mcqMig(r);var JV=Array.isArray(r.jvSets)?r.jvSets:[];var GS=Array.isArray(r.gliSets)?r.gliSets:[];var jvSlots=[{k:'c',l:'🧾 รับเช็ค <span class="mcqfromjv">จาก JV</span>'},{k:'v',l:'📄 ใบกำกับภาษี <span class="mcqfromjv">จาก JV</span>'}];var glSlots=[{k:'i',l:'🧾 ใบแจ้งหนี้'},{k:'r',l:'📄 ใบกำกับภาษี / ใบเสร็จรับเงิน'},{k:'g',l:'📋 Voucher GLI'}];var _pr='แนบเอกสารฝั่ง GLI: ใบแจ้งหนี้ → ใบกำกับภาษี/ใบเสร็จรับเงิน → Voucher GLI · (รับเช็ค + ใบกำกับภาษี ฝั่ง JV แสดงเป็นข้อมูลอ้างอิงอัตโนมัติ live)';var _emp='ยังไม่มีชุดเอกสาร — กด “＋ เพิ่มชุด” เพื่อเริ่มแนบ ใบแจ้งหนี้ + ใบกำกับภาษี/ใบเสร็จรับเงิน + Voucher GLI ฝั่ง GLI';var N=Math.max(GS.length,JV.length);var h='<div class="mcqsetswrap"><div class="mcqsetshd"><span class="mcqsetstt">📎 ชุดเอกสาร · Document Sets</span><span class="mcqsetssub">'+_pr+'</span></div>';if(!N){h+='<div class="mcqsetsempty">'+_emp+'</div>';}for(var si=0;si<N;si++){var gs=GS[si]||{};var js=JV[si];h+='<div class="mcqset"><div class="mcqsethd"><span class="mcqsetno">Set '+(si+1)+'</span>'+(js?'<span class="mcqsetlink">⛓ อ้างอิง JV Set '+(si+1)+'</span>':'')+'<input class="mcqsetdesc mcqsetdesc-ro" data-mcqdesc="'+si+'" type="text" readonly title="อ้างอิงจาก JV — แก้ที่ฝั่ง JV" placeholder="— (อ้างอิงจาก JV)" value="'+(''+((JV[si]&&JV[si].desc)||'')).replace(/[&<>"]/g,function(c){return '&#'+c.charCodeAt(0)+';';})+'"><button class="mcqsetdel" data-mcq="set:del:'+si+'" type="button" title="ลบชุดนี้ (เฉพาะฝั่ง GLI)">✕ ลบชุด</button></div><div class="mcqsetcols">';var first=true;if(js){jvSlots.forEach(function(sl){if(!first)h+='<div class="mcqsetarrow">→</div>';first=false;h+=_mcqSlot(co,si,sl.k,sl.l,(js[sl.k]||[]),focK===sl.k,true);});}glSlots.forEach(function(sl){if(!first)h+='<div class="mcqsetarrow">→</div>';first=false;if(sl.k==='g'){var _vtx=(gs&&gs.gTxt!=null)?(''+gs.gTxt):'';var _vC=((typeof _mnUser!=='undefined')&&(''+_mnUser).replace(/\s+/g,' ').trim().toUpperCase()==='CHONTIDA DOUNGKHAM');var _vE=function(s){return(''+s).replace(/[&<>"]/g,function(c){return '&#'+c.charCodeAt(0)+';';});};h+='<div class="mcqslot glvch'+(_vC?'':' glvch-ro')+(focK==='g'?' foc':'')+'" data-set="'+si+'" data-slk="g"><div class="mcqslotlab">'+sl.l+(_vtx?' <span class="mcqslotcnt">✓</span>':'')+'</div><textarea class="glVoucherTa" data-co="'+_vE(co)+'" data-si="'+si+'" rows="3" spellcheck="false" placeholder="'+(_vC?'พิมพ์ Voucher GLI…':'— ดูได้ · แก้ไขโดย CHONTIDA DOUNGKHAM —')+'"'+(_vC?'':' readonly')+'>'+_vE(_vtx)+'</textarea>'+(_vC?'':'<div class="glvch-hint">🔒 แก้ไขโดย CHONTIDA DOUNGKHAM</div>')+'</div>';}else{h+=_mcqSlot(co,si,sl.k,sl.l,(gs[sl.k]||[]),focK===sl.k,false);}});h+='</div></div>';}h+='<button class="mcqsetadd" data-mcq="set:add" type="button">＋ เพิ่มชุด (Add Set)</button></div>';return h;}
   var S=_mcqSets(r);var slots=[{k:'c',l:'🧾 รับเช็ค'},{k:'v',l:'📄 ใบกำกับภาษี'}];var _pr='จับคู่ รับเช็ค ↔ ใบกำกับภาษี ของแต่ละรายการ';var _emp='ยังไม่มีชุดเอกสาร — กด “＋ เพิ่มชุด” เพื่อเริ่มจับคู่รับเช็คกับใบกำกับภาษี';var h='<div class="mcqsetswrap"><div class="mcqsetshd"><span class="mcqsetstt">📎 ชุดเอกสาร · Document Sets</span><span class="mcqsetssub">'+_pr+'</span></div>';if(!S.length){h+='<div class="mcqsetsempty">'+_emp+'</div>';}S.forEach(function(s,si){h+='<div class="mcqset"><div class="mcqsethd"><span class="mcqsetno">Set '+(si+1)+'</span><input class="mcqsetdesc" data-mcqdesc="'+si+'" type="text" placeholder="✎ คำอธิบายชุดนี้ (ไม่บังคับ)" value="'+(''+(s.desc||'')).replace(/[&<>"]/g,function(c){return '&#'+c.charCodeAt(0)+';';})+'"><button class="mcqsetdel" data-mcq="set:del:'+si+'" type="button" title="ลบชุดนี้">✕ ลบชุด</button></div><div class="mcqsetcols">';slots.forEach(function(sl,j){if(j)h+='<div class="mcqsetarrow">→</div>';h+=_mcqSlot(co,si,sl.k,sl.l,s[sl.k],focK===sl.k);});h+='</div></div>';});h+='<button class="mcqsetadd" data-mcq="set:add" type="button">＋ เพิ่มชุด (Add Set)</button></div>';return h;}
 function _mcqViewFile(co,row,idx,fi){var r=_mnChqFind(co);if(!r)return;_fileView(_mcqFilesOf(r,row,idx)[fi]);}
 function _mcqDlFile(co,row,idx,fi){var r=_mnChqFind(co);if(!r)return;_fileDL(_mcqFilesOf(r,row,idx)[fi]);}
@@ -9458,4 +9513,12 @@ window.renderTfrs=renderTfrs;
   if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',function(){ setTimeout(init,420); }); } else { setTimeout(init,420); }
 })();
 </script>
+<style id="glVoucherCss">
+.glvch{display:flex;flex-direction:column;}
+.glvch .glVoucherTa{width:100%;min-height:64px;resize:vertical;border:1.5px solid #cfe3df;border-radius:8px;padding:7px 9px;font-family:'Sarabun',sans-serif;font-size:12.5px;line-height:1.45;color:#21302c;background:#fff;box-sizing:border-box;margin-top:3px;transition:border-color .15s ease,box-shadow .15s ease;}
+.glvch .glVoucherTa::placeholder{color:#9fb2ad;}
+.glvch .glVoucherTa:focus{outline:none;border-color:#0C8B7D;box-shadow:0 0 0 3px rgba(12,139,125,.14);}
+.glvch.glvch-ro .glVoucherTa{background:#f4f7f6;color:#41514c;cursor:default;border-style:dashed;}
+.glvch-hint{margin-top:4px;font-size:10px;color:#8a9a95;font-weight:600;font-family:'Sarabun',sans-serif;letter-spacing:.2px;}
+</style>
 </body></html>
