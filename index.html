@@ -1528,12 +1528,12 @@ h1{ background:var(--g-aurora) !important;
 
 /* —— Keyframes (เฉดมิ้นต์ #5EEAD4 + แต้มอำพัน #FBBF24 ให้เข้าธีมแบรนด์) —— */
 @keyframes gliLogoGlow{
-  0%,100%{ filter:drop-shadow(0 0 3px rgba(251,191,36,.65)) drop-shadow(0 0 8px rgba(251,191,36,.30)); }
-  50%    { filter:drop-shadow(0 0 7px rgba(255,213,74,.95)) drop-shadow(0 0 18px rgba(251,191,36,.55)); }
+  0%,100%{ filter:drop-shadow(0 0 3px rgba(94,234,212,.55)) drop-shadow(0 0 7px rgba(94,234,212,.22)); }
+  50%    { filter:drop-shadow(0 0 6px rgba(94,234,212,.90)) drop-shadow(0 0 14px rgba(251,191,36,.32)); }
 }
 @keyframes gliTextGlow{
-  0%,100%{ text-shadow:0 0 5px rgba(94,234,212,.40); }
-  50%    { text-shadow:0 0 11px rgba(94,234,212,.78), 0 0 3px rgba(255,255,255,.45); }
+  0%,100%{ text-shadow:0 0 5px rgba(251,191,36,.50); }
+  50%    { text-shadow:0 0 12px rgba(255,213,74,.92), 0 0 3px rgba(255,236,170,.55); }
 }
 @keyframes gliChipGlow{
   0%,100%{ box-shadow:0 0 7px 0 rgba(94,234,212,.30), 0 0 0 1px rgba(94,234,212,.16); }
@@ -1687,6 +1687,7 @@ h1{ background:var(--g-aurora) !important;
 .vcocol .vcorow{display:flex;flex-direction:column;flex-wrap:nowrap;gap:6px;overflow:visible;flex:none;width:100%;min-width:0;padding:0;margin:0}
 .vcocol .vcochip{width:100%;min-width:0;max-width:none;padding:7px 11px;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left}
 .vcocol .vcochip .vcc-name{font-size:14px;font-weight:800;color:var(--ink);line-height:1}
+.vcocol .vcochip .vcc-name.vcc-full{font-size:12.5px;line-height:1.3;white-space:normal;word-break:break-word;text-align:left;flex:1 1 auto;min-width:0}
 .vcocol .vcochip.add,.vcocol .vcochip.pull{width:100%;max-width:none;min-width:0;justify-content:center}
 @media(max-width:860px){.vlayout{flex-direction:column}.vcocol{flex:none;max-width:none;width:100%;position:static;max-height:none;overflow:visible}.vcocol .vcorow{flex-direction:row;flex-wrap:wrap}.vcocol .vcochip{width:auto;flex:1 1 180px;justify-content:center;text-align:center}.vcocol .vcochip.add,.vcocol .vcochip.pull{flex:0 0 auto;width:auto}}
 .vcosel{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -1964,7 +1965,7 @@ body{padding-left:236px;padding-right:8px}
 .sbbrand{display:flex;align-items:center;gap:11px;padding:18px 16px 15px;border-bottom:1px solid rgba(255,255,255,.10);flex:0 0 auto}
 .sbbrand .sblogo{width:40px;height:40px;border-radius:11px;flex:0 0 auto;box-shadow:0 4px 11px rgba(0,0,0,.30)}
 .sbbrand .sbname{display:flex;flex-direction:column;min-width:0;line-height:1.15}
-.sbbrand .sbn1{font-weight:800;font-size:17px;color:#fff;letter-spacing:.01em}
+.sbbrand .sbn1{font-weight:800;font-size:17px;color:#FBBF24;letter-spacing:.01em}
 .sbbrand .sbn2{font-size:9.5px;color:rgba(255,255,255,.56);letter-spacing:.17em;text-transform:uppercase;margin-top:3px}
 .modnav.sidebar .curuser{margin:13px 13px 3px;align-self:stretch;display:flex;align-items:center;gap:9px;justify-content:flex-start;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);border-radius:12px;padding:9px 12px;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;line-height:1.2;transition:background .14s,border-color .14s}
 .modnav.sidebar .curuser:hover{background:rgba(255,255,255,.12)}
@@ -1987,7 +1988,7 @@ body{padding-left:236px;padding-right:8px}
 .modnav.sidebar .authout{margin:0}
 @media(max-width:900px){body{padding-left:18px}.modnav.sidebar{position:relative;width:auto;height:auto;bottom:auto;flex-direction:column;margin:0 0 16px;border-radius:12px}.sbmenu{flex-direction:row;flex-wrap:wrap;gap:4px}.sbsec{width:100%;padding:8px 6px 2px}.modnav.sidebar .modtab{width:auto;flex:0 0 auto}.sbfoot{flex-direction:row;flex-wrap:wrap;margin-top:8px}}
 </style>
-<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gliGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A0"></stop><stop offset="0.5" stop-color="#FBBF24"></stop><stop offset="1" stop-color="#E2950A"></stop></linearGradient><linearGradient id="gliGloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0.9"></stop><stop offset="1" stop-color="#ffffff" stop-opacity="0"></stop></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="15" fill="url(#gliGold)"></rect><rect x="5" y="4" width="54" height="26" rx="13" fill="url(#gliGloss)" opacity="0.6"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#7A4E00" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#ffffff" stroke="#7A4E00" stroke-width="1.2"></circle></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">📒</span><span class="sblbl">General Ledger</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Database Taxation</div><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><div class="sbsec">Book &amp; Knowledge</div><button class="modtab" data-mod="tfrs" role="tab" aria-selected="false"><span class="sbic">📚</span><span class="sblbl">TFRS Thailand</span></button><div class="sbsec">Routine Work</div><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false"><span class="sbic">📝</span><span class="sblbl">Audit Log · Activity</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v8.36</span></div></nav>
+<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">📒</span><span class="sblbl">General Ledger</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Database Taxation</div><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><div class="sbsec">Book &amp; Knowledge</div><button class="modtab" data-mod="tfrs" role="tab" aria-selected="false"><span class="sbic">📚</span><span class="sblbl">TFRS Thailand</span></button><div class="sbsec">Routine Work</div><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false"><span class="sbic">📝</span><span class="sblbl">Audit Log · Activity</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v8.37</span></div></nav>
 <header>
 <div class="letter"><svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0E5C52"></rect><path d="M15 43 L27 31 L35 37 L49 21" fill="none" stroke="#D9A441" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="49" cy="21" r="3.7" fill="#D9A441"></circle><text x="32" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#9FCFC4" letter-spacing="2.5">GLI</text></svg>
 <div class="brand"><div class="brandL"><div class="th">GRANDLINE INNOVATION <span class="th-co">COMPANY LIMITED</span></div><span class="ho">Head Office</span></div><div class="brandR"><div class="addr">333 Soi Lat Phrao 64 Yaek 12, Lat Phrao Road, Wang Thong Lang Sub-District, Wang Thong Lang District, Bangkok 10310</div><div class="taxid">Tax ID · 0105553002230</div></div></div>
@@ -3253,7 +3254,7 @@ function renderVat(){
   if(_vView==='pp30'){h+=_vPP30View();h+='</div>';el.innerHTML=h;_vPP30BindView();return;}
   // entity bar
   h+='<div class="vlayout"><div class="vcocol"><div class="vcohd">กิจการ (ผู้ประกอบการ)</div><div class="vcorow">';
-  VATCO.forEach(function(c){var cnt=VATDATA.filter(function(t){return t.co===c.id;}).length;h+='<div class="vcochip'+(c.id===_vCo?' on':'')+'" data-vco="'+_eatt(c.id)+'" title="'+_eatt((c.name||'')+(c.taxid?' · '+c.taxid:''))+'"><div class="vcc-name">'+esc(_coAbbr(c.name))+'</div>'+(cnt?'<div class="vcc-meta">'+cnt+'</div>':'')+'</div>';});
+  VATCO.forEach(function(c){var cnt=VATDATA.filter(function(t){return t.co===c.id;}).length;h+='<div class="vcochip'+(c.id===_vCo?' on':'')+'" data-vco="'+_eatt(c.id)+'" title="'+_eatt((c.name||'')+(c.taxid?' · '+c.taxid:''))+'"><div class="vcc-name vcc-full">'+esc(c.name||'(ไม่มีชื่อ)')+'</div>'+(cnt?'<div class="vcc-meta">'+cnt+'</div>':'')+'</div>';});
   h+='<div class="vcochip add" id="vCoAdd" title="เพิ่มกิจการ"><div class="vcc-add">+</div></div><div class="vcochip pull" id="vCoPull" title="ดึงรายชื่อกิจการจากฐานข้อมูล WHT"><div class="vcc-pull">⇄</div></div></div></div>';
   h+='<div class="vmaincol"><div class="vcobar vcoinfobar"><div class="vcoinfo"><div class="vcoinfoL"><div class="vcon">'+esc(co?co.name:'-')+'</div><div class="vcom">เลขประจำตัวผู้เสียภาษี '+esc(co?co.taxid:'-')+' · '+_vBranchTxt(co?co.branch:'')+'</div><div class="vcoa">'+esc(co?co.addr:'')+'</div></div><button class="vbtn mini ghost" id="vCoEditT" type="button">✎ แก้ไขข้อมูลกิจการ</button></div>';
   if(_vCoEditOpen)h+=_vCoEditHTML(co);
@@ -3900,8 +3901,8 @@ function _tsTouch(k){if(_squelchPush)return;_TS[k]=Date.now();_tsSave();}
 (function(){var has=false;try{has=!!localStorage.getItem('gli_ts');}catch(e){}
   if(!has){var dt=0;try{dt=+localStorage.getItem('gli_savedt')||0;}catch(e){}
     if(dt){['n','v','r','c','a','pm','wp','wc','wt','up','mn','pt','bf'].forEach(function(k){_TS[k]=dt;});_tsSave();}}})();
-function cloudPush(){if(_squelchPush)return;if(!_pushAllowed())return;try{localStorage.setItem('gli_savedt',String(Date.now()));}catch(_te){}if(typeof _mcqPopState!=='undefined'&&_mcqPopState){_mqPushPending=1;return;}if(_MODE==='local')return;if(_pushT)clearTimeout(_pushT);_setSync('saving');_pushT=setTimeout(function(){var pkt={n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?DOCFILES:{},pt:PTDATA,tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],line:_lnPkt(),bf:BCFSET,gl:{files:(typeof GLFILES!=='undefined'?GLFILES:[]),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS,_t:Date.now(),_by:_cid};_lastSig=_stateSig(_pktSlim(pkt));try{if(_MODE==='firebase'&&_fdb){_fdb.set(_fbWrap(pkt)).then(function(){_setSync('saved');}).catch(function(_e){_setSync('error');try{window._lastSyncErr=(_e&&(_e.code||_e.message))||(''+_e);window._lastSyncErrT=Date.now();if(window.console&&console.error)console.error('[GLI sync error]',window._lastSyncErr);}catch(_x){}});}else if(_SS){var pr=_SS.set(GLI_KEY,JSON.stringify(pkt),true);if(pr&&pr.then){pr.then(function(){_setSync('saved');}).catch(function(_e){_setSync('error');try{window._lastSyncErr=(_e&&(_e.code||_e.message))||(''+_e);window._lastSyncErrT=Date.now();if(window.console&&console.error)console.error('[GLI sync error]',window._lastSyncErr);}catch(_x){}});}else{_setSync('saved');}}}catch(e){_setSync('error');}},500);}
-function cloudPushNow(){if(!_pushAllowed())return;try{localStorage.setItem('gli_savedt',String(Date.now()));}catch(_te){}if(_MODE!=='firebase'||!_fdb)return;if(_pushT){clearTimeout(_pushT);_pushT=null;}_setSync('saving');var pkt={n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?DOCFILES:{},pt:PTDATA,tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],line:_lnPkt(),bf:BCFSET,gl:{files:(typeof GLFILES!=='undefined'?GLFILES:[]),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS,_t:Date.now(),_by:_cid};_lastSig=_stateSig(_pktSlim(pkt));try{_fdb.set(_fbWrap(pkt)).then(function(){_setSync('saved');}).catch(function(_e){_setSync('error');try{window._lastSyncErr=(_e&&(_e.code||_e.message))||(''+_e);window._lastSyncErrT=Date.now();if(window.console&&console.error)console.error('[GLI sync error]',window._lastSyncErr);}catch(_x){}});}catch(e){_setSync('error');}}
+function cloudPush(){if(_squelchPush)return;if(!_pushAllowed())return;try{localStorage.setItem('gli_savedt',String(Date.now()));}catch(_te){}if(typeof _mcqPopState!=='undefined'&&_mcqPopState){_mqPushPending=1;return;}if(_MODE==='local')return;if(_pushT)clearTimeout(_pushT);_setSync('saving');_pushT=setTimeout(function(){var pkt={n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?_dfSlimCloud(DOCFILES):{},pt:PTDATA,tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],line:_lnPkt(),bf:BCFSET,gl:{files:(typeof GLFILES!=='undefined'?GLFILES:[]),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS,_t:Date.now(),_by:_cid};_lastSig=_stateSig(_pktSlim(pkt));try{if(_MODE==='firebase'&&_fdb){_fdb.set(_fbWrap(pkt)).then(function(){_setSync('saved');}).catch(function(_e){_setSync('error');try{window._lastSyncErr=(_e&&(_e.code||_e.message))||(''+_e);window._lastSyncErrT=Date.now();if(window.console&&console.error)console.error('[GLI sync error]',window._lastSyncErr);}catch(_x){}});}else if(_SS){var pr=_SS.set(GLI_KEY,JSON.stringify(pkt),true);if(pr&&pr.then){pr.then(function(){_setSync('saved');}).catch(function(_e){_setSync('error');try{window._lastSyncErr=(_e&&(_e.code||_e.message))||(''+_e);window._lastSyncErrT=Date.now();if(window.console&&console.error)console.error('[GLI sync error]',window._lastSyncErr);}catch(_x){}});}else{_setSync('saved');}}}catch(e){_setSync('error');}},500);}
+function cloudPushNow(){if(!_pushAllowed())return;try{localStorage.setItem('gli_savedt',String(Date.now()));}catch(_te){}if(_MODE!=='firebase'||!_fdb)return;if(_pushT){clearTimeout(_pushT);_pushT=null;}_setSync('saving');var pkt={n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?_dfSlimCloud(DOCFILES):{},pt:PTDATA,tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],line:_lnPkt(),bf:BCFSET,gl:{files:(typeof GLFILES!=='undefined'?GLFILES:[]),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS,_t:Date.now(),_by:_cid};_lastSig=_stateSig(_pktSlim(pkt));try{_fdb.set(_fbWrap(pkt)).then(function(){_setSync('saved');}).catch(function(_e){_setSync('error');try{window._lastSyncErr=(_e&&(_e.code||_e.message))||(''+_e);window._lastSyncErrT=Date.now();if(window.console&&console.error)console.error('[GLI sync error]',window._lastSyncErr);}catch(_x){}});}catch(e){_setSync('error');}}
 function cloudPull(){if(!_SS||_pulling||_editing)return;_pulling=true;var pr;try{pr=_SS.get(GLI_KEY,true);}catch(e){_pulling=false;return;}if(!pr||!pr.then){_pulling=false;return;}pr.then(function(res){_pulling=false;if(!res||!res.value)return;var s;try{s=JSON.parse(res.value);}catch(e){return;}var sig=_stateSig(s);if(sig===_lastSig)return;if(s._by===_cid){_lastSig=sig;return;}_lastSig=sig;_applyState(s);view();refreshAgg();_setSync('synced');}).catch(function(){_pulling=false;});}function _setSync(st){var el=document.getElementById('syncind');if(!el)return;var m={live:'\u2601 Live \u00b7 \u0e43\u0e0a\u0e49\u0e23\u0e48\u0e27\u0e21',saving:'\u27f3 \u0e01\u0e33\u0e25\u0e31\u0e07\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u2026',saved:'\u2713 \u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e41\u0e25\u0e49\u0e27',synced:'\u2713 \u0e2d\u0e31\u0e1b\u0e40\u0e14\u0e15\u0e25\u0e48\u0e32\u0e2a\u0e38\u0e14',error:'\u26a0 \u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e44\u0e21\u0e48\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08',local:'\u25cb \u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e19\u0e35\u0e49\u0e40\u0e17\u0e48\u0e32\u0e19\u0e31\u0e49\u0e19'};el.textContent=m[st]||m.live;el.className='syncind s-'+st;if((st==='saved'||st==='synced')&&_SS){clearTimeout(_revT);_revT=setTimeout(function(){_setSync('live');},2200);}try{if(st==='error'){_syncDirty=true;_syncSchedRetry();}else if(st==='saved'||st==='synced'){_syncDirty=false;_syncRetryN=0;if(_syncRetryT){clearTimeout(_syncRetryT);_syncRetryT=null;}}}catch(_se){}try{_gliLiveUpd(st);}catch(_ge){}}function _startSync(){_initFirebase(function(ok){if(ok){_MODE='firebase';_setSync('live');_fbListen();if(!_glSyncBooted){_glSyncBooted=1;try{setInterval(_glAutoSyncTick,25000);window.addEventListener('online',function(){setTimeout(_glAutoSyncTick,1500);});}catch(e){}}setTimeout(_glAutoSyncTick,2500);setTimeout(_glAutoSyncTick,9000);}else if(_SS){_MODE='artifact';_setSync('live');cloudPull();setInterval(cloudPull,3000);}else{_MODE='local';_setSync('local');}});}
 /* ===== v8.06: resilient cloud save (auto-retry) + global Live / No-Record badge (top-right, every module) ===== */
 var _syncDirty=false,_syncRetryT=null,_syncRetryN=0;
@@ -3915,7 +3916,7 @@ function _gliLiveUpd(st){var el=_gliLiveEnsure();if(!el)return;var cls,tx,tip;
   el.className='gli-live '+cls;var t=el.querySelector('.gli-live-tx');if(t)t.textContent=tx;el.title=tip;
 }
 try{if(document.readyState!=='loading')setTimeout(_gliLiveEnsure,0);else document.addEventListener('DOMContentLoaded',function(){try{_gliLiveEnsure();}catch(e){}});}catch(_le){}
-try{window.addEventListener('pagehide',function(){if(_pushT&&_MODE==='firebase'&&_fdb){try{clearTimeout(_pushT);_pushT=null;var pkt={n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?DOCFILES:{},pt:PTDATA,tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],line:_lnPkt(),bf:BCFSET,gl:{files:(typeof GLFILES!=='undefined'?GLFILES:[]),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS,_t:Date.now(),_by:_cid};_fdb.set(_fbWrap(pkt));}catch(e){}}});}catch(e){}
+try{window.addEventListener('pagehide',function(){if(_pushT&&_MODE==='firebase'&&_fdb){try{clearTimeout(_pushT);_pushT=null;var pkt={n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?_dfSlimCloud(DOCFILES):{},pt:PTDATA,tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],line:_lnPkt(),bf:BCFSET,gl:{files:(typeof GLFILES!=='undefined'?GLFILES:[]),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS,_t:Date.now(),_by:_cid};_fdb.set(_fbWrap(pkt));}catch(e){}}});}catch(e){}
 /* ===== SYNC SAFETY (fix recurring data loss): seed/empty must never overwrite real cloud data ===== */
 var _cloudApplied=false,_userTouched=false;
 try{['pointerdown','keydown','input','change'].forEach(function(ev){window.addEventListener(ev,function(){_userTouched=true;},true);});}catch(_e){}
@@ -3924,7 +3925,7 @@ function _arrN(a){return (a&&a.length)||0;}
 function _deepN(x){if(x==null)return 0;if(Array.isArray(x)){for(var s=0,i=0;i<x.length;i++)s+=_deepN(x[i]);return s;}if(typeof x==='object'){var n=0,k;for(k in x)if(Object.prototype.hasOwnProperty.call(x,k))n+=_deepN(x[k]);return n;}if(typeof x==='string')return x.trim()?1:0;if(typeof x==='number')return x?1:0;if(typeof x==='boolean')return x?1:0;return 0;}
 function _dataScore(st){st=st||{};return _objN(st.n)+_objN(st.v)+_arrN(st.r)+_objN(st.c)+_objN(st.a)+_arrN(st.pm)+_arrN(st.wp)+_arrN(st.wc)+_arrN(st.wt)+_deepN(st.up)+_deepN(st.mn)+_arrN(st.pt)+_objN(st.bf)+_deepN(st.line);}
 function _lnPkt(){try{return JSON.parse(localStorage.getItem('gli_line')||'null');}catch(e){return null;}}
-function _localPkt(){return {n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?DOCFILES:{},pt:PTDATA,tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],line:_lnPkt(),bf:BCFSET,gl:{files:(typeof GLFILES!=='undefined'?GLFILES:[]),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS};}
+function _localPkt(){return {n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?_dfSlimCloud(DOCFILES):{},pt:PTDATA,tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],line:_lnPkt(),bf:BCFSET,gl:{files:(typeof GLFILES!=='undefined'?GLFILES:[]),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS};}
 function _localScore(){return _dataScore(_localPkt());}
 function _pushAllowed(){return _userTouched||_cloudApplied;}
 function _backupSave(st,why){try{if(!st)return;var sc=_dataScore(st);if(sc<=0)return;var prev=0;try{prev=+(JSON.parse(localStorage.getItem('gli_backup')||'{}')._score)||0;}catch(_e){}if(sc>=prev)localStorage.setItem('gli_backup',JSON.stringify({_score:sc,_t:Date.now(),_why:why||'',pkt:st},_stripB64));}catch(e){}}
@@ -6026,6 +6027,8 @@ function _mqSlim(mq){if(!Array.isArray(mq))return mq;try{return JSON.parse(JSON.
    Storage) is confirmed. Still strips transient junk. localStorage keeps using lean _mqSlim (idb||u) since
    the local device already holds the blob in IndexedDB. */
 function _mqSlimCloud(mq){if(!Array.isArray(mq))return mq;try{return JSON.parse(JSON.stringify(mq,function(k,v){if(k==='_burl'||k==='_up'||k==='_lo'||k==='_pid')return undefined;if(k==='d'&&typeof v==='string'&&v.indexOf('data:')===0&&this&&this.u)return undefined;return v;}));}catch(e){return mq;}}
+/* v8.37: keep the cloud packet under the Realtime-DB string limit so Document Vault (Excel/Word) saves don't fail with "No-Record". Carry doc base64 up to a budget; once over budget, drop base64 for files that already have an idb blob (kept locally) or a cloud url. Numbers/metadata always sync. */
+function _dfSlimCloud(df){if(!df||typeof df!=='object')return df||{};var BUDGET=4500000,used=0;try{return JSON.parse(JSON.stringify(df,function(k,v){if(k==='_burl'||k==='_up'||k==='_lo'||k==='_pid')return undefined;if(k==='d'&&typeof v==='string'&&v.lastIndexOf('data:',0)===0){if(this&&this.u)return undefined;if((used+v.length)>BUDGET&&this&&this.idb)return undefined;used+=v.length;}return v;}));}catch(e){return df;}}
 /* v8.30 (global): drop a file's base64 from the localStorage copy ONLY when bytes are safely held elsewhere (idb blob or cloud url); files with only base64 keep it. Used by saveMn/saveDocf + _lsCompact. Global scope so the save paths can reference it. */
 function _slimFilesRep(k,v){if(k==='_burl'||k==='_up'||k==='_lo'||k==='_pid')return undefined;if(k==='d'&&typeof v==='string'&&v.lastIndexOf('data:',0)===0&&this&&(this.idb||this.u))return undefined;return v;}
 function _pktSlim(pkt){try{return JSON.parse(JSON.stringify(pkt,function(k,v){if(k==='_burl'||k==='_up')return undefined;if(k==='d'&&typeof v==='string'&&v.indexOf('data:')===0&&this&&this.u)return undefined;return v;}));}catch(e){return pkt;}}
@@ -8774,22 +8777,22 @@ function ensureUI(){
   var pg=document.getElementById('page-wpb');if(!pg)return;
   pg.innerHTML=''
   +'<div class="wpb-wrap">'
-  +'<div class="wpb-lead">เลือกรหัสบัญชีและวันตัดยอด → ระบบจะแยกองค์ประกอบของยอดคงเหลือ (open items) พร้อม tie-out กับ GL · aging · กระทบยอดรายปี · เคลื่อนไหวรายเดือน — ดึงข้อมูลจาก General Ledger อัตโนมัติ</div>'
-  +'<div class="wpb-src" id="wpbSrc"><span class="dot"></span><span>กำลังเชื่อม General Ledger…</span></div>'
+  +'<div class="wpb-lead">Select an account code and cut-off date → the system breaks the balance into its open items with a tie-out to the GL · aging · annual reconciliation · monthly movement — pulled automatically from the General Ledger</div>'
+  +'<div class="wpb-src" id="wpbSrc"><span class="dot"></span><span>Connecting to General Ledger…</span></div>'
   +'<div class="wpb-ctl">'
   +'  <div class="wpb-row">'
-  +'    <div class="wpb-f grow"><label>รหัสบัญชี / ชื่อบัญชี</label><input type="text" id="wpbAcct" list="wpbList" autocomplete="off" placeholder="พิมพ์รหัส เช่น 2140003 หรือชื่อบัญชี…" disabled><datalist id="wpbList"></datalist></div>'
-  +'    <div class="wpb-f"><label>วันตัดยอด (Cut-off)</label><input type="date" id="wpbCut" disabled></div>'
-  +'    <div class="wpb-f"><button class="wpb-go" id="wpbRun" disabled><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>วิเคราะห์</button></div>'
+  +'    <div class="wpb-f grow"><label>Account code / name</label><input type="text" id="wpbAcct" list="wpbList" autocomplete="off" placeholder="Type a code e.g. 2140003 or an account name…" disabled><datalist id="wpbList"></datalist></div>'
+  +'    <div class="wpb-f"><label>Cut-off date</label><input type="date" id="wpbCut" disabled></div>'
+  +'    <div class="wpb-f"><button class="wpb-go" id="wpbRun" disabled><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Analyze</button></div>'
   +'  </div>'
   +'  <div class="wpb-toggles">'
-  +'    <span class="wpb-tl">วิธีจับคู่</span>'
+  +'    <span class="wpb-tl">Matching method</span>'
   +'    <span class="wpb-seg" id="wpbMethod"><button data-m="fifo" class="on">FIFO</button><button data-m="lifo">LIFO</button></span>'
-  +'    <span class="wpb-cg"><label>ขอบเขต</label><select id="wpbScope">'
-  +'      <option value="subledger" selected>แยกตามคู่สัญญา/เงินหักนำส่ง (Sub-ledger)</option><option value="time">เวลาอย่างเดียว (Global FIFO)</option><option value="ref">ตามโครงการ/Ref</option>'
-  +'      <option value="vendorref">Vendor + Ref</option><option value="type">ชนิด Voucher</option><option value="category">ประเภทรายการ</option></select></span>'
-  +'    <label class="wpb-chk"><input type="checkbox" id="wpbPair"> จับคู่ยอดตรงข้ามที่เท่ากันก่อน</label>'
-  +'    <span class="wpb-cg"><label>ภายในระยะ</label><select id="wpbWin"><option value="0" selected>ไม่จำกัด</option><option value="45">45 วัน</option><option value="92">1 ไตรมาส</option><option value="186">ครึ่งปี</option><option value="370">1 ปี</option></select></span>'
+  +'    <span class="wpb-cg"><label>Scope</label><select id="wpbScope">'
+  +'      <option value="subledger" selected>By counterparty / withholding (Sub-ledger)</option><option value="time">Time only (Global FIFO)</option><option value="ref">By project / Ref</option>'
+  +'      <option value="vendorref">Vendor + Ref</option><option value="type">Voucher type</option><option value="category">Entry category</option></select></span>'
+  +'    <label class="wpb-chk"><input type="checkbox" id="wpbPair"> Pair equal opposite amounts first</label>'
+  +'    <span class="wpb-cg"><label>Within window</label><select id="wpbWin"><option value="0" selected>No limit</option><option value="45">45 days</option><option value="92">1 quarter</option><option value="186">Half year</option><option value="370">1 year</option></select></span>'
   +'  </div>'
   +'</div>'
   +'<div id="wpbResult"></div>'
@@ -8812,13 +8815,13 @@ function renderWpb(){
   if(G){buildAndFill();return;}
   // GL not loaded this session -> load from IndexedDB
   if(_loadingRows)return;_loadingRows=true;
-  setSrc('<span class="dot" style="background:var(--gold)"></span><span>กำลังโหลด General Ledger จากเครื่อง…</span>');
+  setSrc('<span class="dot" style="background:var(--gold)"></span><span>Loading General Ledger from this device…</span>');
   var loader=(typeof _glLoadIdb==='function')?_glLoadIdb():Promise.resolve(false);
   Promise.resolve(loader).then(function(){
     _loadingRows=false;
     if(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length){buildAndFill();}
-    else{setSrc('<span class="warn">⚠ ยังไม่มีข้อมูล GL — โปรดอัปโหลดไฟล์ใน General Ledger ก่อน</span>');}
-  }).catch(function(){_loadingRows=false;setSrc('<span class="warn">⚠ โหลด GL ไม่สำเร็จ — เปิดหน้า General Ledger หนึ่งครั้งแล้วลองใหม่</span>');});
+    else{setSrc('<span class="warn">⚠ No GL data yet — please upload a file in General Ledger first</span>');}
+  }).catch(function(){_loadingRows=false;setSrc('<span class="warn">⚠ Failed to load GL — open the General Ledger page once and try again</span>');});
 }
 function setSrc(html){var el=document.getElementById('wpbSrc');if(el)el.innerHTML=html;}
 
@@ -8827,11 +8830,11 @@ function buildAndFill(){
   var file=(typeof _glActiveFile==='function')?_glActiveFile():null;
   var fn=(file&&file.name)?file.name:'GL';
   var nrows=(typeof GLROWS!=='undefined'&&GLROWS)?GLROWS.length:0;
-  setSrc('<span class="dot"></span><span>เชื่อมกับ <b>General Ledger</b> แล้ว · ไฟล์ <b>'+esc(fn)+'</b> · '+nrows.toLocaleString('en-US')+' แถว · '+ACCTS.size+' บัญชี <span style="color:var(--muted)">(ดึงอัตโนมัติ ไม่ต้องอัปโหลดซ้ำ)</span></span>');
+  setSrc('<span class="dot"></span><span>Connected to <b>General Ledger</b> · file <b>'+esc(fn)+'</b> · '+nrows.toLocaleString('en-US')+' rows · '+ACCTS.size+' accounts <span style="color:var(--muted)">(auto-pulled · no re-upload needed)</span></span>');
   // datalist (balance-sheet first)
   var dl=document.getElementById('wpbList');dl.innerHTML='';
   var arr=Array.from(ACCTS.values()).sort(function(a,b){return a.code<b.code?-1:1;});
-  arr.forEach(function(a){var o=document.createElement('option');o.value=a.code+' — '+a.name+'  ['+(a.cls==='cumulative'?'งบดุล':'P&L')+']';dl.appendChild(o);});
+  arr.forEach(function(a){var o=document.createElement('option');o.value=a.code+' — '+a.name+'  ['+(a.cls==='cumulative'?'BS':'P&L')+']';dl.appendChild(o);});
   // default cut-off = latest date in GL (or 31 Dec of latest year)
   var maxD=null;ACCTS.forEach(function(a){a.txns.forEach(function(t){if(!maxD||t.date>maxD)maxD=t.date;});});
   var cut=document.getElementById('wpbCut');
@@ -8851,9 +8854,9 @@ function resolveAccount(){
 function wpbRun(){
   if(!ACCTS){renderWpb();return;}
   var acct=resolveAccount();
-  if(!acct){alert('ไม่พบบัญชี — โปรดเลือกจากรายการ');return;}
+  if(!acct){alert('Account not found — please pick from the list');return;}
   var cutoff=toDate(document.getElementById('wpbCut').value);
-  if(!cutoff){alert('วันตัดยอดไม่ถูกต้อง');return;}
+  if(!cutoff){alert('Invalid cut-off date');return;}
   CURRENT=W.analyzeAccount(acct,cutoff,{method:MATCH.method,scope:MATCH.scope,pairFirst:MATCH.pairFirst,pairWindowDays:MATCH.pairWindowDays});
   render(CURRENT);
 }
@@ -8863,45 +8866,45 @@ function render(A){
   var R=document.getElementById('wpbResult');
   var cls=A.acct.cls==='cumulative';
   var bal=A.glBal!=null?A.glBal:A.closing;
-  var drcr=bal<0?'เครดิต (เจ้าหนี้/หนี้สิน)':(bal>0?'เดบิต (สินทรัพย์/ลูกหนี้)':'ศูนย์');
-  var scopeMap={subledger:'Sub-ledger (คู่สัญญา)',time:'Global',ref:'ตาม Ref',vendorref:'Vendor+Ref',type:'ชนิด Voucher',category:'ประเภทรายการ'};
-  var cfg=(A.match.scope==='subledger')?('Sub-ledger · แตกยอดเงินเดือน '+(A.decomp||0)+' · จับคู่ '+A.pairedOff):(A.method.toUpperCase()+' · ขอบเขต '+(scopeMap[A.match.scope]||A.match.scope)+(A.match.pairFirst?' · จับคู่ยอดเท่ากันก่อน':''));
+  var drcr=bal<0?'Credit (payable/liability)':(bal>0?'Debit (asset/receivable)':'Zero');
+  var scopeMap={subledger:'Sub-ledger (counterparty)',time:'Global',ref:'By Ref',vendorref:'Vendor+Ref',type:'Voucher type',category:'Entry category'};
+  var cfg=(A.match.scope==='subledger')?('Sub-ledger · salary split '+(A.decomp||0)+' · paired '+A.pairedOff):(A.method.toUpperCase()+' · scope '+(scopeMap[A.match.scope]||A.match.scope)+(A.match.pairFirst?' · pair-equal-first':''));
   var h='';
   // hero KPIs
   h+='<div class="wpb-hero">';
-  h+='<div class="wpb-kpi"><div class="k">บัญชี</div><div class="v" style="font-size:20px">'+esc(A.acct.code)+'</div><div class="s">'+esc(A.acct.name)+'</div></div>';
-  h+='<div class="wpb-kpi"><div class="k">ยอดคงเหลือ ณ '+dmy(A.cutoff)+'</div><div class="v '+(bal<0?'neg':'pos')+'">'+fmt(Math.abs(bal))+'</div><div class="s">'+drcr+'</div></div>';
-  h+='<div class="wpb-kpi"><div class="k">Tie-out (เทียบ GL)</div><div style="margin-top:8px">'+(A.tieOk?'<span class="wpb-badge ok">✓ ตรงกับ GL</span>':'<span class="wpb-badge no">✗ ไม่ตรง</span>')+'</div>'
-   +'<div class="s">'+(A.glBal!=null?('สร้างใหม่ '+fmt(A.closing)+' · GL '+fmt(A.glBal)):'ไม่มีคอลัมน์ Balance')+'</div></div>';
-  h+='<div class="wpb-kpi"><div class="k">รายการเปิดค้าง</div><div class="v" style="font-size:20px">'+A.open.length+' รายการ</div><div class="s">'+((A.decomp?('แตกยอด '+A.decomp+' · '):'')+(A.pairedOff?('คู่ '+A.pairedOff):'')||'—')+'</div></div>';
+  h+='<div class="wpb-kpi"><div class="k">Account</div><div class="v" style="font-size:20px">'+esc(A.acct.code)+'</div><div class="s">'+esc(A.acct.name)+'</div></div>';
+  h+='<div class="wpb-kpi"><div class="k">Balance as of '+dmy(A.cutoff)+'</div><div class="v '+(bal<0?'neg':'pos')+'">'+fmt(Math.abs(bal))+'</div><div class="s">'+drcr+'</div></div>';
+  h+='<div class="wpb-kpi"><div class="k">Tie-out (vs GL)</div><div style="margin-top:8px">'+(A.tieOk?'<span class="wpb-badge ok">✓ Matches GL</span>':'<span class="wpb-badge no">✗ Mismatch</span>')+'</div>'
+   +'<div class="s">'+(A.glBal!=null?('Rebuilt '+fmt(A.closing)+' · GL '+fmt(A.glBal)):'No Balance column')+'</div></div>';
+  h+='<div class="wpb-kpi"><div class="k">Open items</div><div class="v" style="font-size:20px">'+A.open.length+' items</div><div class="s">'+((A.decomp?('split '+A.decomp+' · '):'')+(A.pairedOff?('paired '+A.pairedOff):'')||'—')+'</div></div>';
   h+='</div>';
   if(!A.tieOk){
-    h+='<div class="wpb-sec"><div class="wpb-bd"><span class="wpb-badge no">⚠ ตรวจสอบ</span> <span style="font-size:12.5px;color:var(--ink2)">ยอดที่สร้างใหม่จากรายการ ('+fmt(A.closing)+') ต่างจากคอลัมน์ Balance ของ GL ('+fmt(A.glBal)+') = <b>'+fmt(A.closing-A.glBal)+'</b> — โซ่ยอดยกมา (BF chain) อาจมี adjustment ย้อนหลัง รายการเปิดค้างด้านล่างอ้างอิงยอดสร้างใหม่</span></div></div>';
+    h+='<div class="wpb-sec"><div class="wpb-bd"><span class="wpb-badge no">⚠ Check</span> <span style="font-size:12.5px;color:var(--ink2)">The balance rebuilt from entries ('+fmt(A.closing)+') differs from the GL Balance column ('+fmt(A.glBal)+') = <b>'+fmt(A.closing-A.glBal)+'</b> — the brought-forward (BF) chain may carry retroactive adjustments; the open items below reference the rebuilt balance</span></div></div>';
   }
   // open items
   if(cls){
-    h+='<div class="wpb-sec"><div class="wpb-sh"><h3>รายการเปิดค้างที่ประกอบเป็นยอด</h3><span class="sub">Open Items · '+cfg+' · '+A.open.length+' รายการ'+(A.pairedOff?(' (ตัดคู่ '+A.pairedOff+')'):'')+'</span></div><div class="wpb-bd">';
-    if(!A.open.length){h+='<div class="wpb-empty">ไม่มีรายการเปิดค้าง (ยอดเป็นศูนย์หลังจับคู่)</div>';}
+    h+='<div class="wpb-sec"><div class="wpb-sh"><h3>Open items composing the balance</h3><span class="sub">Open Items · '+cfg+' · '+A.open.length+' items'+(A.pairedOff?(' (paired off '+A.pairedOff+')'):'')+'</span></div><div class="wpb-bd">';
+    if(!A.open.length){h+='<div class="wpb-empty">No open items (balance is zero after matching)</div>';}
     else{
-      h+='<table class="wpb-t"><thead><tr><th>#</th><th>วันที่</th><th>Voucher</th><th>Ref</th><th>รายละเอียด</th><th class="r">จำนวน (เครดิต +)</th><th class="r">อายุ (วัน)</th></tr></thead><tbody>';
+      h+='<table class="wpb-t"><thead><tr><th>#</th><th>Date</th><th>Voucher</th><th>Ref</th><th>Description</th><th class="r">Amount (credit +)</th><th class="r">Age (days)</th></tr></thead><tbody>';
       var _glK=new Set();(A.real||[]).forEach(function(t){_glK.add((t.voucher||'')+'#'+Math.round((t.credit-t.debit)*100));});
       A.open.forEach(function(o,i){var days=Math.floor((A.cutoff-o.date)/86400000);
         var _mmK=(o.voucher||'')+'#'+Math.round(o.amt*100);var _mm=_glK.size>0&&!_glK.has(_mmK);
-        h+='<tr'+(_mm?' class="wpb-mm"':'')+'><td class="wpb-mono">'+(i+1)+'</td><td class="wpb-mono">'+dmy(o.date)+'</td><td class="wpb-mono">'+esc(o.voucher)+'</td><td>'+(o.ref?'<span class="wpb-tag">'+esc(o.ref)+'</span>':'')+'</td><td>'+esc(String(o.remark).slice(0,70))+'</td><td class="r '+(o.amt<0?'neg':'pos')+'">'+fmt(o.amt)+(_mm?' <span class="wpb-mm-mark">⚠ ไม่ตรง GL</span>':'')+'</td><td class="r wpb-mono">'+days+'</td></tr>';});
-      h+='</tbody><tfoot><tr><td colspan="5">รวมยอดคงเหลือ</td><td class="r '+(A.closing<0?'neg':'pos')+'">'+fmt(A.closing)+'</td><td></td></tr></tfoot></table>';
+        h+='<tr'+(_mm?' class="wpb-mm"':'')+'><td class="wpb-mono">'+(i+1)+'</td><td class="wpb-mono">'+dmy(o.date)+'</td><td class="wpb-mono">'+esc(o.voucher)+'</td><td>'+(o.ref?'<span class="wpb-tag">'+esc(o.ref)+'</span>':'')+'</td><td>'+esc(String(o.remark).slice(0,70))+'</td><td class="r '+(o.amt<0?'neg':'pos')+'">'+fmt(o.amt)+(_mm?' <span class="wpb-mm-mark">⚠ Not in GL</span>':'')+'</td><td class="r wpb-mono">'+days+'</td></tr>';});
+      h+='</tbody><tfoot><tr><td colspan="5">Total balance</td><td class="r '+(A.closing<0?'neg':'pos')+'">'+fmt(A.closing)+'</td><td></td></tr></tfoot></table>';
       // aging
       var ag=A.aging;
-      h+='<div style="margin-top:16px"><div class="wpb-tl" style="margin-bottom:8px">การวิเคราะห์อายุหนี้ (Aging)</div><div class="wpb-aging">'
-       +ab('0–30 วัน',ag.cur)+ab('31–60',ag.d31)+ab('61–90',ag.d61)+ab('91–180',ag.d91)+ab('181–365',ag.d181)+ab('> 365',ag.d365)+'</div></div>';
-      if(A.match.scope==='subledger'){h+='<div class="wpb-note"><b>วิธี Sub-ledger (คู่สัญญา):</b> แตกยอดเครดิตเงินเดือนก้อนรวม ("To Record Salary") ออกเป็นกลุ่มเงินนำส่งของคู่สัญญาเดียวกัน (ธอส. · บังคับคดี · กยศ. · ปกส.) ที่ผลรวมตรงกันภายในเดือนถัดไป จากนั้นจับคู่ยอดตรงข้ามที่เท่ากัน แล้วจึง FIFO ตามเวลา — เงินหักแต่ละประเภทจึงไม่ถูกตัดข้ามกัน (เช่น PIT/ภงด.1 คงค้างเต็มจำนวนจนกว่าจะนำส่งจริงต้นเดือนถัดไป) · ยอดรวมยัง tie กับ GL ทุกกรณี</div>';}
+      h+='<div style="margin-top:16px"><div class="wpb-tl" style="margin-bottom:8px">Aging analysis</div><div class="wpb-aging">'
+       +ab('0–30 days',ag.cur)+ab('31–60',ag.d31)+ab('61–90',ag.d61)+ab('91–180',ag.d91)+ab('181–365',ag.d181)+ab('> 365',ag.d365)+'</div></div>';
+      if(A.match.scope==='subledger'){h+='<div class="wpb-note"><b>Sub-ledger (counterparty) method:</b> splits the lump-sum salary credit ("To Record Salary") into the remittance groups of the same counterparty (GHB · Legal Execution · SLF · SSO) whose totals match within the following month, then pairs equal opposite amounts, then applies FIFO by time — so each deduction type is never netted across the others (e.g. PIT/PND.1 stays fully outstanding until it is actually remitted early next month) · the total still ties to the GL in every case</div>';}
     }
     h+='</div></div>';
   } else {
-    h+='<div class="wpb-sec"><div class="wpb-bd"><div class="wpb-note">บัญชีนี้เป็นหมวดกำไรขาดทุน (P&amp;L) — ยอดสะสมจะรีเซ็ตทุกปี การวิเคราะห์ open items ออกแบบสำหรับบัญชีงบดุล (สินทรัพย์/หนี้สิน/ทุน)</div></div></div>';
+    h+='<div class="wpb-sec"><div class="wpb-bd"><div class="wpb-note">This account is a Profit &amp; Loss (P&amp;L) account — its accumulated balance resets each year. Open-item analysis is designed for balance-sheet accounts (assets / liabilities / equity).</div></div></div>';
   }
   // year reconciliation
-  h+='<div class="wpb-sec"><div class="wpb-sh"><h3>กระทบยอดรายปี</h3><span class="sub">Year Reconciliation · เทียบ GL Balance</span></div><div class="wpb-bd">';
-  h+='<table class="wpb-t"><thead><tr><th>ปี</th>'+(A.hasBF?'<th class="r">ยกมา (BF)</th>':'')+'<th class="r">เดบิต</th><th class="r">เครดิต</th><th class="r">เคลื่อนไหวสุทธิ</th><th class="r">ยอดสะสม (สร้างใหม่)</th><th class="r">GL Balance</th><th>ตรง?</th></tr></thead><tbody>';
+  h+='<div class="wpb-sec"><div class="wpb-sh"><h3>Year reconciliation</h3><span class="sub">Year Reconciliation · vs GL Balance</span></div><div class="wpb-bd">';
+  h+='<table class="wpb-t"><thead><tr><th>Year</th>'+(A.hasBF?'<th class="r">Brought fwd (BF)</th>':'')+'<th class="r">Debit</th><th class="r">Credit</th><th class="r">Net movement</th><th class="r">Running balance (rebuilt)</th><th class="r">GL Balance</th><th>Match?</th></tr></thead><tbody>';
   A.byYear.forEach(function(y){var ok=(y.glClose==null)||Math.abs(y.closing-y.glClose)<0.01;
     h+='<tr><td class="wpb-mono">'+y.year+'</td>'+(A.hasBF?('<td class="r wpb-mono">'+(y.bf!=null?fmt(y.bf):'—')+'</td>'):'')
      +'<td class="r wpb-mono">'+fmt(y.dr)+'</td><td class="r wpb-mono">'+fmt(y.cr)+'</td>'
@@ -8910,21 +8913,21 @@ function render(A){
   h+='</tbody></table></div></div>';
   // monthly movement (cutoff year) + by project, side by side
   h+='<div style="display:flex;gap:18px;flex-wrap:wrap">';
-  h+='<div class="wpb-sec" style="flex:1;min-width:320px;margin-bottom:0"><div class="wpb-sh"><h3>เคลื่อนไหวรายเดือน</h3><span class="sub">ปี '+A.cutoff.getFullYear()+'</span></div><div class="wpb-bd">';
-  if(!A.monthly.length){h+='<div class="wpb-empty">ไม่มีเคลื่อนไหวในปีนี้</div>';}
-  else{h+='<table class="wpb-t"><thead><tr><th>เดือน</th><th class="r">เดบิต</th><th class="r">เครดิต</th><th class="r">สุทธิ</th></tr></thead><tbody>';
+  h+='<div class="wpb-sec" style="flex:1;min-width:320px;margin-bottom:0"><div class="wpb-sh"><h3>Monthly movement</h3><span class="sub">Year '+A.cutoff.getFullYear()+'</span></div><div class="wpb-bd">';
+  if(!A.monthly.length){h+='<div class="wpb-empty">No movement this year</div>';}
+  else{h+='<table class="wpb-t"><thead><tr><th>Month</th><th class="r">Debit</th><th class="r">Credit</th><th class="r">Net</th></tr></thead><tbody>';
     A.monthly.forEach(function(m){h+='<tr><td class="wpb-mono">'+m.m+'/'+A.cutoff.getFullYear()+'</td><td class="r wpb-mono">'+fmt(m.dr)+'</td><td class="r wpb-mono">'+fmt(m.cr)+'</td><td class="r '+(m.net<0?'neg':'pos')+'">'+fmt(m.net)+'</td></tr>';});
     h+='</tbody></table>';}
   h+='</div></div>';
-  h+='<div class="wpb-sec" style="flex:1;min-width:320px;margin-bottom:0"><div class="wpb-sh"><h3>ยอดแยกตามโครงการ</h3><span class="sub">By Project / Ref</span></div><div class="wpb-bd">';
+  h+='<div class="wpb-sec" style="flex:1;min-width:320px;margin-bottom:0"><div class="wpb-sh"><h3>Balance by project</h3><span class="sub">By Project / Ref</span></div><div class="wpb-bd">';
   if(!A.byProject.length){h+='<div class="wpb-empty">—</div>';}
-  else{h+='<table class="wpb-t"><thead><tr><th>โครงการ / Ref</th><th class="r">ยอดสุทธิ</th></tr></thead><tbody>';
-    A.byProject.slice(0,14).forEach(function(p){h+='<tr><td>'+(p.ref?'<span class="wpb-tag">'+esc(p.ref)+'</span>':'(ไม่ระบุ)')+'</td><td class="r '+(p.amt<0?'neg':'pos')+'">'+fmt(p.amt)+'</td></tr>';});
-    h+='</tbody></table>';if(A.byProject.length>14)h+='<div class="wpb-note">… และอีก '+(A.byProject.length-14)+' โครงการ</div>';}
+  else{h+='<table class="wpb-t"><thead><tr><th>Project / Ref</th><th class="r">Net balance</th></tr></thead><tbody>';
+    A.byProject.slice(0,14).forEach(function(p){h+='<tr><td>'+(p.ref?'<span class="wpb-tag">'+esc(p.ref)+'</span>':'(unspecified)')+'</td><td class="r '+(p.amt<0?'neg':'pos')+'">'+fmt(p.amt)+'</td></tr>';});
+    h+='</tbody></table>';if(A.byProject.length>14)h+='<div class="wpb-note">… and '+(A.byProject.length-14)+' more projects</div>';}
   h+='</div></div>';
   h+='</div>';
   // export
-  h+='<div style="display:flex;justify-content:flex-end;margin-top:18px"><button class="wpb-xl" id="wpbExport">⬇ ส่งออก Excel (4 ชีต)</button></div>';
+  h+='<div style="display:flex;justify-content:flex-end;margin-top:18px"><button class="wpb-xl" id="wpbExport">⬇ Export Excel (4 sheets)</button></div>';
   R.innerHTML=h;
   var ab2=document.getElementById('wpbExport');if(ab2)ab2.addEventListener('click',function(){exportExcel(CURRENT,ab2);});
 }
