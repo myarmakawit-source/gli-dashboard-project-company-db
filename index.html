@@ -1691,9 +1691,12 @@ h1{ background:var(--g-aurora) !important;
 .vcoinfobar{margin-bottom:14px}
 .vcoinfoR{display:flex;flex-direction:column;align-items:flex-end;gap:9px;flex:0 0 auto;max-width:100%}
 .vcoinfoR .vbar{margin:0;justify-content:flex-end}
-.vcoinfoR .vupwrap{margin:0}
-.vcoinfoR .vbtn{align-self:flex-end}
-@media(max-width:860px){.vcoinfoR{align-items:flex-start;width:100%}.vcoinfoR .vbar,.vcoinfoR .vbtn{align-self:flex-start;justify-content:flex-start}}
+@media(max-width:860px){.vcoinfoR{align-items:flex-start;width:100%}.vcoinfoR .vbar{align-self:flex-start;justify-content:flex-start}}
+.vcoleftact{display:flex;flex-direction:column;gap:7px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);width:100%}
+.vcoleftact .vupwrap{margin:0;width:100%}
+.vcoleftact .vupzone{display:flex;width:100%}
+.vcoleftact .vbtn{width:100%;justify-content:center}
+@media(max-width:860px){.vcoleftact{flex-direction:row;flex-wrap:wrap;border-top:none;padding-top:0}.vcoleftact .vupwrap,.vcoleftact .vbtn{width:auto}}
 .vcocol .vcorow{display:flex;flex-direction:column;flex-wrap:nowrap;gap:6px;overflow:visible;flex:none;width:100%;min-width:0;padding:0;margin:0}
 .vcocol .vcochip{width:100%;min-width:0;max-width:none;padding:7px 11px;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left}
 .vcocol .vcochip .vcc-name{font-size:14px;font-weight:800;color:var(--ink);line-height:1}
@@ -1937,6 +1940,8 @@ select.ppin{cursor:pointer}
 .v30pill.zero{background:#f0ece1;color:var(--muted)}
 .v30tag-add{font-family:'Sarabun',sans-serif;font-size:9.5px;font-weight:600;background:var(--blue-bg);color:var(--blue);padding:1px 6px;border-radius:5px}
 .v30tag-late{font-family:'Sarabun',sans-serif;font-size:9.5px;font-weight:600;background:var(--neg-bg);color:var(--neg);padding:1px 6px;border-radius:5px}
+.v30tag-mn{font-family:'Sarabun',sans-serif;font-size:9.5px;font-weight:700;background:#FBF1DE;color:#A8741A;padding:1px 6px;border-radius:5px}
+.v30frommn td{background:#FFFCF4}
 .v30add{width:26px;height:26px;border:1px dashed var(--brand);background:var(--brand-t);color:var(--brand);border-radius:7px;cursor:pointer;font-size:15px;line-height:1;transition:.15s}
 .v30add:hover{background:var(--brand);color:#fff}
 .v30fb,.v30ed,.v30del{width:26px;height:26px;border:1px solid var(--line);background:var(--card);border-radius:7px;cursor:pointer;font-size:12px;transition:.15s;margin:0 1px}
@@ -1998,7 +2003,7 @@ body{padding-left:236px;padding-right:8px}
 .modnav.sidebar .authout{margin:0}
 @media(max-width:900px){body{padding-left:18px}.modnav.sidebar{position:relative;width:auto;height:auto;bottom:auto;flex-direction:column;margin:0 0 16px;border-radius:12px}.sbmenu{flex-direction:row;flex-wrap:wrap;gap:4px}.sbsec{width:100%;padding:8px 6px 2px}.modnav.sidebar .modtab{width:auto;flex:0 0 auto}.sbfoot{flex-direction:row;flex-wrap:wrap;margin-top:8px}}
 </style>
-<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">📒</span><span class="sblbl">General Ledger</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Database Taxation</div><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><div class="sbsec">Book &amp; Knowledge</div><button class="modtab" data-mod="tfrs" role="tab" aria-selected="false"><span class="sbic">📚</span><span class="sblbl">TFRS Thailand</span></button><div class="sbsec">Routine Work</div><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false"><span class="sbic">📝</span><span class="sblbl">Audit Log · Activity</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v8.39</span></div></nav>
+<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">📒</span><span class="sblbl">General Ledger</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Database Taxation</div><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><div class="sbsec">Book &amp; Knowledge</div><button class="modtab" data-mod="tfrs" role="tab" aria-selected="false"><span class="sbic">📚</span><span class="sblbl">TFRS Thailand</span></button><div class="sbsec">Routine Work</div><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><button class="modtab modtab-ad" data-mod="ad" role="tab" aria-selected="false"><span class="sbic">📝</span><span class="sblbl">Audit Log · Activity</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — must be identical on every machine after deploy + Ctrl+Shift+R">v8.41</span></div></nav>
 <header>
 <div class="letter"><svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0E5C52"></rect><path d="M15 43 L27 31 L35 37 L49 21" fill="none" stroke="#D9A441" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="49" cy="21" r="3.7" fill="#D9A441"></circle><text x="32" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#9FCFC4" letter-spacing="2.5">GLI</text></svg>
 <div class="brand"><div class="brandL"><div class="th">GRANDLINE INNOVATION <span class="th-co">COMPANY LIMITED</span></div><span class="ho">Head Office</span></div><div class="brandR"><div class="addr">333 Soi Lat Phrao 64 Yaek 12, Lat Phrao Road, Wang Thong Lang Sub-District, Wang Thong Lang District, Bangkok 10310</div><div class="taxid">Tax ID · 0105553002230</div></div></div>
@@ -3115,7 +3120,7 @@ var _vPP30Cur=null;
 function _amtRow(id,lab,val,hint){return '<div class="pprow"><label>'+lab+(hint?' <span class="pphint">'+hint+'</span>':'')+'</label><div class="ppfield"><span class="ppcur">฿</span><input id="'+id+'" class="ppin" type="text" inputmode="decimal" value="'+_eatt(_ppNum(val))+'" placeholder="0.00" autocomplete="off"></div></div>';}
 function _vPP30OpenModal(p,file,warn){_vPP30EnsureModal();_vPP30Cur={file:file,edit:_vPP30Edit};var L=p.L||{};var beY=p.beYear||((new Date()).getFullYear()+543);
   var matchedCo=_vPP30Edit?_vPP30Edit.co:(p._co||_vMatchCo(p.taxid));
-  var _vCoSrc=(typeof WHTPAYER!=='undefined'&&WHTPAYER&&WHTPAYER.length)?WHTPAYER:VATCO;var coOpts='<option value="">— เลือกบริษัท —</option>';if(_vCoSrc)_vCoSrc.forEach(function(c){coOpts+='<option value="'+_eatt(c.id)+'"'+(c.id===matchedCo?' selected':'')+'>'+esc(c.name||'(ไม่มีชื่อ)')+(c.taxid?' · '+esc(c.taxid):'')+'</option>';});
+  var _vCoSrc=(typeof _vPP30Companies==='function')?_vPP30Companies():((typeof WHTPAYER!=='undefined'&&WHTPAYER&&WHTPAYER.length)?WHTPAYER:VATCO);var coOpts='<option value="">— เลือกบริษัท —</option>';if(_vCoSrc)_vCoSrc.forEach(function(c){coOpts+='<option value="'+_eatt(c.id)+'"'+(c.id===matchedCo?' selected':'')+'>'+esc(c.name||'(ไม่มีชื่อ)')+(c.taxid?' · '+esc(c.taxid):'')+'</option>';});
   var ed=_vPP30Edit||{};
   function g(k,lk){return ed&&ed[k]!=null?ed[k]:(L[lk]!=null?L[lk]:'');}
   var mSel='';for(var mi=1;mi<=12;mi++){var sel=(ed.month||p.month)===mi;mSel+='<option value="'+mi+'"'+(sel?' selected':'')+'>'+_VPP30MONF[mi-1]+'</option>';}
@@ -3164,12 +3169,58 @@ function _vPP30SaveModal(){var co=_gv('pp_co');var month=+_gv('pp_month')||0;var
     if(dup>=0){if(!confirm('มีรายการ ภ.พ.30 ของบริษัทนี้ เดือน '+_VPP30MONF[month-1]+' '+beYear+' อยู่แล้ว — บันทึกทับ?'))return;VATPP30[dup]=rec;}else VATPP30.push(rec);}
   _vPP30Edit=null;saveVatPP30();var m=document.getElementById('vPP30Modal');if(m)m.hidden=true;_vPP30Cur=null;if(typeof renderVat==='function')renderVat();setTimeout(_vPP30HandleNext,60);}
 function _vPP30EditRec(id){loadVatPP30();var r=null;for(var i=0;i<VATPP30.length;i++)if(VATPP30[i].id===id){r=VATPP30[i];break;}if(!r)return;_vPP30Edit=r;_vPP30OpenModal({L:{},month:r.month,beYear:r.beYear,company:r.coName,taxid:'',normal:r.normal,onTime:r.onTime},r.file||{n:'(ไม่มีไฟล์)',d:''},'');}
-function _vPP30DelRec(id){loadVatPP30();var r=null;for(var i=0;i<VATPP30.length;i++)if(VATPP30[i].id===id){r=VATPP30[i];break;}if(!r)return;if(!confirm('ลบรายการ ภ.พ.30 นี้ ('+_VPP30MONF[(r.month||1)-1]+' '+r.beYear+')?'))return;VATPP30=VATPP30.filter(function(x){return x.id!==id;});saveVatPP30();renderVat();}
+function _vPP30DelRec(id){loadVatPP30();var r=null;for(var i=0;i<VATPP30.length;i++)if(VATPP30[i].id===id){r=VATPP30[i];break;}if(!r)return;if(!confirm('ลบรายการ ภ.พ.30 นี้ ('+_VPP30MONF[(r.month||1)-1]+' '+r.beYear+')?'))return;if(r.fromMN&&r.mnId)_vPP30MNHide(r.mnId);VATPP30=VATPP30.filter(function(x){return x.id!==id;});saveVatPP30();renderVat();}
 function _vPP30ViewFile(id){loadVatPP30();for(var i=0;i<VATPP30.length;i++)if(VATPP30[i].id===id){var f=VATPP30[i].file;if(f&&_fCanView(f))_fileView(f);else alert('ไม่มีไฟล์แนบ');return;}}
 /* ---- summary view ---- */
 function _vPP30SeedGLR(){try{if(localStorage.getItem('gli_pp30_seed_glr_v4'))return;var cos=(typeof WHTPAYER!=='undefined'&&WHTPAYER)?WHTPAYER:[];var glr=null;for(var i=0;i<cos.length;i++){if((cos[i].taxid||'').replace(/\D/g,'')==='0993000444558'){glr=cos[i];break;}}if(!glr)for(var j=0;j<cos.length;j++){if(/GLR/i.test(cos[j].name||'')){glr=cos[j];break;}}if(!glr)return;loadVatPP30();var have={};VATPP30.forEach(function(r){if(r.co===glr.id&&(+r.beYear)===2569)have[r.month]=1;});var seed=[{month:1,sales:17758726.77,outputVat:1243110.88,purchases:19443154.18,inputVat:1361020.80,payable:'',overpaid:117909.92,carried:65579.08,overpaidCarry:183489.00,ref:'P300034909745',receipt:'69007700874',filedDate:'23/02/2569',dln:'ภพ3000006000020204503302569022303000429'},{month:2,sales:5723495.32,outputVat:400644.68,purchases:15865799.43,inputVat:1110605.97,payable:'',overpaid:709961.29,carried:183489.00,overpaidCarry:893450.29,ref:'P300035657394',receipt:'69011560458',filedDate:'23/03/2569',dln:'ภพ3000006000020204503302569032303000360'},{month:3,sales:10315121.49,outputVat:722058.51,purchases:9580146.17,inputVat:670558.06,payable:51500.45,overpaid:'',carried:893450.29,overpaidCarry:841949.84,ref:'P300036450737',receipt:'69014742009',filedDate:'23/04/2569',dln:'ภพ3000006000020204503302569042303000393'},{month:4,sales:6031906.54,outputVat:422233.46,purchases:2538071.30,inputVat:177664.98,payable:244568.48,overpaid:'',carried:841949.84,overpaidCarry:597381.36,ref:'P300037039819',receipt:'69015325845',filedDate:'22/05/2569',dln:'ภพ3000006000020204503302569052203000194'}];var added=0;seed.forEach(function(d){if(have[d.month])return;VATPP30.push({id:'pp_seed_glr_'+d.month,co:glr.id,coName:glr.name,month:d.month,beYear:2569,normal:true,onTime:true,sales:d.sales,salesZero:'',salesExempt:'',outputVat:d.outputVat,purchases:d.purchases,inputVat:d.inputVat,payable:d.payable,overpaid:d.overpaid,carried:d.carried,mustPay:'',overpaidCarry:d.overpaidCarry,surcharge:'',penalty:'',ref:d.ref,receipt:d.receipt,filedDate:d.filedDate,dln:d.dln,file:null,ts:Date.now()});added++;});if(added)saveVatPP30();localStorage.setItem('gli_pp30_seed_glr_v4','1');}catch(e){}}
+/* v8.41: unified company list for P.P.30 Summary = WHTPAYER ∪ VATCO ∪ (Monitor/UPDATA companies that filed PP.30), deduped by tax id. Monitor-only companies get registered into VATCO so the VAT register + the summary show the same companies/names (one source of truth). */
+function _vPP30Companies(){
+  var out=[],byTax={},byId={};
+  function add(id,name,taxid){
+    var nt=(''+(taxid||'')).replace(/\D/g,'');
+    if(nt&&byTax[nt]){if(name&&!byTax[nt].name)byTax[nt].name=name;return byTax[nt];}
+    if(byId[id])return byId[id];
+    var c={id:id,name:name||'',taxid:taxid||''};out.push(c);byId[id]=c;if(nt)byTax[nt]=c;return c;
+  }
+  if(typeof WHTPAYER!=='undefined'&&WHTPAYER)WHTPAYER.forEach(function(c){add(c.id,c.name,c.taxid);});
+  if(typeof VATCO!=='undefined'&&VATCO)VATCO.forEach(function(c){add(c.id,c.name,c.taxid);});
+  try{loadMn();loadUp();var seen={},changed=false;
+    (MNDATA||[]).forEach(function(t){if(!t||t.tax!=='PP30'||!t.co||seen[t.co])return;seen[t.co]=1;var up=_upFind(t.co);if(!up)return;var nt=(''+(up.tax||'')).replace(/\D/g,'');
+      if(nt&&byTax[nt])return;if(byId[up.id])return;
+      VATCO.push({id:up.id,name:up.name||'',taxid:up.tax||'',branch:up.branch||'',addr:''});changed=true;add(up.id,up.name,up.tax);});
+    if(changed)saveVatCo();
+  }catch(e){}
+  return out;
+}
+/* v8.41: pull each PP.30 saved monthly in Monitor → Accounting Routine into the summary. Reads company name + month + year + the attached form file; figures stay blank for hand entry / OCR. Never overwrites an existing row; rows deleted by hand stay hidden. */
+function _vPP30MNHidden(){try{return JSON.parse(localStorage.getItem('gli_pp30_mnhide')||'{}')||{};}catch(e){return {};}}
+function _vPP30MNHide(mnId){if(!mnId)return;try{var h=_vPP30MNHidden();h[mnId]=1;localStorage.setItem('gli_pp30_mnhide',JSON.stringify(h));}catch(e){}}
+function _vPP30SyncMN(){
+  try{loadMn();loadVatPP30();loadUp();}catch(e){return 0;}
+  var hidden=_vPP30MNHidden(),haveKey={},haveMn={},added=0;
+  VATPP30.forEach(function(r){haveKey[r.co+'|'+(+r.month)+'|'+(+r.beYear)]=1;if(r.mnId)haveMn[r.mnId]=1;});
+  (MNDATA||[]).forEach(function(t){
+    if(!t||t.tax!=='PP30'||!t.co)return;
+    if(hidden[t.id]||haveMn[t.id])return;
+    var ff=(typeof _mnFilesOf==='function')?_mnFilesOf(t,'form'):(t.fmF||[]);
+    var hasFile=Array.isArray(ff)&&ff.length>0;
+    if(!hasFile&&!t.fOk&&!t.payOk)return;
+    var up=_upFind(t.co);if(!up)return;
+    var cid=_vMatchCo(up.tax)||up.id;
+    var beY=+t.yr;if(beY&&beY<2400)beY+=543;
+    var mo=+t.mo||0;if(!mo||!beY)return;
+    if(haveKey[cid+'|'+mo+'|'+beY])return;
+    VATPP30.push({id:'ppmn_'+t.id,co:cid,coName:up.name||_vCoNameOf(cid)||'',month:mo,beYear:beY,
+      normal:true,onTime:true,sales:'',salesZero:'',salesExempt:'',outputVat:'',purchases:'',inputVat:'',
+      payable:'',overpaid:'',carried:'',mustPay:'',overpaidCarry:'',surcharge:'',penalty:'',
+      ref:'',receipt:'',filedDate:'',dln:'',file:(hasFile?ff[0]:null),fromMN:true,mnId:t.id,ts:Date.now()});
+    haveKey[cid+'|'+mo+'|'+beY]=1;haveMn[t.id]=1;added++;
+  });
+  if(added)saveVatPP30();
+  return added;
+}
 function _vPP30View(){loadVatPP30();_vPP30SeedGLR();
-  var cos=(typeof WHTPAYER!=='undefined'&&WHTPAYER&&WHTPAYER.length)?WHTPAYER:((typeof VATCO!=='undefined'&&VATCO)?VATCO:[]);
+  var cos=_vPP30Companies();_vPP30SyncMN();
   var ydata={};VATPP30.forEach(function(r){if(r.beYear)ydata[+r.beYear]=1;});
   var dataYears=Object.keys(ydata).map(Number).sort(function(a,b){return b-a;});
   var curBE=(new Date()).getFullYear()+543;var yset={};dataYears.forEach(function(y){yset[y]=1;});yset[curBE]=1;
@@ -3210,7 +3261,7 @@ function _vPP30View(){loadVatPP30();_vPP30SeedGLR();
         var cfPrev=(r.carried!=null&&r.carried!=='')?+r.carried:null;
         var cfNext=(r.overpaidCarry!=null&&r.overpaidCarry!=='')?+r.overpaidCarry:null;
         var stTxt=st?(st.pay?'<span class="v30pill pay">ชำระ '+_ppNum(st.v)+'</span>':'<span class="v30pill over">ชำระเกิน · ยกไป</span>'):'<span class="v30pill zero">—</span>';
-        h+='<tr><td class="l v30mo">'+_VPP30MON[mo-1]+' '+_vPP30Year+(r.normal===false?' <span class="v30tag-add">เพิ่มเติม</span>':'')+(r.onTime===false?' <span class="v30tag-late">เกินกำหนด</span>':'')+'</td>'
+        h+='<tr'+(r.fromMN?' class="v30frommn"':'')+'><td class="l v30mo">'+_VPP30MON[mo-1]+' '+_vPP30Year+(r.normal===false?' <span class="v30tag-add">เพิ่มเติม</span>':'')+(r.onTime===false?' <span class="v30tag-late">เกินกำหนด</span>':'')+(r.fromMN?' <span class="v30tag-mn" title="ดึงจาก Monitor → Accounting Routine — กรอกตัวเลขด้วยมือได้">↪ Monitor</span>':'')+'</td>'
           +'<td>'+(r.sales!=null&&r.sales!==''?_ppNum(r.sales):'—')+'</td><td class="b">'+(r.outputVat!=null&&r.outputVat!==''?_ppNum(r.outputVat):'—')+'</td>'
           +'<td>'+(r.purchases!=null&&r.purchases!==''?_ppNum(r.purchases):'—')+'</td><td class="b">'+(r.inputVat!=null&&r.inputVat!==''?_ppNum(r.inputVat):'—')+'</td>'
           +'<td class="'+(net>0?'np':(net<0?'cf':''))+'">'+(net<0?'+'+_ppNum(-net):_ppNum(net))+'</td>'
@@ -3265,14 +3316,13 @@ function renderVat(){
   // entity bar
   h+='<div class="vlayout"><div class="vcocol"><div class="vcohd">กิจการ (ผู้ประกอบการ)</div><div class="vcorow">';
   VATCO.forEach(function(c){var cnt=VATDATA.filter(function(t){return t.co===c.id;}).length;h+='<div class="vcochip'+(c.id===_vCo?' on':'')+'" data-vco="'+_eatt(c.id)+'" title="'+_eatt((c.name||'')+(c.taxid?' · '+c.taxid:''))+'"><div class="vcc-name vcc-full">'+esc(c.name||'(ไม่มีชื่อ)')+'</div>'+(cnt?'<div class="vcc-meta">'+cnt+'</div>':'')+'</div>';});
-  h+='<div class="vcochip add" id="vCoAdd" title="เพิ่มกิจการ"><div class="vcc-add">+</div></div><div class="vcochip pull" id="vCoPull" title="ดึงรายชื่อกิจการจากฐานข้อมูล WHT"><div class="vcc-pull">⇄</div></div></div></div>';
+  h+='<div class="vcochip add" id="vCoAdd" title="เพิ่มกิจการ"><div class="vcc-add">+</div></div><div class="vcochip pull" id="vCoPull" title="ดึงรายชื่อกิจการจากฐานข้อมูล WHT"><div class="vcc-pull">⇄</div></div></div>';
+  h+='<div class="vcoleftact"><div class="vupwrap"><div id="vatPdfZone" class="vupzone"><div class="vupicon">⬆</div><div class="vuptext"><div class="vupbig">แนบรายงานภาษีซื้อ / ขาย (PDF)</div><div class="vupsmall">อ่านไฟล์อัตโนมัติ · แยกประเภท (ซื้อ/ขาย) · จับคู่กิจการจากเลขผู้เสียภาษี · นำเข้ารายการ + ตรวจยอดกับ PDF · อัปโหลดงวดเดิมซ้ำ = แทนที่</div></div><input id="vatPdfInput" type="file" accept="application/pdf,image/*,.pdf,.jpg,.jpeg,.png" hidden></div></div><button class="vbtn mini ghost" id="vCoEditT" type="button">✎ แก้ไขข้อมูลกิจการ</button></div></div>';
   // period tabs + attach moved into header (top-right cluster)
   var yopts='';for(var y=_vYear+1;y>=2018;y--)yopts+='<option value="'+y+'"'+(y===_vYear?' selected':'')+'>'+y+' / '+(y+543)+'</option>';
   var mt='';for(var m=1;m<=12;m++)mt+='<button class="vmtab'+(m===_vMonth?' on':'')+'" data-m="'+m+'" type="button">'+m+'</button>';
   h+='<div class="vmaincol"><div class="vcobar vcoinfobar"><div class="vcoinfo"><div class="vcoinfoL"><div class="vcon">'+esc(co?co.name:'-')+'</div><div class="vcom">เลขประจำตัวผู้เสียภาษี '+esc(co?co.taxid:'-')+' · '+_vBranchTxt(co?co.branch:'')+'</div><div class="vcoa">'+esc(co?co.addr:'')+'</div></div>';
-  h+='<div class="vcoinfoR"><div class="vbar"><div class="vbarL"><select id="vYear" class="vyear">'+yopts+'</select><div class="vmtabs">'+mt+'</div></div></div>';
-  h+='<div class="vupwrap"><div id="vatPdfZone" class="vupzone"><div class="vupicon">⬆</div><div class="vuptext"><div class="vupbig">แนบรายงานภาษีซื้อ / ขาย (PDF)</div><div class="vupsmall">อ่านไฟล์อัตโนมัติ · แยกประเภท (ซื้อ/ขาย) · จับคู่กิจการจากเลขผู้เสียภาษี · นำเข้ารายการ + ตรวจยอดกับ PDF · อัปโหลดงวดเดิมซ้ำ = แทนที่</div></div><input id="vatPdfInput" type="file" accept="application/pdf,image/*,.pdf,.jpg,.jpeg,.png" hidden></div></div>';
-  h+='<button class="vbtn mini ghost" id="vCoEditT" type="button">✎ แก้ไขข้อมูลกิจการ</button></div></div>';
+  h+='<div class="vcoinfoR"><div class="vbar"><div class="vbarL"><select id="vYear" class="vyear">'+yopts+'</select><div class="vmtabs">'+mt+'</div></div></div></div></div>';
   if(_vCoEditOpen)h+=_vCoEditHTML(co);
   h+='<div id="vatPdfStatus" class="vupst"></div>';
   h+='</div>';
