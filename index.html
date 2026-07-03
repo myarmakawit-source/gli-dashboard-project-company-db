@@ -4313,7 +4313,8 @@ try{if(_scrubHiddenData()){try{if(typeof cloudPush==='function')cloudPush();}cat
 function _applyState(s,force){s=s||{};var rts=(s._ts&&typeof s._ts==='object')?s._ts:{};
   var healed=false;
   var acc=function(k,present){if(force)return true;var ri=+rts[k]||0,lo=+_TS[k]||0;if(ri>=lo)return true;if(present)healed=true;return false;};
-  var W=function(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch(e){}};
+  var W=function(key,val,rep){try{localStorage.setItem(key,JSON.stringify(val,rep));}catch(e){}};
+  var _rep=(typeof _slimFilesRep==='function')?_slimFilesRep:undefined;/* v8.98: slim base64 when persisting synced file-bearing keys (gli_mn / gli_docfiles) — same as saveMn/saveDocf, avoids quota bloat */
   /* v8.96: ANTI-WIPE — never let a drastically-emptier remote value overwrite substantial local data.
      If incoming has < 40% of the local "data richness" (and local is non-trivial), keep LOCAL and mark
      healed so the good copy is re-pushed to repair the cloud. Prevents an empty/stale sync from silently
@@ -4332,7 +4333,7 @@ function _applyState(s,force){s=s||{};var rts=(s._ts&&typeof s._ts==='object')?s
   if(s.wc){if(acc('wc',true)){WHTCO=_keep(WHTCO,s.wc);W('gli_whtco',WHTCO);}}
   if(s.wt){if(acc('wt',true)){WHTTX=_keep(WHTTX,s.wt);W('gli_whttx',WHTTX);}}
   if(s.up){if(acc('up',true)){UPDATA=_keep(UPDATA,s.up);W('gli_up',UPDATA);}}
-  if(s.mn){if(acc('mn',true)){try{if(typeof _mnDataScore==='function'&&_mnDataScore(MNDATA)>_mnDataScore(s.mn)+2)_mnSnapshotRaw(MNDATA,'ก่อนรับข้อมูลจากคลาวด์');}catch(_ce){}MNDATA=_keep(MNDATA,s.mn,_mnSc);W('gli_mn',MNDATA);}}if(s.df){if(acc('df',true)){DOCFILES=s.df;W('gli_docfiles',DOCFILES);}}try{if(typeof _zattRefreshAll==='function')_zattRefreshAll();}catch(_zz){}if(s.mq){if(acc('mq',true)){MNCHQ=_mqMerge(MNCHQ,s.mq,true);W('gli_mnchq',(typeof _mqSlim==='function'?_mqSlim(MNCHQ):MNCHQ));}}if(s.dt&&typeof s.dt==='object'){try{var _lt=(typeof _delTombLoad==='function')?_delTombLoad():null;if(_lt){for(var _dk in s.dt){var _dv=+s.dt[_dk]||0;if(_dv>(+_lt[_dk]||0))_lt[_dk]=_dv;}if(typeof _delTombSave==='function')_delTombSave();}}catch(_dme){}}if(typeof _delTombScrub==='function'){try{_delTombScrub();}catch(_dte){}}if(s.vp30){if(acc('vp30',true)){VATPP30=s.vp30;W('gli_vatpp30',VATPP30);}}
+  if(s.mn){if(acc('mn',true)){try{if(typeof _mnDataScore==='function'&&_mnDataScore(MNDATA)>_mnDataScore(s.mn)+2)_mnSnapshotRaw(MNDATA,'ก่อนรับข้อมูลจากคลาวด์');}catch(_ce){}MNDATA=_keep(MNDATA,s.mn,_mnSc);W('gli_mn',MNDATA,_rep);}}if(s.df){if(acc('df',true)){DOCFILES=_keep(DOCFILES,s.df);W('gli_docfiles',DOCFILES,_rep);}}try{if(typeof _zattRefreshAll==='function')_zattRefreshAll();}catch(_zz){}if(s.mq){if(acc('mq',true)){MNCHQ=_mqMerge(MNCHQ,s.mq,true);W('gli_mnchq',(typeof _mqSlim==='function'?_mqSlim(MNCHQ):MNCHQ));}}if(s.dt&&typeof s.dt==='object'){try{var _lt=(typeof _delTombLoad==='function')?_delTombLoad():null;if(_lt){for(var _dk in s.dt){var _dv=+s.dt[_dk]||0;if(_dv>(+_lt[_dk]||0))_lt[_dk]=_dv;}if(typeof _delTombSave==='function')_delTombSave();}}catch(_dme){}}if(typeof _delTombScrub==='function'){try{_delTombScrub();}catch(_dte){}}if(s.vp30){if(acc('vp30',true)){VATPP30=_keep(VATPP30,s.vp30);W('gli_vatpp30',VATPP30);}}
   if(s.tk){if(acc('tk',true)){TRACKDATA=_keep(TRACKDATA,s.tk);W('gli_track',TRACKDATA);}}
   if(s.vc){if(acc('vc',true)){VATCO=_keep(VATCO,s.vc);W('gli_vatco',VATCO);}}
   if(s.vd&&s.vd.length){if(!Array.isArray(VATDEL))VATDEL=[];var _vds={};for(var _vi=0;_vi<VATDEL.length;_vi++)_vds[VATDEL[_vi]]=1;for(var _vj=0;_vj<s.vd.length;_vj++){if(s.vd[_vj]&&!_vds[s.vd[_vj]]){_vds[s.vd[_vj]]=1;VATDEL.push(s.vd[_vj]);}}if(VATDEL.length>400)VATDEL=VATDEL.slice(-400);W('gli_vatdel',VATDEL);}if(s.va){if(acc('va',true)){VATDATA=_keep(VATDATA,s.va);}}if(typeof _vApplyDel==='function')_vApplyDel();W('gli_vat',VATDATA);
@@ -4377,13 +4378,36 @@ function _gliLiveUpd(st){var el=_gliLiveEnsure();if(!el)return;var cls,tx,tip;
 }
 try{if(document.readyState!=='loading')setTimeout(_gliLiveEnsure,0);else document.addEventListener('DOMContentLoaded',function(){try{_gliLiveEnsure();}catch(e){}});}catch(_le){}
 try{window.addEventListener('pagehide',function(){if(_pushT&&_MODE==='firebase'&&_fdb){try{clearTimeout(_pushT);_pushT=null;var pkt={n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?_dfSlimCloud(DOCFILES):{},pt:PTDATA,fsm:(typeof FSMAN!=='undefined'&&FSMAN)?FSMAN:{},tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],line:_lnPkt(),bf:BCFSET,gl:{files:(typeof _glFilesPkt==='function'?_glFilesPkt():(typeof GLFILES!=='undefined'?GLFILES:[])),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS,_t:Date.now(),_by:_cid};_fdb.set(_fbWrap(pkt));}catch(e){}}});}catch(e){}
+/* ===== v8.97: กันข้อมูลหาย — flush ทุกการกด/สถานะ/วางไฟล์ ขึ้น Cloud ทันทีเมื่อสลับแอป/ปิดแท็บ/ล็อกจอ (mobile-safe)
+   saveMn / saveMnChq / ฯลฯ เก็บลง localStorage ทุกครั้งอยู่แล้ว (ในเครื่องไม่หาย) แต่การ push ขึ้น Cloud ถูกหน่วง:
+   debounce 500ms และ "ค้างไว้" ตอนเปิดป๊อปอัป Financial Routine (_mqPushPending) — จะ flush ตอนปิดป๊อปอัป/beforeunload เท่านั้น
+   ปัญหา: บนมือถือ beforeunload มักไม่ยิงเมื่อสลับแอป/ล็อกจอ/แท็บถูกทิ้ง และ pagehide เดิม flush เฉพาะเมื่อ debounce ค้างอยู่
+   (ข้ามเคส _mqPushPending) จึงทำให้สิ่งที่กด/แนบไฟล์ก่อนสลับแอปขึ้น Cloud ไม่ทัน แล้วดูเหมือน "หาย" บนเครื่องอื่น
+   ตัวช่วยนี้ push สถานะทั้งหมด (ทุกโมดูล) แบบทันทีเมื่อหน้าถูกซ่อน/ปิด รองรับทั้งโหมด firebase และ artifact
+   เป็นการ "เพิ่ม" จุด flush เท่านั้น ใช้ยาม _pushAllowed() เดียวกับ cloudPush จึงไม่มีทางเขียนทับข้อมูลจริงด้วยค่าว่าง */
+function _gliBuildPkt(){return {n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?_dfSlimCloud(DOCFILES):{},pt:PTDATA,fsm:(typeof FSMAN!=='undefined'&&FSMAN)?FSMAN:{},tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],line:_lnPkt(),bf:BCFSET,gl:{files:(typeof _glFilesPkt==='function'?_glFilesPkt():(typeof GLFILES!=='undefined'?GLFILES:[])),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS,_t:Date.now(),_by:_cid};}
+function _gliFlushNow(){try{
+  if(typeof _pushAllowed==='function'&&!_pushAllowed())return;
+  if(typeof _squelchPush!=='undefined'&&_squelchPush)return;
+  if(typeof _mqPushPending!=='undefined')_mqPushPending=0;      /* ล้างสถานะ "ค้างไว้" ของป๊อปอัป Financial Routine */
+  if(typeof _pushT!=='undefined'&&_pushT){try{clearTimeout(_pushT);}catch(_ct){}_pushT=null;}
+  try{localStorage.setItem('gli_savedt',String(Date.now()));}catch(_ls){}
+  var pkt=_gliBuildPkt();
+  if(_MODE==='firebase'&&_fdb){_lastSig=_stateSig(_pktSlim(pkt));_fdb.set(_fbWrap(pkt));}
+  else if(typeof _SS!=='undefined'&&_SS){_lastSig=_stateSig(_pktSlim(pkt));try{_SS.set(GLI_KEY,JSON.stringify(pkt),true);}catch(_se){}}
+}catch(e){}}
+try{window._gliFlushNow=_gliFlushNow;
+  document.addEventListener('visibilitychange',function(){if(document.hidden)_gliFlushNow();});
+  window.addEventListener('pagehide',_gliFlushNow);
+  window.addEventListener('beforeunload',_gliFlushNow);
+}catch(_fe){}
 /* ===== SYNC SAFETY (fix recurring data loss): seed/empty must never overwrite real cloud data ===== */
 var _cloudApplied=false,_userTouched=false;
 try{['pointerdown','keydown','input','change'].forEach(function(ev){window.addEventListener(ev,function(){_userTouched=true;},true);});}catch(_e){}
 function _objN(o){var n=0,k;if(o&&typeof o==='object'){for(k in o)if(Object.prototype.hasOwnProperty.call(o,k))n++;}return n;}
 function _arrN(a){return (a&&a.length)||0;}
 function _deepN(x){if(x==null)return 0;if(Array.isArray(x)){for(var s=0,i=0;i<x.length;i++)s+=_deepN(x[i]);return s;}if(typeof x==='object'){var n=0,k;for(k in x)if(Object.prototype.hasOwnProperty.call(x,k))n+=_deepN(x[k]);return n;}if(typeof x==='string')return x.trim()?1:0;if(typeof x==='number')return x?1:0;if(typeof x==='boolean')return x?1:0;return 0;}
-function _dataScore(st){st=st||{};return _objN(st.n)+_objN(st.v)+_arrN(st.r)+_objN(st.c)+_objN(st.a)+_arrN(st.pm)+_arrN(st.wp)+_arrN(st.wc)+_arrN(st.wt)+_deepN(st.up)+_deepN(st.mn)+_arrN(st.pt)+_deepN(st.fsm)+_objN(st.bf)+_deepN(st.line);}
+function _dataScore(st){st=st||{};return _objN(st.n)+_objN(st.v)+_arrN(st.r)+_objN(st.c)+_objN(st.a)+_arrN(st.pm)+_arrN(st.wp)+_arrN(st.wc)+_arrN(st.wt)+_deepN(st.up)+_deepN(st.mn)+_arrN(st.pt)+_deepN(st.fsm)+_objN(st.bf)+_deepN(st.line)+_deepN(st.df)+_deepN(st.mq)+_deepN(st.vp30);}
 function _lnPkt(){try{return JSON.parse(localStorage.getItem('gli_line')||'null');}catch(e){return null;}}
 function _localPkt(){return {n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?_dfSlimCloud(DOCFILES):{},pt:PTDATA,fsm:(typeof FSMAN!=='undefined'&&FSMAN)?FSMAN:{},tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:(typeof GLILOG!=='undefined'&&GLILOG)?GLILOG.slice(-500):[],line:_lnPkt(),bf:BCFSET,gl:{files:(typeof _glFilesPkt==='function'?_glFilesPkt():(typeof GLFILES!=='undefined'?GLFILES:[])),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),_ts:_TS};}
 function _localScore(){return _dataScore(_localPkt());}
@@ -4421,8 +4445,11 @@ window.gliIsMaster=function(){return _masterDev;};
 /* ===== Manual Save (ปุ่มบันทึก + Ctrl+S) ===== */
 function manualSave(){
   if(typeof gliLog==='function')gliLog('บันทึกข้อมูล','บันทึกทั้งระบบ');
-  var W=function(k,v){try{if(v!==null&&v!==undefined)localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
-  try{W('gli_nameov',NAMEOV);W('gli_valov',VALOV);W('gli_newrows',NEWROWS);W('gli_custov',CUSTOV);W('gli_activeov',ACTIVEOV);W('gli_projmaster',PROJMASTER);W('gli_whtpayer',WHTPAYER);W('gli_whtco',WHTCO);W('gli_whttx',WHTTX);W('gli_up',UPDATA);W('gli_mn',MNDATA);W('gli_mnchq',MNCHQ);W('gli_pt',PTDATA);W('gli_fsman',(typeof FSMAN!=='undefined'?FSMAN:{}));W('gli_track',TRACKDATA);W('gli_vatco',VATCO);W('gli_vat',VATDATA);W('gli_bcf',BCFSET);}catch(e){}
+  /* v8.98: manualSave (ปุ่มบันทึก / Ctrl+S) ต้อง "slim" ไฟล์แนบ (ตัด base64 ที่มีสำเนา IndexedDB/cloud แล้ว) ให้ตรงกับ
+     saveMn/saveMnChq/saveDocf มิฉะนั้นการกดบันทึกจะอัด base64 ก้อนใหญ่ลง localStorage แล้วชน quota ง่ายกว่าการเซฟอัตโนมัติ */
+  var W=function(k,v,rep){try{if(v!==null&&v!==undefined)localStorage.setItem(k,JSON.stringify(v,rep));}catch(e){}};
+  var _rep=(typeof _slimFilesRep==='function')?_slimFilesRep:undefined;
+  try{W('gli_nameov',NAMEOV);W('gli_valov',VALOV);W('gli_newrows',NEWROWS);W('gli_custov',CUSTOV);W('gli_activeov',ACTIVEOV);W('gli_projmaster',PROJMASTER);W('gli_whtpayer',WHTPAYER);W('gli_whtco',WHTCO);W('gli_whttx',WHTTX);W('gli_up',UPDATA);W('gli_mn',MNDATA,_rep);W('gli_mnchq',(typeof _mqSlim==='function'?_mqSlim(MNCHQ):MNCHQ));W('gli_docfiles',(typeof DOCFILES!=='undefined'?DOCFILES:null),_rep);W('gli_pt',PTDATA);W('gli_fsman',(typeof FSMAN!=='undefined'?FSMAN:{}));W('gli_track',TRACKDATA);W('gli_vatco',VATCO);W('gli_vat',VATDATA);W('gli_bcf',BCFSET);}catch(e){}
   try{_backupSave(_localPkt(),'manual');}catch(e){}
   _userTouched=true;
   if(_MODE==='firebase'){
@@ -6245,6 +6272,10 @@ function renderDoc(){loadDocf();if(typeof loadUp==='function')loadUp();var w=doc
 var DOCFILES=null,_docBound=false;
 var _DOCCATS=[['fs','📊 Financial Statements','งบการเงิน','#4F6BED','#EEF2FE'],['bank','🏦 Bank Confirmation','หนังสือยืนยันยอดธนาคาร','#0E9E84','#E7F7F2'],['other','📁 Other Documents','เอกสารอื่นๆ','#9B6DF0','#F3EEFD']];
 function loadDocf(){if(DOCFILES===null){try{DOCFILES=JSON.parse(localStorage.getItem('gli_docfiles')||'{}')||{};}catch(e){DOCFILES={};}}return DOCFILES;}
+/* v8.98: eager-load DOCFILES + VATPP30 at boot. เดิมเป็น lazy-load (null จนกว่าจะเปิดแท็บ) — เครื่องที่ไม่เคยเปิด DOC Vault / VAT
+   จะ push df:{} / vp30:[] (ค่าว่างที่ "truthy") ทับข้อมูลบนคลาวด์ ทำให้เครื่องอื่นไฟล์หายตอน sync. โหลดไว้ล่วงหน้าให้สะท้อน
+   localStorage เสมอ → ไม่ยืนยันค่าว่างเท็จ และมีข้อมูลจริงให้ _keep/_dataScore ปกป้อง */
+try{if(typeof loadDocf==='function')loadDocf();}catch(_e){}try{if(typeof loadVatPP30==='function')loadVatPP30();}catch(_e){}
 function saveDocf(){loadDocf();try{localStorage.setItem('gli_docfiles',JSON.stringify(DOCFILES,(typeof _slimFilesRep==='function'?_slimFilesRep:undefined)));}catch(e){if(typeof _onQuotaExceeded==='function')_onQuotaExceeded('gli_docfiles');}if(typeof _tsTouch==='function')_tsTouch('df');if(typeof _markLocalOp==='function')_markLocalOp();if(typeof cloudPush==='function')cloudPush();if(typeof _autoMigrateSoon==='function')_autoMigrateSoon();if(typeof _stoGuardUpd==='function')_stoGuardUpd();}
 function _docfCell(cid,cat){loadDocf();return (DOCFILES[cid]&&DOCFILES[cid][cat])?DOCFILES[cid][cat]:[];}
 function _docfAdd(cid,cat,f){loadDocf();if(!DOCFILES[cid])DOCFILES[cid]={};if(!DOCFILES[cid][cat])DOCFILES[cid][cat]=[];DOCFILES[cid][cat].push(f);saveDocf();}
@@ -6741,6 +6772,8 @@ function _dfSlimCloud(df){if(!df||typeof df!=='object')return df||{};var BUDGET=
 function _slimFilesRep(k,v){if(k==='_burl'||k==='_up'||k==='_lo'||k==='_pid')return undefined;if(k==='d'&&typeof v==='string'&&v.lastIndexOf('data:',0)===0&&this&&(this.idb||this.u))return undefined;return v;}
 function _pktSlim(pkt){try{return JSON.parse(JSON.stringify(pkt,function(k,v){if(k==='_burl'||k==='_up')return undefined;if(k==='d'&&typeof v==='string'&&v.indexOf('data:')===0&&this&&this.u)return undefined;return v;}));}catch(e){return pkt;}}
 function saveMnChq(){try{localStorage.setItem('gli_mnchq',JSON.stringify(_mqSlim(MNCHQ)));}catch(e){if(typeof _onQuotaExceeded==='function')_onQuotaExceeded('gli_mnchq');}_tsTouch('mq');if(typeof _markLocalOp==='function')_markLocalOp();if(typeof cloudPush==='function')cloudPush();if(typeof _autoMigrateSoon==='function')_autoMigrateSoon();if(typeof _stoGuardUpd==='function')_stoGuardUpd();}
+/* v8.98: กู้คืนข้อมูล Financial Routine จากชุดสำรองก่อน reset ครั้งเดียว (สำหรับผู้ใช้ local-only ที่ข้อมูลถูก reset ล้าง) — เรียกผ่าน console: gliRestoreMnchqPreReset() */
+try{window.gliRestoreMnchqPreReset=function(){try{var raw=localStorage.getItem('gli_mnchq_pre_reset_bak');if(!raw){alert('ไม่พบชุดสำรองก่อน reset ในเครื่องนี้');return 0;}var arr=JSON.parse(raw);if(!Array.isArray(arr)||!arr.length){alert('ชุดสำรองว่างเปล่า');return 0;}if(typeof loadMnChq==='function')loadMnChq();MNCHQ=(typeof _mqMerge==='function')?_mqMerge(MNCHQ,arr,false):(Array.isArray(MNCHQ)&&MNCHQ.length?MNCHQ:arr);saveMnChq();if(typeof cloudPushNow==='function'){try{cloudPushNow();}catch(_e){}}if(typeof renderMn==='function')renderMn();alert('กู้คืน Financial Routine จากชุดสำรองก่อน reset สำเร็จ ('+arr.length+' รายการ) และ sync ขึ้นคลาวด์แล้ว');return arr.length;}catch(e){alert('กู้คืนล้มเหลว: '+(e&&e.message||e));return 0;}};}catch(_e){}
 function _mcqMig(r){if(!r)return r;
   if(!Array.isArray(r.jvF)){r.jvF=[[],[],[],[]];if(Array.isArray(r.jvAtt)&&r.jvAtt.length)r.jvF[1]=r.jvAtt.slice();}while(r.jvF.length<4)r.jvF.push([]);
   if(!Array.isArray(r.jv))r.jv=[0,0,0,0];if(!Array.isArray(r.jvDt))r.jvDt=['','','',''];if(!Array.isArray(r.jvBy))r.jvBy=['','','',''];
@@ -6964,7 +6997,7 @@ function _mnRelRender(){
 }
 function _mnChqRender(){
   if(typeof UPDATA==='undefined'||!UPDATA)return '';loadMnChq();
-  try{if(!localStorage.getItem('gli_mnchq_reset_v2')){MNCHQ=[];try{localStorage.removeItem('gli_mnchq');}catch(_e){}localStorage.setItem('gli_mnchq_reset_v2','1');setTimeout(function(){try{if(typeof saveMnChq==='function')saveMnChq();}catch(_e){}},60);}}catch(_e){}
+  try{if(!localStorage.getItem('gli_mnchq_reset_v2')){try{var _preMq=localStorage.getItem('gli_mnchq');if(_preMq&&_preMq.length>2&&!localStorage.getItem('gli_mnchq_pre_reset_bak'))localStorage.setItem('gli_mnchq_pre_reset_bak',_preMq);}catch(_pe){}/* v8.98: สำรองข้อมูลเดิมก่อน reset ครั้งเดียว เผื่อกู้คืน (โดยเฉพาะผู้ใช้ local-only ที่ไม่มีคลาวด์) */MNCHQ=[];try{localStorage.removeItem('gli_mnchq');}catch(_e){}localStorage.setItem('gli_mnchq_reset_v2','1');setTimeout(function(){try{if(typeof saveMnChq==='function')saveMnChq();}catch(_e){}},60);}}catch(_e){}
   var cos=[];for(var i=0;i<UPDATA.length;i++){var _c=UPDATA[i];if(!((_c.name||'').trim()))continue;if((''+(_c.tax||'')).replace(/\D/g,'')==='0105553002230')continue;cos.push(_c);}
   if(!cos.length)return '';
   var seg=function(on){return '<span class="mcqseg'+(on?' on':'')+'"></span>';};
