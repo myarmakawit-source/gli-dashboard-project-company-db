@@ -13703,7 +13703,7 @@ window.renderTfrs=renderTfrs;
 .glvch-hint{margin-top:4px;font-size:10px;color:#8a9a95;font-weight:600;font-family:'Sarabun',sans-serif;letter-spacing:.2px;}
 /* ===================== v9.52: Confirm Bank module ===================== */
 #page-cb{--cb:#155E75;--cb-d:#0E4258;--cb-t:#E6F1F5}
-.cbwrap{max-width:1220px;margin:0 auto}
+.cbwrap{max-width:none;margin:0}
 .cbtop{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0 18px}
 .cbstat{flex:1;min-width:158px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 18px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(20,30,40,.05)}
 .cbstat::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--cb)}
@@ -13958,8 +13958,14 @@ function renderCb(){
   h+='<div class="cbbar"><div class="cbsrch"><span class="ic">🔍</span><input id="cbSrch" type="text" placeholder="Search company, bank, address, account no…" value="'+_eatt(_cbQ)+'" autocomplete="off"></div>'
     +'<div class="cblegend"><span class="cbleg"><i style="background:var(--pos)"></i>Confirmed</span><span class="cbleg"><i style="background:var(--gold)"></i>Pending</span><span class="cbleg"><i style="background:var(--blue)"></i>Requested</span><span class="cbleg"><i class="tick">✓</i>ถูก · ส่งได้</span><span class="cbleg"><i class="cross">✗</i>ผิด · ห้ามส่ง</span></div>'
     +'<span class="sp"></span></div>';
-  h+='<div class="cblist">';
-  var q=_cbQ.trim().toLowerCase();
+  h+='<div class="cblist">'+_cbListHTML()+'</div>';
+  h+='<div class="cbnote"><b>Confirm Bank · Bank Database</b> — ทะเบียนบัญชีธนาคารของแต่ละบริษัท แยกฐานข้อมูลตาม<b>ปี</b> (เพิ่มปีใหม่ได้ ระบบจะยกฐานข้อมูลปีล่าสุดมาให้). คลิกบริษัทเพื่อเปิด<b>หน้าต่างเต็มจอ</b> แล้วแก้ไขได้ทุกช่อง รวมถึงช่อง<b>ที่อยู่ธนาคาร</b> (วาง/Copy ได้). แต่ละบัญชีกด <b>✓ ถูก</b> เพื่ออนุญาตให้<b>ส่งหนังสือยืนยันยอดธนาคาร</b> หรือ <b>✗ ผิด</b> เพื่อห้ามส่ง. ยอดเงิน THB จะรวมให้ทั้งรายบริษัทและทั้งกลุ่ม · บันทึกอัตโนมัติบนอุปกรณ์นี้. ชื่อบริษัท &amp; เลขผู้เสียภาษีใช้ร่วมกับโมดูล <b>E-Filing &amp; DBD Credentials</b>.</div>';
+  h+='</div>';
+  w.innerHTML=h; _cbBind(w);
+  if(_cbModalCo)_cbRenderModal();
+}
+function _cbListHTML(){
+  var cos=_cbCos(),q=_cbQ.trim().toLowerCase(),h='';
   cos.forEach(function(c){
     var accs=_cbAccs(c.id);
     if(q){var hit=((c.name+' '+c.tax+' company '+c.idx).toLowerCase().indexOf(q)>=0);
@@ -13967,24 +13973,22 @@ function renderCb(){
       if(!hit)return;}
     var thb=_cbCoTotal(c.id),empty=(accs.length===0),okc=0,badc=0;
     accs.forEach(function(x){if(x.verify==='ok')okc++;else if(x.verify==='bad')badc++;});
-    var nm=c.name?esc(c.name):('<span class="muted">Company '+c.idx+' — <i>not set</i></span>');
+    var nm=c.name?esc(c.name):('<span class="muted">Company '+c.idx+' \u2014 <i>not set</i></span>');
     h+='<div class="cbco'+(empty?' empty':'')+'" data-cbopen="'+c.id+'" role="button" tabindex="0" aria-label="Open bank accounts">'
       +'<div class="cbco-h">'
         +'<div class="cbco-badge">'+(c.idx<10?'0':'')+c.idx+'</div>'
         +'<div class="cbco-id"><div class="cbco-nm">'+nm+'</div>'+(c.tax?'<div class="cbco-tax">Tax ID '+esc(c.tax)+'</div>':'')+'</div>'
-        +'<div class="cbco-sum"><span class="cbchip '+(accs.length?'acc':'warn')+'">🏦 '+accs.length+' account'+(accs.length===1?'':'s')+'</span>'
-          +(okc?'<span class="cbchip ok">✓ '+okc+'</span>':'')
-          +(badc?'<span class="cbchip bad">✗ '+badc+'</span>':'')
-          +(thb?'<span class="cbchip bal">฿'+_cbMoney(thb)+'</span>':'')+'</div>'
-        +'<div class="cbco-open">เปิด&nbsp;›</div>'
+        +'<div class="cbco-sum"><span class="cbchip '+(accs.length?'acc':'warn')+'">\ud83c\udfe6 '+accs.length+' account'+(accs.length===1?'':'s')+'</span>'
+          +(okc?'<span class="cbchip ok">\u2713 '+okc+'</span>':'')
+          +(badc?'<span class="cbchip bad">\u2717 '+badc+'</span>':'')
+          +(thb?'<span class="cbchip bal">\u0e3f'+_cbMoney(thb)+'</span>':'')+'</div>'
+        +'<div class="cbco-open">\u0e40\u0e1b\u0e34\u0e14&nbsp;\u203a</div>'
       +'</div></div>';
   });
-  h+='</div>';
-  h+='<div class="cbnote"><b>Confirm Bank · Bank Database</b> — ทะเบียนบัญชีธนาคารของแต่ละบริษัท แยกฐานข้อมูลตาม<b>ปี</b> (เพิ่มปีใหม่ได้ ระบบจะยกฐานข้อมูลปีล่าสุดมาให้). คลิกบริษัทเพื่อเปิด<b>หน้าต่างเต็มจอ</b> แล้วแก้ไขได้ทุกช่อง รวมถึงช่อง<b>ที่อยู่ธนาคาร</b> (วาง/Copy ได้). แต่ละบัญชีกด <b>✓ ถูก</b> เพื่ออนุญาตให้<b>ส่งหนังสือยืนยันยอดธนาคาร</b> หรือ <b>✗ ผิด</b> เพื่อห้ามส่ง. ยอดเงิน THB จะรวมให้ทั้งรายบริษัทและทั้งกลุ่ม · บันทึกอัตโนมัติบนอุปกรณ์นี้. ชื่อบริษัท &amp; เลขผู้เสียภาษีใช้ร่วมกับโมดูล <b>E-Filing &amp; DBD Credentials</b>.</div>';
-  h+='</div>';
-  w.innerHTML=h; _cbBind(w);
-  if(_cbModalCo)_cbRenderModal();
+  if(!h)h='<div class="cbempty" style="padding:28px 16px"><div class="big">\ud83d\udd0d</div><div class="t">\u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e1c\u0e25\u0e25\u0e31\u0e1e\u0e18\u0e4c</div><div class="s">No matching company or bank account.</div></div>';
+  return h;
 }
+function _cbRenderList(){ var w=document.getElementById('page-cb'); if(!w)return; var lc=w.querySelector('.cblist'); if(lc)lc.innerHTML=_cbListHTML(); }
 function _cbBody(id,accs){
   if(!accs.length)return '<div class="cbempty"><div class="big">🏦</div><div class="t">ยังไม่มีบัญชีธนาคารสำหรับบริษัทนี้ในปี '+esc(CBDATA.cur)+'</div><div class="s">No bank accounts yet in this database year.</div></div><button class="cbadd" data-cbadd="'+id+'" type="button">＋ Add bank account</button>';
   var h='<div class="cbtblw"><table class="cbtbl"><thead><tr><th>Bank</th><th>Branch</th><th>ที่อยู่ธนาคาร · Address</th><th>Account name</th><th>Account no.</th><th>Type</th><th>Currency</th><th class="r">Balance</th><th>As of</th><th>Status</th><th class="c">ถูก/ผิด</th><th class="c">หนังสือยืนยันยอด</th><th></th></tr></thead><tbody>';
@@ -14098,7 +14102,7 @@ function _cbBind(w){ if(w._cb)return; w._cb=1;
     var op=cl('[data-cbopen]');if(op){_cbOpenModal(op.getAttribute('data-cbopen'));return;}
   });
   w.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){var op=e.target&&e.target.closest?e.target.closest('[data-cbopen]'):null; if(op){e.preventDefault();_cbOpenModal(op.getAttribute('data-cbopen'));}}});
-  w.addEventListener('input',function(e){var t=e.target;if(t&&t.id==='cbSrch'){_cbQ=t.value;var keep=(document.activeElement===t);renderCb();if(keep){var el=document.getElementById('cbSrch');if(el){el.focus();try{el.setSelectionRange(el.value.length,el.value.length);}catch(x){}}}return;}});
+  w.addEventListener('input',function(e){var t=e.target;if(t&&t.id==='cbSrch'){_cbQ=t.value;_cbRenderList();return;}});
 }
 try{ if(localStorage.getItem('gli_module')==='cb'&&typeof renderCb==='function')renderCb(); }catch(e){}
 </script>
