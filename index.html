@@ -13818,8 +13818,19 @@ body.cbmodal-open{overflow:hidden}
 .cbmodal-hdr{flex:none;display:flex;align-items:center;gap:8px}
 .cbmodal-hdr .cbchip.bal{background:rgba(255,255,255,.16);color:#fff;font-size:14px;font-weight:800;padding:7px 14px}
 .cbmodal-body{flex:1;min-height:0;overflow:auto;padding:18px 22px 26px}
-.cbmodal-body .cbtbl{min-width:1240px}
+.cbmodal-body .cbtbl{min-width:1330px}
 .cbmodal-body .cbtblw{margin-top:0}
+.cbmodal-body .cbtbl{font-size:14px}
+.cbmodal-body .cbtbl thead th{font-size:12px}
+.cbmodal-body .cbin{font-size:14px}
+.cbmodal-body .cbta{font-size:14px}
+.cbmodal-body .cbsel{font-size:13.5px}
+.cbmodal-body .cbst select{font-size:13px}
+.cbmodal-body .cbsend{font-size:13px}
+.cbmodal-body .cbtbl tfoot td{font-size:13.5px}
+.cbmodal-body .cbvfb{width:32px;height:32px;font-size:16px}
+.cbyn{max-width:64px;text-align:center;font-weight:700}
+
 .cbtbl thead th.c{text-align:center}
 .cbtbl td.c{text-align:center;white-space:nowrap}
 .cbta{resize:vertical;min-height:34px;height:34px;min-width:190px;line-height:1.35;font-family:'Sarabun',sans-serif;white-space:pre-wrap}
@@ -13956,7 +13967,7 @@ function renderCb(){
     +'<div class="cbstat pos"><div class="l">Total balance · THB</div><div class="v">฿'+_cbMoney(totalBalThb)+'</div><div class="u">'+confirmed+' confirmed · '+okCnt+' ✓ correct</div></div>'
     +'</div>';
   h+='<div class="cbbar"><div class="cbsrch"><span class="ic">🔍</span><input id="cbSrch" type="text" placeholder="Search company, bank, address, account no…" value="'+_eatt(_cbQ)+'" autocomplete="off"></div>'
-    +'<div class="cblegend"><span class="cbleg"><i style="background:var(--pos)"></i>Confirmed</span><span class="cbleg"><i style="background:var(--gold)"></i>Pending</span><span class="cbleg"><i style="background:var(--blue)"></i>Requested</span><span class="cbleg"><i class="tick">✓</i>ถูก · ส่งได้</span><span class="cbleg"><i class="cross">✗</i>ผิด · ห้ามส่ง</span></div>'
+    +'<div class="cblegend"><span class="cbleg"><i style="background:var(--pos)"></i>Confirmed</span><span class="cbleg"><i style="background:var(--gold)"></i>Pending</span><span class="cbleg"><i style="background:var(--blue)"></i>Requested</span><span class="cbleg"><i class="tick">✓</i>Deduct fee · ส่งได้</span><span class="cbleg"><i class="cross">✗</i>ไม่หัก · ห้ามส่ง</span></div>'
     +'<span class="sp"></span></div>';
   h+='<div class="cblist">'+_cbListHTML()+'</div>';
   h+='<div class="cbnote"><b>Confirm Bank · Bank Database</b> — ทะเบียนบัญชีธนาคารของแต่ละบริษัท แยกฐานข้อมูลตาม<b>ปี</b> (เพิ่มปีใหม่ได้ ระบบจะยกฐานข้อมูลปีล่าสุดมาให้). คลิกบริษัทเพื่อเปิด<b>หน้าต่างเต็มจอ</b> แล้วแก้ไขได้ทุกช่อง รวมถึงช่อง<b>ที่อยู่ธนาคาร</b> (วาง/Copy ได้). แต่ละบัญชีกด <b>✓ ถูก</b> เพื่ออนุญาตให้<b>ส่งหนังสือยืนยันยอดธนาคาร</b> หรือ <b>✗ ผิด</b> เพื่อห้ามส่ง. ยอดเงิน THB จะรวมให้ทั้งรายบริษัทและทั้งกลุ่ม · บันทึกอัตโนมัติบนอุปกรณ์นี้. ชื่อบริษัท &amp; เลขผู้เสียภาษีใช้ร่วมกับโมดูล <b>E-Filing &amp; DBD Credentials</b>.</div>';
@@ -13991,7 +14002,7 @@ function _cbListHTML(){
 function _cbRenderList(){ var w=document.getElementById('page-cb'); if(!w)return; var lc=w.querySelector('.cblist'); if(lc)lc.innerHTML=_cbListHTML(); }
 function _cbBody(id,accs){
   if(!accs.length)return '<div class="cbempty"><div class="big">🏦</div><div class="t">ยังไม่มีบัญชีธนาคารสำหรับบริษัทนี้ในปี '+esc(CBDATA.cur)+'</div><div class="s">No bank accounts yet in this database year.</div></div><button class="cbadd" data-cbadd="'+id+'" type="button">＋ Add bank account</button>';
-  var h='<div class="cbtblw"><table class="cbtbl"><thead><tr><th>Bank</th><th>Branch</th><th>ที่อยู่ธนาคาร · Address</th><th>Account name</th><th>Account no.</th><th>Type</th><th>Currency</th><th class="r">Balance</th><th>As of</th><th>Status</th><th class="c">ถูก/ผิด</th><th class="c">หนังสือยืนยันยอด</th><th></th></tr></thead><tbody>';
+  var h='<div class="cbtblw"><table class="cbtbl"><thead><tr><th>Bank</th><th>Branch</th><th>ที่อยู่ธนาคาร · Address</th><th>Account name</th><th>Account no.</th><th>Type</th><th class="c">Collateral A/C?</th><th>Currency</th><th class="r">Balance</th><th>As of</th><th>Status</th><th class="c">Deduct bank fee</th><th class="c">หนังสือยืนยันยอด</th><th></th></tr></thead><tbody>';
   accs.forEach(function(x,i){ var st=x.status||'none',vf=x.verify||'',canSend=(vf==='ok');
     h+='<tr data-co="'+id+'" data-i="'+i+'">'
       +'<td><input class="cbin" data-k="bank" value="'+_eatt(x.bank||'')+'" placeholder="Bank"></td>'
@@ -14000,20 +14011,22 @@ function _cbBody(id,accs){
       +'<td><input class="cbin" data-k="accName" value="'+_eatt(x.accName||'')+'" placeholder="Account name"></td>'
       +'<td><input class="cbin mono" data-k="accNo" value="'+_eatt(x.accNo||'')+'" placeholder="000-0-00000-0"></td>'
       +'<td>'+_cbSelect('type',x.type||'Current',CB_TYPES)+'</td>'
+      +'<td class="c">'+_cbYnSel('collat',x.collat||'')+'</td>'
       +'<td>'+_cbSelect('ccy',x.ccy||'THB',CB_CCY)+'</td>'
       +'<td><input class="cbin num" data-k="bal" value="'+_eatt((x.bal!=null&&x.bal!=='')?_cbMoney(_cbNum(x.bal)):'')+'" placeholder="0.00" inputmode="decimal"></td>'
       +'<td><input class="cbin" data-k="asOf" type="date" value="'+_eatt(x.asOf||'')+'" style="min-width:130px"></td>'
       +'<td><span class="cbst '+st+'">'+_cbStatSel(st)+'</span></td>'
-      +'<td class="c"><div class="cbvf"><button type="button" class="cbvfb ok'+(vf==='ok'?' on':'')+'" data-cbvf="ok" title="ถูก — อนุญาตให้ส่งหนังสือยืนยันยอด">✓</button><button type="button" class="cbvfb bad'+(vf==='bad'?' on':'')+'" data-cbvf="bad" title="ผิด — ห้ามส่งหนังสือยืนยันยอด">✗</button></div></td>'
+      +'<td class="c"><div class="cbvf"><button type="button" class="cbvfb ok'+(vf==='ok'?' on':'')+'" data-cbvf="ok" title="Deduct bank fee — อนุญาตให้ส่งหนังสือยืนยันยอด">✓</button><button type="button" class="cbvfb bad'+(vf==='bad'?' on':'')+'" data-cbvf="bad" title="ไม่หักค่าธรรมเนียม — ห้ามส่งหนังสือยืนยันยอด">✗</button></div></td>'
       +'<td class="c"><button type="button" class="cbsend'+(canSend?'':' off')+'" data-cbsend="1"'+(canSend?'':' disabled')+' title="'+(canSend?'ส่ง / พิมพ์หนังสือยืนยันยอดธนาคาร':'ต้องกด ✓ ถูก ก่อน จึงจะส่งได้')+'">📄 ส่ง</button></td>'
       +'<td><button class="cbdel" data-cbdel="'+id+'" data-i="'+i+'" title="Delete account">🗑</button></td></tr>';
   });
   var thb=_cbCoTotal(id);
-  h+='</tbody><tfoot><tr><td colspan="7">Total · '+accs.length+' account'+(accs.length===1?'':'s')+' (THB)</td><td class="r" data-cototal="'+id+'">฿'+_cbMoney(thb)+'</td><td colspan="5"></td></tr></tfoot></table></div>';
+  h+='</tbody><tfoot><tr><td colspan="8">Total · '+accs.length+' account'+(accs.length===1?'':'s')+' (THB)</td><td class="r" data-cototal="'+id+'">฿'+_cbMoney(thb)+'</td><td colspan="5"></td></tr></tfoot></table></div>';
   h+='<button class="cbadd" data-cbadd="'+id+'" type="button">＋ Add bank account</button>';
   return h;
 }
 function _cbSelect(k,val,opts){var s='<select class="cbsel" data-k="'+k+'">';for(var i=0;i<opts.length;i++){s+='<option'+(opts[i]===val?' selected':'')+'>'+opts[i]+'</option>';}return s+'</select>';}
+function _cbYnSel(k,val){var opts=[['','\u2014'],['Y','Y'],['N','N']];var s='<select class="cbsel cbyn" data-k="'+k+'">';for(var i=0;i<opts.length;i++){s+='<option value="'+opts[i][0]+'"'+(opts[i][0]===val?' selected':'')+'>'+opts[i][1]+'</option>';}return s+'</select>';}
 function _cbStatSel(val){var s='<select data-k="status">';for(var i=0;i<CB_STAT.length;i++){s+='<option value="'+CB_STAT[i][0]+'"'+(CB_STAT[i][0]===val?' selected':'')+'>'+CB_STAT[i][1]+'</option>';}return s+'</select>';}
 function _cbUpdModalTotals(id){
   var thb=_cbCoTotal(id);
@@ -14050,7 +14063,7 @@ function _cbRenderModal(){
 function _cbModalClick(e){
   var t=e.target,cl=function(s){return t.closest?t.closest(s):null;};
   var add=cl('[data-cbadd]');
-  if(add){var id=add.getAttribute('data-cbadd');var a=_cbAccs(id);a.push({bank:'',branch:'',addr:'',accName:'',accNo:'',type:'Current',ccy:'THB',bal:'',asOf:'',status:'none',verify:'',note:''});saveCb();_cbRenderModal();return;}
+  if(add){var id=add.getAttribute('data-cbadd');var a=_cbAccs(id);a.push({bank:'',branch:'',addr:'',accName:'',accNo:'',type:'Current',collat:'',ccy:'THB',bal:'',asOf:'',status:'none',verify:'',note:''});saveCb();_cbRenderModal();return;}
   var del=cl('[data-cbdel]');
   if(del){var id2=del.getAttribute('data-cbdel'),i=+del.getAttribute('data-i');var a2=_cbAccs(id2);if(i>=0&&i<a2.length&&confirm('ลบบัญชีธนาคารนี้? · Delete this bank account?')){a2.splice(i,1);saveCb();_cbRenderModal();}return;}
   var vf=cl('[data-cbvf]');
