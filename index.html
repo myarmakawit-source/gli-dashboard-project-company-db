@@ -12203,21 +12203,37 @@ function _fsTplModel(){
   ppush('line','กำไรต่อหุ้นขั้นพื้นฐาน (บาท)','',null,null);
 
   /* ---------- Statement of Changes in Equity (simplified 5-column) ---------- */
-  var socCols=['ทุนที่ออกและชำระแล้ว','สำรองตามกฎหมาย','กำไร(ขาดทุน)สะสม','องค์ประกอบอื่นของส่วนของผู้ถือหุ้น','รวม'];
-  function eqVec(agg,T){ var sc=_fsTplLine(agg,'E','Share capital'),lr=_fsTplLine(agg,'E','Legal reserve'),oc=_fsTplLine(agg,'E','Other components of equity')+_fsTplLine(agg,'E','Share premium')+_fsTplLine(agg,'E','Other equity'),re=T.accProfit; return [sc,lr,re,oc,sc+lr+re+oc]; }
+  var socCols=['ทุนที่ออกและ ชำระแล้ว','สำรอง ตามกฎหมาย','กำไร(ขาดทุน) สะสม','องค์ประกอบอื่น ของส่วนของ ผู้ถือหุ้น','รวม'];
+  /* equity vector [ทุน, สำรองตามกฎหมาย, กำไรสะสม, องค์ประกอบอื่น, รวม] — total ties to the balance-sheet
+     equity (T.equity + T.accProfit): RE = ยอดบัญชีกำไรสะสม + กำไรสะสมจาก P&L; other = ส่วนของผู้ถือหุ้นที่เหลือ */
+  function eqVec(agg,T){ var sc=_fsTplLine(agg,'E','Share capital'),lr=_fsTplLine(agg,'E','Legal reserve'),reAcct=_fsTplLine(agg,'E','Retained earnings'),re=reAcct+T.accProfit,oc=(T.equity-sc-lr-reAcct); return [sc,lr,re,oc,sc+lr+re+oc]; }
   var soc={cols:socCols,rows:[]};
   var curV=eqVec(gc,Tc);
+  var _socCurBE=_fsTplCurBE(), _socPrevBE=_fsTplPrevBE();
+  /* v9.95: full two-year statement of changes in equity (ปีก่อน + ปีปัจจุบัน) */
+  function _socMove(fromV,toV,net){ var m=[toV[0]-fromV[0], toV[1]-fromV[1], toV[2]-fromV[2]-net, toV[3]-fromV[3], 0]; m[4]=m[0]+m[1]+m[2]+m[3]; return m; }
+  function _socNZ(v){ for(var i=0;i<v.length;i++) if(Math.abs(v[i])>=0.005) return true; return false; }
   if(hp){
-    var begV=eqVec(gp,Tp);
-    soc.rows.push({label:'ยอดคงเหลือ ณ วันต้นปี',v:begV.slice()});
-    var profV=[0,0,Tc.netProfit,0,Tc.netProfit];
-    soc.rows.push({label:'กำไร(ขาดทุน)เบ็ดเสร็จรวมสำหรับปี',v:profV});
-    var othV=[curV[0]-begV[0], curV[1]-begV[1], curV[2]-begV[2]-Tc.netProfit, curV[3]-begV[3], 0];
-    othV[4]=othV[0]+othV[1]+othV[2]+othV[3];
-    soc.rows.push({label:'เงินปันผลจ่าย / รายการกับผู้ถือหุ้นและรายการอื่น',v:othV});
-    soc.rows.push({label:'ยอดคงเหลือ ณ วันสิ้นปี',v:curV.slice(),bold:true});
+    var begV=eqVec(gp,Tp);   /* ยอดสิ้นปีก่อน = ยอดต้นปีปัจจุบัน */
+    /* prior-year opening equity: share capital/legal reserve/other from _fsPrevTB opening balances;
+       retained earnings carried forward = accumulated P&L before the prior year (Tp.accProfit − Tp.netProfit) */
+    var pOpen=[0,0,0,0,0], _pReA=0, _pEqTot=0;
+    if(_fsPrevTB)_fsPrevTB.forEach(function(x){ if(!x.cls||x.cls.cat!=='E')return; var ln=x.cls.line, ov=+x.openNat||0; _pEqTot+=ov;
+      if(ln==='Share capital')pOpen[0]+=ov; else if(ln==='Legal reserve')pOpen[1]+=ov; else if(ln==='Retained earnings')_pReA+=ov; });
+    pOpen[2]=_pReA+(Tp.accProfit-Tp.netProfit); pOpen[3]=_pEqTot-pOpen[0]-pOpen[1]-_pReA; pOpen[4]=pOpen[0]+pOpen[1]+pOpen[2]+pOpen[3];
+    /* ---- prior year (ปีก่อน) ---- */
+    soc.rows.push({label:'ยอดคงเหลือ ณ วันต้นปี '+_socPrevBE,v:pOpen.slice(),bold:true});
+    soc.rows.push({label:'กำไร(ขาดทุน)เบ็ดเสร็จรวมสำหรับปี '+_socPrevBE,v:[0,0,Tp.netProfit,0,Tp.netProfit]});
+    var pOth=_socMove(pOpen,begV,Tp.netProfit);
+    if(_socNZ(pOth))soc.rows.push({label:'เงินปันผลจ่าย / รายการกับผู้ถือหุ้นและรายการอื่น '+_socPrevBE,v:pOth});
+    soc.rows.push({label:'ยอดคงเหลือ ณ วันสิ้นปี '+_socPrevBE,v:begV.slice(),bold:true});
+    /* ---- current year (ปีปัจจุบัน) ---- */
+    soc.rows.push({label:'กำไร(ขาดทุน)เบ็ดเสร็จรวมสำหรับปี '+_socCurBE,v:[0,0,Tc.netProfit,0,Tc.netProfit]});
+    var cOth=_socMove(begV,curV,Tc.netProfit);
+    if(_socNZ(cOth))soc.rows.push({label:'เงินปันผลจ่าย / รายการกับผู้ถือหุ้นและรายการอื่น '+_socCurBE,v:cOth});
+    soc.rows.push({label:'ยอดคงเหลือ ณ วันสิ้นปี '+_socCurBE,v:curV.slice(),bold:true});
   } else {
-    soc.rows.push({label:'ยอดคงเหลือ ณ วันสิ้นปี',v:curV.slice(),bold:true});
+    soc.rows.push({label:'ยอดคงเหลือ ณ วันสิ้นปี '+_socCurBE,v:curV.slice(),bold:true});
     soc.note='* แสดงเฉพาะยอดคงเหลือปลายปี — ต้องมีข้อมูลปีก่อนจึงจะแสดงการเปลี่ยนแปลงระหว่างปีได้';
   }
 
@@ -12367,7 +12383,7 @@ function _fsPrintTpl(){
     });
     return h+'</tbody></table>';
   }
-  function page(title,dateLine,inner,fit){ return '<section class="pg'+(fit?' pgfit':'')+'"><div class="pgin"><div class="hd"><div class="co">'+E(m.co)+'</div><div class="ti">'+E(title)+'</div><div class="dt">'+E(dateLine)+'</div></div>'+inner+'</div></section>'; }
+  function page(title,dateLine,inner,fit,cls){ return '<section class="pg'+(fit?' pgfit':'')+(cls?(' '+cls):'')+'"><div class="pgin"><div class="hd"><div class="co">'+E(m.co)+'</div><div class="ti">'+E(title)+'</div><div class="dt">'+E(dateLine)+'</div></div>'+inner+'</div></section>'; }
   var socInner='<table class="fst soc"><thead><tr><th class="l"></th>'+m.soc.cols.map(function(c){return '<th class="v">'+E(c)+'</th>';}).join('')+'</tr></thead><tbody>'
     + m.soc.rows.map(function(r){ return '<tr class="'+(r.bold?'tot':'ln')+'"><td class="l">'+E(r.label)+'</td>'+r.v.map(function(x){return '<td class="v">'+amt(x)+'</td>';}).join('')+'</tr>'; }).join('')
     + '</tbody></table>'+(m.soc.note?('<div class="nt">'+E(m.soc.note)+'</div>'):'');
@@ -12386,15 +12402,15 @@ function _fsPrintTpl(){
     +'@page{size:A4;margin:0}*{box-sizing:border-box}'+'body{font-family:"Angsana New","AngsanaUPC","TH Sarabun New","Sarabun",serif;color:#000;font-size:18px;margin:0;padding:0;-webkit-font-smoothing:antialiased}'
     /* v9.85: each statement fits exactly ONE A4 page — .pgfit is auto-scaled down by script if it
        would overflow; the multi-page notes flow normally. */
-    +'.pg{page-break-after:always;margin:0 auto}.pg:last-child{page-break-after:auto}.pgin{width:690px;margin:0 auto;padding-top:12mm;transform-origin:top center}.pgfit{overflow:hidden}.pgnotes .pgin{padding-top:0}.ntwrap{width:100%;border-collapse:collapse}.ntwrap td{padding:0;vertical-align:top}.ntpad{height:12mm}'+'.hd{text-align:center;margin-bottom:9px}'+'.hd .co{font-weight:700;font-size:21px;line-height:1.22;color:#000}'+'.hd .ti{font-weight:700;font-size:19px;margin-top:1px;color:#000}'+'.hd .dt{font-weight:400;font-size:18px;margin-top:1px;color:#000}'+'table.fst{width:100%;border-collapse:collapse;font-size:18px}'+'table.fst th,table.fst td{padding:2px 8px;vertical-align:baseline}'+'table.fst thead th{font-weight:700;text-align:center;color:#000}'+'table.fst thead tr:first-child th.n,table.fst thead tr:first-child th.v{border-bottom:1px solid #000}'+'table.fst th.l{text-align:left}'+'.fst .v{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;width:130px}'+'.fst .n{text-align:center;width:52px;font-style:italic;color:#000}'+'.fst tr.u th{border:none;color:#000;font-weight:400;font-style:italic;padding-top:0}'+'.fst tr.sec td{font-weight:700;padding-top:11px;padding-bottom:1px;color:#000}'+'.fst tr.sub td{font-weight:700;font-style:italic;padding-top:6px;color:#000}'+'.fst tr.ln td.l{padding-left:22px;color:#000}'+'.fst tr.stot td{font-weight:700}.fst tr.stot td.l{padding-left:22px}.fst tr.stot .v,.fst tr.stot .n{border-top:1px solid #000;border-bottom:1px solid #000;color:#000}'+'.fst tr.tot td{font-weight:700;color:#000}.fst tr.tot .v,.fst tr.tot .n{border-top:1px solid #000;border-bottom:3px double #000}'+'.fst tr.warn td{color:#000}.fst.soc .v{width:auto}.fst.sm .v{width:150px}'+'.nt{font-size:16px;color:#000;margin-top:7px;font-style:italic}'+'.note{margin:0 0 12px;break-inside:avoid}.note .nh{font-weight:700;font-size:19px;margin:9px 0 3px;color:#000;border-bottom:1px solid #000;padding-bottom:2px}.note p{margin:2px 0;text-indent:0;line-height:1.5}'+'.toolbar{position:fixed;top:8px;right:10px;background:#0E5C52;color:#fff;padding:8px 12px;border-radius:8px;font-family:sans-serif;font-size:13px;z-index:9;box-shadow:0 3px 12px rgba(0,0,0,.18)}.toolbar button{font:inherit;border:none;background:#fff;color:#0E5C52;font-weight:800;border-radius:6px;padding:5px 10px;cursor:pointer;margin-left:6px}@media print{.toolbar{display:none}}'
+    +'.pg{page-break-after:always;margin:0 auto}.pg:last-child{page-break-after:auto}.pgin{width:690px;margin:0 auto;padding-top:12mm;transform-origin:top center}.pgfit{overflow:hidden}.pgnotes .pgin{padding-top:0}.ntwrap{width:100%;border-collapse:collapse}.ntwrap td{padding:0;vertical-align:top}.ntpad{height:12mm}'+'.hd{text-align:center;margin-bottom:9px}'+'.hd .co{font-weight:700;font-size:21px;line-height:1.22;color:#000}'+'.hd .ti{font-weight:700;font-size:19px;margin-top:1px;color:#000}'+'.hd .dt{font-weight:400;font-size:18px;margin-top:1px;color:#000}'+'table.fst{width:100%;border-collapse:collapse;font-size:18px}'+'table.fst th,table.fst td{padding:2px 8px;vertical-align:baseline}'+'.pgdense table.fst{font-size:13px}.pgdense table.fst th,.pgdense table.fst td{padding:1px 8px}'+'table.fst thead th{font-weight:700;text-align:center;color:#000}'+'table.fst thead tr:first-child th.n,table.fst thead tr:first-child th.v{border-bottom:1px solid #000}'+'table.fst th.l{text-align:left}'+'.fst .v{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;width:130px}'+'.fst .n{text-align:center;width:52px;font-style:italic;color:#000}'+'.fst tr.u th{border:none;color:#000;font-weight:400;font-style:italic;padding-top:0}'+'.fst tr.sec td{font-weight:700;padding-top:11px;padding-bottom:1px;color:#000}'+'.fst tr.sub td{font-weight:700;font-style:italic;padding-top:6px;color:#000}'+'.fst tr.ln td.l{padding-left:22px;color:#000}'+'.fst tr.stot td{font-weight:700}.fst tr.stot td.l{padding-left:22px}.fst tr.stot .v,.fst tr.stot .n{border-top:1px solid #000;border-bottom:1px solid #000;color:#000}'+'.fst tr.tot td{font-weight:700;color:#000}.fst tr.tot .v,.fst tr.tot .n{border-top:1px solid #000;border-bottom:3px double #000}'+'.fst tr.warn td{color:#000}.fst.sm .v{width:150px}'+'.fst.soc{table-layout:fixed}.fst.soc th,.fst.soc td{padding:3px 4px;font-size:13.5px}.fst.soc thead th{white-space:normal;word-break:break-word;vertical-align:bottom;line-height:1.18;font-size:12px}.fst.soc td.l,.fst.soc th.l{width:22%;white-space:normal}.fst.soc tr.ln td.l,.fst.soc tr.tot td.l{padding-left:4px}.fst.soc .v{width:15.6%}.fst.soc tbody .v{white-space:nowrap}'+'.nt{font-size:16px;color:#000;margin-top:7px;font-style:italic}'+'.note{margin:0 0 12px;break-inside:avoid}.note .nh{font-weight:700;font-size:19px;margin:9px 0 3px;color:#000;border-bottom:1px solid #000;padding-bottom:2px}.note p{margin:2px 0;text-indent:0;line-height:1.5}'+'.toolbar{position:fixed;top:8px;right:10px;background:#0E5C52;color:#fff;padding:8px 12px;border-radius:8px;font-family:sans-serif;font-size:13px;z-index:9;box-shadow:0 3px 12px rgba(0,0,0,.18)}.toolbar button{font:inherit;border:none;background:#fff;color:#0E5C52;font-weight:800;border-radius:6px;padding:5px 10px;cursor:pointer;margin-left:6px}@media print{.toolbar{display:none}}'
     +'</style></head><body>'
     +'<div class="toolbar noprint">🖨 บันทึกเป็น PDF ได้จากหน้าต่างพิมพ์ <button onclick="window.print()">พิมพ์ / PDF</button></div>'
-    +page('งบแสดงฐานะการเงิน','ณ วันที่ 31 ธันวาคม '+m.curBE,stmtTable(m.bs),true)
+    +page('งบแสดงฐานะการเงิน','ณ วันที่ 31 ธันวาคม '+m.curBE,stmtTable(m.bs),true,'pgdense')
     +page('งบกำไรขาดทุนเบ็ดเสร็จ','สำหรับปีสิ้นสุดวันที่ 31 ธันวาคม '+m.curBE,stmtTable(m.pl),true)
     +page('งบแสดงการเปลี่ยนแปลงส่วนของผู้ถือหุ้น','สำหรับปีสิ้นสุดวันที่ 31 ธันวาคม '+m.curBE,socInner,true)
     +page('งบกระแสเงินสด','สำหรับปีสิ้นสุดวันที่ 31 ธันวาคม '+m.curBE,cfInner,true)
     +'<section class="pg pgnotes"><div class="pgin"><table class="ntwrap"><thead><tr><td><div class="ntpad"></div></td></tr></thead><tbody><tr><td><div class="hd"><div class="co">'+E(m.co)+'</div><div class="ti">หมายเหตุประกอบงบการเงิน</div><div class="dt">สำหรับปีสิ้นสุดวันที่ 31 ธันวาคม '+E(m.curBE)+'</div></div>'+notesInner+'</td></tr></tbody><tfoot><tr><td><div class="ntpad"></div></td></tr></tfoot></table></div></section>'
-    +'<scr'+'ipt>(function(){function fit(){var TH=1010,TW=700,pgs=document.querySelectorAll(".pgfit");for(var i=0;i<pgs.length;i++){var pg=pgs[i],inner=pg.querySelector(".pgin");if(!inner)continue;inner.style.transform="none";pg.style.height="";var h=inner.scrollHeight,w=inner.scrollWidth,s=Math.min(1,TH/h,TW/w);if(s<1)inner.style.transform="scale("+s+")";pg.style.height=Math.ceil(h*s)+"px";}}try{fit();}catch(e){}setTimeout(function(){try{window.print();}catch(e){}},350);})();</scr'+'ipt></body></html>';
+    +'<scr'+'ipt>(function(){function fit(){var TH=1072,TW=748,pgs=document.querySelectorAll(".pgfit");for(var i=0;i<pgs.length;i++){var pg=pgs[i],inner=pg.querySelector(".pgin");if(!inner)continue;inner.style.transform="none";pg.style.height="";var h=inner.scrollHeight,w=inner.scrollWidth,s=Math.min(TH/h,TW/w);if(s>1.7)s=1.7;if(Math.abs(s-1)>0.004)inner.style.transform="scale("+s+")";pg.style.height=Math.ceil(h*s)+"px";}}try{fit();}catch(e){}setTimeout(function(){try{window.print();}catch(e){}},350);})();</scr'+'ipt></body></html>';
   var w=window.open('','_blank'); if(!w){alert('โปรดอนุญาตป๊อปอัป (pop-up) เพื่อพิมพ์งบการเงิน');return;}
   w.document.open(); w.document.write(html); w.document.close();
 }
