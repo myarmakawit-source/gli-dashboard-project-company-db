@@ -3116,6 +3116,26 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-fs .fsann-cmp.dim{color:var(--fx-muted);background:var(--fx-tint);border-color:var(--fx-hair);font-weight:700}
 #page-fs .fsmon-yr{font-size:11px;font-weight:800;color:var(--fx-brand-d);white-space:nowrap;letter-spacing:.01em}
 #page-fs .fsmon-w.on .fsmon-yr{color:var(--fx-gold-d)}
+/* ---- v9.90: expense drill-down pop-up (งบส่วนของค่าใช้จ่าย · จัดกลุ่มตามประเภท) ---- */
+#page-fs .fsxpop{margin-left:10px;font:inherit;font-size:10.5px;font-weight:800;color:var(--fx-gold-d);
+  background:var(--fx-gold-t);border:1px solid #E7CF97;border-radius:999px;padding:2px 10px;cursor:pointer;
+  vertical-align:middle;white-space:nowrap;transition:background .12s,border-color .12s,transform .12s}
+#page-fs .fsxpop:hover{background:#FBEFCF;border-color:var(--fx-gold);transform:translateY(-1px)}
+#page-fs .fsxpm-modal{width:min(780px,96vw)}
+#page-fs .fsxpm-wrap{max-height:60vh;overflow:auto;border:1px solid var(--fx-hair);border-radius:11px}
+#page-fs .fsxpm-t{width:100%;border-collapse:collapse;font-size:12.5px}
+#page-fs .fsxpm-t thead th{position:sticky;top:0;z-index:1;background:var(--fx-brand-d);color:#fff;font-weight:700;
+  text-align:left;padding:8px 11px;font-size:11.5px;white-space:nowrap}
+#page-fs .fsxpm-t thead th.fsm{text-align:right}
+#page-fs .fsxpm-t td{padding:6px 11px;border-top:1px solid var(--fx-hair);vertical-align:top}
+#page-fs .fsxpm-t td.fsm{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+#page-fs .fsxpm-gh td{background:var(--fx-tint);font-weight:800;color:var(--fx-brand-d);border-top:2px solid var(--fx-brand-l)}
+#page-fs .fsxpm-r .fsxpm-c{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--fx-muted);white-space:nowrap}
+#page-fs .fsxpm-r .fsxpm-n{color:var(--fx-ink)}
+#page-fs .fsxpm-tot td{background:var(--fx-brand-d);color:#fff;font-weight:800;border-top:2px solid var(--fx-brand-d)}
+#page-fs .fsxpm-tot td.fsm{color:#fff}
+#page-fs .fsxpm-t .fsprev{color:var(--fx-muted)}
+#page-fs .fsxpm-tot .fsprev{color:#DCEBE6}
 
 /* =====================================================================
    TB reconciliation panel
@@ -10031,7 +10051,7 @@ var _FS_PL_GROUPS=[
  {sec:'R',key:'rev_jv',th:'ส่วนแบ่งกำไรจากการร่วมค้าและบริษัทร่วม',en:'Share of profit of JV/associates',members:['Share of profit of JV']},
  {sec:'R',key:'rev_other',th:'รายได้อื่น',en:'Other income',members:['Other income']},
  {sec:'X',key:'cogs',th:'ต้นทุนขาย',en:'Cost of sales',members:['Cost of construction','Cost of sales / services']},
- {sec:'X',key:'distribution',th:'ต้นทุนในการจัดจำหน่าย',en:'Distribution costs',members:['Selling expenses']},
+ {sec:'X',key:'distribution',th:'ค่าใช้จ่ายในการขาย',en:'Selling expenses',members:['Selling expenses']},
  {sec:'X',key:'admin',th:'ค่าใช้จ่ายในการบริหาร',en:'Administrative expenses',members:['Administrative expenses']},
  {sec:'X',key:'other_exp',th:'ค่าใช้จ่ายอื่น',en:'Other expenses',members:['Other expenses']},
  {sec:'X',key:'fin_cost',th:'ต้นทุนทางการเงิน',en:'Finance costs',members:['Finance costs']},
@@ -10063,7 +10083,7 @@ var _FS_LINE_TH={
  'Retained earnings':'กำไร(ขาดทุน)สะสม','Retained earnings (incl. result for the year)':'กำไร(ขาดทุน)สะสม (รวมผลปีปัจจุบัน)',
  'Other components of equity':'องค์ประกอบอื่นของส่วนของผู้ถือหุ้น','Other equity':'ส่วนของผู้ถือหุ้นอื่น',
  'Construction revenue':'รายได้จากการก่อสร้างตามสัญญา','Service revenue':'รายได้จากการให้บริการและค่าเช่า','Sales revenue':'รายได้จากการขาย','Other income':'รายได้อื่น',
- 'Cost of construction':'ต้นทุนขาย (งานก่อสร้าง)','Cost of sales / services':'ต้นทุนขาย (สินค้า/บริการ)','Selling expenses':'ต้นทุนในการจัดจำหน่าย',
+ 'Cost of construction':'ต้นทุนขาย (งานก่อสร้าง)','Cost of sales / services':'ต้นทุนขาย (สินค้า/บริการ)','Selling expenses':'ค่าใช้จ่ายในการขาย',
  'Administrative expenses':'ค่าใช้จ่ายในการบริหาร','Finance costs':'ต้นทุนทางการเงิน','Income tax expense':'ค่าใช้จ่าย(รายได้)ภาษีเงินได้','Other expenses':'ค่าใช้จ่ายอื่น',
  'Other':'อื่นๆ'};
 function _fsLineTh(line){ return _FS_LINE_TH[line]||line; }
@@ -10093,7 +10113,7 @@ var _FS_LINE_EN={
  'Retained earnings':'Retained earnings (deficit)','Retained earnings (incl. result for the year)':'Retained earnings (incl. current year)',
  'Other components of equity':'Other components of equity','Other equity':'Other equity',
  'Construction revenue':'Revenue \u2014 construction','Service revenue':'Revenue \u2014 services','Sales revenue':'Revenue \u2014 sales','Other income':'Other income',
- 'Cost of construction':'Cost of sales \u2014 construction','Cost of sales / services':'Cost of sales \u2014 goods/services','Selling expenses':'Distribution costs',
+ 'Cost of construction':'Cost of sales \u2014 construction','Cost of sales / services':'Cost of sales \u2014 goods/services','Selling expenses':'Selling expenses',
  'Administrative expenses':'Administrative expenses','Finance costs':'Finance costs','Income tax expense':'Tax expense (income)','Other expenses':'Other expenses'};
 function _fsLineEn(line){ return _FS_LINE_EN[line]||line; }
 /* v9.46: icon per FS line — ทำหัวข้อกระดาษทำการให้สวย + สื่อความหมาย */
@@ -10515,7 +10535,8 @@ function _fsDrillRow(key,th,en,sum,prev,accts,ctx,opts){
   var lead=n>0?('<span class="fsgc">▸</span>'):'<span class="fsgc fsgc-none"></span>';
   var cnt=n>0?(' <span class="fsgn">'+n+' บัญชี</span>'):'';
   var cls='fsgrprow'+(opts.cls?(' '+opts.cls):'')+(n>0?'':' fsgrp-flat');
-  var row='<tr class="'+cls+'"'+(n>0?' data-fsgrp="'+key+'"':'')+'><td class="fsbsth">'+lead+_fsE(th)+cnt+'</td><td class="fsbsen">'+_fsE(en)+'</td>'+
+  var pop=opts.popKey?(' <button class="fsxpop" type="button" data-fsxpop="'+opts.popKey+'" title="ดูงบส่วนของค่าใช้จ่ายนี้ · จัดกลุ่มตามประเภท (Pop-up)">📊 ดูงบแยกประเภท</button>'):'';
+  var row='<tr class="'+cls+'"'+(n>0?' data-fsgrp="'+key+'"':'')+'><td class="fsbsth">'+lead+_fsE(th)+cnt+pop+'</td><td class="fsbsen">'+_fsE(en)+'</td>'+
     '<td class="fsm">'+_fsMoney(sum)+'</td>'+(ctx.hasPrev?'<td class="fsm fsprev">'+_fsMoney(prev,true)+'</td>':'')+'</tr>';
   if(n>0)row+='<tr class="fsgrpdetr" hidden><td class="fsgrpdetc" colspan="'+ctx.nspan+'">'+_fsDetHtml(accts,ctx,opts)+'</td></tr>';
   return row;
@@ -10613,18 +10634,18 @@ function _fsRenderPL(){
   var prevByCode={}; if(_fsPrevTB)_fsPrevTB.forEach(function(x){prevByCode[x.code]=x.nat;});
   var ctx={hasPrev:pc,yC:'ปีล่าสุด',yP:pc?'ปีก่อนหน้า':'',nspan:nspan,prevByCode:prevByCode};
   var assigned={};
-  function grp(key){ var G=null; for(var i=0;i<_FS_PL_GROUPS.length;i++){ if(_FS_PL_GROUPS[i].key===key){G=_FS_PL_GROUPS[i];break;} }
+  function grp(key,opts){ var G=null; for(var i=0;i<_FS_PL_GROUPS.length;i++){ if(_FS_PL_GROUPS[i].key===key){G=_FS_PL_GROUPS[i];break;} }
     var src=(G.sec==='R')?g.R:g.X, psrc=pg?((G.sec==='R')?pg.R:pg.X):null;
     var s=0,p=0,accts=[],any=false;
     G.members.forEach(function(m){ assigned[G.sec+'|'+m]=1; var o=src[m]; if(o){any=true;s+=o.sum;accts=accts.concat(o.accts);} var po=psrc&&psrc[m]; if(po)p+=po.sum; });
-    return {s:s,p:p,h:(any||Math.abs(s)>0.005)?_fsDrillRow(G.key,G.th,G.en,s,p,accts,ctx):''}; }
+    return {s:s,p:p,h:(any||Math.abs(s)>0.005)?_fsDrillRow(G.key,G.th,G.en,s,p,accts,ctx,opts):''}; }
   function loose(sec,thL,enL){ var s=0,p=0,accts=[]; var src=(sec==='R')?g.R:g.X, psrc=pg?((sec==='R')?pg.R:pg.X):null;
     Object.keys(src).forEach(function(ln){ if(assigned[sec+'|'+ln])return; var o=src[ln]; s+=o.sum; accts=accts.concat(o.accts); var po=psrc&&psrc[ln]; if(po)p+=po.sum; });
     return {s:s,p:p,h:(accts.length||Math.abs(s)>0.005)?_fsDrillRow('pl_other_'+sec,thL,enL,s,p,accts,ctx):''}; }
   function sub(lbl){return '<tr class="fssubh"><td colspan="'+nspan+'">'+lbl+'</td></tr>';}
   function tot(th,en,v,pv,cls){return '<tr class="'+(cls||'fssub')+'"><td class="fsbsth">'+th+'</td><td class="fsbsen">'+en+'</td><td class="fsm">'+_fsMoney(v)+'</td>'+(pc?'<td class="fsm fsprev">'+_fsMoney(pv,true)+'</td>':'')+'</tr>';}
   var con=grp('rev_construction'),svc=grp('rev_service'),sal=grp('rev_sales'),finI=grp('rev_finance'),jv=grp('rev_jv'),othR=grp('rev_other');
-  var cogs=grp('cogs'),dist=grp('distribution'),adm=grp('admin'),oth=grp('other_exp'),fin=grp('fin_cost'),tax=grp('tax_exp');
+  var cogs=grp('cogs'),dist=grp('distribution',{popKey:'distribution'}),adm=grp('admin',{popKey:'admin'}),oth=grp('other_exp',{popKey:'other_exp'}),fin=grp('fin_cost'),tax=grp('tax_exp');
   var loR=loose('R','รายได้อื่น ๆ','Other revenue'), loX=loose('X','ค่าใช้จ่ายอื่น ๆ','Other');
   var opRev=con.s+svc.s+sal.s, popRev=con.p+svc.p+sal.p;
   var othRev=finI.s+jv.s+othR.s+loR.s, pothRev=finI.p+jv.p+othR.p+loR.p;
@@ -10650,9 +10671,68 @@ function _fsRenderPL(){
   var gm=(opRev>0)?((gross/opRev*100).toFixed(1)+'%'):'—', nm=(totRev>0)?((np/totRev*100).toFixed(1)+'%'):'—';
   return '<div class="fsstmtwrap"><div class="fsst-h"><span class="fssth-en">STATEMENT OF COMPREHENSIVE INCOME</span><span class="fssth-th">งบกำไรขาดทุนเบ็ดเสร็จ · จำแนกค่าใช้จ่ายตามหน้าที่ (แบบหลายขั้น · อ.3)</span></div>'+
     '<table class="fstable fsstmt fsbs2">'+COLS+head+'<tbody>'+body+'</tbody></table>'+
-    '<p class="fsnote">จำแนกค่าใช้จ่ายตามหน้าที่ (แบบหลายขั้น) ตามแบบ อ.3 · รายได้แยกเป็น ก่อสร้าง/บริการ-เช่า/ขาย/ดอกเบี้ย-การเงิน/ส่วนแบ่งร่วมค้า/อื่น · หมวด 5 = ต้นทุนขาย · หมวด 6 = ต้นทุนในการจัดจำหน่าย + ค่าใช้จ่ายในการบริหาร · หมวด 7 = ต้นทุนทางการเงิน/ค่าใช้จ่ายอื่น · อัตรากำไรขั้นต้น '+gm+' · อัตรากำไรสุทธิ '+nm+'</p></div>';
+    '<p class="fsnote">จำแนกค่าใช้จ่ายตามหน้าที่ (แบบหลายขั้น) ตามแบบ อ.3 · รายได้แยกเป็น ก่อสร้าง/บริการ-เช่า/ขาย/ดอกเบี้ย-การเงิน/ส่วนแบ่งร่วมค้า/อื่น · หมวด 5 = ต้นทุนขาย · หมวด 6 = ค่าใช้จ่ายในการขาย + ค่าใช้จ่ายในการบริหาร · หมวด 7 = ต้นทุนทางการเงิน/ค่าใช้จ่ายอื่น · อัตรากำไรขั้นต้น '+gm+' · อัตรากำไรสุทธิ '+nm+'</p></div>';
 }
 
+/* ---------- v9.90: Expense drill-down pop-up — งบส่วนของค่าใช้จ่าย จัดกลุ่มตามประเภท (รหัสบัญชี) ---------- */
+function _fsExpTypeKey(code){ var c=(''+(code||'')).replace(/[^0-9A-Za-z]/g,''); return c.length>=4?c.slice(0,4):(c||'—'); }
+function _fsExpBreakdown(key){
+  if(!_fsTB) return null;
+  var G=null; for(var i=0;i<_FS_PL_GROUPS.length;i++){ if(_FS_PL_GROUPS[i].key===key){G=_FS_PL_GROUPS[i];break;} }
+  if(!G) return null;
+  var g=_fsAgg(_fsTB);
+  var prevByCode={}; if(_fsPrevTB)_fsPrevTB.forEach(function(x){ if(x.cls&&x.cls.cat==='X')prevByCode[x.code]=x.nat; });
+  var accts=[]; G.members.forEach(function(mn){ var o=g.X[mn]; if(o)accts=accts.concat(o.accts); });
+  var gm={},order=[];
+  accts.forEach(function(x){ var k=_fsExpTypeKey(x.code); var o=gm[k]; if(!o){o=gm[k]={key:k,accts:[],sum:0,psum:0};order.push(k);} o.accts.push(x); o.sum+=x.nat; o.psum+=(prevByCode[x.code]||0); });
+  order.sort();
+  var groups=order.map(function(k){var o=gm[k]; o.accts.sort(function(a,b){return (''+a.code)<(''+b.code)?-1:((''+a.code)>(''+b.code)?1:0);}); return o;});
+  var total=0,ptotal=0; groups.forEach(function(o){total+=o.sum;ptotal+=o.psum;});
+  return {key:key,th:G.th,en:G.en,groups:groups,total:total,ptotal:ptotal,hasPrev:!!_fsPrevTB,prevByCode:prevByCode};
+}
+var _fsExpEsc=null;
+function _fsExpModalClose(){ var m=document.getElementById('fsExpModal'); if(m&&m.parentNode)m.parentNode.removeChild(m);
+  try{if(_fsExpEsc){document.removeEventListener('keydown',_fsExpEsc);_fsExpEsc=null;}}catch(e){}
+  try{document.body.style.overflow='';}catch(e){} }
+function _fsExpModal(key){
+  var B=_fsExpBreakdown(key); if(!B){alert('ยังไม่มีข้อมูล GL สำหรับค่าใช้จ่ายนี้');return;}
+  _fsExpModalClose();
+  var hp=B.hasPrev, ycLbl=_fsCurFYLabel(), ypLbl=_fsPrevFYLabel(), nAcc=0, rows='';
+  B.groups.forEach(function(o){ nAcc+=o.accts.length;
+    rows+='<tr class="fsxpm-gh"><td class="fsxpm-c">'+_fsE(o.key)+'…</td><td>กลุ่มรหัส '+_fsE(o.key)+' · '+o.accts.length+' บัญชี</td><td class="fsm">'+_fsMoney(o.sum)+'</td>'+(hp?'<td class="fsm fsprev">'+_fsMoney(o.psum,true)+'</td>':'')+'</tr>';
+    o.accts.forEach(function(x){ rows+='<tr class="fsxpm-r"><td class="fsxpm-c">'+_fsE(x.code)+'</td><td class="fsxpm-n" title="'+_fsE(x.name)+'">'+_fsE(x.name)+'</td><td class="fsm">'+_fsMoney(x.nat)+'</td>'+(hp?'<td class="fsm fsprev">'+_fsMoney(B.prevByCode[x.code]||0,true)+'</td>':'')+'</tr>'; });
+  });
+  var head='<tr><th class="fsxpm-c">Code</th><th>บัญชี</th><th class="fsm">'+_fsE(ycLbl)+'</th>'+(hp?'<th class="fsm">'+_fsE(ypLbl)+'</th>':'')+'</tr>';
+  var totrow='<tr class="fsxpm-tot"><td colspan="2">รวม '+_fsE(B.th)+'</td><td class="fsm">'+_fsMoney(B.total)+'</td>'+(hp?'<td class="fsm fsprev">'+_fsMoney(B.ptotal,true)+'</td>':'')+'</tr>';
+  var html='<div class="rt-modal-ov" id="fsExpModal"><div class="rt-modal fsxpm-modal" role="dialog" aria-modal="true">'+
+    '<button class="rt-modal-x" type="button" aria-label="ปิด">✕</button>'+
+    '<div class="rt-modal-hd rt-ok"><div class="rt-mh-l"><div class="rt-mh-th">'+_fsE(B.th)+'</div><div class="rt-mh-en">'+_fsE(B.en)+' · '+_fsE(ycLbl)+'</div></div>'+
+      '<div class="rt-mh-r"><div class="rt-mh-v">'+_fsMoney(B.total)+'</div><span class="rt-mh-badge">'+B.groups.length+' กลุ่ม · '+nAcc+' บัญชี</span></div></div>'+
+    '<div class="rt-modal-bd">'+
+      '<div class="rt-msec"><div class="rt-msec-h">📊 งบส่วนของค่าใช้จ่าย · จัดกลุ่มตามประเภท (รหัสบัญชี 4 หลักแรก)</div>'+
+        '<div class="fsxpm-wrap"><table class="fsxpm-t"><thead>'+head+'</thead><tbody>'+rows+totrow+'</tbody></table></div>'+
+      '</div>'+
+    '</div></div></div>';
+  var host=document.getElementById('page-fs')||document.body;
+  var wrap=document.createElement('div'); wrap.innerHTML=html; var el=wrap.firstChild; host.appendChild(el);
+  try{document.body.style.overflow='hidden';}catch(e){}
+  el.addEventListener('click',function(e){var t=e.target; if(t===el||(t.closest&&t.closest('.rt-modal-x')))_fsExpModalClose();});
+  _fsExpEsc=function(e){ if(e.key==='Escape')_fsExpModalClose(); }; document.addEventListener('keydown',_fsExpEsc);
+}
+/* v9.90: rows for the extra Excel sheet — the 3 expense statements grouped by type */
+function _fsExpDetailRows(){
+  var rows=[]; var KEYS=['distribution','admin','other_exp'];
+  KEYS.forEach(function(k){ var B=_fsExpBreakdown(k); if(!B)return;
+    if(rows.length)rows.push({t:'blank',label:''});
+    rows.push({t:'sec',label:B.th+' · '+B.en});
+    B.groups.forEach(function(o){
+      rows.push({t:'subtotal',label:'กลุ่มรหัส '+o.key+' ('+o.accts.length+' บัญชี)',cur:o.sum,prev:B.hasPrev?o.psum:null});
+      o.accts.forEach(function(x){ rows.push({t:'line',label:'    '+x.code+'  '+x.name,cur:x.nat,prev:B.hasPrev?(B.prevByCode[x.code]||0):null}); });
+    });
+    rows.push({t:'total',label:'รวม '+B.th,cur:B.total,prev:B.hasPrev?B.ptotal:null});
+  });
+  return rows;
+}
 /* ---------- RENDER: Changes in Equity ---------- */
 function _fsRenderSCE(){
   var t=_fsT,pt=_fsPrevT;
@@ -11659,6 +11739,7 @@ function _fsBind(w){ if(w._b)return; w._b=1;
   w.addEventListener('click',function(e){var t=e.target;
     if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'))return;
     var tab=t.closest?t.closest('[data-fstab]'):null; if(tab){var _nt=tab.getAttribute('data-fstab'),_wasWk=(_fsTab==='wk'),_isWk=(_nt==='wk');_fsTab=_nt;if(!_isWk&&_fsYear!=='ALL'&&_fsY0!==_fsY1){_fsYear=_fsY1;_fsCompute();}if(_wasWk!==_isWk){w.innerHTML=_fsShell();}_fsRenderBody();_fsSyncTabs(w);return;}
+    var xpop=t.closest?t.closest('[data-fsxpop]'):null; if(xpop){_fsExpModal(xpop.getAttribute('data-fsxpop'));return;}
     var fadd=t.closest?t.closest('[data-fsadd]'):null; if(fadd){_fsManAddRow(fadd.getAttribute('data-fsadd'));return;}
     var fdel=t.closest?t.closest('[data-fsdel]'):null; if(fdel){_fsManDelRow(fdel.getAttribute('data-fsdel'));return;}
     var fex=t.closest?t.closest('#fsManExport'):null; if(fex){_fsManExport();return;}
@@ -11821,6 +11902,7 @@ function _fsExportXml(){
     +_fsXmlSheet('งบกำไรขาดทุน','งบกำไรขาดทุนเบ็ดเสร็จ','สำหรับปีสิ้นสุดวันที่ 31 ธันวาคม '+be,m.pl,m)
     +_fsXmlSheetSOC('เปลี่ยนแปลงส่วนผู้ถือหุ้น','งบแสดงการเปลี่ยนแปลงส่วนของผู้ถือหุ้น','สำหรับปีสิ้นสุดวันที่ 31 ธันวาคม '+be,m.soc,m)
     +_fsXmlSheetCF('งบกระแสเงินสด','งบกระแสเงินสด','สำหรับปีสิ้นสุดวันที่ 31 ธันวาคม '+be,m.cf,m)
+    +_fsXmlSheet('รายละเอียดค่าใช้จ่าย','รายละเอียดค่าใช้จ่าย · จัดกลุ่มตามประเภท (ค่าใช้จ่ายในการขาย · บริหาร · อื่น)','สำหรับปีสิ้นสุดวันที่ 31 ธันวาคม '+be,_fsExpDetailRows(),m)
     +'</Workbook>';
   var fn='งบการเงิน_'+((m.co||'').replace(/[^\wก-๙ ]/g,'').trim()||'company')+'_'+be+'.xls';
   var blob=new Blob(['﻿'+xml],{type:'application/vnd.ms-excel;charset=utf-8'});
