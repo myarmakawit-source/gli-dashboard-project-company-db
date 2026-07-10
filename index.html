@@ -3109,6 +3109,13 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-fs .fsyr-mo:disabled{opacity:.45;cursor:not-allowed}
 #page-fs .fsintchip{background:linear-gradient(120deg,var(--fx-gold-t) 0%,#FFF7E6 100%);color:var(--fx-gold-d);
   border:1px solid #E7CF97;font-weight:800}
+/* ---- v9.88: งบการเงินประจำปี — prior-year comparison note · งบประจำเดือน year label ---- */
+#page-fs .fsann-cmp{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:800;
+  color:var(--fx-gold-d);background:var(--fx-gold-t);border:1px solid #ECD9AE;border-radius:999px;
+  padding:3px 10px;white-space:nowrap}
+#page-fs .fsann-cmp.dim{color:var(--fx-muted);background:var(--fx-tint);border-color:var(--fx-hair);font-weight:700}
+#page-fs .fsmon-yr{font-size:11px;font-weight:800;color:var(--fx-brand-d);white-space:nowrap;letter-spacing:.01em}
+#page-fs .fsmon-w.on .fsmon-yr{color:var(--fx-gold-d)}
 
 /* =====================================================================
    TB reconciliation panel
@@ -10357,10 +10364,15 @@ function _fsShell(){
     return '<div class="fsbar"><div class="fsbar-l"><span class="fsbar-file">📊 Financial Statements</span><span class="fsfw">NPAEs</span><span class="fscmp dim">โหลด GL ในแท็บ Database เพื่อดูงบการเงินอัตโนมัติ</span></div></div>'+
       '<div class="fstabs">'+tabs+'</div><div id="fsBody"></div>';
   }
-  var y0opts='',y1opts=''; for(var i=_fsYears.length-1;i>=0;i--){var y=_fsYears[i];y0opts+='<option value="'+y+'"'+(y===_fsY0?' selected':'')+'>FY '+(+y+543)+' ('+y+')</option>';y1opts+='<option value="'+y+'"'+(y===_fsY1?' selected':'')+'>FY '+(+y+543)+' ('+y+')</option>';}
+  /* v9.88: งบการเงินประจำปี — single-year picker (prior year auto-compared) + ทุกปี option */
+  var yrOpts=''; for(var i=_fsYears.length-1;i>=0;i--){var y=_fsYears[i];yrOpts+='<option value="'+y+'"'+((_fsYear!=='ALL'&&y===_fsY1)?' selected':'')+'>ปี '+(+y+543)+' ('+y+')</option>';}
+  yrOpts+='<option value="ALL"'+(_fsYear==='ALL'?' selected':'')+'>ทุกปี · All years</option>';
+  var annCmp=''; if(_fsYear!=='ALL'&&_fsY1!=null){var _pyBE=(+_fsY1-1)+543; annCmp=_fsPrevYear?('<span class="fsann-cmp">↩ ยกมาเทียบ ปี '+_pyBE+'</span>'):('<span class="fsann-cmp dim">↩ ยกมาเทียบ ปี '+_pyBE+' · ไม่มีข้อมูล</span>');}
   var monopts='<option value="12"'+(_fsEndM>=12?' selected':'')+'>ทั้งปี · ม.ค.–ธ.ค.</option>';
   for(var mo=1;mo<=11;mo++){monopts+='<option value="'+mo+'"'+(_fsEndM===mo?' selected':'')+'>ถึงสิ้น '+_FS_MON_TH[mo-1]+' ('+mo+')</option>';}
-  var monW='<span class="fsmon-w'+(_fsIsInterim()?' on':'')+'"><span class="fsrlab">เดือนสิ้นสุด</span><select id="fsEndMSel" class="fsyr fsyr-mo"'+(_fsYear==='ALL'?' disabled':'')+'>'+monopts+'</select></span>';
+  /* v9.88: งบประจำเดือน ของปีที่เลือก (interim / monthly statements) */
+  var _curBE=(_fsYear==='ALL')?'':(''+(+_fsY1+543));
+  var monW='<span class="fsmon-w'+(_fsIsInterim()?' on':'')+'"><span class="fsrlab">งบประจำเดือน</span><select id="fsEndMSel" class="fsyr fsyr-mo"'+(_fsYear==='ALL'?' disabled':'')+'>'+monopts+'</select>'+(_curBE?'<span class="fsmon-yr">ของปี '+_curBE+'</span>':'')+'</span>';
   var interimChip=_fsIsInterim()?'<span class="fscmp fsintchip">🗓 งบเดือน · ณ สิ้น '+_FS_MON_TH[_fsEndM-1]+' '+(+_fsY1+543)+'</span>':'';
   var bal=Math.abs(t.movDiff)<0.5, bsb=Math.abs(t.bsDiff)<0.5;
   var chipsInner=_fsChip(bal,'TB balanced', bal?'':('Dr−Cr '+_fsMoney(t.movDiff)))+
@@ -10376,7 +10388,7 @@ function _fsShell(){
     '</div>'+
     '<div class="fsbar-ctrls">'+
       '<div class="fsfilters">'+
-        '<span class="fsrange-w"><span class="fsrlab">ช่วงปี</span><select id="fsY0Sel" class="fsyr fsyr-rg">'+y0opts+'</select><span class="fsrdash">→</span><select id="fsY1Sel" class="fsyr fsyr-rg">'+y1opts+'</select><button type="button" id="fsAllBtn" class="fsallbtn'+(_fsYear==='ALL'?' on':'')+'">ทุกปี</button></span>'+
+        '<span class="fsrange-w fsann-w"><span class="fsrlab">งบการเงินประจำปี</span><select id="fsYearSel" class="fsyr-rg">'+yrOpts+'</select>'+annCmp+'</span>'+
         monW+
         '<span class="fsminif"><span class="fsflab">กรอบ</span><span class="fsfw">NPAEs</span></span>'+
         '<span class="fsminif"><span class="fsflab">เทียบ</span>'+_fsCmpChip()+interimChip+'</span>'+
@@ -11650,7 +11662,6 @@ function _fsBind(w){ if(w._b)return; w._b=1;
     var fex=t.closest?t.closest('#fsManExport'):null; if(fex){_fsManExport();return;}
     var frs=t.closest?t.closest('#fsManReset'):null; if(frs){_fsManDoReset();return;}
     var wk=t.closest?t.closest('[data-wk]'):null; if(wk){_fsWk=wk.getAttribute('data-wk');_fsRenderBody();return;}
-    var ab=t.closest?t.closest('#fsAllBtn'):null; if(ab){_fsYear='ALL';_fsCompute();w.innerHTML=_fsShell();_fsRenderBody();return;}
     var ex=t.closest?t.closest('#fsExport'):null; if(ex){_fsExport();return;}
     var pex=t.closest?t.closest('#fsPrint'):null; if(pex){_fsPrint();return;}
     var rclr=t.closest?t.closest('#fsReconClear'):null; if(rclr){_fsReconClear();_fsRenderBody();return;}
@@ -11669,7 +11680,7 @@ function _fsBind(w){ if(w._b)return; w._b=1;
     if(t&&t.id==='fsReconFile'){_fsReconOnFile(t.files&&t.files[0]);return;}
     if(t&&t.id==='fsReconSheet'){if(_fsReconWB&&_fsRecon){_fsReconApplySheet(_fsRecon.name,_fsRecon.sheets,t.value);}return;}
     if(t&&(t.id==='fsReconCodeCol'||t.id==='fsReconAmtCol')){var _cc=w.querySelector('#fsReconCodeCol'),_ac=w.querySelector('#fsReconAmtCol');if(_cc&&_ac&&_fsRecon&&_fsRecon.aoa){_fsReconRemap(parseInt(_cc.value,10),parseInt(_ac.value,10));}return;}
-    if(t&&t.classList&&t.classList.contains('fsxall')){var wp=t.closest('.fsfltwrap'); if(wp){var cs=wp.querySelectorAll('.fsxsel'); for(var z=0;z<cs.length;z++){var tr=cs[z].closest('tr'); if(!tr||tr.style.display!=='none')cs[z].checked=t.checked;}} return;} if(t&&t.id==='fsManCo'){_fsManCo=t.value;_fsManRerender();return;} if(t&&t.id==='fsManYr'){_fsManYr=(''+t.value).trim();_fsManRerender();return;} if(t&&(t.id==='fsY0Sel'||t.id==='fsY1Sel')){var s0=w.querySelector('#fsY0Sel'),s1=w.querySelector('#fsY1Sel');var v0=s0?s0.value:'',v1=s1?s1.value:'';if(v0&&v1){if(v0>v1){var tt=v0;v0=v1;v1=tt;}_fsYear=(v0===v1)?v0:(v0+'..'+v1);_fsCompute();w.innerHTML=_fsShell();_fsRenderBody();}}});
+    if(t&&t.classList&&t.classList.contains('fsxall')){var wp=t.closest('.fsfltwrap'); if(wp){var cs=wp.querySelectorAll('.fsxsel'); for(var z=0;z<cs.length;z++){var tr=cs[z].closest('tr'); if(!tr||tr.style.display!=='none')cs[z].checked=t.checked;}} return;} if(t&&t.id==='fsManCo'){_fsManCo=t.value;_fsManRerender();return;} if(t&&t.id==='fsManYr'){_fsManYr=(''+t.value).trim();_fsManRerender();return;} if(t&&t.id==='fsYearSel'){var vy=t.value;_fsYear=(vy==='ALL')?'ALL':vy;_fsCompute();w.innerHTML=_fsShell();_fsRenderBody();return;}});
 }
 function renderFs(){ var w=document.getElementById('fsWrap'); if(!w)return;
   w.innerHTML='<div class="fsempty"><div class="fsempty-ic">⏳</div><p>Reading GL…</p></div>';
