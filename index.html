@@ -10373,7 +10373,14 @@ function _fsShell(){
   /* v9.88: งบประจำเดือน ของปีที่เลือก (interim / monthly statements) */
   var _curBE=(_fsYear==='ALL')?'':(''+(+_fsY1+543));
   var monW='<span class="fsmon-w'+(_fsIsInterim()?' on':'')+'"><span class="fsrlab">งบประจำเดือน</span><select id="fsEndMSel" class="fsyr fsyr-mo"'+(_fsYear==='ALL'?' disabled':'')+'>'+monopts+'</select>'+(_curBE?'<span class="fsmon-yr">ของปี '+_curBE+'</span>':'')+'</span>';
-  var interimChip=_fsIsInterim()?'<span class="fscmp fsintchip">🗓 งบเดือน · ณ สิ้น '+_FS_MON_TH[_fsEndM-1]+' '+(+_fsY1+543)+'</span>':'';
+  /* v9.89: Working Papers → simple year-range picker (จาก → ถึง); statement tabs → งบการเงินประจำปี + งบประจำเดือน */
+  var filtersInner;
+  if(_fsTab==='wk'){
+    var y0opts='',y1opts=''; for(var i=_fsYears.length-1;i>=0;i--){var y=_fsYears[i];y0opts+='<option value="'+y+'"'+(y===_fsY0?' selected':'')+'>ปี '+(+y+543)+' ('+y+')</option>';y1opts+='<option value="'+y+'"'+(y===_fsY1?' selected':'')+'>ปี '+(+y+543)+' ('+y+')</option>';}
+    filtersInner='<span class="fsrange-w"><span class="fsrlab">ช่วงปี</span><select id="fsY0Sel" class="fsyr-rg">'+y0opts+'</select><span class="fsrdash">→</span><select id="fsY1Sel" class="fsyr-rg">'+y1opts+'</select></span>';
+  } else {
+    filtersInner='<span class="fsrange-w fsann-w"><span class="fsrlab">งบการเงินประจำปี</span><select id="fsYearSel" class="fsyr-rg">'+yrOpts+'</select>'+annCmp+'</span>'+monW;
+  }
   var bal=Math.abs(t.movDiff)<0.5, bsb=Math.abs(t.bsDiff)<0.5;
   var chipsInner=_fsChip(bal,'TB balanced', bal?'':('Dr−Cr '+_fsMoney(t.movDiff)))+
     _fsChip(bsb,'BS balanced', bsb?'':('off '+_fsMoney(t.bsDiff)))+
@@ -10387,12 +10394,7 @@ function _fsShell(){
       '</div>'+
     '</div>'+
     '<div class="fsbar-ctrls">'+
-      '<div class="fsfilters">'+
-        '<span class="fsrange-w fsann-w"><span class="fsrlab">งบการเงินประจำปี</span><select id="fsYearSel" class="fsyr-rg">'+yrOpts+'</select>'+annCmp+'</span>'+
-        monW+
-        '<span class="fsminif"><span class="fsflab">กรอบ</span><span class="fsfw">NPAEs</span></span>'+
-        '<span class="fsminif"><span class="fsflab">เทียบ</span>'+_fsCmpChip()+interimChip+'</span>'+
-      '</div>'+
+      '<div class="fsfilters">'+filtersInner+'</div>'+
       '<div class="fsbar-health" id="fsChips">'+chipsInner+'</div>'+
     '</div>'+
     '</div>'+
@@ -11656,7 +11658,7 @@ function _fsToggleAcc(acc){ var det=acc.querySelector('.fsaccdet'); if(!det)retu
 function _fsBind(w){ if(w._b)return; w._b=1;
   w.addEventListener('click',function(e){var t=e.target;
     if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'))return;
-    var tab=t.closest?t.closest('[data-fstab]'):null; if(tab){_fsTab=tab.getAttribute('data-fstab');_fsRenderBody();_fsSyncTabs(w);return;}
+    var tab=t.closest?t.closest('[data-fstab]'):null; if(tab){var _nt=tab.getAttribute('data-fstab'),_wasWk=(_fsTab==='wk'),_isWk=(_nt==='wk');_fsTab=_nt;if(!_isWk&&_fsYear!=='ALL'&&_fsY0!==_fsY1){_fsYear=_fsY1;_fsCompute();}if(_wasWk!==_isWk){w.innerHTML=_fsShell();}_fsRenderBody();_fsSyncTabs(w);return;}
     var fadd=t.closest?t.closest('[data-fsadd]'):null; if(fadd){_fsManAddRow(fadd.getAttribute('data-fsadd'));return;}
     var fdel=t.closest?t.closest('[data-fsdel]'):null; if(fdel){_fsManDelRow(fdel.getAttribute('data-fsdel'));return;}
     var fex=t.closest?t.closest('#fsManExport'):null; if(fex){_fsManExport();return;}
@@ -11680,7 +11682,7 @@ function _fsBind(w){ if(w._b)return; w._b=1;
     if(t&&t.id==='fsReconFile'){_fsReconOnFile(t.files&&t.files[0]);return;}
     if(t&&t.id==='fsReconSheet'){if(_fsReconWB&&_fsRecon){_fsReconApplySheet(_fsRecon.name,_fsRecon.sheets,t.value);}return;}
     if(t&&(t.id==='fsReconCodeCol'||t.id==='fsReconAmtCol')){var _cc=w.querySelector('#fsReconCodeCol'),_ac=w.querySelector('#fsReconAmtCol');if(_cc&&_ac&&_fsRecon&&_fsRecon.aoa){_fsReconRemap(parseInt(_cc.value,10),parseInt(_ac.value,10));}return;}
-    if(t&&t.classList&&t.classList.contains('fsxall')){var wp=t.closest('.fsfltwrap'); if(wp){var cs=wp.querySelectorAll('.fsxsel'); for(var z=0;z<cs.length;z++){var tr=cs[z].closest('tr'); if(!tr||tr.style.display!=='none')cs[z].checked=t.checked;}} return;} if(t&&t.id==='fsManCo'){_fsManCo=t.value;_fsManRerender();return;} if(t&&t.id==='fsManYr'){_fsManYr=(''+t.value).trim();_fsManRerender();return;} if(t&&t.id==='fsYearSel'){var vy=t.value;_fsYear=(vy==='ALL')?'ALL':vy;_fsCompute();w.innerHTML=_fsShell();_fsRenderBody();return;}});
+    if(t&&t.classList&&t.classList.contains('fsxall')){var wp=t.closest('.fsfltwrap'); if(wp){var cs=wp.querySelectorAll('.fsxsel'); for(var z=0;z<cs.length;z++){var tr=cs[z].closest('tr'); if(!tr||tr.style.display!=='none')cs[z].checked=t.checked;}} return;} if(t&&t.id==='fsManCo'){_fsManCo=t.value;_fsManRerender();return;} if(t&&t.id==='fsManYr'){_fsManYr=(''+t.value).trim();_fsManRerender();return;} if(t&&t.id==='fsYearSel'){var vy=t.value;_fsYear=(vy==='ALL')?'ALL':vy;_fsCompute();w.innerHTML=_fsShell();_fsRenderBody();return;} if(t&&(t.id==='fsY0Sel'||t.id==='fsY1Sel')){var s0=w.querySelector('#fsY0Sel'),s1=w.querySelector('#fsY1Sel');var v0=s0?s0.value:'',v1=s1?s1.value:'';if(v0&&v1){if(v0>v1){var _tt=v0;v0=v1;v1=_tt;}_fsYear=(v0===v1)?v0:(v0+'..'+v1);_fsCompute();w.innerHTML=_fsShell();_fsRenderBody();}return;}});
 }
 function renderFs(){ var w=document.getElementById('fsWrap'); if(!w)return;
   w.innerHTML='<div class="fsempty"><div class="fsempty-ic">⏳</div><p>Reading GL…</p></div>';
