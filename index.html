@@ -10890,36 +10890,19 @@ function _fsRenderPL(){
 
 /* ---------- v9.90: Expense drill-down pop-up — งบส่วนของค่าใช้จ่าย จัดกลุ่มตามประเภท (รหัสบัญชี) ---------- */
 function _fsExpTypeKey(code){ var c=(''+(code||'')).replace(/[^0-9A-Za-z]/g,''); return c.length>=4?c.slice(0,4):(c||'—'); }
-/* v9.94: readable "ประเภท" (type) name for an expense group — collapses many sub-account codes into
-   one labelled line for the expense schedules. Prefers a shared account name; else the common name
-   stem across the group; else the largest account's name. */
-/* longest common leading run of WHOLE words (separators normalised to spaces) — never cuts mid-word */
-function _fsCommonNamePrefix(names){
-  names=(names||[]).filter(Boolean); if(names.length<2) return '';
-  var toks=names.map(function(s){ return (''+s).replace(/[·\-–—:/.,()]+/g,' ').replace(/\s+/g,' ').trim().split(' '); });
-  var first=toks[0], out=[];
-  for(var i=0;i<first.length;i++){ var t=first[i], ok=true;
-    for(var j=1;j<toks.length;j++){ if(toks[j][i]!==t){ok=false;break;} }
-    if(!ok)break; out.push(t); }
-  return out.join(' ').trim();
-}
-var _FS_EXP_STOP={'ค่า':1,'ค่าใช้จ่าย':1,'ค่าใช้':1,'เงิน':1,'ภาษี':1,'รายการ':1,'อื่น':1,'อื่นๆ':1,'อื่น ๆ':1};
-function _fsExpTypeName(accts,fallbackKey){
-  accts=accts||[];
-  var names=accts.map(function(a){return (''+((a&&a.name)||'')).trim();}).filter(Boolean);
-  if(!names.length) return 'กลุ่มรหัส '+(fallbackKey||'—');
-  var uniq={}; names.forEach(function(n){uniq[n]=1;});
-  var uk=Object.keys(uniq); if(uk.length===1) return uk[0];
-  var stem=_fsCommonNamePrefix(names);
-  if(stem && !_FS_EXP_STOP[stem] && stem.length>=2) return stem;
-  var rep=accts.slice().sort(function(a,b){return Math.abs(+((b&&b.nat))||0)-Math.abs(+((a&&a.nat))||0);})[0];
-  return (rep&&rep.name)?(''+rep.name).trim():('กลุ่มรหัส '+(fallbackKey||'—'));
-}
-/* Header {code,name} for one expense type group — single-account groups keep their own code+name. */
-function _fsExpGroupHead(o){
-  var accts=(o&&o.accts)||[];
-  if(accts.length===1){ var a=accts[0]; return {code:(''+((a&&a.code)||'')), name:(''+((a&&a.name)||''))}; }
-  return {code:(''+((o&&o.key)||''))+'…', name:_fsExpTypeName(accts,(o&&o.key))};
+/* v9.94: จัดกลุ่มงบค่าใช้จ่าย "ตามชื่อบัญชี" (ไม่ใช่ตามรหัสบัญชี) — อ่านชื่อบัญชี ตัดรหัส/หน่วยงาน/
+   สาขา/รายละเอียดท้ายชื่อออก เหลือ "ชื่อประเภท" แล้วรวมบัญชีที่ชื่อประเภทเดียวกันเป็นบรรทัดเดียว */
+function _fsExpNameBase(name){
+  var s=(''+(name||'')).trim(); if(!s) return '';
+  /* 1) ตัดรหัสบัญชีนำหน้า (ตัวเลข + . - /) และตัวคั่นที่ตามมา */
+  s=s.replace(/^[0-9][0-9.\-\/]*\s*[-–—:·)]?\s*/,'').trim();
+  /* 2) ตัดที่ตัวคั่นตัวแรก → เหลือชื่อประเภทก่อนส่วนของหน่วยงาน/สาขา/รายละเอียด */
+  var base=s.split(/\s*[\-–—\/\\()\[\]{}:;,·•|]\s*/)[0].trim();
+  /* 3) ตัดคำขยายหน่วยงานที่เขียนติดกันโดยไม่มีตัวคั่น (ฝ่าย/สาขา/แผนก/โครงการ) */
+  base=base.replace(/(ฝ่าย|สาขา|แผนก|โครงการ)\s*\S.*$/,'').trim();
+  /* 4) สั้นเกินไป → ใช้ชื่อเต็มที่ตัดรหัสแล้ว */
+  if(base.replace(/\s/g,'').length<2) base=s;
+  return base||s;
 }
 function _fsExpBreakdown(key){
   if(!_fsTB) return null;
@@ -12433,15 +12416,24 @@ function _fsPrintTpl(){
   /* v9.97: expense schedules (flowing pages) — บริหาร / ในการขาย / อื่น ๆ, non-zero accounts only */
   function expSchedFlow(key,pageTitle){
     var B=(typeof _fsExpBreakdown==='function')?_fsExpBreakdown(key):null; if(!B) return '';
-    /* v9.94: จัดกลุ่มตามประเภท (ไม่ดึงรหัสบัญชีมาแสดงทั้งหมด) — one line per type group, not per account code */
-    var groups=(B.groups||[]).filter(function(o){return Math.abs(+o.sum||0)>=0.005 || Math.abs(+o.psum||0)>=0.005;});
-    groups.sort(function(a,b){return (''+a.key)<(''+b.key)?-1:((''+a.key)>(''+b.key)?1:0);});
+    /* v9.94: จัดกลุ่ม "ตามชื่อบัญชี" — อ่านชื่อ ตัดรหัส/หน่วยงานออก แล้วรวมบัญชีที่ชื่อประเภทเดียวกัน
+       เป็นบรรทัดเดียว (ไม่ใช่จัดตามรหัสบัญชี, ไม่ดึงทุกรหัสมาวาง) แสดงเฉพาะชื่อประเภท */
+    var accts=[]; (B.groups||[]).forEach(function(o){ accts=accts.concat(o.accts||[]); });
+    var gm={},order=[];
+    accts.forEach(function(x){
+      var nm=_fsExpNameBase(x.name)||('('+(x.code||'')+')');
+      var o=gm[nm]; if(!o){o=gm[nm]={name:nm,sum:0,psum:0};order.push(nm);}
+      o.sum+=(+x.nat||0); o.psum+=(+(B.prevByCode[x.code]||0));
+    });
+    var groups=order.map(function(k){return gm[k];})
+      .filter(function(o){return Math.abs(o.sum)>=0.005 || Math.abs(o.psum)>=0.005;});
+    groups.sort(function(a,b){var d=Math.abs(b.sum)-Math.abs(a.sum); return d!==0?d:((''+a.name)<(''+b.name)?-1:1);});
     var body = groups.length
-      ? groups.map(function(o){ var h=_fsExpGroupHead(o); return '<tr class="ln"><td class="l">'+(h.code?(E(h.code)+'&nbsp;&nbsp;'):'')+E(h.name)+'</td><td class="v">'+amt(o.sum)+'</td>'+(hp?('<td class="v">'+amt(o.psum||0)+'</td>'):'')+'</tr>'; }).join('')
+      ? groups.map(function(o){ return '<tr class="ln"><td class="l">'+E(o.name)+'</td><td class="v">'+amt(o.sum)+'</td>'+(hp?('<td class="v">'+amt(o.psum||0)+'</td>'):'')+'</tr>'; }).join('')
       : '<tr class="ln"><td class="l" colspan="'+(hp?3:2)+'" style="font-style:italic">— ไม่มีรายการในปีนี้ —</td></tr>';
     var tbl='<table class="fst"><thead><tr><th class="l"></th><th class="v">'+E(m.curBE)+'</th>'+(hp?('<th class="v">'+E(m.prevBE)+'</th>'):'')+'</tr><tr class="u"><th></th><th class="v">(บาท)</th>'+(hp?'<th class="v">(บาท)</th>':'')+'</tr></thead><tbody>'+body+'<tr class="tot"><td class="l">รวม'+E(B.th)+'</td><td class="v">'+MO(B.total)+'</td>'+(hp?('<td class="v">'+MO(B.ptotal)+'</td>'):'')+'</tr></tbody></table>';
     return '<section class="pg pgnotes"><div class="pgin"><table class="ntwrap"><thead><tr><td><div class="ntpad"></div></td></tr></thead><tbody><tr><td>'
-      +'<div class="hd"><div class="co">'+E(m.co)+'</div><div class="ti">'+E(pageTitle)+'</div><div class="dt">สำหรับปีสิ้นสุดวันที่ 31 ธันวาคม '+E(m.curBE)+' · จัดกลุ่มตามประเภท</div></div>'
+      +'<div class="hd"><div class="co">'+E(m.co)+'</div><div class="ti">'+E(pageTitle)+'</div><div class="dt">สำหรับปีสิ้นสุดวันที่ 31 ธันวาคม '+E(m.curBE)+' · จัดกลุ่มตามชื่อบัญชี</div></div>'
       +tbl+_stmtFoot
       +'</td></tr></tbody><tfoot><tr><td><div class="ntpad"></div></td></tr></tfoot></table></div></section>';
   }
