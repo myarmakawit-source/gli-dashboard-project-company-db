@@ -3283,6 +3283,37 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-fs .fstbrsz:hover{background:rgba(255,255,255,.45)}
 body.fstb-resizing{cursor:col-resize!important;user-select:none!important}
 body.fstb-resizing #page-fs .fstb thead th{cursor:col-resize!important}
+/* v9.94: TB — view/edit-in-app icon + attached-file spreadsheet viewer/editor modal */
+#page-fs .fsattview{margin-left:2px;border:1px solid #C6DED6;background:#fff;color:var(--fx-brand-d);font-size:11px;cursor:pointer;padding:2px 4px;line-height:1;vertical-align:middle;border-radius:6px}
+#page-fs .fsattview:hover{background:var(--fx-tint);border-color:var(--fx-brand)}
+#page-fs .fsav-modal{width:min(1120px,97vw);max-height:92vh}
+#page-fs .fsav-modal .rt-modal-bd{padding:0;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+#page-fs .fsavbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--fx-hair);background:var(--fx-tint2)}
+#page-fs .fsavtabs{display:flex;gap:6px;flex-wrap:wrap;min-width:0}
+#page-fs .fsavtab{font:inherit;font-size:12px;font-weight:700;color:var(--fx-ink2);background:#fff;border:1px solid #C6DED6;border-radius:8px;padding:5px 11px;cursor:pointer;white-space:nowrap}
+#page-fs .fsavtab:hover{background:var(--fx-tint)}
+#page-fs .fsavtab.on{background:var(--fx-brand);border-color:var(--fx-brand);color:#fff}
+#page-fs .fsavhid{font-size:9.5px;font-weight:600;opacity:.75}
+#page-fs .fsavacts{display:flex;gap:8px;flex-wrap:wrap}
+#page-fs .fsavbtn{font:inherit;font-size:12px;font-weight:800;color:var(--fx-brand-d);background:#fff;border:1px solid #C6DED6;border-radius:9px;padding:7px 13px;cursor:pointer}
+#page-fs .fsavbtn:hover{background:var(--fx-tint);border-color:var(--fx-brand)}
+#page-fs .fsavbtn.pri{background:var(--fx-brand);border-color:var(--fx-brand);color:#fff}
+#page-fs .fsavbtn.pri:hover{filter:brightness(1.06)}
+#page-fs .fsavsheet{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+#page-fs .fsavsheet[hidden]{display:none}
+#page-fs .fsavtip{font-size:11.5px;color:#8A5A12;background:var(--fx-gold-t);border-bottom:1px solid #E7CF97;padding:7px 14px;line-height:1.5}
+#page-fs .fsavtip b{color:var(--fx-brand-d)}
+#page-fs .fsavgrid{flex:1 1 auto;min-height:0;overflow:auto;background:#fff}
+#page-fs .fsavtbl{border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+#page-fs .fsavtbl th,#page-fs .fsavtbl td{border:1px solid #D7E0DC;padding:4px 8px;min-width:70px;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:top}
+#page-fs .fsavtbl thead th{position:sticky;top:0;z-index:2;background:linear-gradient(180deg,var(--fx-brand-l) 0%,var(--fx-brand-d) 100%);color:#fff;font-weight:700;text-align:center;min-width:70px}
+#page-fs .fsavtbl td.fsavcn,#page-fs .fsavtbl th.fsavcn{position:sticky;left:0;z-index:1;background:var(--fx-tint2);color:var(--fx-muted);text-align:center;font-weight:700;min-width:38px;max-width:44px}
+#page-fs .fsavtbl thead th.fsavcn{z-index:3;background:var(--fx-brand-d)}
+#page-fs .fsavtbl td[contenteditable]{cursor:text}
+#page-fs .fsavtbl td[contenteditable]:focus{outline:2px solid var(--fx-brand);outline-offset:-2px;background:#FEFCE8;white-space:normal;overflow:visible;text-overflow:clip}
+#page-fs .fsavnote{font-size:11px;color:var(--fx-ink2);line-height:1.5;padding:8px 14px;border-top:1px solid var(--fx-hair);background:var(--fx-tint2)}
+#page-fs .fsavempty{padding:34px 24px;text-align:center;font-size:13.5px;color:var(--fx-ink2);line-height:1.6}
+#page-fs .rt-mh-badge.bad{background:#fff;color:var(--fx-neg)}
 
 /* =====================================================================
    Financial ratios dashboard
@@ -5304,7 +5335,7 @@ try{for(var _fri=localStorage.length-1;_fri>=0;_fri--){var _frk=localStorage.key
 function _fsReconPersist(){try{localStorage.setItem('gli_fsrecon_all',JSON.stringify(FSRECON));}catch(e){}}
 /* v9.94: per-account supporting-file attachments (แนบไฟล์ประกอบต่อรหัสบัญชี) — {glid:{code:{name,amt,ts}}} */
 var FSATT={}; try{FSATT=JSON.parse(localStorage.getItem('gli_fsatt_all')||'{}')||{};}catch(_fae){FSATT={};}
-function _fsAttPersistAll(){try{localStorage.setItem('gli_fsatt_all',JSON.stringify(FSATT));}catch(e){}}
+function _fsAttPersistAll(){try{localStorage.setItem('gli_fsatt_all',JSON.stringify(FSATT));return true;}catch(e){return false;}}
 function _gliBuildPkt(){return {n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?_dfSlimCloud(DOCFILES):{},pt:PTDATA,fsm:(typeof FSMAN!=='undefined'&&FSMAN)?FSMAN:{},fsr:(typeof FSRECON!=='undefined'&&FSRECON)?FSRECON:{},tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:[],/*v9.17:log moved to its own incremental node*/line:_lnPkt(),bf:BCFSET,sl:(typeof SECLOCK!=='undefined'&&SECLOCK)?SECLOCK:null,gl:{files:(typeof _glFilesPkt==='function'?_glFilesPkt():(typeof GLFILES!=='undefined'?GLFILES:[])),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),cb:(typeof _cbPushData==='function'?_cbPushData():null),_ts:_TS,_t:Date.now(),_by:_cid};}
 function _gliFlushNow(){try{
   if(typeof _pushAllowed==='function'&&!_pushAllowed())return;
@@ -10397,7 +10428,10 @@ function _fsReconRemap(codeCol,amtCol){
 function _fsAttMap(){ var k=_fsReconGlid(); return FSATT[k]||(FSATT[k]={}); }
 function _fsAttGet(code){ var m=FSATT[_fsReconGlid()]; return (m&&m[_fsRcCode(code)])||null; }
 function _fsAttSet(code,rec){ var m=_fsAttMap(); code=_fsRcCode(code); if(rec)m[code]=rec; else delete m[code];
-  if(typeof _fsAttPersistAll==='function')_fsAttPersistAll();
+  var ok=(typeof _fsAttPersistAll==='function')?_fsAttPersistAll():true;
+  if(!ok && rec && rec.sheets){ /* localStorage เต็ม → เก็บเฉพาะยอด (ตัดเนื้อไฟล์ออก) เพื่อไม่ให้ข้อมูลหาย */
+    rec.sheets=null; rec.gridBig=true; _fsAttPersistAll();
+    try{alert('ไฟล์ใหญ่เกินกว่าจะเก็บเนื้อหาไว้ดู/แก้ในแอป — บันทึกเฉพาะยอดเทียบ TB ให้แล้ว');}catch(e){} }
   if(typeof _tsTouch==='function')_tsTouch('fsa'); if(typeof cloudPush==='function')cloudPush(); }
 /* จำนวนเงินมุมซ้ายบน = อ่านเซลล์ A1 "โดยตรง" (แม่นที่สุด · ไม่พึ่งการเดาช่วงข้อมูล/ตาราง
    ของไฟล์ ซึ่งบางไฟล์ที่ทำเป็น Excel Table จะทำให้ A1 หลุดช่วงและอ่านผิดเซลล์) */
@@ -10428,6 +10462,20 @@ function _fsAttPickAmt(wb,code){
   var ws0=wb.Sheets[names[0]]; var aoa=ws0?XLSX.utils.sheet_to_json(ws0,{header:1,raw:true,defval:null}):[];
   return {amt:_fsAttFirstAmt(aoa),sheet:names[0]||''};
 }
+/* v9.94: เก็บเนื้อไฟล์ (เป็นตาราง) ไว้ดู/แก้ในแอปได้โดยไม่ต้องดาวน์โหลด — ตัดแถวว่างท้าย + จำกัดขนาด */
+var _FS_ATT_MAXR=1500, _FS_ATT_MAXC=40;
+function _fsAttTrimAoa(aoa){
+  aoa=(aoa||[]).slice(0,_FS_ATT_MAXR).map(function(r){ return (r||[]).slice(0,_FS_ATT_MAXC).map(function(c){ return (c==null)?'':(''+c); }); });
+  var last=-1; for(var i=0;i<aoa.length;i++){ for(var j=0;j<aoa[i].length;j++){ if((''+aoa[i][j]).trim()!==''){last=i;break;} } }
+  return aoa.slice(0,last+1);
+}
+function _fsAttSheets(wb){
+  var names=(wb&&wb.SheetNames)||[], vis=(wb.Workbook&&wb.Workbook.Sheets)||[], out=[];
+  for(var i=0;i<names.length && i<15;i++){ var ws=wb.Sheets[names[i]]; if(!ws)continue;
+    var aoa=_fsAttTrimAoa(XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:''}));
+    out.push({name:names[i], hidden:!!(vis[i]&&vis[i].Hidden), aoa:aoa}); }
+  return out;
+}
 function _fsAttOnFile(code,file){ if(!file||!code)return;
   if(typeof XLSX==='undefined'){alert('ไลบรารี Excel (SheetJS) ยังโหลดไม่เสร็จ — เปิดหน้านี้ออนไลน์อย่างน้อยหนึ่งครั้ง');return;}
   var fr=new FileReader();
@@ -10435,11 +10483,99 @@ function _fsAttOnFile(code,file){ if(!file||!code)return;
     var wb=XLSX.read(new Uint8Array(fr.result),{type:'array'});
     var pick=_fsAttPickAmt(wb,code); var amt=pick.amt;
     if(isNaN(amt)){ alert('ไม่พบจำนวนเงินในเซลล์ A1 (มุมซ้ายบน) ของไฟล์ “'+file.name+'”\nโปรดใส่จำนวนเงินไว้ที่เซลล์ A1 ของชีตที่ต้องการเทียบ'); return; }
-    _fsAttSet(code,{name:file.name,amt:amt,sheet:pick.sheet,ts:Date.now()});
+    var sheets=_fsAttSheets(wb); var pickIdx=0; for(var si=0;si<sheets.length;si++){ if(sheets[si].name===pick.sheet){pickIdx=si;break;} }
+    /* จำกัดขนาดที่เก็บ: ถ้าใหญ่มากเก็บเฉพาะชีตที่ใช้ยอด แล้วถ้ายังใหญ่ค่อยไม่เก็บเนื้อ (เก็บแค่ยอด) */
+    try{ if(sheets.length && JSON.stringify(sheets).length>1300000){ sheets=[sheets[pickIdx]]; pickIdx=0; } }catch(e){}
+    var rec={name:file.name,amt:amt,sheet:pick.sheet,ts:Date.now(),sheets:sheets,pickIdx:pickIdx};
+    try{ if(rec.sheets && JSON.stringify(rec.sheets).length>1300000){ rec.sheets=null; rec.gridBig=true; } }catch(e){}
+    _fsAttSet(code,rec);
     _fsRenderBody();
   }catch(e){ alert('อ่านไฟล์ไม่สำเร็จ: '+((e&&e.message)||e)); } };
   fr.onerror=function(){alert('อ่านไฟล์ไม่ได้');};
   fr.readAsArrayBuffer(file);
+}
+
+/* ---------- v9.94: in-app viewer/editor for the attached file (ดู/แก้ในแอป · ไม่ต้องดาวน์โหลด) ---------- */
+var _fsAttEsc=null, _fsAttViewCode=null;
+function _fsAttColName(c){ var s=''; c=+c; do{ s=String.fromCharCode(65+(c%26))+s; c=Math.floor(c/26)-1; }while(c>=0); return s; }
+function _fsAttViewClose(){ var m=document.getElementById('fsAttModal'); if(m&&m.parentNode)m.parentNode.removeChild(m);
+  try{if(_fsAttEsc){document.removeEventListener('keydown',_fsAttEsc);_fsAttEsc=null;}}catch(e){}
+  try{document.body.style.overflow='';}catch(e){} _fsAttViewCode=null; }
+function _fsAttGridHTML(sheet){
+  var aoa=(sheet&&sheet.aoa)||[]; var maxC=1; for(var r=0;r<aoa.length;r++){ if(aoa[r].length>maxC)maxC=aoa[r].length; }
+  var head='<tr class="fsavh"><th class="fsavcn"></th>'; for(var c=0;c<maxC;c++)head+='<th>'+_fsAttColName(c)+'</th>'; head+='</tr>';
+  var body=''; for(var r2=0;r2<aoa.length;r2++){ body+='<tr><td class="fsavcn">'+(r2+1)+'</td>';
+    for(var c2=0;c2<maxC;c2++){ var v=(aoa[r2][c2]==null)?'':aoa[r2][c2]; body+='<td contenteditable="true" data-r="'+r2+'" data-c="'+c2+'">'+_fsE(v)+'</td>'; }
+    body+='</tr>'; }
+  if(!aoa.length)body='<tr><td class="fsavcn">1</td><td contenteditable="true" data-r="0" data-c="0"></td></tr>';
+  return '<table class="fsavtbl"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>';
+}
+function _fsAttViewReadDOM(att){ /* อ่านค่าที่แก้จาก DOM กลับเข้า att.sheets */
+  var modal=document.getElementById('fsAttModal'); if(!modal||!att||!att.sheets)return;
+  var panes=modal.querySelectorAll('.fsavsheet');
+  for(var p=0;p<panes.length;p++){ var si=+panes[p].getAttribute('data-si'); var sh=att.sheets[si]; if(!sh)continue;
+    var cells=panes[p].querySelectorAll('td[data-r]'); var grid=[], maxc=0;
+    for(var i=0;i<cells.length;i++){ var td=cells[i], rr=+td.getAttribute('data-r'), cc=+td.getAttribute('data-c');
+      if(!grid[rr])grid[rr]=[]; grid[rr][cc]=td.textContent; if(cc+1>maxc)maxc=cc+1; }
+    for(var r=0;r<grid.length;r++){ if(!grid[r])grid[r]=[]; for(var c=0;c<maxc;c++){ if(grid[r][c]==null)grid[r][c]=''; } }
+    sh.aoa=_fsAttTrimAoa(grid); }
+}
+function _fsAttViewSave(){ var code=_fsAttViewCode; if(!code)return; var att=_fsAttGet(code); if(!att||!att.sheets)return;
+  _fsAttViewReadDOM(att);
+  var ps=att.sheets[att.pickIdx||0]; var a1=(ps&&ps.aoa&&ps.aoa[0])?ps.aoa[0][0]:''; var namt=_fsRcNum(a1); if(!isNaN(namt))att.amt=namt;
+  att.edited=true; att.ts=Date.now(); _fsAttSet(code,att); _fsAttViewClose(); _fsRenderBody();
+}
+function _fsAttViewDownload(){ var code=_fsAttViewCode, att=_fsAttGet(code); if(!att||!att.sheets)return;
+  if(typeof XLSX==='undefined'){alert('ไลบรารี Excel ยังไม่พร้อม');return;}
+  _fsAttViewReadDOM(att);
+  var wb=XLSX.utils.book_new();
+  att.sheets.forEach(function(sh,i){ var ws=XLSX.utils.aoa_to_sheet(sh.aoa&&sh.aoa.length?sh.aoa:[['']]); XLSX.utils.book_append_sheet(wb,ws,(sh.name||('Sheet'+(i+1))).slice(0,31)); });
+  try{ XLSX.writeFile(wb, (att.name&&/\.(xlsx|xls|csv)$/i.test(att.name))?att.name:((att.name||'attachment')+'.xlsx')); }catch(e){ alert('ดาวน์โหลดไม่สำเร็จ: '+((e&&e.message)||e)); }
+}
+function _fsAttViewTab(si){ var modal=document.getElementById('fsAttModal'); if(!modal)return;
+  var att=_fsAttGet(_fsAttViewCode); if(att)_fsAttViewReadDOM(att);   /* เก็บที่แก้ก่อนสลับ (กันหาย) */
+  var tabs=modal.querySelectorAll('.fsavtab'), panes=modal.querySelectorAll('.fsavsheet');
+  for(var i=0;i<tabs.length;i++){ tabs[i].classList.toggle('on', +tabs[i].getAttribute('data-si')===si); }
+  for(var j=0;j<panes.length;j++){ panes[j].hidden = (+panes[j].getAttribute('data-si')!==si); }
+}
+function _fsAttView(code){
+  var att=_fsAttGet(code); if(!att){alert('ยังไม่ได้แนบไฟล์บัญชีนี้');return;}
+  _fsAttViewClose(); _fsAttViewCode=_fsRcCode(code);
+  var acct=null; if(_fsTB)for(var i=0;i<_fsTB.length;i++){ if(_fsRcCode(_fsTB[i].code)===_fsRcCode(code)){acct=_fsTB[i];break;} }
+  var nat=acct?(+acct.nat||0):null;
+  var hasGrid=!!(att.sheets&&att.sheets.length);
+  var pickIdx=att.pickIdx||0;
+  var tabs='', panes='';
+  if(hasGrid){
+    att.sheets.forEach(function(sh,si){
+      tabs+='<button type="button" class="fsavtab'+(si===pickIdx?' on':'')+'" data-si="'+si+'">'+(si===pickIdx?'📊 ':'')+_fsE(sh.name||('ชีต '+(si+1)))+(sh.hidden?' <span class="fsavhid">(ซ่อน)</span>':'')+'</button>';
+      panes+='<div class="fsavsheet" data-si="'+si+'"'+(si===pickIdx?'':' hidden')+'>'+
+        (si===pickIdx?'<div class="fsavtip">💡 ยอดที่ใช้เทียบ TB = เซลล์ <b>A1</b> ของชีตนี้ · แก้แล้วกด «บันทึกการแก้ไข» ระบบจะคำนวณผลต่างใหม่</div>':'')+
+        '<div class="fsavgrid">'+_fsAttGridHTML(sh)+'</div></div>';
+    });
+  }
+  var diffTxt=''; if(nat!=null){ var d=(+att.amt||0)-nat, okd=Math.abs(d)<0.5; diffTxt='<span class="rt-mh-badge'+(okd?'':' bad')+'">'+(okd?'✓ ตรงกับ TB':'ต่าง '+_fsMoney(d))+'</span>'; }
+  var body = hasGrid
+    ? ('<div class="fsavbar"><div class="fsavtabs">'+tabs+'</div><div class="fsavacts">'+
+        '<button type="button" class="fsavbtn fsavdl">⤓ ดาวน์โหลด Excel</button>'+
+        '<button type="button" class="fsavbtn pri fsavsave">💾 บันทึกการแก้ไข</button></div></div>'+panes+
+        '<div class="fsavnote">แก้ไขค่าในตารางได้เลย (คลิกที่ช่อง) · เก็บไว้ในแอป ไม่ต้องดาวน์โหลดออกไปแก้ · กด «บันทึกการแก้ไข» เพื่อบันทึก</div>')
+    : ('<div class="fsavempty">ไฟล์นี้'+(att.gridBig?'ใหญ่เกินกว่าจะเก็บเนื้อหาไว้ดู/แก้ในแอป':'ยังไม่ได้เก็บเนื้อหาไว้ (แนบก่อนอัปเดตฟีเจอร์นี้)')+' — โปรดกด 📎 แนบไฟล์นี้อีกครั้ง เพื่อเปิดดู/แก้ในแอป</div>');
+  var html='<div class="rt-modal-ov" id="fsAttModal"><div class="rt-modal fsav-modal" role="dialog" aria-modal="true">'+
+    '<button class="rt-modal-x" type="button" aria-label="ปิด">✕</button>'+
+    '<div class="rt-modal-hd rt-ok"><div class="rt-mh-l"><div class="rt-mh-th">📄 '+_fsE(att.name||'ไฟล์แนบ')+'</div><div class="rt-mh-en">บัญชี '+_fsE(code)+(acct?' · '+_fsE(acct.name):'')+'</div></div>'+
+      '<div class="rt-mh-r"><div class="rt-mh-v">'+_fsMoney(att.amt)+'</div>'+diffTxt+'</div></div>'+
+    '<div class="rt-modal-bd">'+body+'</div></div></div>';
+  var host=document.getElementById('page-fs')||document.body;
+  var wrap=document.createElement('div'); wrap.innerHTML=html; var el=wrap.firstChild; host.appendChild(el);
+  try{document.body.style.overflow='hidden';}catch(e){}
+  el.addEventListener('click',function(e){ var t=e.target;
+    if(t===el||(t.closest&&t.closest('.rt-modal-x'))){ _fsAttViewClose(); return; }
+    var tab=t.closest?t.closest('.fsavtab'):null; if(tab){ _fsAttViewTab(+tab.getAttribute('data-si')); return; }
+    if(t.closest&&t.closest('.fsavsave')){ _fsAttViewSave(); return; }
+    if(t.closest&&t.closest('.fsavdl')){ _fsAttViewDownload(); return; }
+  });
+  _fsAttEsc=function(e){ if(e.key==='Escape')_fsAttViewClose(); }; document.addEventListener('keydown',_fsAttEsc);
 }
 
 /* ---------- HELPERS ---------- */
@@ -10737,6 +10873,7 @@ function _fsRenderTB(){
       var d=(+att.amt||0)-(+x.nat||0), okd=Math.abs(d)<0.5;
       var ttl=_fsE(att.name)+(att.sheet?(' · ชีต “'+_fsE(att.sheet)+'” เซลล์ A1'):'')+' · ยอดในไฟล์ '+_fsMoney(att.amt)+' — คลิกเพื่อเปลี่ยนไฟล์';
       return '<td class="fsattc"><label class="fsattbtn on" title="'+ttl+'"><input type="file" class="fsattfile" data-fsatt="'+ec+'" accept=".xlsx,.xls,.csv" hidden>📎</label>'+
+        '<button type="button" class="fsattview" data-fsatt="'+ec+'" title="ดู/แก้ไฟล์ในแอป (ไม่ต้องดาวน์โหลด)">🔍</button>'+
         '<button type="button" class="fsattrm" data-fsatt="'+ec+'" title="ลบไฟล์แนบ">✕</button></td>'+
         '<td class="fsm fsatt-amt">'+_fsMoney(att.amt,true)+'</td>'+
         '<td class="fsm fsatt-diff '+(okd?'ok':'bad')+'">'+(okd?'<span class="fsrctick">✓</span>':('<span class="fsrcx">▲</span> '+_fsMoney(d)))+'</td>';
@@ -12086,6 +12223,7 @@ function _fsBind(w){ if(w._b)return; w._b=1;
     var ex=t.closest?t.closest('#fsExport'):null; if(ex){_fsExport();return;}
     var pex=t.closest?t.closest('#fsPrint'):null; if(pex){_fsPrint();return;}
     var rclr=t.closest?t.closest('#fsReconClear'):null; if(rclr){_fsReconClear();_fsRenderBody();return;}
+    var avw=t.closest?t.closest('.fsattview'):null; if(avw){_fsAttView(avw.getAttribute('data-fsatt'));return;}
     var arm=t.closest?t.closest('.fsattrm'):null; if(arm){_fsAttSet(arm.getAttribute('data-fsatt'),null);_fsRenderBody();return;}
     /* v9.41: ratio card / hero → open the detail popup */
     var rtile=t.closest?t.closest('[data-rt]'):null;
