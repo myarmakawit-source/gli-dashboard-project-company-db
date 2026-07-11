@@ -3262,18 +3262,19 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 /* v9.94: TB — per-account supporting-file attachment columns (left) */
 #page-fs .fstb th.fsatthd-ic,#page-fs .fstb th.fsatthd-amt,#page-fs .fstb th.fsatthd-diff{background:linear-gradient(180deg,var(--fx-gold) 0%,var(--fx-gold-d) 100%)!important;color:#fff;text-align:center;font-size:11px;line-height:1.15}
 #page-fs .fstb th .fsatthx{display:block;font-size:9px;font-weight:600;opacity:.9;margin-top:1px;letter-spacing:.01em}
-#page-fs .fstb th.fsatthd-ic,#page-fs .fstb td.fsattc{width:52px;min-width:52px;text-align:center;white-space:nowrap;border-left:1px solid var(--line2)}
+#page-fs .fstb th.fsatthd-ic,#page-fs .fstb td.fsattc{width:88px;min-width:88px;text-align:center;white-space:nowrap;border-left:1px solid var(--line2)}
 #page-fs .fstb th.fsatthd-amt,#page-fs .fstb td.fsatt-amt{width:124px;min-width:106px;text-align:right}
 #page-fs .fstb th.fsatthd-diff,#page-fs .fstb td.fsatt-diff{width:116px;min-width:98px;text-align:right;font-weight:700}
 #page-fs .fstb td.fsatt-amt{color:var(--fx-ink2);font-variant-numeric:tabular-nums}
 #page-fs .fstb td.fsatt-diff.ok{color:var(--fx-pos)}
 #page-fs .fstb td.fsatt-diff.bad{color:var(--fx-neg);background:var(--fx-neg-bg)}
 #page-fs .fstb td.fsatt-none{color:#C7CFC9;font-weight:400;text-align:center}
-#page-fs .fsattbtn{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:8px;cursor:pointer;border:1px solid #C6DED6;background:#fff;font-size:14px;line-height:1;vertical-align:middle;transition:background .12s,border-color .12s}
+/* v9.94: attach-cell action icons — unified rounded pill buttons (📎 / 🔍 / ✕) */
+#page-fs .fsattbtn,#page-fs .fsattview,#page-fs .fsattrm{display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;border-radius:8px;cursor:pointer;border:1px solid transparent;font-size:13px;line-height:1;vertical-align:middle;margin:0 1.5px;padding:0;transition:transform .1s ease,background .12s,border-color .12s,box-shadow .12s}
+#page-fs .fsattbtn:hover,#page-fs .fsattview:hover,#page-fs .fsattrm:hover{transform:translateY(-1px);box-shadow:0 2px 7px rgba(15,60,50,.16)}
+#page-fs .fsattbtn{border-color:#CFE0DA;background:#F4F8F6}
 #page-fs .fsattbtn:hover{background:var(--fx-tint);border-color:var(--fx-brand)}
-#page-fs .fsattbtn.on{background:#EAF6EE;border-color:var(--fx-pos)}
-#page-fs .fsattrm{margin-left:2px;border:none;background:none;color:var(--fx-neg);font-weight:800;font-size:11px;cursor:pointer;padding:1px 3px;line-height:1;vertical-align:middle;border-radius:5px}
-#page-fs .fsattrm:hover{color:#fff;background:var(--fx-neg)}
+#page-fs .fsattbtn.on{background:#E7F6EE;border-color:#7FC7A2}
 /* v9.94: TB — freeze header (& totals) row while scrolling long lists */
 #page-fs .fstbwrap{max-height:calc(100vh - 150px);overflow:auto}
 #page-fs .fstb thead th{position:sticky;top:0;z-index:4}
@@ -3283,11 +3284,15 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-fs .fstbrsz:hover{background:rgba(255,255,255,.45)}
 body.fstb-resizing{cursor:col-resize!important;user-select:none!important}
 body.fstb-resizing #page-fs .fstb thead th{cursor:col-resize!important}
-/* v9.94: TB — view/edit-in-app icon + attached-file spreadsheet viewer/editor modal */
-#page-fs .fsattview{margin-left:2px;border:1px solid #C6DED6;background:#fff;color:var(--fx-brand-d);font-size:11px;cursor:pointer;padding:2px 4px;line-height:1;vertical-align:middle;border-radius:6px}
-#page-fs .fsattview:hover{background:var(--fx-tint);border-color:var(--fx-brand)}
-#page-fs .fsav-modal{width:min(1120px,97vw);max-height:92vh}
-#page-fs .fsav-modal .rt-modal-bd{padding:0;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+/* v9.94: TB — view/edit-in-app icon (🔍) + delete (✕), sharing the unified pill style above */
+#page-fs .fsattview{background:#EAF1FB;border-color:#BDD5F0;color:#1D5FAE}
+#page-fs .fsattview:hover{background:#DCEAFB;border-color:#1D5FAE}
+#page-fs .fsattrm{background:#FBEEEC;border-color:#F0C9C2;color:var(--fx-neg);font-weight:800;font-size:12px}
+#page-fs .fsattrm:hover{background:var(--fx-neg);border-color:var(--fx-neg);color:#fff}
+/* v9.94: attached-file spreadsheet viewer/editor modal — near-fullscreen */
+#page-fs #fsAttModal.rt-modal-ov{padding:14px}
+#page-fs .rt-modal.fsav-modal{width:100%;max-width:1780px;height:100%;max-height:100%}
+#page-fs .fsav-modal .rt-modal-bd{padding:0;display:flex;flex-direction:column;min-height:0;overflow:hidden;flex:1 1 auto}
 #page-fs .fsavbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--fx-hair);background:var(--fx-tint2)}
 #page-fs .fsavtabs{display:flex;gap:6px;flex-wrap:wrap;min-width:0}
 #page-fs .fsavtab{font:inherit;font-size:12px;font-weight:700;color:var(--fx-ink2);background:#fff;border:1px solid #C6DED6;border-radius:8px;padding:5px 11px;cursor:pointer;white-space:nowrap}
@@ -3312,6 +3317,7 @@ body.fstb-resizing #page-fs .fstb thead th{cursor:col-resize!important}
 #page-fs .fsavtbl td[contenteditable]{cursor:text}
 #page-fs .fsavtbl td[contenteditable]:focus{outline:2px solid var(--fx-brand);outline-offset:-2px;background:#FEFCE8;white-space:normal;overflow:visible;text-overflow:clip}
 #page-fs .fsavnote{font-size:11px;color:var(--fx-ink2);line-height:1.5;padding:8px 14px;border-top:1px solid var(--fx-hair);background:var(--fx-tint2)}
+#page-fs .fsavwarn{color:#8A5A12;font-weight:700}
 #page-fs .fsavempty{padding:34px 24px;text-align:center;font-size:13.5px;color:var(--fx-ink2);line-height:1.6}
 #page-fs .rt-mh-badge.bad{background:#fff;color:var(--fx-neg)}
 
@@ -10430,9 +10436,10 @@ function _fsAttGet(code){ var m=FSATT[_fsReconGlid()]; return (m&&m[_fsRcCode(co
 function _fsAttSet(code,rec){ var m=_fsAttMap(); code=_fsRcCode(code); if(rec)m[code]=rec; else delete m[code];
   var ok=(typeof _fsAttPersistAll==='function')?_fsAttPersistAll():true;
   if(!ok && rec && rec.sheets){ /* localStorage เต็ม → เก็บเฉพาะยอด (ตัดเนื้อไฟล์ออก) เพื่อไม่ให้ข้อมูลหาย */
-    rec.sheets=null; rec.gridBig=true; _fsAttPersistAll();
-    try{alert('ไฟล์ใหญ่เกินกว่าจะเก็บเนื้อหาไว้ดู/แก้ในแอป — บันทึกเฉพาะยอดเทียบ TB ให้แล้ว');}catch(e){} }
-  if(typeof _tsTouch==='function')_tsTouch('fsa'); if(typeof cloudPush==='function')cloudPush(); }
+    rec.sheets=null; rec.gridBig=true; var ok2=_fsAttPersistAll();
+    try{alert(ok2?'ไฟล์ใหญ่เกินกว่าจะเก็บเนื้อหาไว้ดู/แก้ในแอป — บันทึกเฉพาะยอดเทียบ TB ให้แล้ว':'พื้นที่จัดเก็บ (localStorage) เต็ม — บันทึกไม่สำเร็จ โปรดลบไฟล์แนบบางบัญชีออกก่อน');}catch(e){} }
+  /* FSATT เก็บใน localStorage อย่างเดียว (ไม่อยู่ใน cloud packet) — ไม่ต้อง _tsTouch/cloudPush
+     เพราะจะไปกระตุ้นการเขียน state ทั้งก้อนขึ้นคลาวด์โดยเปล่าประโยชน์ทุกครั้งที่แนบ/แก้/ลบ */ }
 /* จำนวนเงินมุมซ้ายบน = อ่านเซลล์ A1 "โดยตรง" (แม่นที่สุด · ไม่พึ่งการเดาช่วงข้อมูล/ตาราง
    ของไฟล์ ซึ่งบางไฟล์ที่ทำเป็น Excel Table จะทำให้ A1 หลุดช่วงและอ่านผิดเซลล์) */
 function _fsAttCellA1(ws){ if(!ws)return NaN; var a1=ws['A1'];
@@ -10463,9 +10470,10 @@ function _fsAttPickAmt(wb,code){
   return {amt:_fsAttFirstAmt(aoa),sheet:names[0]||''};
 }
 /* v9.94: เก็บเนื้อไฟล์ (เป็นตาราง) ไว้ดู/แก้ในแอปได้โดยไม่ต้องดาวน์โหลด — ตัดแถวว่างท้าย + จำกัดขนาด */
-var _FS_ATT_MAXR=1500, _FS_ATT_MAXC=40;
+var _FS_ATT_MAXR=1500, _FS_ATT_MAXC=40, _fsAttTrunc=false;
 function _fsAttTrimAoa(aoa){
-  aoa=(aoa||[]).slice(0,_FS_ATT_MAXR).map(function(r){ return (r||[]).slice(0,_FS_ATT_MAXC).map(function(c){ return (c==null)?'':(''+c); }); });
+  var raw=aoa||[]; if(raw.length>_FS_ATT_MAXR)_fsAttTrunc=true;
+  aoa=raw.slice(0,_FS_ATT_MAXR).map(function(r){ r=r||[]; if(r.length>_FS_ATT_MAXC)_fsAttTrunc=true; return r.slice(0,_FS_ATT_MAXC).map(function(c){ return (c==null)?'':(''+c); }); });
   var last=-1; for(var i=0;i<aoa.length;i++){ for(var j=0;j<aoa[i].length;j++){ if((''+aoa[i][j]).trim()!==''){last=i;break;} } }
   return aoa.slice(0,last+1);
 }
@@ -10483,10 +10491,12 @@ function _fsAttOnFile(code,file){ if(!file||!code)return;
     var wb=XLSX.read(new Uint8Array(fr.result),{type:'array'});
     var pick=_fsAttPickAmt(wb,code); var amt=pick.amt;
     if(isNaN(amt)){ alert('ไม่พบจำนวนเงินในเซลล์ A1 (มุมซ้ายบน) ของไฟล์ “'+file.name+'”\nโปรดใส่จำนวนเงินไว้ที่เซลล์ A1 ของชีตที่ต้องการเทียบ'); return; }
-    var sheets=_fsAttSheets(wb); var pickIdx=0; for(var si=0;si<sheets.length;si++){ if(sheets[si].name===pick.sheet){pickIdx=si;break;} }
+    _fsAttTrunc=false;
+    var sheets=_fsAttSheets(wb); var pickIdx=-1; for(var si=0;si<sheets.length;si++){ if(sheets[si].name===pick.sheet){pickIdx=si;break;} }
+    if(pickIdx<0){ var pws=wb.Sheets[pick.sheet]; if(pws){ sheets.push({name:pick.sheet,hidden:false,aoa:_fsAttTrimAoa(XLSX.utils.sheet_to_json(pws,{header:1,raw:false,defval:''}))}); pickIdx=sheets.length-1; } else pickIdx=0; }
     /* จำกัดขนาดที่เก็บ: ถ้าใหญ่มากเก็บเฉพาะชีตที่ใช้ยอด แล้วถ้ายังใหญ่ค่อยไม่เก็บเนื้อ (เก็บแค่ยอด) */
     try{ if(sheets.length && JSON.stringify(sheets).length>1300000){ sheets=[sheets[pickIdx]]; pickIdx=0; } }catch(e){}
-    var rec={name:file.name,amt:amt,sheet:pick.sheet,ts:Date.now(),sheets:sheets,pickIdx:pickIdx};
+    var rec={name:file.name,amt:amt,sheet:pick.sheet,ts:Date.now(),sheets:sheets,pickIdx:pickIdx,trunc:_fsAttTrunc};
     try{ if(rec.sheets && JSON.stringify(rec.sheets).length>1300000){ rec.sheets=null; rec.gridBig=true; } }catch(e){}
     _fsAttSet(code,rec);
     _fsRenderBody();
@@ -10510,30 +10520,39 @@ function _fsAttGridHTML(sheet){
   if(!aoa.length)body='<tr><td class="fsavcn">1</td><td contenteditable="true" data-r="0" data-c="0"></td></tr>';
   return '<table class="fsavtbl"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>';
 }
-function _fsAttViewReadDOM(att){ /* อ่านค่าที่แก้จาก DOM กลับเข้า att.sheets */
-  var modal=document.getElementById('fsAttModal'); if(!modal||!att||!att.sheets)return;
+/* อ่านค่าที่แก้จาก DOM → คืนเป็น {si:aoa} โดย "ไม่แตะ" att (กัน download ทำ record เพี้ยน) */
+function _fsAttReadGrids(){ var out={}; var modal=document.getElementById('fsAttModal'); if(!modal)return out;
   var panes=modal.querySelectorAll('.fsavsheet');
-  for(var p=0;p<panes.length;p++){ var si=+panes[p].getAttribute('data-si'); var sh=att.sheets[si]; if(!sh)continue;
+  for(var p=0;p<panes.length;p++){ var si=+panes[p].getAttribute('data-si');
     var cells=panes[p].querySelectorAll('td[data-r]'); var grid=[], maxc=0;
     for(var i=0;i<cells.length;i++){ var td=cells[i], rr=+td.getAttribute('data-r'), cc=+td.getAttribute('data-c');
       if(!grid[rr])grid[rr]=[]; grid[rr][cc]=td.textContent; if(cc+1>maxc)maxc=cc+1; }
     for(var r=0;r<grid.length;r++){ if(!grid[r])grid[r]=[]; for(var c=0;c<maxc;c++){ if(grid[r][c]==null)grid[r][c]=''; } }
-    sh.aoa=_fsAttTrimAoa(grid); }
+    out[si]=_fsAttTrimAoa(grid); }
+  return out;
 }
+/* ข้อความที่ "เป็นตัวเลขล้วน" (ไว้แปลงกลับเป็นตัวเลขตอนดาวน์โหลด) — ไม่จับวันที่/รหัส-มีขีด/ข้อความ */
+function _fsAttCellIsNum(s){ s=(''+s).trim(); if(!s)return false; return /^\(?-?[฿$]?\s*[0-9][0-9,]*(\.[0-9]+)?\)?%?(\s*บาท)?$/.test(s); }
 function _fsAttViewSave(){ var code=_fsAttViewCode; if(!code)return; var att=_fsAttGet(code); if(!att||!att.sheets)return;
-  _fsAttViewReadDOM(att);
-  var ps=att.sheets[att.pickIdx||0]; var a1=(ps&&ps.aoa&&ps.aoa[0])?ps.aoa[0][0]:''; var namt=_fsRcNum(a1); if(!isNaN(namt))att.amt=namt;
+  var pi=att.pickIdx||0; var ps0=att.sheets[pi]; var origA1=(ps0&&ps0.aoa&&ps0.aoa[0]&&ps0.aoa[0][0]!=null)?(''+ps0.aoa[0][0]):'';
+  var grids=_fsAttReadGrids();
+  att.sheets.forEach(function(sh,i){ if(grids[i])sh.aoa=grids[i]; });
+  /* คำนวณยอดใหม่ "เฉพาะเมื่อผู้ใช้แก้ A1 ของชีตที่ใช้ยอด" — ไม่งั้นคงยอดเดิม (แม่นจากตอนแนบ) กัน format ทำเพี้ยน */
+  var ps=att.sheets[pi]; var newA1=(ps&&ps.aoa&&ps.aoa[0]&&ps.aoa[0][0]!=null)?(''+ps.aoa[0][0]):'';
+  if(newA1!==origA1){ var namt=_fsRcNum(newA1); if(!isNaN(namt))att.amt=namt; }
   att.edited=true; att.ts=Date.now(); _fsAttSet(code,att); _fsAttViewClose(); _fsRenderBody();
 }
 function _fsAttViewDownload(){ var code=_fsAttViewCode, att=_fsAttGet(code); if(!att||!att.sheets)return;
   if(typeof XLSX==='undefined'){alert('ไลบรารี Excel ยังไม่พร้อม');return;}
-  _fsAttViewReadDOM(att);
+  var grids=_fsAttReadGrids();   /* ไม่แตะ att */
   var wb=XLSX.utils.book_new();
-  att.sheets.forEach(function(sh,i){ var ws=XLSX.utils.aoa_to_sheet(sh.aoa&&sh.aoa.length?sh.aoa:[['']]); XLSX.utils.book_append_sheet(wb,ws,(sh.name||('Sheet'+(i+1))).slice(0,31)); });
+  att.sheets.forEach(function(sh,i){ var aoa=(grids[i]&&grids[i].length)?grids[i]:((sh.aoa&&sh.aoa.length)?sh.aoa:[['']]);
+    var num=aoa.map(function(row){ return (row||[]).map(function(v){ var s=(v==null?'':(''+v)); if(_fsAttCellIsNum(s)){var n=_fsRcNum(s); if(!isNaN(n))return n;} return s; }); });
+    var ws=XLSX.utils.aoa_to_sheet(num.length?num:[['']]); XLSX.utils.book_append_sheet(wb,ws,(sh.name||('Sheet'+(i+1))).slice(0,31)); });
   try{ XLSX.writeFile(wb, (att.name&&/\.(xlsx|xls|csv)$/i.test(att.name))?att.name:((att.name||'attachment')+'.xlsx')); }catch(e){ alert('ดาวน์โหลดไม่สำเร็จ: '+((e&&e.message)||e)); }
 }
 function _fsAttViewTab(si){ var modal=document.getElementById('fsAttModal'); if(!modal)return;
-  var att=_fsAttGet(_fsAttViewCode); if(att)_fsAttViewReadDOM(att);   /* เก็บที่แก้ก่อนสลับ (กันหาย) */
+  /* ทุกชีตถูก render ไว้ใน DOM อยู่แล้ว (แค่ซ่อน/แสดง) — ที่แก้ไม่หายเมื่อสลับแท็บ */
   var tabs=modal.querySelectorAll('.fsavtab'), panes=modal.querySelectorAll('.fsavsheet');
   for(var i=0;i<tabs.length;i++){ tabs[i].classList.toggle('on', +tabs[i].getAttribute('data-si')===si); }
   for(var j=0;j<panes.length;j++){ panes[j].hidden = (+panes[j].getAttribute('data-si')!==si); }
@@ -10559,7 +10578,7 @@ function _fsAttView(code){
     ? ('<div class="fsavbar"><div class="fsavtabs">'+tabs+'</div><div class="fsavacts">'+
         '<button type="button" class="fsavbtn fsavdl">⤓ ดาวน์โหลด Excel</button>'+
         '<button type="button" class="fsavbtn pri fsavsave">💾 บันทึกการแก้ไข</button></div></div>'+panes+
-        '<div class="fsavnote">แก้ไขค่าในตารางได้เลย (คลิกที่ช่อง) · เก็บไว้ในแอป ไม่ต้องดาวน์โหลดออกไปแก้ · กด «บันทึกการแก้ไข» เพื่อบันทึก</div>')
+        '<div class="fsavnote">'+(att.trunc?'<b class="fsavwarn">⚠ ไฟล์มีข้อมูลเกิน '+_FS_ATT_MAXR+' แถว/'+_FS_ATT_MAXC+' คอลัมน์ — มุมมอง/แก้ไขในแอปแสดงเท่าที่เก็บได้ (ยอดเทียบจาก A1 ไม่กระทบ) · ไฟล์ต้นฉบับเต็มยังอยู่ในเครื่องของท่าน</b><br>':'')+'แก้ไขค่าในตารางได้เลย (คลิกที่ช่อง) · เก็บไว้ในแอป ไม่ต้องดาวน์โหลดออกไปแก้ · กด «บันทึกการแก้ไข» เพื่อบันทึก</div>')
     : ('<div class="fsavempty">ไฟล์นี้'+(att.gridBig?'ใหญ่เกินกว่าจะเก็บเนื้อหาไว้ดู/แก้ในแอป':'ยังไม่ได้เก็บเนื้อหาไว้ (แนบก่อนอัปเดตฟีเจอร์นี้)')+' — โปรดกด 📎 แนบไฟล์นี้อีกครั้ง เพื่อเปิดดู/แก้ในแอป</div>');
   var html='<div class="rt-modal-ov" id="fsAttModal"><div class="rt-modal fsav-modal" role="dialog" aria-modal="true">'+
     '<button class="rt-modal-x" type="button" aria-label="ปิด">✕</button>'+
@@ -10569,8 +10588,11 @@ function _fsAttView(code){
   var host=document.getElementById('page-fs')||document.body;
   var wrap=document.createElement('div'); wrap.innerHTML=html; var el=wrap.firstChild; host.appendChild(el);
   try{document.body.style.overflow='hidden';}catch(e){}
+  var _downOnOv=false;
+  el.addEventListener('mousedown',function(e){ _downOnOv=(e.target===el); });   /* กันลากเลือกข้อความในเซลล์แล้วปล่อยนอกกรอบ → ปิดทิ้งงานแก้ */
   el.addEventListener('click',function(e){ var t=e.target;
-    if(t===el||(t.closest&&t.closest('.rt-modal-x'))){ _fsAttViewClose(); return; }
+    if(t.closest&&t.closest('.rt-modal-x')){ _fsAttViewClose(); return; }
+    if(t===el && _downOnOv){ _fsAttViewClose(); return; }   /* คลิกพื้นหลังจริง ๆ (กดและปล่อยที่ overlay) เท่านั้น */
     var tab=t.closest?t.closest('.fsavtab'):null; if(tab){ _fsAttViewTab(+tab.getAttribute('data-si')); return; }
     if(t.closest&&t.closest('.fsavsave')){ _fsAttViewSave(); return; }
     if(t.closest&&t.closest('.fsavdl')){ _fsAttViewDownload(); return; }
