@@ -3259,6 +3259,21 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-fs .fstb td.fsrcdiff.ok{color:var(--fx-pos);text-align:right}
 #page-fs .fstb td.fsrcdiff.bad{color:var(--fx-neg);background:var(--fx-neg-bg)}
 #page-fs .fstb td.fsrcnone{color:#C7CFC9;font-weight:400}
+/* v9.94: TB — per-account supporting-file attachment columns (left) */
+#page-fs .fstb th.fsatthd-ic,#page-fs .fstb th.fsatthd-amt,#page-fs .fstb th.fsatthd-diff{background:linear-gradient(180deg,var(--fx-gold) 0%,var(--fx-gold-d) 100%)!important;color:#fff;text-align:center;font-size:11px;line-height:1.15}
+#page-fs .fstb th .fsatthx{display:block;font-size:9px;font-weight:600;opacity:.9;margin-top:1px;letter-spacing:.01em}
+#page-fs .fstb th.fsatthd-ic,#page-fs .fstb td.fsattc{width:52px;min-width:52px;text-align:center;white-space:nowrap;border-left:1px solid var(--line2)}
+#page-fs .fstb th.fsatthd-amt,#page-fs .fstb td.fsatt-amt{width:124px;min-width:106px;text-align:right}
+#page-fs .fstb th.fsatthd-diff,#page-fs .fstb td.fsatt-diff{width:116px;min-width:98px;text-align:right;font-weight:700}
+#page-fs .fstb td.fsatt-amt{color:var(--fx-ink2);font-variant-numeric:tabular-nums}
+#page-fs .fstb td.fsatt-diff.ok{color:var(--fx-pos)}
+#page-fs .fstb td.fsatt-diff.bad{color:var(--fx-neg);background:var(--fx-neg-bg)}
+#page-fs .fstb td.fsatt-none{color:#C7CFC9;font-weight:400;text-align:center}
+#page-fs .fsattbtn{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:8px;cursor:pointer;border:1px solid #C6DED6;background:#fff;font-size:14px;line-height:1;vertical-align:middle;transition:background .12s,border-color .12s}
+#page-fs .fsattbtn:hover{background:var(--fx-tint);border-color:var(--fx-brand)}
+#page-fs .fsattbtn.on{background:#EAF6EE;border-color:var(--fx-pos)}
+#page-fs .fsattrm{margin-left:2px;border:none;background:none;color:var(--fx-neg);font-weight:800;font-size:11px;cursor:pointer;padding:1px 3px;line-height:1;vertical-align:middle;border-radius:5px}
+#page-fs .fsattrm:hover{color:#fff;background:var(--fx-neg)}
 
 /* =====================================================================
    Financial ratios dashboard
@@ -5278,6 +5293,9 @@ try{window.addEventListener('pagehide',function(){if(_pushT&&_MODE==='firebase'&
 var FSRECON={}; try{FSRECON=JSON.parse(localStorage.getItem('gli_fsrecon_all')||'{}')||{};}catch(_fre){FSRECON={};}
 try{for(var _fri=localStorage.length-1;_fri>=0;_fri--){var _frk=localStorage.key(_fri);if(_frk&&_frk.indexOf('gli_fsrecon_')===0&&_frk!=='gli_fsrecon_all'){var _frid=_frk.slice(12);if(!FSRECON[_frid]){try{var _frv=JSON.parse(localStorage.getItem(_frk)||'null');if(_frv&&_frv.map)FSRECON[_frid]=_frv;}catch(_e){}}}}}catch(_frm){}
 function _fsReconPersist(){try{localStorage.setItem('gli_fsrecon_all',JSON.stringify(FSRECON));}catch(e){}}
+/* v9.94: per-account supporting-file attachments (แนบไฟล์ประกอบต่อรหัสบัญชี) — {glid:{code:{name,amt,ts}}} */
+var FSATT={}; try{FSATT=JSON.parse(localStorage.getItem('gli_fsatt_all')||'{}')||{};}catch(_fae){FSATT={};}
+function _fsAttPersistAll(){try{localStorage.setItem('gli_fsatt_all',JSON.stringify(FSATT));}catch(e){}}
 function _gliBuildPkt(){return {n:NAMEOV,v:VALOV,r:NEWROWS,c:CUSTOV,a:ACTIVEOV,wc:WHTCO,wt:WHTTX,wp:WHTPAYER,pm:PROJMASTER,up:UPDATA,mn:MNDATA,mq:_mqSlimCloud(MNCHQ),vp30:(typeof VATPP30!=='undefined'&&VATPP30)?VATPP30:[],df:(typeof DOCFILES!=='undefined'&&DOCFILES)?_dfSlimCloud(DOCFILES):{},pt:PTDATA,fsm:(typeof FSMAN!=='undefined'&&FSMAN)?FSMAN:{},fsr:(typeof FSRECON!=='undefined'&&FSRECON)?FSRECON:{},tk:TRACKDATA,vc:VATCO,va:VATDATA,vd:(typeof VATDEL!=='undefined'&&VATDEL)?VATDEL:[],lg:[],/*v9.17:log moved to its own incremental node*/line:_lnPkt(),bf:BCFSET,sl:(typeof SECLOCK!=='undefined'&&SECLOCK)?SECLOCK:null,gl:{files:(typeof _glFilesPkt==='function'?_glFilesPkt():(typeof GLFILES!=='undefined'?GLFILES:[])),del:(typeof GLFILESDEL!=='undefined'?GLFILESDEL:[])},dt:(typeof _delTombLoad==='function'?_delTombLoad():{}),cb:(typeof _cbPushData==='function'?_cbPushData():null),_ts:_TS,_t:Date.now(),_by:_cid};}
 function _gliFlushNow(){try{
   if(typeof _pushAllowed==='function'&&!_pushAllowed())return;
@@ -10364,6 +10382,33 @@ function _fsReconRemap(codeCol,amtCol){
   _fsReconSave(); _fsRenderBody();
 }
 
+/* ---------- v9.94: per-account supporting-file attach + compare to TB ----------
+   แต่ละรหัสบัญชีแนบไฟล์ Excel/CSV ได้ · ระบบอ่านจำนวนเงิน "มุมซ้ายบน" (เซลล์ตัวเลขแรก
+   ในลำดับอ่าน บน→ล่าง ซ้าย→ขวา) มาเทียบกับยอดคงเหลือ (Ending) ของบัญชีนั้น */
+function _fsAttMap(){ var k=_fsReconGlid(); return FSATT[k]||(FSATT[k]={}); }
+function _fsAttGet(code){ var m=FSATT[_fsReconGlid()]; return (m&&m[_fsRcCode(code)])||null; }
+function _fsAttSet(code,rec){ var m=_fsAttMap(); code=_fsRcCode(code); if(rec)m[code]=rec; else delete m[code];
+  if(typeof _fsAttPersistAll==='function')_fsAttPersistAll();
+  if(typeof _tsTouch==='function')_tsTouch('fsa'); if(typeof cloudPush==='function')cloudPush(); }
+/* จำนวนเงินมุมซ้ายบน = เซลล์แรกที่แปลงเป็นตัวเลขได้ (อ่าน บน→ล่าง · ซ้าย→ขวา) */
+function _fsAttFirstAmt(aoa){ for(var r=0;r<(aoa?aoa.length:0);r++){ var row=aoa[r]; if(!row)continue;
+    for(var c=0;c<row.length;c++){ var n=_fsRcNum(row[c]); if(!isNaN(n))return n; } } return NaN; }
+function _fsAttOnFile(code,file){ if(!file||!code)return;
+  if(typeof XLSX==='undefined'){alert('ไลบรารี Excel (SheetJS) ยังโหลดไม่เสร็จ — เปิดหน้านี้ออนไลน์อย่างน้อยหนึ่งครั้ง');return;}
+  var fr=new FileReader();
+  fr.onload=function(){ try{
+    var wb=XLSX.read(new Uint8Array(fr.result),{type:'array'});
+    var sh=wb.SheetNames[0]; var ws=sh?wb.Sheets[sh]:null;
+    var aoa=ws?XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null}):[];
+    var amt=_fsAttFirstAmt(aoa);
+    if(isNaN(amt)){ alert('ไม่พบจำนวนเงินในไฟล์ “'+file.name+'”\nโปรดใส่จำนวนเงินไว้ที่มุมซ้ายบน (เซลล์ตัวเลขแรก) ของชีต'); return; }
+    _fsAttSet(code,{name:file.name,amt:amt,ts:Date.now()});
+    _fsRenderBody();
+  }catch(e){ alert('อ่านไฟล์ไม่สำเร็จ: '+((e&&e.message)||e)); } };
+  fr.onerror=function(){alert('อ่านไฟล์ไม่ได้');};
+  fr.readAsArrayBuffer(file);
+}
+
 /* ---------- HELPERS ---------- */
 function _fsE(s){ if(typeof esc==='function'){try{return esc(s);}catch(e){}} return (''+(s==null?'':s)).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
 function _fsMoney(n,blank){ n=+n||0; if(blank&&Math.abs(n)<0.005)return ''; var neg=n<-0.0049; var a=Math.abs(n);
@@ -10646,40 +10691,53 @@ function _fsTbOpenFilter(k,btn){ _fsTbCloseDrop(); var pg=document.getElementByI
 }
 /* ---------- RENDER: Trial Balance ---------- */
 function _fsRenderTB(){
-  var rec=(_fsRecon&&_fsRecon.map)?_fsRecon:null;
   var arr=_fsTbRows(); var rows='';
+  /* v9.94: per-account attachment columns (left) — 📎 แนบไฟล์ · ยอดตามไฟล์ · ผลต่าง (ไฟล์ − TB) */
+  function _attCells(x){
+    var att=_fsAttGet(x.code), ec=_fsE(x.code);
+    if(att){
+      var d=(+att.amt||0)-(+x.nat||0), okd=Math.abs(d)<0.5;
+      var ttl=_fsE(att.name)+' · ยอดในไฟล์ '+_fsMoney(att.amt)+' — คลิกเพื่อเปลี่ยนไฟล์';
+      return '<td class="fsattc"><label class="fsattbtn on" title="'+ttl+'"><input type="file" class="fsattfile" data-fsatt="'+ec+'" accept=".xlsx,.xls,.csv" hidden>📎</label>'+
+        '<button type="button" class="fsattrm" data-fsatt="'+ec+'" title="ลบไฟล์แนบ">✕</button></td>'+
+        '<td class="fsm fsatt-amt">'+_fsMoney(att.amt,true)+'</td>'+
+        '<td class="fsm fsatt-diff '+(okd?'ok':'bad')+'">'+(okd?'<span class="fsrctick">✓</span>':('<span class="fsrcx">▲</span> '+_fsMoney(d)))+'</td>';
+    }
+    return '<td class="fsattc"><label class="fsattbtn" title="แนบไฟล์ประกอบ (Excel/CSV) — ระบบอ่านจำนวนเงินมุมซ้ายบนมาเทียบกับ TB"><input type="file" class="fsattfile" data-fsatt="'+ec+'" accept=".xlsx,.xls,.csv" hidden>📎</label></td>'+
+      '<td class="fsm fsatt-amt fsatt-none">–</td><td class="fsm fsatt-diff fsatt-none">–</td>';
+  }
   arr.forEach(function(x){var c=x.cls; var fl=(c.flags&&c.flags.length)?c.flags:[];
     var badges=''; if(fl.indexOf('pledged')>=0)badges+='<span class="fsfl fsfl-pl" title="ติดภาระค้ำประกัน">ค้ำประกัน</span>';
     if(fl.indexOf('related')>=0)badges+='<span class="fsfl fsfl-rp" title="กิจการ/บุคคลที่เกี่ยวข้องกัน">เกี่ยวข้องกัน</span>';
-    var extra='';
-    if(rec){ var dv=rec.map[_fsRcCode(x.code)];
-      if(dv!=null){ var diff=dv-x.nat; var okd=Math.abs(diff)<0.5;
-        extra='<td class="fsm fsrcdet">'+_fsMoney(dv,true)+'</td><td class="fsm fsrcdiff '+(okd?'ok':'bad')+'">'+(okd?'<span class="fsrctick">✓</span>':('<span class="fsrcx">▲</span> '+_fsMoney(diff)))+'</td>'; }
-      else { extra='<td class="fsm fsrcdet fsrcnone">–</td><td class="fsm fsrcdiff fsrcnone">–</td>'; } }
-    rows+='<tr class="fscat-'+c.cat+'"><td class="fsc">'+_fsE(x.code)+'</td>'+
+    rows+='<tr class="fscat-'+c.cat+'">'+_attCells(x)+'<td class="fsc">'+_fsE(x.code)+'</td>'+
       '<td class="fsacct"><span class="fsnm">'+_fsE(x.name)+badges+'</span></td>'+
       '<td class="fsgrpcol fsgrp-'+c.cat+'"><span class="fsgrpth">'+_fsE(_fsLineTh(c.line))+'</span><span class="fsgrpen">'+_fsE(_fsLineEn(c.line))+'</span></td>'+
       '<td class="fsm">'+_fsMoney(x.openNat,true)+'</td>'+
       '<td class="fsm">'+_fsMoney(x.yd,true)+'</td><td class="fsm">'+_fsMoney(x.yc,true)+'</td>'+
-      '<td class="fsm fsend">'+_fsMoney(x.nat)+'</td>'+extra+'</tr>';});
-  if(!arr.length)rows='<tr class="fstbempty"><td colspan="'+(rec?9:7)+'">— ไม่มีบัญชีที่ตรงกับตัวกรอง —</td></tr>';
-  var thExtra=rec?'<th class="fsm fsrch">ยอดตาม TB (ไฟล์)</th><th class="fsm fsrch">ผลต่าง (TB − GL)</th>':'';
+      '<td class="fsm fsend">'+_fsMoney(x.nat)+'</td></tr>';});
+  if(!arr.length)rows='<tr class="fstbempty"><td colspan="10">— ไม่มีบัญชีที่ตรงกับตัวกรอง —</td></tr>';
+  var attHead='<th class="fsatthd-ic" title="แนบไฟล์ประกอบต่อบัญชี">📎<span class="fsatthx">แนบไฟล์</span></th>'+
+    '<th class="fsm fsatthd-amt">ยอดตามไฟล์<span class="fsatthx">Excel · ซ้ายบน</span></th>'+
+    '<th class="fsm fsatthd-diff">ผลต่าง<span class="fsatthx">ไฟล์ − TB</span></th>';
   var y0BE=(+_fsY0+543), y1BE=(+_fsY1+543), isAll=(_fsYear==='ALL');
   var openSub=isAll?'ยอดยกมา · ทุกปี':('ยอดยกมาต้นปี '+y0BE);
   var movSub=isAll?'ระหว่างทุกปี':(_fsIsInterim()?('ม.ค.–'+_FS_MON_TH[_fsEndM-1]+' '+y1BE):((_fsY0===_fsY1)?('ระหว่างปี '+y1BE):('ปี '+y0BE+'–'+y1BE)));
   var endSub=isAll?'คงเหลือ · ทุกปี':(_fsIsInterim()?('ณ สิ้น '+_FS_MON_TH[_fsEndM-1]+' '+y1BE):('ยอดคงเหลือปลายปี '+y1BE));
-  var head='<thead><tr>'+
+  var head='<thead><tr>'+attHead+
     _fsTbTh('code','Code','','')+
     _fsTbTh('acct','Account · ชื่อบัญชี','','')+
     _fsTbTh('group','จัดกลุ่มเข้างบการเงิน','Group → FS line (บรรทัดในงบ)','fsgrphd')+
     _fsTbTh('opening','Opening',openSub,'fsm')+
     _fsTbTh('debit','Debit',movSub,'fsm')+
     _fsTbTh('credit','Credit',movSub,'fsm')+
-    _fsTbTh('ending','Ending',endSub,'fsm')+thExtra+'</tr></thead>';
-  var fyd=0,fyc=0,sOpen=0,sEnd=0; arr.forEach(function(x){fyd+=+x.yd||0;fyc+=+x.yc||0;sOpen+=+x.openNat||0;sEnd+=+x.nat||0;}); var fdiff=fyd-fyc;
+    _fsTbTh('ending','Ending',endSub,'fsm')+'</tr></thead>';
+  var fyd=0,fyc=0,sOpen=0,sEnd=0,nAtt=0,attSum=0,nAttMatch=0,nAttMis=0;
+  arr.forEach(function(x){fyd+=+x.yd||0;fyc+=+x.yc||0;sOpen+=+x.openNat||0;sEnd+=+x.nat||0;
+    var a=_fsAttGet(x.code); if(a){nAtt++;attSum+=(+a.amt||0); if(Math.abs((+a.amt||0)-(+x.nat||0))<0.5)nAttMatch++; else nAttMis++;} });
+  var fdiff=fyd-fyc;
   var filtered=_fsTbHasFil(), nAll=_fsTB.length;
   var filterBar=filtered?('<div class="fstbfbar">🔎 กำลังกรอง — แสดง <b>'+arr.length+'</b> จาก '+nAll+' บัญชี · Debit '+_fsMoney(fyd)+' · Credit '+_fsMoney(fyc)+'<button type="button" id="fsTbClearAll" class="fstbclr">✕ ล้างตัวกรองทั้งหมด</button></div>'):'';
-  /* v9.94: ยอดรวมจำนวนเงินด้านบน (colourful column totals) + เทียบ GL ↔ TB (ไฟล์ที่อัปโหลด) */
+  /* v9.94: ยอดรวมจำนวนเงินด้านบน (colourful column totals) + เทียบไฟล์แนบต่อบัญชี กับ TB */
   function _fsSc(th,en,val,k){ return '<div class="fstbsum-c s-'+k+'"><div class="fstbsum-cl">'+th+'<span class="fstbsum-cen">'+en+'</span></div><div class="fstbsum-cv">'+val+'</div></div>'; }
   var _balOk=Math.abs(fdiff)<0.5;
   var sumPanel='<div class="fstbsum">'+
@@ -10691,26 +10749,27 @@ function _fsRenderTB(){
       _fsSc('เครดิต','CREDIT',_fsMoney(fyc),'cred')+
       _fsSc('ยอดปลาย · คงเหลือ','ENDING',_fsMoney(sEnd),'end')+
     '</div>';
-  if(rec){ var TC=_fsReconTotals(rec);
-    sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-cmph">🔗 เทียบ GL ↔ TB (ไฟล์ที่อัปโหลด) — จับคู่ '+TC.nMatch+'/'+_fsTB.length+' บัญชี</div><div class="fstbsum-grid">'+
-      _fsSc('ยอดตาม GL','ระบบ · SYSTEM',_fsMoney(TC.tSys),'gl')+
-      _fsSc('ยอดตาม TB','ไฟล์ · FILE',_fsMoney(TC.tDet),'tb')+
-      _fsSc('ผลต่าง TB − GL','DIFFERENCE',_fsMoney(TC.tDiff),TC.okAll?'ok':'bad')+
-      _fsSc('สถานะ',(TC.okAll?'MATCHED':'CHECK'),(TC.okAll?'✓ ตรงกัน':'▲ '+TC.nMis+' บัญชีต่าง'),TC.okAll?'ok':'bad')+
+  if(nAtt){
+    sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-cmph">📎 เทียบไฟล์แนบกับ TB — แนบแล้ว '+nAtt+' บัญชี</div><div class="fstbsum-grid">'+
+      _fsSc('รวมยอดตามไฟล์','FILE',_fsMoney(attSum),'tb')+
+      _fsSc('ตรงกับ TB','MATCHED',''+nAttMatch,'ok')+
+      _fsSc('ผลต่าง','DIFF',''+nAttMis,nAttMis?'bad':'ok')+
+      _fsSc('สถานะ',(nAttMis?'CHECK':'MATCHED'),(nAttMis?('▲ '+nAttMis+' บัญชีต่าง'):'✓ ตรงกันทั้งหมด'),nAttMis?'bad':'ok')+
     '</div></div>';
   } else {
-    sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-wait">🔗 <b>เทียบ GL กับ TB:</b> แนบไฟล์ Trial Balance (TB) ที่ช่อง “กระทบยอด” ด้านล่าง เพื่อดูผลต่างระหว่างยอดในระบบ (GL) กับไฟล์ของท่าน</div></div>';
+    sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-wait">📎 <b>แนบไฟล์ประกอบต่อบัญชี:</b> กดไอคอน 📎 ที่คอลัมน์ซ้ายสุดของแต่ละบัญชี เพื่อแนบไฟล์ Excel/CSV — ระบบจะอ่านจำนวนเงินมุมซ้ายบนมาเทียบกับยอดคงเหลือ (Ending) ในระบบให้อัตโนมัติ</div></div>';
   }
   sumPanel+='</div>';
-  var tfExtra='';
-  if(rec){ var T=_fsReconTotals(rec); tfExtra='<td class="fsm">'+_fsMoney(T.tDet)+'</td><td class="fsm">'+(T.okAll?'<span class="fsok">balanced</span>':'<span class="fsbad">'+_fsMoney(T.tDiff)+'</span>')+'</td>'; }
+  var attFoot='<td class="fsattc"></td>'+
+    '<td class="fsm">'+(nAtt?_fsMoney(attSum):'')+'</td>'+
+    '<td class="fsm">'+(nAtt?(nAttMis?('<span class="fsbad">▲ '+nAttMis+'</span>'):'<span class="fsok">✓</span>'):'')+'</td>';
   /* footer = clean column totals; the Debit=Credit balance check lives in the ⚖ chip above */
   var totLbl='Total ('+arr.length+(filtered?(' / '+nAll):'')+' accounts)';
-  return sumPanel+_fsReconPanel()+filterBar+'<div class="fstbwrap"><table class="fstable fstb'+(rec?' fstb-rec':'')+'">'+head+
-    '<tbody>'+rows+'</tbody><tfoot><tr class="fstot"><td colspan="3">'+totLbl+'</td>'+
+  return sumPanel+filterBar+'<div class="fstbwrap"><table class="fstable fstb fstb-att">'+head+
+    '<tbody>'+rows+'</tbody><tfoot><tr class="fstot">'+attFoot+'<td colspan="3">'+totLbl+'</td>'+
     '<td class="fsm">'+_fsMoney(sOpen)+'</td>'+
-    '<td class="fsm">'+_fsMoney(fyd)+'</td><td class="fsm">'+_fsMoney(fyc)+'</td><td class="fsm">'+_fsMoney(sEnd)+'</td>'+tfExtra+'</tr></tfoot></table></div>'+
-    '<p class="fsnote">Ending shown in <b>natural sign</b> (assets/expenses debit-positive · liabilities/equity/revenue credit-positive). BS accounts cumulative through year-end · P&L accounts period movement. · <b>กรอง/เรียงแบบ Excel:</b> กดปุ่ม ▼ ที่หัวคอลัมน์เพื่อกรอง · คลิกชื่อคอลัมน์เพื่อเรียงลำดับ.'+(_fsIsInterim()?' <b>งบเดือน:</b> ยอดคำนวณถึงสิ้นเดือน '+_FS_MON_TH[_fsEndM-1]+' '+(+_fsY1+543)+'.':'')+'</p>';
+    '<td class="fsm">'+_fsMoney(fyd)+'</td><td class="fsm">'+_fsMoney(fyc)+'</td><td class="fsm">'+_fsMoney(sEnd)+'</td></tr></tfoot></table></div>'+
+    '<p class="fsnote"><b>📎 แนบไฟล์ประกอบต่อบัญชี:</b> กดไอคอน 📎 คอลัมน์ซ้ายสุดของแต่ละบัญชีเพื่อแนบไฟล์ Excel/CSV · ระบบดึง<b>จำนวนเงินมุมซ้ายบน</b>ของชีตมาใส่คอลัมน์ «ยอดตามไฟล์» แล้วเทียบกับ Ending — ตรงกันแสดง <span class="fsrctick">✓</span> · ต่างแสดงจำนวนผลต่าง (ไฟล์ − TB). · Ending shown in <b>natural sign</b>. · <b>กรอง/เรียงแบบ Excel:</b> กดปุ่ม ▼ ที่หัวคอลัมน์.'+(_fsIsInterim()?' <b>งบเดือน:</b> ยอดคำนวณถึงสิ้นเดือน '+_FS_MON_TH[_fsEndM-1]+' '+(+_fsY1+543)+'.':'')+'</p>';
 }
 
 /* ---------- RENDER: Balance Sheet ---------- */
@@ -11979,6 +12038,7 @@ function _fsBind(w){ if(w._b)return; w._b=1;
     var ex=t.closest?t.closest('#fsExport'):null; if(ex){_fsExport();return;}
     var pex=t.closest?t.closest('#fsPrint'):null; if(pex){_fsPrint();return;}
     var rclr=t.closest?t.closest('#fsReconClear'):null; if(rclr){_fsReconClear();_fsRenderBody();return;}
+    var arm=t.closest?t.closest('.fsattrm'):null; if(arm){_fsAttSet(arm.getAttribute('data-fsatt'),null);_fsRenderBody();return;}
     /* v9.41: ratio card / hero → open the detail popup */
     var rtile=t.closest?t.closest('[data-rt]'):null;
     if(rtile){ _fsRatioModal(rtile.getAttribute('data-rt')); return; }
@@ -11992,6 +12052,7 @@ function _fsBind(w){ if(w._b)return; w._b=1;
   w.addEventListener('change',function(e){var t=e.target;
     if(t&&t.id==='fsEndMSel'){var mv=parseInt(t.value,10);if(!(mv>=1&&mv<=12))mv=12;_fsEndM=mv;_fsCompute();w.innerHTML=_fsShell();_fsRenderBody();return;}
     if(t&&t.id==='fsReconFile'){_fsReconOnFile(t.files&&t.files[0]);return;}
+    if(t&&t.classList&&t.classList.contains('fsattfile')){_fsAttOnFile(t.getAttribute('data-fsatt'),t.files&&t.files[0]);return;}
     if(t&&t.id==='fsReconSheet'){if(_fsReconWB&&_fsRecon){_fsReconApplySheet(_fsRecon.name,_fsRecon.sheets,t.value);}return;}
     if(t&&(t.id==='fsReconCodeCol'||t.id==='fsReconAmtCol')){var _cc=w.querySelector('#fsReconCodeCol'),_ac=w.querySelector('#fsReconAmtCol');if(_cc&&_ac&&_fsRecon&&_fsRecon.aoa){_fsReconRemap(parseInt(_cc.value,10),parseInt(_ac.value,10));}return;}
     if(t&&t.classList&&t.classList.contains('fsxall')){var wp=t.closest('.fsfltwrap'); if(wp){var cs=wp.querySelectorAll('.fsxsel'); for(var z=0;z<cs.length;z++){var tr=cs[z].closest('tr'); if(!tr||tr.style.display!=='none')cs[z].checked=t.checked;}} return;} if(t&&t.id==='fsManCo'){_fsManCo=t.value;_fsManRerender();return;} if(t&&t.id==='fsManYr'){_fsManYr=(''+t.value).trim();_fsManRerender();return;} if(t&&t.id==='fsYearSel'){var vy=t.value;_fsYear=(vy==='ALL')?'ALL':vy;_fsCompute();w.innerHTML=_fsShell();_fsRenderBody();return;} if(t&&(t.id==='fsY0Sel'||t.id==='fsY1Sel')){var s0=w.querySelector('#fsY0Sel'),s1=w.querySelector('#fsY1Sel');var v0=s0?s0.value:'',v1=s1?s1.value:'';if(v0&&v1){if(v0>v1){var _tt=v0;v0=v1;v1=_tt;}_fsYear=(v0===v1)?v0:(v0+'..'+v1);_fsCompute();w.innerHTML=_fsShell();_fsRenderBody();}return;}});
@@ -12086,19 +12147,23 @@ function _fsXmlSheet(name,title,dateLine,rows,m){
     +'<WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel"><PageSetup><Layout x:Orientation="Portrait"/><Header x:Margin="0.3"/><Footer x:Margin="0.3"/><PageMargins x:Bottom="0.5" x:Left="0.6" x:Right="0.4" x:Top="0.5"/></PageSetup><FitToPage/><Print><FitWidth>1</FitWidth><FitHeight>0</FitHeight></Print></WorksheetOptions></Worksheet>';
 }
 function _fsXmlSheetCF(name,title,dateLine,rows,m){
-  /* cash flow — single year column */
+  /* cash flow — current + prior-year comparative columns (v9.94) */
+  var hp=m.hasPrev;
   var h='<Worksheet ss:Name="'+_fsXe(name)+'"><Table>'+_fsXmlCols();
   h+='<Row ss:Height="22"><Cell ss:MergeAcross="5" ss:StyleID="co"><Data ss:Type="String">'+_fsXe(m.co)+'</Data></Cell></Row>';
   h+='<Row ss:Height="21"><Cell ss:MergeAcross="5" ss:StyleID="ti"><Data ss:Type="String">'+_fsXe(title)+'</Data></Cell></Row>';
   h+='<Row ss:Height="20"><Cell ss:MergeAcross="5" ss:StyleID="dt"><Data ss:Type="String">'+_fsXe(dateLine)+'</Data></Cell></Row><Row/>';
-  h+='<Row>'+_fsXmlStr('','lbl')+_fsXmlStr('','note')+_fsXmlStr(''+m.curBE,'colh',4)+'</Row>';
-  h+='<Row><Cell ss:Index="4" ss:StyleID="unit"><Data ss:Type="String">(บาท)</Data></Cell></Row>';
+  h+='<Row>'+_fsXmlStr('','lbl')+_fsXmlStr('','note')+_fsXmlStr(''+m.curBE,'colh',4)+(hp?_fsXmlStr(''+m.prevBE,'colh',6):'')+'</Row>';
+  h+='<Row><Cell ss:Index="4" ss:MergeAcross="'+(hp?2:0)+'" ss:StyleID="unit"><Data ss:Type="String">(บาท)</Data></Cell></Row>';
   rows.forEach(function(r){
     if(r.t==='sec'){ h+='<Row>'+_fsXmlStr(r.label,'sec')+'</Row>'; return; }
     if(r.t==='blank'||!r.label){ h+='<Row/>'; return; }
     var lblSt=(r.t==='total')?'totLbl':((r.t==='subtotal')?'subLbl':'lbl');
     var valSt=(r.t==='total')?'totVal':((r.t==='subtotal')?'subVal':'val');
-    h+='<Row>'+_fsXmlStr(r.label,lblSt)+'<Cell ss:Index="4" ss:StyleID="'+valSt+'">'+((r.cur==null||r.cur==='')?'':'<Data ss:Type="Number">'+(Math.round((+r.cur)*100)/100)+'</Data>')+'</Cell></Row>';
+    h+='<Row>'+_fsXmlStr(r.label,lblSt)
+      +'<Cell ss:Index="4" ss:StyleID="'+valSt+'">'+((r.cur==null||r.cur==='')?'':'<Data ss:Type="Number">'+(Math.round((+r.cur)*100)/100)+'</Data>')+'</Cell>'
+      +(hp?('<Cell ss:Index="6" ss:StyleID="'+valSt+'">'+((r.prev==null||r.prev==='')?'':'<Data ss:Type="Number">'+(Math.round((+r.prev)*100)/100)+'</Data>')+'</Cell>'):'')
+      +'</Row>';
   });
   h+='</Table></Worksheet>';
   return h;
@@ -12253,45 +12318,38 @@ function _fsTplModel(){
 
   /* ---------- Statement of Cash Flows (indirect, best-effort, ties to Δcash) ---------- */
   var cf=[]; var cfNote='';
-  function cpush(t,label,cur){ cf.push({t:t,label:label,cur:cur}); }
+  function cpush(t,label,cur,prev,warn){ cf.push({t:t,label:label,cur:(cur===undefined?null:cur),prev:(prev===undefined?null:prev),warn:!!warn}); }
   var cashGrp=_FS_BS_GROUPS.filter(function(g){return g.key==='cash';})[0];
-  var cashCur=cashGrp?_fsTplGrp(gc,cashGrp):0, cashPrev=(gp&&cashGrp)?_fsTplGrp(gp,cashGrp):0;
-  if(hp){
-    /* delta of a BS group between years, in "natural" sign */
-    function d(g){ return _fsTplGrp(gc,g)-(gp?_fsTplGrp(gp,g):0); }
-    function byKey(k){ return _FS_BS_GROUPS.filter(function(g){return g.key===k;})[0]; }
-    var opKeys=['ar','contract_a','inv','oca','ap','contract_l','taxpay','ocl','ebo','prov','dtl','dta'];
-    var invKeys=['ppe','rou','intang','invest','onca'];
-    var finKeys=['stloan','ltloan','lease'];
+  var cashCur=cashGrp?_fsTplGrp(gc,cashGrp):0;
+  /* v9.94: งบกระแสเงินสดแสดง "ปีก่อนเปรียบเทียบ" เหมือนงบอื่น — คำนวณแต่ละปีจากงบทดลองของปีนั้นเอง
+     (วิธีเดียวกับหน้าจอ _fsRenderCF) จึงได้คอลัมน์ปีก่อนโดยไม่ต้องใช้ข้อมูลปีที่ 3 */
+  if(hp && typeof _fsCFCompute==='function'){
+    var cfc=_fsCFCompute(_fsTB,_fsT), cfp=_fsCFCompute(_fsPrevTB,_fsPrevT);
+    function _cfLines(cAcc,pAcc){
+      var keys={}; for(var k in cAcc)keys[k]=1; for(var k2 in pAcc)keys[k2]=1;
+      Object.keys(keys).sort(function(a,b){return Math.abs(cAcc[b]||0)-Math.abs(cAcc[a]||0);})
+        .forEach(function(ln){ var cv=cAcc[ln]||0, pv=pAcc[ln]||0;
+          if(Math.abs(cv)<0.005 && Math.abs(pv)<0.005)return;
+          cpush('line',_fsLineTh(ln),cv,pv); });
+    }
     /* operating */
     cpush('sec','กระแสเงินสดจากกิจกรรมดำเนินงาน','');
-    cpush('line','กำไร(ขาดทุน)สำหรับปี',Tc.netProfit);
-    var opTot=Tc.netProfit;
-    opKeys.forEach(function(k){ var g=byKey(k); if(!g)return; var dd=d(g); if(Math.abs(dd)<0.005)return; var eff=(g.cat==='A')?-dd:dd; opTot+=eff; cpush('line','การเปลี่ยนแปลง: '+g.th,eff); });
-    cpush('subtotal','เงินสดสุทธิจากกิจกรรมดำเนินงาน',opTot);
+    cpush('line','กำไร(ขาดทุน)สำหรับปี',cfc.netProfit,cfp.netProfit);
+    _cfLines(cfc.op,cfp.op);
+    cpush('subtotal','เงินสดสุทธิจากกิจกรรมดำเนินงาน',cfc.opSum,cfp.opSum);
     /* investing */
     cpush('sec','กระแสเงินสดจากกิจกรรมลงทุน','');
-    var invTot=0;
-    invKeys.forEach(function(k){ var g=byKey(k); if(!g)return; var dd=d(g); if(Math.abs(dd)<0.005)return; var eff=-dd; invTot+=eff; cpush('line','การเปลี่ยนแปลง: '+g.th,eff); });
-    cpush('subtotal','เงินสดสุทธิจากกิจกรรมลงทุน',invTot);
+    _cfLines(cfc.inv,cfp.inv);
+    cpush('subtotal','เงินสดสุทธิจากกิจกรรมลงทุน',cfc.invSum,cfp.invSum);
     /* financing */
     cpush('sec','กระแสเงินสดจากกิจกรรมจัดหาเงิน','');
-    var finTot=0;
-    finKeys.forEach(function(k){ var g=byKey(k); if(!g)return; var dd=d(g); if(Math.abs(dd)<0.005)return; var eff=dd; finTot+=eff; cpush('line','การเปลี่ยนแปลง: '+g.th,eff); });
-    /* share capital & dividends / other equity residual */
-    var scDelta=(_fsTplLine(gc,'E','Share capital')-_fsTplLine(gp,'E','Share capital'))+(_fsTplLine(gc,'E','Share premium')-_fsTplLine(gp,'E','Share premium'));
-    if(Math.abs(scDelta)>=0.005){ finTot+=scDelta; cpush('line','เงินสดรับจากการเพิ่มทุน',scDelta); }
-    var divRes=(Tc.accProfit-Tp.accProfit)-Tc.netProfit;   /* usually −dividends */
-    if(Math.abs(divRes)>=0.005){ finTot+=divRes; cpush('line','เงินปันผลจ่าย / รายการส่วนของผู้ถือหุ้นอื่น',divRes); }
-    var ocDelta=_fsTplLine(gc,'E','Other components of equity')-_fsTplLine(gp,'E','Other components of equity');
-    if(Math.abs(ocDelta)>=0.005){ finTot+=ocDelta; cpush('line','องค์ประกอบอื่นของส่วนของผู้ถือหุ้นเปลี่ยนแปลง',ocDelta); }
-    cpush('subtotal','เงินสดสุทธิจากกิจกรรมจัดหาเงิน',finTot);
-    /* tie to actual Δcash; force residual into operating if identity drifts */
-    var dcash=cashCur-cashPrev, resid=dcash-(opTot+invTot+finTot);
-    if(Math.abs(resid)>=0.5){ cf.push({t:'line',label:'รายการปรับปรุงการจัดประเภท (โปรดตรวจสอบ)',cur:resid,warn:true}); opTot+=resid; }
-    cpush('total','เงินสดและรายการเทียบเท่าเงินสดเพิ่มขึ้น(ลดลง)สุทธิ',dcash);
-    cpush('line','เงินสดและรายการเทียบเท่าเงินสด ณ วันต้นปี',cashPrev);
-    cpush('total','เงินสดและรายการเทียบเท่าเงินสด ณ วันสิ้นปี',cashCur);
+    _cfLines(cfc.fin,cfp.fin);
+    cpush('subtotal','เงินสดสุทธิจากกิจกรรมจัดหาเงิน',cfc.finSum,cfp.finSum);
+    /* net + cash begin/end */
+    cpush('total','เงินสดและรายการเทียบเท่าเงินสดเพิ่มขึ้น(ลดลง)สุทธิ',cfc.net,cfp.net);
+    cpush('line','เงินสดและรายการเทียบเท่าเงินสด ณ วันต้นปี',cfc.beginCash,cfp.beginCash);
+    cpush('total','เงินสดและรายการเทียบเท่าเงินสด ณ วันสิ้นปี',cfc.endCash,cfp.endCash);
+    if(!cfc.tie) cfNote='* หมายเหตุ: ยอดคำนวณต่างจากการเปลี่ยนแปลงเงินสดจริง '+_fsMoney(cfc.net-cfc.deltaCash)+' — โปรดตรวจสอบการจัดประเภทบัญชี';
   } else {
     cfNote='* งบกระแสเงินสดต้องมีข้อมูลปีก่อนเพื่อคำนวณการเปลี่ยนแปลง — เลือกช่วงปีที่มีปีก่อนหน้าเพื่อสร้างงบกระแสเงินสด';
     cpush('line','เงินสดและรายการเทียบเท่าเงินสด ณ วันสิ้นปี',cashCur);
@@ -12368,10 +12426,11 @@ function _fsExportTpl(){
   if(m.soc.note)sa.push([],[m.soc.note]);
   var wsS=XLSX.utils.aoa_to_sheet(sa); wsS['!cols']=[{wch:46},{wch:18},{wch:16},{wch:20},{wch:22},{wch:20}]; _fsTplNum(wsS,[1,2,3,4,5]); XLSX.utils.book_append_sheet(wb,wsS,'เปลี่ยนแปลงส่วนผู้ถือหุ้น');
   /* Cash flow */
-  var fa=[[m.co],['งบกระแสเงินสด'],['สำหรับปีสิ้นสุดวันที่ 31 ธันวาคม '+m.curBE],[],['',''+m.curBE],['','(บาท)']];
-  m.cf.forEach(function(r){ if(r.t==='sec'){fa.push([r.label]);return;} fa.push([r.label,(r.cur==null?'':r.cur)]); });
+  var hpF=m.hasPrev;
+  var fa=[[m.co],['งบกระแสเงินสด'],['สำหรับปีสิ้นสุดวันที่ 31 ธันวาคม '+m.curBE],[],['',''+m.curBE,hpF?(''+m.prevBE):''],['','(บาท)',hpF?'(บาท)':'']];
+  m.cf.forEach(function(r){ if(r.t==='sec'){fa.push([r.label]);return;} fa.push([r.label,(r.cur==null?'':r.cur),(hpF&&r.prev!=null?r.prev:'')]); });
   if(m.cfNote)fa.push([],[m.cfNote]);
-  var wsF=XLSX.utils.aoa_to_sheet(fa); wsF['!cols']=[{wch:56},{wch:22}]; _fsTplNum(wsF,[1]); XLSX.utils.book_append_sheet(wb,wsF,'งบกระแสเงินสด');
+  var wsF=XLSX.utils.aoa_to_sheet(fa); wsF['!cols']=[{wch:56},{wch:22},{wch:22}]; _fsTplNum(wsF,[1,2]); XLSX.utils.book_append_sheet(wb,wsF,'งบกระแสเงินสด');
   /* Notes */
   var noa=[[m.co],['หมายเหตุประกอบงบการเงิน'],['สำหรับปีสิ้นสุดวันที่ 31 ธันวาคม '+m.curBE],[]];
   m.notes.forEach(function(n){ noa.push([n.no+'.  '+n.title]); (n.body||[]).forEach(function(p){noa.push(['',p]);}); if(n.table){ noa.push(['',''].concat(n.table.head.slice(1))); n.table.rows.forEach(function(rr){ noa.push(['',rr[0],rr[1]]); }); } noa.push([]); });
@@ -12407,8 +12466,8 @@ function _fsPrintTpl(){
   var socInner='<table class="fst soc"><thead><tr><th class="l"></th>'+m.soc.cols.map(function(c){return '<th class="v">'+E(c)+'</th>';}).join('')+'</tr></thead><tbody>'
     + m.soc.rows.map(function(r){ return '<tr class="'+(r.bold?'tot':'ln')+'"><td class="l">'+E(r.label)+'</td>'+r.v.map(function(x){return '<td class="v">'+amt(x)+'</td>';}).join('')+'</tr>'; }).join('')
     + '</tbody></table>'+(m.soc.note?('<div class="nt">'+E(m.soc.note)+'</div>'):'');
-  var cfInner='<table class="fst"><thead><tr><th class="l"></th><th class="v">'+E(m.curBE)+'</th></tr><tr class="u"><th></th><th class="v">(บาท)</th></tr></thead><tbody>'
-    + m.cf.map(function(r){ if(r.t==='sec')return '<tr class="sec"><td colspan="2">'+E(r.label)+'</td></tr>'; var cls=(r.t==='total')?'tot':((r.t==='subtotal')?'stot':'ln'); return '<tr class="'+cls+(r.warn?' warn':'')+'"><td class="l">'+E(r.label)+'</td><td class="v">'+amt(r.cur)+'</td></tr>'; }).join('')
+  var cfInner='<table class="fst"><thead><tr><th class="l"></th><th class="v">'+E(m.curBE)+'</th>'+(hp?('<th class="v">'+E(m.prevBE)+'</th>'):'')+'</tr><tr class="u"><th></th><th class="v">(บาท)</th>'+(hp?'<th class="v">(บาท)</th>':'')+'</tr></thead><tbody>'
+    + m.cf.map(function(r){ if(r.t==='sec')return '<tr class="sec"><td colspan="'+(hp?3:2)+'">'+E(r.label)+'</td></tr>'; var cls=(r.t==='total')?'tot':((r.t==='subtotal')?'stot':'ln'); return '<tr class="'+cls+(r.warn?' warn':'')+'"><td class="l">'+E(r.label)+'</td><td class="v">'+amt(r.cur)+'</td>'+(hp?('<td class="v">'+amt(r.prev)+'</td>'):'')+'</tr>'; }).join('')
     + '</tbody></table>'+(m.cfNote?('<div class="nt">'+E(m.cfNote)+'</div>'):'');
   var notesInner=m.notes.map(function(n){ var b=(n.body||[]).map(function(p){return '<p>'+E(p)+'</p>';}).join('');
     var t=''; if(n.table){ t='<table class="fst sm"><thead><tr>'+n.table.head.map(function(h,i){return '<th class="'+(i?'v':'l')+'">'+E(h)+'</th>';}).join('')+'</tr></thead><tbody>'+n.table.rows.map(function(rr){return '<tr class="ln"><td class="l">'+E(rr[0])+'</td><td class="v">'+amt(rr[1])+'</td></tr>';}).join('')+'</tbody></table>'; }
