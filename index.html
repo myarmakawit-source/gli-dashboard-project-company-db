@@ -10407,16 +10407,35 @@ function _fsAttCellA1(ws){ if(!ws)return NaN; var a1=ws['A1'];
 /* fallback: ถ้า A1 ว่างจริง ค่อยหาเซลล์ตัวเลขแรกในลำดับอ่าน (บน→ล่าง · ซ้าย→ขวา) */
 function _fsAttFirstAmt(aoa){ for(var r=0;r<(aoa?aoa.length:0);r++){ var row=aoa[r]; if(!row)continue;
     for(var c=0;c<row.length;c++){ var n=_fsRcNum(row[c]); if(!isNaN(n))return n; } } return NaN; }
+/* v9.94: เลือกชีตที่ถูกต้องเมื่อไฟล์มีหลายชีต/มีชีตซ่อน — อ่าน A1 ของชีต "ที่มองเห็น" และ
+   ข้ามค่า A1 ที่บังเอิญเท่ากับ "รหัสบัญชี" (บางไฟล์มีชีตแรกซ่อนที่ A1 เป็นรหัสบัญชี) */
+function _fsAttA1IsNum(ws){ var a1=ws&&ws['A1']; return !!(a1&&a1.t==='n'&&typeof a1.v==='number'); }
+function _fsAttPickAmt(wb,code){
+  var codeNum=_fsRcNum(code), names=(wb&&wb.SheetNames)||[], vis=(wb.Workbook&&wb.Workbook.Sheets)||[];
+  function neCode(n){ return !(isFinite(codeNum)&&Math.abs(n-codeNum)<0.5); }
+  function hidden(i){ return !!(vis[i]&&vis[i].Hidden); }
+  var i,n;
+  /* 0) ชีตที่มองเห็น & A1 เป็น "เซลล์ตัวเลขจริง" (สัญญาณดีที่สุด — กัน A1 ที่เป็นข้อความหัวเรื่องมีเลขปน) */
+  for(i=0;i<names.length;i++){ if(hidden(i))continue; if(_fsAttA1IsNum(wb.Sheets[names[i]])){ n=wb.Sheets[names[i]]['A1'].v; if(neCode(n))return {amt:n,sheet:names[i]}; } }
+  /* 1) ชีตที่มองเห็น & A1 แปลงเป็นตัวเลขได้ & ไม่เท่ากับรหัสบัญชี */
+  for(i=0;i<names.length;i++){ if(hidden(i))continue; n=_fsAttCellA1(wb.Sheets[names[i]]); if(!isNaN(n)&&neCode(n))return {amt:n,sheet:names[i]}; }
+  /* 2) ชีตใดก็ได้ ที่ A1 เป็นเซลล์ตัวเลขจริง */
+  for(i=0;i<names.length;i++){ if(_fsAttA1IsNum(wb.Sheets[names[i]])){ n=wb.Sheets[names[i]]['A1'].v; if(neCode(n))return {amt:n,sheet:names[i]}; } }
+  /* 3) ชีตใดก็ได้ ที่ A1 แปลงเป็นตัวเลขได้ */
+  for(i=0;i<names.length;i++){ n=_fsAttCellA1(wb.Sheets[names[i]]); if(!isNaN(n)&&neCode(n))return {amt:n,sheet:names[i]}; }
+  /* 4) A1 ชีตแรก (แม้จะเท่ารหัส) แล้วค่อย scan */
+  n=_fsAttCellA1(wb.Sheets[names[0]]); if(!isNaN(n))return {amt:n,sheet:names[0]};
+  var ws0=wb.Sheets[names[0]]; var aoa=ws0?XLSX.utils.sheet_to_json(ws0,{header:1,raw:true,defval:null}):[];
+  return {amt:_fsAttFirstAmt(aoa),sheet:names[0]||''};
+}
 function _fsAttOnFile(code,file){ if(!file||!code)return;
   if(typeof XLSX==='undefined'){alert('ไลบรารี Excel (SheetJS) ยังโหลดไม่เสร็จ — เปิดหน้านี้ออนไลน์อย่างน้อยหนึ่งครั้ง');return;}
   var fr=new FileReader();
   fr.onload=function(){ try{
     var wb=XLSX.read(new Uint8Array(fr.result),{type:'array'});
-    var sh=wb.SheetNames[0]; var ws=sh?wb.Sheets[sh]:null;
-    var amt=_fsAttCellA1(ws);   /* อ่านเซลล์ A1 มุมซ้ายบนก่อน */
-    if(isNaN(amt)){ var aoa=ws?XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null}):[]; amt=_fsAttFirstAmt(aoa); }
-    if(isNaN(amt)){ alert('ไม่พบจำนวนเงินในเซลล์ A1 (มุมซ้ายบน) ของไฟล์ “'+file.name+'”\nโปรดใส่จำนวนเงินไว้ที่เซลล์ A1 ของชีต'); return; }
-    _fsAttSet(code,{name:file.name,amt:amt,ts:Date.now()});
+    var pick=_fsAttPickAmt(wb,code); var amt=pick.amt;
+    if(isNaN(amt)){ alert('ไม่พบจำนวนเงินในเซลล์ A1 (มุมซ้ายบน) ของไฟล์ “'+file.name+'”\nโปรดใส่จำนวนเงินไว้ที่เซลล์ A1 ของชีตที่ต้องการเทียบ'); return; }
+    _fsAttSet(code,{name:file.name,amt:amt,sheet:pick.sheet,ts:Date.now()});
     _fsRenderBody();
   }catch(e){ alert('อ่านไฟล์ไม่สำเร็จ: '+((e&&e.message)||e)); } };
   fr.onerror=function(){alert('อ่านไฟล์ไม่ได้');};
@@ -10716,7 +10735,7 @@ function _fsRenderTB(){
     var att=_fsAttGet(x.code), ec=_fsE(x.code);
     if(att){
       var d=(+att.amt||0)-(+x.nat||0), okd=Math.abs(d)<0.5;
-      var ttl=_fsE(att.name)+' · ยอดในไฟล์ '+_fsMoney(att.amt)+' — คลิกเพื่อเปลี่ยนไฟล์';
+      var ttl=_fsE(att.name)+(att.sheet?(' · ชีต “'+_fsE(att.sheet)+'” เซลล์ A1'):'')+' · ยอดในไฟล์ '+_fsMoney(att.amt)+' — คลิกเพื่อเปลี่ยนไฟล์';
       return '<td class="fsattc"><label class="fsattbtn on" title="'+ttl+'"><input type="file" class="fsattfile" data-fsatt="'+ec+'" accept=".xlsx,.xls,.csv" hidden>📎</label>'+
         '<button type="button" class="fsattrm" data-fsatt="'+ec+'" title="ลบไฟล์แนบ">✕</button></td>'+
         '<td class="fsm fsatt-amt">'+_fsMoney(att.amt,true)+'</td>'+
@@ -12081,7 +12100,7 @@ function _fsBind(w){ if(w._b)return; w._b=1;
   w.addEventListener('change',function(e){var t=e.target;
     if(t&&t.id==='fsEndMSel'){var mv=parseInt(t.value,10);if(!(mv>=1&&mv<=12))mv=12;_fsEndM=mv;_fsCompute();w.innerHTML=_fsShell();_fsRenderBody();return;}
     if(t&&t.id==='fsReconFile'){_fsReconOnFile(t.files&&t.files[0]);return;}
-    if(t&&t.classList&&t.classList.contains('fsattfile')){_fsAttOnFile(t.getAttribute('data-fsatt'),t.files&&t.files[0]);return;}
+    if(t&&t.classList&&t.classList.contains('fsattfile')){_fsAttOnFile(t.getAttribute('data-fsatt'),t.files&&t.files[0]);try{t.value='';}catch(_e){}return;}
     if(t&&t.id==='fsReconSheet'){if(_fsReconWB&&_fsRecon){_fsReconApplySheet(_fsRecon.name,_fsRecon.sheets,t.value);}return;}
     if(t&&(t.id==='fsReconCodeCol'||t.id==='fsReconAmtCol')){var _cc=w.querySelector('#fsReconCodeCol'),_ac=w.querySelector('#fsReconAmtCol');if(_cc&&_ac&&_fsRecon&&_fsRecon.aoa){_fsReconRemap(parseInt(_cc.value,10),parseInt(_ac.value,10));}return;}
     if(t&&t.classList&&t.classList.contains('fsxall')){var wp=t.closest('.fsfltwrap'); if(wp){var cs=wp.querySelectorAll('.fsxsel'); for(var z=0;z<cs.length;z++){var tr=cs[z].closest('tr'); if(!tr||tr.style.display!=='none')cs[z].checked=t.checked;}} return;} if(t&&t.id==='fsManCo'){_fsManCo=t.value;_fsManRerender();return;} if(t&&t.id==='fsManYr'){_fsManYr=(''+t.value).trim();_fsManRerender();return;} if(t&&t.id==='fsYearSel'){var vy=t.value;_fsYear=(vy==='ALL')?'ALL':vy;_fsCompute();w.innerHTML=_fsShell();_fsRenderBody();return;} if(t&&(t.id==='fsY0Sel'||t.id==='fsY1Sel')){var s0=w.querySelector('#fsY0Sel'),s1=w.querySelector('#fsY1Sel');var v0=s0?s0.value:'',v1=s1?s1.value:'';if(v0&&v1){if(v0>v1){var _tt=v0;v0=v1;v1=_tt;}_fsYear=(v0===v1)?v0:(v0+'..'+v1);_fsCompute();w.innerHTML=_fsShell();_fsRenderBody();}return;}});
