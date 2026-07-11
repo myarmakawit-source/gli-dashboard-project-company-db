@@ -6779,9 +6779,10 @@ function _glEmptyCols(){var e=[];for(var c=0;c<GL_COLS.length;c++)e.push(true);i
 /* ---- IndexedDB key namespacing per file (legacy file keeps un-namespaced keys) ---- */
 function _glKey(id,suf){id=id||GLACTIVE||'_legacy';return (id==='_legacy'?'':(id+':'))+suf;}
 /* ---- file management ---- */
-function _glAddFile(meta){var id=_glNewId();var entry={id:id,name:(meta&&meta.src)||'GL',ts:Date.now(),n:(GLROWS?GLROWS.length:0),na:(meta&&meta.na)||0,cloud:null};GLFILES.push(entry);GLACTIVE=id;_glSaveFiles();_glSaveActive();try{if(typeof _fsCarryOnImport==='function')_fsCarryOnImport(id);}catch(_ci){}/* v9.99: อัป GL ใหม่ → ดึงไฟล์แนบ+ทะเบียนบัญชีจากสล็อต carry มาใส่ไฟล์ใหม่ */return entry;}
+function _glAddFile(meta){var id=_glNewId();var entry={id:id,name:(meta&&meta.src)||'GL',ts:Date.now(),n:(GLROWS?GLROWS.length:0),na:(meta&&meta.na)||0,cloud:null};GLFILES.push(entry);GLACTIVE=id;try{localStorage.removeItem('gli_glemb_del');}catch(_ge2){}/* v9.99: อัป GL ใหม่ → ล้างธง "ลบไฟล์ฝังถาวร" (เริ่มข้อมูลชุดใหม่) */_glSaveFiles();_glSaveActive();try{if(typeof _fsCarryOnImport==='function')_fsCarryOnImport(id);}catch(_ci){}/* v9.99: อัป GL ใหม่ → ดึงไฟล์แนบ+ทะเบียนบัญชีจากสล็อต carry มาใส่ไฟล์ใหม่ */return entry;}
 function _glSelectFile(id){if(id===GLACTIVE&&GLROWS&&GLROWS.length){return;}GLACTIVE=id;_glSaveActive();GLROWS=null;GLMETA=null;GLFIL={};GLSORT=[];GLSHOW=300;_glClass='';GLHLFILTER=null;GLHLPAINT=-2;_glHlFile=null;renderGl();}
 function _glDeleteFile(id){var f=_glFindFile(id);if(!f)return;if(!confirm('Remove file "'+((f.name)||id)+'" from all devices? This cannot be undone.'))return;
+  if(f.embedded||id==='_embedded'){try{localStorage.setItem('gli_glemb_del','1');}catch(_ge){}}/* v9.99: ลบไฟล์ GL ที่ฝัง (baked) แบบถาวร — กัน _glBootEmbedded โหลดกลับตอน boot (เดิมลบไม่ติดเพราะ un-tombstone อัตโนมัติ) */
   GLFILES=GLFILES.filter(function(x){return x.id!==id;});if(GLFILESDEL.indexOf(id)<0)GLFILESDEL.push(id);_glSaveFiles();_glSaveDel();
   try{_glDelIdb(id);}catch(e){}if(f.cloud&&f.cloud.p&&typeof _stDel==='function')_stDel(f.cloud.p);try{if((f.cloud&&f.cloud.glc)&&typeof _glcDel==='function')_glcDel(id);}catch(e){}/* v9.05: also drop the chunked GL-cloud nodes */
   if(typeof gliLog==='function')gliLog('Removed GL file',(f.name||id));
@@ -7136,6 +7137,7 @@ function _glFilesPkt(){if(!Array.isArray(GLFILES))return [];return GLFILES.map(f
 /* ===== EMBED GL DATA INTO THE HTML FILE (self-contained: any device sees the data with no Excel upload and no cloud) ===== */
 function _glBootEmbedded(force){
   try{
+    try{if(localStorage.getItem('gli_glemb_del')==='1')return Promise.resolve(false);}catch(_ed){}/* v9.99: ผู้ใช้ลบไฟล์ GL ที่ฝังนี้ถาวรแล้ว → ห้ามโหลดกลับ (ล้างธงเมื่ออัป GL ใหม่) */
     if(typeof window.__GLI_EMBEDDED_GL__!=='string'||!window.__GLI_EMBEDDED_GL__.length)return Promise.resolve(false);
     if(!force&&typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length)return Promise.resolve(false);
     var bin=atob(window.__GLI_EMBEDDED_GL__);var len=bin.length;var bytes=new Uint8Array(len);for(var i=0;i<len;i++)bytes[i]=bin.charCodeAt(i);
