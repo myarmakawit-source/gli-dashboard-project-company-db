@@ -5547,6 +5547,27 @@ function _fsAcctIdbLoad(){try{
   },function(){_fsAcctReady=true;});
 }catch(e){_fsAcctReady=true;}}
 try{setTimeout(_fsAcctIdbLoad,0);}catch(_fle2){_fsAcctReady=true;}
+/* v9.99: CARRY-OVER — โยงไฟล์แนบ (FSATT) + ทะเบียนบัญชี (FSACCT) ข้ามการ "ลบ/อัปโหลด GL ใหม่" (glid เปลี่ยน)
+   ผ่านสล็อต '__carry__' → ลบ GL แล้วรหัส+ชื่อ+ไฟล์แนบยังอยู่ (ยอด 0) · อัป GL ใหม่แล้วยอดกลับมา ของแนบยังครบ */
+function _fsAttMergeInto(dst,src){ if(!src)return; var d=FSATT[dst]||(FSATT[dst]={}); for(var c in src){ if(Object.prototype.hasOwnProperty.call(src,c)){ var s=src[c],e=d[c]; if(!e||((+((s&&s.ts))||0)>(+((e&&e.ts))||0)))d[c]=s; } } }
+function _fsAcctMergeInto(dst,src){ if(!src)return; var d=FSACCT[dst]||(FSACCT[dst]={a:{},y:[]}); if(!d.a)d.a={}; if(src.a)for(var c in src.a){ if(Object.prototype.hasOwnProperty.call(src.a,c)&&d.a[c]==null)d.a[c]=src.a[c]; } if((!d.y||!d.y.length)&&src.y&&src.y.length)d.y=src.y.slice(); }
+function _fsHasAtt(k){ var m=FSATT[k]; return !!(m&&Object.keys(m).length); }
+function _fsHasAcct(k){ var m=FSACCT[k]; return !!(m&&m.a&&Object.keys(m.a).length); }
+function _fsCarryOnDelete(oldId){ try{
+  var newG=(typeof GLACTIVE!=='undefined'&&GLACTIVE)?GLACTIVE:'_legacy';
+  if(_fsHasAtt(oldId)) _fsAttMergeInto('__carry__',FSATT[oldId]);
+  if(_fsHasAcct(oldId)) _fsAcctMergeInto('__carry__',FSACCT[oldId]);
+  if(newG==='_legacy'){ /* GL เป็นไฟล์สุดท้าย → โยงเข้า context ว่าง เพื่อให้ TB โชว์รหัส+ชื่อ+ไฟล์แนบต่อทันที (ยอด 0) */
+    if(_fsHasAtt(oldId)) _fsAttMergeInto('_legacy',FSATT[oldId]);
+    if(_fsHasAcct(oldId)) _fsAcctMergeInto('_legacy',FSACCT[oldId]);
+  }
+  try{_fsAttPersistAll();}catch(e){} try{_fsAcctPersist();}catch(e){}
+}catch(e){} }
+function _fsCarryOnImport(newId){ try{ if(newId==null||newId===''||newId==='__carry__')return; var did=false;
+  if(_fsHasAtt('__carry__')){ _fsAttMergeInto(newId,FSATT['__carry__']); did=true; }
+  if(_fsHasAcct('__carry__')){ _fsAcctMergeInto(newId,FSACCT['__carry__']); did=true; }
+  if(did){ try{delete FSATT['__carry__'];}catch(e){} try{delete FSACCT['__carry__'];}catch(e){} try{_fsAttPersistAll();}catch(e){} try{_fsAcctPersist();}catch(e){} }
+}catch(e){} }
 /* ===== v9.95: FSATT CLOUD BACKUP — สำรอง "ไฟล์แนบต่อบัญชี" (Trial Balance) ขึ้น Firebase =====
    เดิม FSATT อยู่ใน localStorage เท่านั้น → ล้างเบราว์เซอร์ = หาย และเปิดข้ามเครื่องไม่ได้
    โมดูลนี้สำรองขึ้นคลาวด์แบบ "ประหยัดโควตา Spark 360MB/วัน + ประหยัดการดาวน์โหลด":
@@ -6758,14 +6779,17 @@ function _glEmptyCols(){var e=[];for(var c=0;c<GL_COLS.length;c++)e.push(true);i
 /* ---- IndexedDB key namespacing per file (legacy file keeps un-namespaced keys) ---- */
 function _glKey(id,suf){id=id||GLACTIVE||'_legacy';return (id==='_legacy'?'':(id+':'))+suf;}
 /* ---- file management ---- */
-function _glAddFile(meta){var id=_glNewId();var entry={id:id,name:(meta&&meta.src)||'GL',ts:Date.now(),n:(GLROWS?GLROWS.length:0),na:(meta&&meta.na)||0,cloud:null};GLFILES.push(entry);GLACTIVE=id;_glSaveFiles();_glSaveActive();return entry;}
+function _glAddFile(meta){var id=_glNewId();var entry={id:id,name:(meta&&meta.src)||'GL',ts:Date.now(),n:(GLROWS?GLROWS.length:0),na:(meta&&meta.na)||0,cloud:null};GLFILES.push(entry);GLACTIVE=id;_glSaveFiles();_glSaveActive();try{if(typeof _fsCarryOnImport==='function')_fsCarryOnImport(id);}catch(_ci){}/* v9.99: อัป GL ใหม่ → ดึงไฟล์แนบ+ทะเบียนบัญชีจากสล็อต carry มาใส่ไฟล์ใหม่ */return entry;}
 function _glSelectFile(id){if(id===GLACTIVE&&GLROWS&&GLROWS.length){return;}GLACTIVE=id;_glSaveActive();GLROWS=null;GLMETA=null;GLFIL={};GLSORT=[];GLSHOW=300;_glClass='';GLHLFILTER=null;GLHLPAINT=-2;_glHlFile=null;renderGl();}
 function _glDeleteFile(id){var f=_glFindFile(id);if(!f)return;if(!confirm('Remove file "'+((f.name)||id)+'" from all devices? This cannot be undone.'))return;
   GLFILES=GLFILES.filter(function(x){return x.id!==id;});if(GLFILESDEL.indexOf(id)<0)GLFILESDEL.push(id);_glSaveFiles();_glSaveDel();
   try{_glDelIdb(id);}catch(e){}if(f.cloud&&f.cloud.p&&typeof _stDel==='function')_stDel(f.cloud.p);try{if((f.cloud&&f.cloud.glc)&&typeof _glcDel==='function')_glcDel(id);}catch(e){}/* v9.05: also drop the chunked GL-cloud nodes */
   if(typeof gliLog==='function')gliLog('Removed GL file',(f.name||id));
-  if(GLACTIVE===id){GLACTIVE=GLFILES.length?GLFILES[0].id:'';_glSaveActive();GLROWS=null;GLMETA=null;}
-  if(typeof cloudPush==='function')cloudPush();
+  if(GLACTIVE===id){GLACTIVE=GLFILES.length?GLFILES[0].id:'';_glSaveActive();GLROWS=null;GLMETA=null;
+    try{ if(typeof _fsCarryOnDelete==='function') _fsCarryOnDelete(id); }catch(_co){}/* v9.99: ลบ GL แล้วไฟล์แนบ+ทะเบียนบัญชียังอยู่ (โยงไป context ใหม่/สล็อต carry) */}
+  /* v9.99: ดันการลบ + tombstone ขึ้นคลาวด์ "ทันที" (ไม่หน่วง 500ms) กันลบแล้วเด้งกลับเพราะ push ไม่ทัน/ถูก echo ทับ */
+  try{ _userTouched=true; }catch(_ut){}
+  if(typeof cloudPushNow==='function')cloudPushNow(); else if(typeof cloudPush==='function')cloudPush();
   renderGl();}
 function _glMigrateLegacy(){if(GLFILES.length)return Promise.resolve(false);
   return _glIdb().then(function(db){if(!db)return false;return new Promise(function(res){try{var tx=db.transaction('kv','readonly');var rq=tx.objectStore('kv').get('meta');
