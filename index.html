@@ -13302,7 +13302,8 @@ function _fsPrintTpl(){
     });
     return h+'</tbody></table>';
   }
-  /* v9.96: footer on every statement page — note reference + director's certification & signature */
+  /* v9.96: footer on every statement page — note reference + director's certification & signature
+     v9.99: footer now repeats on EVERY paginated page of each statement (previously last page only) */
   var _stmtFootInner='<div class="fnote">หมายเหตุประกอบงบการเงินเป็นส่วนหนึ่งของงบการเงินนี้</div>'
     +'<div class="fsigblock"><div class="fcert">ขอรับรองว่าถูกต้องทุกประการ</div>'
     +'<div class="fsigln">ลงชื่อ ....................................... กรรมการ</div>'
@@ -13384,11 +13385,12 @@ function _fsPrintTpl(){
     +'var b=table.tBodies[0];if(b)[].slice.call(b.rows).forEach(function(tr){units.push({h:H(tr),html:tr.outerHTML});});'
     +'[].slice.call(main.children).forEach(function(c){if(c!==table)trailing+=c.outerHTML;});}'
     +'else if(main){[].slice.call(main.children).forEach(function(c){units.push({h:H(c),html:c.outerHTML});});}'
-    +'var pages=[[]],ph=hdH+theadH,i;for(i=0;i<units.length;i++){var u=units[i];if(ph+u.h>PU&&pages[pages.length-1].length){pages.push([]);ph=hdH+theadH;}pages[pages.length-1].push(u);ph+=u.h;}'
-    +'if(wantFoot){var lp=pages[pages.length-1],lh=hdH+theadH,j;for(j=0;j<lp.length;j++)lh+=lp[j].h;if(lh+footH>PU)pages.push([]);}'
+    /* v9.99: reserve footer height on EVERY page (not just the last) so it can repeat on all pages */
+    +'var avail=wantFoot?(PU-footH):PU;var pages=[[]],ph=hdH+theadH,i;for(i=0;i<units.length;i++){var u=units[i];if(ph+u.h>avail&&pages[pages.length-1].length){pages.push([]);ph=hdH+theadH;}pages[pages.length-1].push(u);ph+=u.h;}'
     +'var nP=pages.length,out="",p,q;for(p=0;p<nP;p++){var pg=pages[p],inner=hdr(p>0),rows="";for(q=0;q<pg.length;q++)rows+=pg[q].html;'
     +'if(table)inner+="<table class=\\""+tcls+"\\">"+theadHTML+"<tbody>"+rows+"</tbody></table>";else inner+=rows;'
-    +'if(p===nP-1){if(trailing)inner+=trailing;if(wantFoot)inner+="<div class=\\"stmtfoot\\">"+footInner+"</div>";}'
+    /* v9.99: trailing note only on the last page; certification footer repeated on EVERY page */
+    +'if(p===nP-1&&trailing)inner+=trailing;if(wantFoot)inner+="<div class=\\"stmtfoot\\">"+footInner+"</div>";'
     +'out+="<section class=\\"pg "+cls+"\\"><div class=\\"pgin\\">"+inner+"</div></section>";}'
     +'if(out)d.outerHTML=out;}catch(e){}});if(fp&&fp.parentNode)fp.parentNode.removeChild(fp);}'
     +'try{paginate();}catch(e){}setTimeout(function(){try{window.print();}catch(e){}},350);})();</scr'+'ipt></body></html>';
