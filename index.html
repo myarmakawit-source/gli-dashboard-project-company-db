@@ -5506,8 +5506,29 @@ function _fsMapCodes(){ if(!FSMAP.code)FSMAP.code={}; return FSMAP.code; }
 function _fsMapLines(){ if(!FSMAP.line)FSMAP.line={}; return FSMAP.line; }
 function _fsMapGrps(){ if(!FSMAP.grp)FSMAP.grp={}; return FSMAP.grp; }
 function _fsMapMan(){ if(!FSMAP.man)FSMAP.man={}; return FSMAP.man; }
-var FSATT={}; try{FSATT=JSON.parse(localStorage.getItem('gli_fsatt_all')||'{}')||{};}catch(_fae){FSATT={};}
-function _fsAttPersistAll(){try{localStorage.setItem('gli_fsatt_all',JSON.stringify(FSATT));return true;}catch(e){return false;}}
+/* v9.99: ไฟล์แนบงบ (FSATT) ย้ายจาก localStorage → IndexedDB (โควตาใหญ่กว่ามาก) · สำรอง Firebase เหมือนเดิม
+   เก็บทั้งก้อนใต้คีย์ IndexedDB 'fsatt_all' (store gli_files_db/files) → ไม่กินพื้นที่ localStorage อีก
+   · โหลดแบบ async หลังสคริปต์รันครบ (ค่า _IDB_* ถูกตั้งค่าเสร็จที่บรรทัดถัด ๆ ไป) แล้ว re-render หน้างบถ้าเปิดค้างอยู่
+   · MIGRATE: ยังมีของเดิมใน localStorage → seed ทันที (ใช้ได้เลย) แล้วย้ายเข้า IDB "สำเร็จ" ค่อยลบคีย์เดิม
+   · GUARD: ห้าม persist ทับ IDB ก่อนโหลดเสร็จ (_fsAttReady) กันของว่างทับข้อมูลจริง · IDB ล่ม → fallback localStorage (ไม่สูญข้อมูล) */
+var FSATT={}, _fsAttReady=false;
+try{var _falRaw=localStorage.getItem('gli_fsatt_all');if(_falRaw){var _falObj=JSON.parse(_falRaw);if(_falObj&&typeof _falObj==='object')FSATT=_falObj;}}catch(_fae){FSATT={};}
+/* union FSATT (ในหน่วยความจำ) กับก้อนจาก IDB — เก็บ record ที่ ts ใหม่กว่าไว้ต่อ (glid,code) กันข้อมูลชนกันหาย */
+function _fsAttMergeAll(src){if(!src||typeof src!=='object')return;for(var g in src){if(!Object.prototype.hasOwnProperty.call(src,g))continue;var sm=src[g];if(!sm||typeof sm!=='object')continue;var dm=FSATT[g]||(FSATT[g]={});for(var c in sm){if(!Object.prototype.hasOwnProperty.call(sm,c))continue;var sr=sm[c],dr=dm[c];if(!dr){dm[c]=sr;}else if(((+(sr&&sr.ts))||0)>((+(dr&&dr.ts))||0))dm[c]=sr;}}}
+function _fsAttPersistAll(){if(!_fsAttReady)return true;/* ยังโหลดจาก IDB ไม่เสร็จ → อย่าเขียนทับ (กันของว่างทับข้อมูลจริง) */
+  var wrote=false;
+  try{if(typeof _idbPut==='function'){wrote=true;_idbPut('fsatt_all',FSATT).then(function(){try{localStorage.removeItem('gli_fsatt_all');}catch(e){}},function(){/* IDB ล่ม → fallback localStorage ไม่ให้สูญ */try{localStorage.setItem('gli_fsatt_all',JSON.stringify(FSATT));}catch(e){}});}}catch(e){}
+  if(!wrote){try{localStorage.setItem('gli_fsatt_all',JSON.stringify(FSATT));return true;}catch(e){return false;}}
+  return true;}
+function _fsAttIdbLoad(){try{
+  if(typeof _idbGet!=='function'){_fsAttReady=true;return;}
+  _idbGet('fsatt_all').then(function(obj){try{if(obj&&typeof obj==='object')_fsAttMergeAll(obj);}catch(e){}
+    _fsAttReady=true;
+    try{if(localStorage.getItem('gli_fsatt_all')!=null)_fsAttPersistAll();}catch(e){}/* ย้าย/ล้างของเดิมออกจาก localStorage */
+    try{var pg=document.getElementById('page-fs');if(pg&&!pg.hidden&&!document.getElementById('fsAttModal')&&typeof _fsRenderBody==='function')_fsRenderBody();}catch(e){}
+  },function(){_fsAttReady=true;});
+}catch(e){_fsAttReady=true;}}
+try{setTimeout(_fsAttIdbLoad,0);}catch(_fle){_fsAttReady=true;}
 /* ===== v9.95: FSATT CLOUD BACKUP — สำรอง "ไฟล์แนบต่อบัญชี" (Trial Balance) ขึ้น Firebase =====
    เดิม FSATT อยู่ใน localStorage เท่านั้น → ล้างเบราว์เซอร์ = หาย และเปิดข้ามเครื่องไม่ได้
    โมดูลนี้สำรองขึ้นคลาวด์แบบ "ประหยัดโควตา Spark 360MB/วัน + ประหยัดการดาวน์โหลด":
