@@ -3269,6 +3269,15 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-fs .fstb td.fsatt-diff.ok{color:var(--fx-pos)}
 #page-fs .fstb td.fsatt-diff.bad{color:var(--fx-neg);background:var(--fx-neg-bg)}
 #page-fs .fstb td.fsatt-none{color:#C7CFC9;font-weight:400;text-align:center}
+/* v9.95: year-based sheet lookup — no sheet for the selected year → red warning */
+#page-fs .fstb td.fsatt-amt.fsatt-nosheet,#page-fs .fstb td.fsatt-diff.fsatt-nosheet{color:#fff;background:var(--fx-neg);font-weight:800;text-align:center;letter-spacing:.01em}
+#page-fs .fstb td.fsatt-amt.fsatt-nosheet{white-space:nowrap}
+.fstbsum-c.s-nosheet .fstbsum-cv,.fstbsum-cmph .fsnosheet-warn{color:var(--neg,#B42318)}
+.fstbsum-cmph .fsnosheet-warn{font-weight:800;margin-left:6px}
+.rt-mh-badge.nosheet,.fsav-nosheet{background:var(--neg,#B42318);color:#fff;font-weight:800}
+.fsav-nosheet{display:block;margin:0 0 10px;padding:9px 13px;border-radius:9px;font-size:13px}
+.rt-mh-v.fsav-nohd{color:#fff;background:var(--neg,#B42318);padding:2px 10px;border-radius:8px;font-weight:800}
+.fsavtab.fsavtab-y{border-color:var(--fx-brand,#0E7C5A);box-shadow:0 0 0 1px var(--fx-brand,#0E7C5A) inset}
 /* v9.94: attach-cell action icons — unified rounded pill buttons (📎 / 🔍 / ✕) */
 #page-fs .fsattbtn,#page-fs .fsattview,#page-fs .fsattrm{display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;border-radius:8px;cursor:pointer;border:1px solid transparent;font-size:13px;line-height:1;vertical-align:middle;margin:0 1.5px;padding:0;transition:transform .1s ease,background .12s,border-color .12s,box-shadow .12s}
 #page-fs .fsattbtn:hover,#page-fs .fsattview:hover,#page-fs .fsattrm:hover{transform:translateY(-1px);box-shadow:0 2px 7px rgba(15,60,50,.16)}
@@ -3316,6 +3325,12 @@ body.fstb-resizing #page-fs .fstb thead th{cursor:col-resize!important}
 #page-fs .fsavtbl thead th.fsavcn{z-index:3;background:var(--fx-brand-d)}
 #page-fs .fsavtbl td[contenteditable]{cursor:text}
 #page-fs .fsavtbl td[contenteditable]:focus{outline:2px solid var(--fx-brand);outline-offset:-2px;background:#FEFCE8;white-space:normal;overflow:visible;text-overflow:clip}
+/* v9.95: กรอบเรืองแสงเขียว-เหลือง ที่เซลล์ A1 (ยอดที่ใช้เทียบ TB) */
+#page-fs .fsavtbl td.fsav-a1{position:relative;z-index:1;font-weight:800;color:#0B3B2E;background:linear-gradient(0deg,rgba(250,204,21,.22),rgba(22,163,74,.16));outline:2px solid #16A34A;outline-offset:-2px;box-shadow:0 0 0 2px rgba(250,204,21,.6),0 0 13px 3px rgba(22,163,74,.55);animation:fsavA1Glow 1.5s ease-in-out infinite}
+#page-fs .fsavtbl td.fsav-a1:focus{outline:2px solid #16A34A;outline-offset:-2px;background:linear-gradient(0deg,rgba(250,204,21,.3),rgba(22,163,74,.2));animation:none}
+#page-fs .fsavtbl .fsav-a1h{background:linear-gradient(180deg,#FDE047 0%,#16A34A 130%)!important;color:#0B3B2E!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.45)}
+@keyframes fsavA1Glow{0%,100%{box-shadow:0 0 0 2px rgba(250,204,21,.5),0 0 8px 2px rgba(22,163,74,.45)}50%{box-shadow:0 0 0 3px rgba(250,204,21,.92),0 0 18px 5px rgba(22,163,74,.72)}}
+@media (prefers-reduced-motion:reduce){#page-fs .fsavtbl td.fsav-a1{animation:none}}
 #page-fs .fsavnote{font-size:11px;color:var(--fx-ink2);line-height:1.5;padding:8px 14px;border-top:1px solid var(--fx-hair);background:var(--fx-tint2)}
 #page-fs .fsavwarn{color:#8A5A12;font-weight:700}
 #page-fs .fsavempty{padding:34px 24px;text-align:center;font-size:13.5px;color:var(--fx-ink2);line-height:1.6}
@@ -10469,6 +10484,37 @@ function _fsAttPickAmt(wb,code){
   var ws0=wb.Sheets[names[0]]; var aoa=ws0?XLSX.utils.sheet_to_json(ws0,{header:1,raw:true,defval:null}):[];
   return {amt:_fsAttFirstAmt(aoa),sheet:names[0]||''};
 }
+/* ---------- v9.95: ยอดจากไฟล์ = A1 ของชีตที่ "ชื่อตรงกับปีที่เลือก" (พ.ศ.) ----------
+   เลือกปี 2568 → อ่าน A1 ของชีตชื่อ 2568 · เลือกปี 2569 → ชีตชื่อ 2569 · ถ้ายังไม่มีชีตปีนั้น
+   → No sheet data ! (เตือนสีแดง). ยอดจึง "เปลี่ยนตามปีที่เลือก" อัตโนมัติทุกครั้งที่สลับปี */
+function _fsAttSheetBE(name){ var s=(''+(name==null?'':name)).trim(); if(!s)return '';
+  var m=s.match(/(?:^|[^0-9])(\d{4})(?![0-9])/); if(!m)return ''; var y=+m[1];
+  if(y>=2400&&y<=2700)return ''+y;              /* ชื่อชีตเป็น พ.ศ. */
+  if(y>=1980&&y<=2200)return ''+(y+543);         /* ชื่อชีตเป็น ค.ศ. → แปลงเป็น พ.ศ. */
+  return ''; }
+/* ปี พ.ศ. ที่เลือกอยู่ (อ้างอิงปีสิ้นสุด _fsY1 — ตรงกับคอลัมน์ Ending ในตาราง) */
+function _fsCurBE(){ return (typeof _fsY1!=='undefined'&&_fsY1!=null)?(''+(+_fsY1+543)):null; }
+/* สร้างแผนที่ {ปีพ.ศ. → ยอด A1} จากทุกชีตที่ตั้งชื่อเป็นปี — อ่านค่าดิบตอนแนบไฟล์ (แม่นสุด) */
+function _fsAttBuildYearAmts(wb){ var out={}, names=(wb&&wb.SheetNames)||[];
+  for(var i=0;i<names.length;i++){ var be=_fsAttSheetBE(names[i]); if(!be||out[be]!=null)continue;
+    var v=_fsAttCellA1(wb.Sheets[names[i]]); if(!isNaN(v))out[be]=v; } return out; }
+/* สร้างแผนที่ปี→ยอด จากชีตที่เก็บไว้ (aoa เป็นข้อความจัดรูปแล้ว) — ใช้ตอนแก้ในแอป/ไฟล์เก่า */
+function _fsAttYearAmtsFromSheets(sheets){ var out={}; sheets=sheets||[];
+  for(var i=0;i<sheets.length;i++){ var be=_fsAttSheetBE(sheets[i].name); if(!be||out[be]!=null)continue;
+    var a1=(sheets[i].aoa&&sheets[i].aoa[0]&&sheets[i].aoa[0][0]!=null)?sheets[i].aoa[0][0]:null;
+    var v=_fsRcNum(a1); if(!isNaN(v))out[be]=v; } return out; }
+/* คืนยอดของ "ปีที่เลือก" สำหรับไฟล์แนบหนึ่งบัญชี:
+   {ok, amt, beY, sheet, noA1?}  ·  ok=false → ไม่มีชีตของปีนี้ (No sheet data !) */
+function _fsAttYearAmt(att){ var beY=_fsCurBE(); var res={ok:false,beY:beY,amt:NaN,sheet:''};
+  if(!att||beY==null)return res;
+  if(att.yearAmts&&att.yearAmts[beY]!=null){ var n=+att.yearAmts[beY]; if(!isNaN(n)){res.ok=true;res.amt=n;res.sheet=beY;return res;} }
+  if(att.sheets&&att.sheets.length){ for(var i=0;i<att.sheets.length;i++){ var sh=att.sheets[i];
+      if(_fsAttSheetBE(sh.name)!==beY)continue; res.sheet=sh.name;
+      var a1=(sh.aoa&&sh.aoa[0]&&sh.aoa[0][0]!=null)?sh.aoa[0][0]:null; var v=_fsRcNum(a1);
+      if(!isNaN(v)){res.ok=true;res.amt=v;} else {res.noA1=true;} return res; } }
+  /* ไฟล์เก่า (ไม่มีแผนที่ปี/เนื้อชีต) — ใช้ยอดที่เคยอ่านได้ ต่อเมื่อชีตที่หยิบมานั้นตรงปีที่เลือก */
+  if(att.amt!=null&&!isNaN(+att.amt)&&_fsAttSheetBE(att.sheet)===beY){ res.ok=true;res.amt=+att.amt;res.sheet=att.sheet||beY; return res; }
+  return res; }
 /* v9.94: เก็บเนื้อไฟล์ (เป็นตาราง) ไว้ดู/แก้ในแอปได้โดยไม่ต้องดาวน์โหลด — ตัดแถวว่างท้าย + จำกัดขนาด */
 var _FS_ATT_MAXR=1500, _FS_ATT_MAXC=40, _fsAttTrunc=false;
 function _fsAttTrimAoa(aoa){
@@ -10496,7 +10542,8 @@ function _fsAttOnFile(code,file){ if(!file||!code)return;
     if(pickIdx<0){ var pws=wb.Sheets[pick.sheet]; if(pws){ sheets.push({name:pick.sheet,hidden:false,aoa:_fsAttTrimAoa(XLSX.utils.sheet_to_json(pws,{header:1,raw:false,defval:''}))}); pickIdx=sheets.length-1; } else pickIdx=0; }
     /* จำกัดขนาดที่เก็บ: ถ้าใหญ่มากเก็บเฉพาะชีตที่ใช้ยอด แล้วถ้ายังใหญ่ค่อยไม่เก็บเนื้อ (เก็บแค่ยอด) */
     try{ if(sheets.length && JSON.stringify(sheets).length>1300000){ sheets=[sheets[pickIdx]]; pickIdx=0; } }catch(e){}
-    var rec={name:file.name,amt:amt,sheet:pick.sheet,ts:Date.now(),sheets:sheets,pickIdx:pickIdx,trunc:_fsAttTrunc};
+    var yearAmts=_fsAttBuildYearAmts(wb);   /* v9.95: ยอด A1 ต่อชีต-ต่อปี (พ.ศ.) — ใช้เลือกตามปีที่เลือกดู */
+    var rec={name:file.name,amt:amt,sheet:pick.sheet,ts:Date.now(),sheets:sheets,pickIdx:pickIdx,trunc:_fsAttTrunc,yearAmts:yearAmts};
     try{ if(rec.sheets && JSON.stringify(rec.sheets).length>1300000){ rec.sheets=null; rec.gridBig=true; } }catch(e){}
     _fsAttSet(code,rec);
     _fsRenderBody();
@@ -10511,13 +10558,14 @@ function _fsAttColName(c){ var s=''; c=+c; do{ s=String.fromCharCode(65+(c%26))+
 function _fsAttViewClose(){ var m=document.getElementById('fsAttModal'); if(m&&m.parentNode)m.parentNode.removeChild(m);
   try{if(_fsAttEsc){document.removeEventListener('keydown',_fsAttEsc);_fsAttEsc=null;}}catch(e){}
   try{document.body.style.overflow='';}catch(e){} _fsAttViewCode=null; }
-function _fsAttGridHTML(sheet){
+function _fsAttGridHTML(sheet,hlA1){
   var aoa=(sheet&&sheet.aoa)||[]; var maxC=1; for(var r=0;r<aoa.length;r++){ if(aoa[r].length>maxC)maxC=aoa[r].length; }
-  var head='<tr class="fsavh"><th class="fsavcn"></th>'; for(var c=0;c<maxC;c++)head+='<th>'+_fsAttColName(c)+'</th>'; head+='</tr>';
-  var body=''; for(var r2=0;r2<aoa.length;r2++){ body+='<tr><td class="fsavcn">'+(r2+1)+'</td>';
-    for(var c2=0;c2<maxC;c2++){ var v=(aoa[r2][c2]==null)?'':aoa[r2][c2]; body+='<td contenteditable="true" data-r="'+r2+'" data-c="'+c2+'">'+_fsE(v)+'</td>'; }
+  var head='<tr class="fsavh"><th class="fsavcn"></th>'; for(var c=0;c<maxC;c++)head+='<th'+(hlA1&&c===0?' class="fsav-a1h"':'')+'>'+_fsAttColName(c)+'</th>'; head+='</tr>';
+  var body=''; for(var r2=0;r2<aoa.length;r2++){ body+='<tr><td class="fsavcn'+(hlA1&&r2===0?' fsav-a1h':'')+'">'+(r2+1)+'</td>';
+    for(var c2=0;c2<maxC;c2++){ var v=(aoa[r2][c2]==null)?'':aoa[r2][c2]; var isA1=(hlA1&&r2===0&&c2===0);
+      body+='<td contenteditable="true"'+(isA1?' class="fsav-a1" title="ยอดที่ใช้เทียบ TB (A1)"':'')+' data-r="'+r2+'" data-c="'+c2+'">'+_fsE(v)+'</td>'; }
     body+='</tr>'; }
-  if(!aoa.length)body='<tr><td class="fsavcn">1</td><td contenteditable="true" data-r="0" data-c="0"></td></tr>';
+  if(!aoa.length)body='<tr><td class="fsavcn'+(hlA1?' fsav-a1h':'')+'">1</td><td contenteditable="true"'+(hlA1?' class="fsav-a1" title="ยอดที่ใช้เทียบ TB (A1)"':'')+' data-r="0" data-c="0"></td></tr>';
   return '<table class="fsavtbl"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>';
 }
 /* อ่านค่าที่แก้จาก DOM → คืนเป็น {si:aoa} โดย "ไม่แตะ" att (กัน download ทำ record เพี้ยน) */
@@ -10540,6 +10588,7 @@ function _fsAttViewSave(){ var code=_fsAttViewCode; if(!code)return; var att=_fs
   /* คำนวณยอดใหม่ "เฉพาะเมื่อผู้ใช้แก้ A1 ของชีตที่ใช้ยอด" — ไม่งั้นคงยอดเดิม (แม่นจากตอนแนบ) กัน format ทำเพี้ยน */
   var ps=att.sheets[pi]; var newA1=(ps&&ps.aoa&&ps.aoa[0]&&ps.aoa[0][0]!=null)?(''+ps.aoa[0][0]):'';
   if(newA1!==origA1){ var namt=_fsRcNum(newA1); if(!isNaN(namt))att.amt=namt; }
+  att.yearAmts=_fsAttYearAmtsFromSheets(att.sheets);   /* v9.95: อัปเดตแผนที่ปี→ยอด หลังแก้ A1 ของชีตปี */
   att.edited=true; att.ts=Date.now(); _fsAttSet(code,att); _fsAttViewClose(); _fsRenderBody();
 }
 function _fsAttViewDownload(){ var code=_fsAttViewCode, att=_fsAttGet(code); if(!att||!att.sheets)return;
@@ -10563,17 +10612,23 @@ function _fsAttView(code){
   var acct=null; if(_fsTB)for(var i=0;i<_fsTB.length;i++){ if(_fsRcCode(_fsTB[i].code)===_fsRcCode(code)){acct=_fsTB[i];break;} }
   var nat=acct?(+acct.nat||0):null;
   var hasGrid=!!(att.sheets&&att.sheets.length);
-  var pickIdx=att.pickIdx||0;
+  var ya=_fsAttYearAmt(att), beY=ya.beY;   /* v9.95: ยอด = A1 ของชีตปีที่เลือก */
+  var yearIdx=-1; if(hasGrid){ for(var yi=0;yi<att.sheets.length;yi++){ if(_fsAttSheetBE(att.sheets[yi].name)===beY){yearIdx=yi;break;} } }
+  var openIdx=(yearIdx>=0)?yearIdx:(att.pickIdx||0);
   var tabs='', panes='';
   if(hasGrid){
     att.sheets.forEach(function(sh,si){
-      tabs+='<button type="button" class="fsavtab'+(si===pickIdx?' on':'')+'" data-si="'+si+'">'+(si===pickIdx?'📊 ':'')+_fsE(sh.name||('ชีต '+(si+1)))+(sh.hidden?' <span class="fsavhid">(ซ่อน)</span>':'')+'</button>';
-      panes+='<div class="fsavsheet" data-si="'+si+'"'+(si===pickIdx?'':' hidden')+'>'+
-        (si===pickIdx?'<div class="fsavtip">💡 ยอดที่ใช้เทียบ TB = เซลล์ <b>A1</b> ของชีตนี้ · แก้แล้วกด «บันทึกการแก้ไข» ระบบจะคำนวณผลต่างใหม่</div>':'')+
-        '<div class="fsavgrid">'+_fsAttGridHTML(sh)+'</div></div>';
+      var isY=(si===yearIdx), isOpen=(si===openIdx);
+      tabs+='<button type="button" class="fsavtab'+(isOpen?' on':'')+(isY?' fsavtab-y':'')+'" data-si="'+si+'">'+(isY?'📅 ':(isOpen?'📊 ':''))+_fsE(sh.name||('ชีต '+(si+1)))+(sh.hidden?' <span class="fsavhid">(ซ่อน)</span>':'')+'</button>';
+      panes+='<div class="fsavsheet" data-si="'+si+'"'+(isOpen?'':' hidden')+'>'+
+        (isY?'<div class="fsavtip">💡 ยอดที่ใช้เทียบ TB (ปี '+(beY||'')+') = เซลล์ <b>A1</b> ของชีตนี้ · แก้แล้วกด «บันทึกการแก้ไข» ระบบจะคำนวณผลต่างใหม่</div>':'')+
+        '<div class="fsavgrid">'+_fsAttGridHTML(sh,isY)+'</div></div>';
     });
   }
-  var diffTxt=''; if(nat!=null){ var d=(+att.amt||0)-nat, okd=Math.abs(d)<0.5; diffTxt='<span class="rt-mh-badge'+(okd?'':' bad')+'">'+(okd?'✓ ตรงกับ TB':'ต่าง '+_fsMoney(d))+'</span>'; }
+  var diffTxt='', headVal=(ya.ok?_fsMoney(ya.amt):'No sheet data !');
+  if(!ya.ok){ diffTxt='<span class="rt-mh-badge nosheet">⚠ ไม่มีชีตปี '+(beY||'?')+'</span>'; }
+  else if(nat!=null){ var d=(+ya.amt||0)-nat, okd=Math.abs(d)<0.5; diffTxt='<span class="rt-mh-badge'+(okd?'':' bad')+'">'+(okd?'✓ ตรงกับ TB':'ต่าง '+_fsMoney(d))+'</span>'; }
+  var noBanner=ya.ok?'':('<div class="fsav-nosheet">⚠ No sheet data ! — ไฟล์นี้ยังไม่มีชีตชื่อ “'+(beY||'?')+'” (ปีที่เลือก)'+(ya.noA1?' หรือเซลล์ A1 ของชีตนั้นว่าง/ไม่ใช่ตัวเลข':'')+' · สร้างชีตชื่อ “'+(beY||'?')+'” แล้วใส่ยอดที่เซลล์ <b>A1</b> เพื่อให้ระบบดึงมาเทียบกับ TB ของปีนี้</div>');
   var body = hasGrid
     ? ('<div class="fsavbar"><div class="fsavtabs">'+tabs+'</div><div class="fsavacts">'+
         '<button type="button" class="fsavbtn fsavdl">⤓ ดาวน์โหลด Excel</button>'+
@@ -10582,9 +10637,9 @@ function _fsAttView(code){
     : ('<div class="fsavempty">ไฟล์นี้'+(att.gridBig?'ใหญ่เกินกว่าจะเก็บเนื้อหาไว้ดู/แก้ในแอป':'ยังไม่ได้เก็บเนื้อหาไว้ (แนบก่อนอัปเดตฟีเจอร์นี้)')+' — โปรดกด 📎 แนบไฟล์นี้อีกครั้ง เพื่อเปิดดู/แก้ในแอป</div>');
   var html='<div class="rt-modal-ov" id="fsAttModal"><div class="rt-modal fsav-modal" role="dialog" aria-modal="true">'+
     '<button class="rt-modal-x" type="button" aria-label="ปิด">✕</button>'+
-    '<div class="rt-modal-hd rt-ok"><div class="rt-mh-l"><div class="rt-mh-th">📄 '+_fsE(att.name||'ไฟล์แนบ')+'</div><div class="rt-mh-en">บัญชี '+_fsE(code)+(acct?' · '+_fsE(acct.name):'')+'</div></div>'+
-      '<div class="rt-mh-r"><div class="rt-mh-v">'+_fsMoney(att.amt)+'</div>'+diffTxt+'</div></div>'+
-    '<div class="rt-modal-bd">'+body+'</div></div></div>';
+    '<div class="rt-modal-hd rt-ok"><div class="rt-mh-l"><div class="rt-mh-th">📄 '+_fsE(att.name||'ไฟล์แนบ')+'</div><div class="rt-mh-en">บัญชี '+_fsE(code)+(acct?' · '+_fsE(acct.name):'')+' · ปี '+(beY||'?')+'</div></div>'+
+      '<div class="rt-mh-r"><div class="rt-mh-v'+(ya.ok?'':' fsav-nohd')+'">'+headVal+'</div>'+diffTxt+'</div></div>'+
+    '<div class="rt-modal-bd">'+noBanner+body+'</div></div></div>';
   var host=document.getElementById('page-fs')||document.body;
   var wrap=document.createElement('div'); wrap.innerHTML=html; var el=wrap.firstChild; host.appendChild(el);
   try{document.body.style.overflow='hidden';}catch(e){}
@@ -10892,12 +10947,22 @@ function _fsRenderTB(){
   function _attCells(x){
     var att=_fsAttGet(x.code), ec=_fsE(x.code);
     if(att){
-      var d=(+att.amt||0)-(+x.nat||0), okd=Math.abs(d)<0.5;
-      var ttl=_fsE(att.name)+(att.sheet?(' · ชีต “'+_fsE(att.sheet)+'” เซลล์ A1'):'')+' · ยอดในไฟล์ '+_fsMoney(att.amt)+' — คลิกเพื่อเปลี่ยนไฟล์';
+      var ya=_fsAttYearAmt(att);   /* v9.95: ยอด = A1 ของชีตที่ชื่อตรงกับปีที่เลือก */
+      var actBtns='<label class="fsattbtn on" title="คลิกเพื่อเปลี่ยนไฟล์แนบ"><input type="file" class="fsattfile" data-fsatt="'+ec+'" accept=".xlsx,.xls,.csv" hidden>📎</label>'+
+        '<button type="button" class="fsattview" data-fsatt="'+ec+'" title="ดู/แก้ไฟล์ในแอป (ไม่ต้องดาวน์โหลด)">🔍</button>'+
+        '<button type="button" class="fsattrm" data-fsatt="'+ec+'" title="ลบไฟล์แนบ">✕</button>';
+      if(!ya.ok){   /* ไม่มีชีตของปีที่เลือก (หรือ A1 ว่าง) → No sheet data ! (แดง) */
+        var noReason=ya.noA1?('ไฟล์ “'+_fsE(att.name)+'” มีชีต “'+_fsE(ya.sheet)+'” แต่เซลล์ A1 ว่าง/ไม่ใช่ตัวเลข'):('ไฟล์ “'+_fsE(att.name)+'” ยังไม่มีชีตชื่อ “'+(ya.beY||'?')+'” (ปีที่เลือก) — โปรดสร้างชีตปีนี้แล้วใส่ยอดที่เซลล์ A1');
+        return '<td class="fsattc" title="'+_fsE(noReason)+'">'+actBtns+'</td>'+
+          '<td class="fsm fsatt-amt fsatt-nosheet" title="'+_fsE(noReason)+'">No sheet data !</td>'+
+          '<td class="fsm fsatt-diff fsatt-nosheet" title="'+_fsE(noReason)+'">⚠ ปี '+(ya.beY||'?')+'</td>';
+      }
+      var d=(+ya.amt||0)-(+x.nat||0), okd=Math.abs(d)<0.5;
+      var ttl=_fsE(att.name)+' · ชีต “'+_fsE(ya.sheet||ya.beY)+'” เซลล์ A1 (ปี '+(ya.beY||'')+') · ยอดในไฟล์ '+_fsMoney(ya.amt)+' — คลิกเพื่อเปลี่ยนไฟล์';
       return '<td class="fsattc"><label class="fsattbtn on" title="'+ttl+'"><input type="file" class="fsattfile" data-fsatt="'+ec+'" accept=".xlsx,.xls,.csv" hidden>📎</label>'+
         '<button type="button" class="fsattview" data-fsatt="'+ec+'" title="ดู/แก้ไฟล์ในแอป (ไม่ต้องดาวน์โหลด)">🔍</button>'+
         '<button type="button" class="fsattrm" data-fsatt="'+ec+'" title="ลบไฟล์แนบ">✕</button></td>'+
-        '<td class="fsm fsatt-amt">'+_fsMoney(att.amt,true)+'</td>'+
+        '<td class="fsm fsatt-amt">'+_fsMoney(ya.amt,true)+'</td>'+
         '<td class="fsm fsatt-diff '+(okd?'ok':'bad')+'">'+(okd?'<span class="fsrctick">✓</span>':('<span class="fsrcx">▲</span> '+_fsMoney(d)))+'</td>';
     }
     return '<td class="fsattc"><label class="fsattbtn" title="แนบไฟล์ประกอบ (Excel/CSV) — ระบบอ่านจำนวนเงินในเซลล์ A1 (มุมซ้ายบน) มาเทียบกับ TB"><input type="file" class="fsattfile" data-fsatt="'+ec+'" accept=".xlsx,.xls,.csv" hidden>📎</label></td>'+
@@ -10914,7 +10979,7 @@ function _fsRenderTB(){
       '<td class="fsm fsend">'+_fsMoney(x.nat)+'</td></tr>';});
   if(!arr.length)rows='<tr class="fstbempty"><td colspan="10">— ไม่มีบัญชีที่ตรงกับตัวกรอง —</td></tr>';
   var attHead='<th class="fsatthd-ic"'+_fsTbWSty('att_ic')+' title="แนบไฟล์ประกอบต่อบัญชี">📎<span class="fsatthx">แนบไฟล์</span>'+_fsTbRszH('att_ic')+'</th>'+
-    '<th class="fsm fsatthd-amt"'+_fsTbWSty('att_amt')+'>ยอดตามไฟล์<span class="fsatthx">Excel · เซลล์ A1</span>'+_fsTbRszH('att_amt')+'</th>'+
+    '<th class="fsm fsatthd-amt"'+_fsTbWSty('att_amt')+'>ยอดตามไฟล์<span class="fsatthx">A1 · ชีตปี '+((typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):'')+'</span>'+_fsTbRszH('att_amt')+'</th>'+
     '<th class="fsm fsatthd-diff"'+_fsTbWSty('att_diff')+'>ผลต่าง<span class="fsatthx">ไฟล์ − TB</span>'+_fsTbRszH('att_diff')+'</th>';
   var y0BE=(+_fsY0+543), y1BE=(+_fsY1+543), isAll=(_fsYear==='ALL');
   var openSub=isAll?'ยอดยกมา · ทุกปี':('ยอดยกมาต้นปี '+y0BE);
@@ -10928,9 +10993,11 @@ function _fsRenderTB(){
     _fsTbTh('debit','Debit',movSub,'fsm')+
     _fsTbTh('credit','Credit',movSub,'fsm')+
     _fsTbTh('ending','Ending',endSub,'fsm')+'</tr></thead>';
-  var fyd=0,fyc=0,sOpen=0,sEnd=0,nAtt=0,attSum=0,nAttMatch=0,nAttMis=0;
+  var fyd=0,fyc=0,sOpen=0,sEnd=0,nAtt=0,attSum=0,nAttMatch=0,nAttMis=0,nAttNo=0;
   arr.forEach(function(x){fyd+=+x.yd||0;fyc+=+x.yc||0;sOpen+=+x.openNat||0;sEnd+=+x.nat||0;
-    var a=_fsAttGet(x.code); if(a){nAtt++;attSum+=(+a.amt||0); if(Math.abs((+a.amt||0)-(+x.nat||0))<0.5)nAttMatch++; else nAttMis++;} });
+    var a=_fsAttGet(x.code); if(a){ nAtt++; var ya=_fsAttYearAmt(a);   /* v9.95: ยอดตามปีที่เลือก */
+      if(!ya.ok){ nAttNo++; } else { attSum+=(+ya.amt||0); if(Math.abs((+ya.amt||0)-(+x.nat||0))<0.5)nAttMatch++; else nAttMis++; } } });
+  var _curBEs=_fsCurBE();
   var fdiff=fyd-fyc;
   var filtered=_fsTbHasFil(), nAll=_fsTB.length;
   var filterBar=filtered?('<div class="fstbfbar">🔎 กำลังกรอง — แสดง <b>'+arr.length+'</b> จาก '+nAll+' บัญชี · Debit '+_fsMoney(fyd)+' · Credit '+_fsMoney(fyc)+'<button type="button" id="fsTbClearAll" class="fstbclr">✕ ล้างตัวกรองทั้งหมด</button></div>'):'';
@@ -10947,11 +11014,13 @@ function _fsRenderTB(){
       _fsSc('ยอดปลาย · คงเหลือ','ENDING',_fsMoney(sEnd),'end')+
     '</div>';
   if(nAtt){
-    sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-cmph">📎 เทียบไฟล์แนบกับ TB — แนบแล้ว '+nAtt+' บัญชี</div><div class="fstbsum-grid">'+
-      _fsSc('รวมยอดตามไฟล์','FILE',_fsMoney(attSum),'tb')+
+    var _noWarn=nAttNo?('<span class="fsnosheet-warn">· ⚠ '+nAttNo+' บัญชี No sheet data (ไม่มีชีตปี '+(_curBEs||'?')+')</span>'):'';
+    sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-cmph">📎 เทียบไฟล์แนบกับ TB — แนบแล้ว '+nAtt+' บัญชี · ยอดจากชีตปี '+(_curBEs||'?')+' (A1)'+_noWarn+'</div><div class="fstbsum-grid">'+
+      _fsSc('รวมยอดตามไฟล์','FILE · ปี '+(_curBEs||''),_fsMoney(attSum),'tb')+
       _fsSc('ตรงกับ TB','MATCHED',''+nAttMatch,'ok')+
       _fsSc('ผลต่าง','DIFF',''+nAttMis,nAttMis?'bad':'ok')+
-      _fsSc('สถานะ',(nAttMis?'CHECK':'MATCHED'),(nAttMis?('▲ '+nAttMis+' บัญชีต่าง'):'✓ ตรงกันทั้งหมด'),nAttMis?'bad':'ok')+
+      (nAttNo?_fsSc('No sheet data','ไม่มีชีตปีนี้','▲ '+nAttNo,'nosheet')
+             :_fsSc('สถานะ',(nAttMis?'CHECK':'MATCHED'),(nAttMis?('▲ '+nAttMis+' บัญชีต่าง'):'✓ ตรงกันทั้งหมด'),nAttMis?'bad':'ok'))+
     '</div></div>';
   } else {
     sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-wait">📎 <b>แนบไฟล์ประกอบต่อบัญชี:</b> กดไอคอน 📎 ที่คอลัมน์ซ้ายสุดของแต่ละบัญชี เพื่อแนบไฟล์ Excel/CSV — ระบบจะอ่านจำนวนเงินในเซลล์ A1 (มุมซ้ายบน) มาเทียบกับยอดคงเหลือ (Ending) ในระบบให้อัตโนมัติ</div></div>';
@@ -10959,14 +11028,14 @@ function _fsRenderTB(){
   sumPanel+='</div>';
   var attFoot='<td class="fsattc"></td>'+
     '<td class="fsm">'+(nAtt?_fsMoney(attSum):'')+'</td>'+
-    '<td class="fsm">'+(nAtt?(nAttMis?('<span class="fsbad">▲ '+nAttMis+'</span>'):'<span class="fsok">✓</span>'):'')+'</td>';
+    '<td class="fsm">'+(nAtt?(nAttNo?('<span class="fsbad">No sheet ×'+nAttNo+'</span>'):(nAttMis?('<span class="fsbad">▲ '+nAttMis+'</span>'):'<span class="fsok">✓</span>')):'')+'</td>';
   /* footer = clean column totals; the Debit=Credit balance check lives in the ⚖ chip above */
   var totLbl='Total ('+arr.length+(filtered?(' / '+nAll):'')+' accounts)';
   return sumPanel+filterBar+'<div class="fstbwrap"><table class="fstable fstb fstb-att">'+head+
     '<tbody>'+rows+'</tbody><tfoot><tr class="fstot">'+attFoot+'<td colspan="3">'+totLbl+'</td>'+
     '<td class="fsm">'+_fsMoney(sOpen)+'</td>'+
     '<td class="fsm">'+_fsMoney(fyd)+'</td><td class="fsm">'+_fsMoney(fyc)+'</td><td class="fsm">'+_fsMoney(sEnd)+'</td></tr></tfoot></table></div>'+
-    '<p class="fsnote"><b>📎 แนบไฟล์ประกอบต่อบัญชี:</b> กดไอคอน 📎 คอลัมน์ซ้ายสุดของแต่ละบัญชีเพื่อแนบไฟล์ Excel/CSV · ระบบดึง<b>จำนวนเงินในเซลล์ A1 (มุมซ้ายบน)</b>ของชีตมาใส่คอลัมน์ «ยอดตามไฟล์» แล้วเทียบกับ Ending — ตรงกันแสดง <span class="fsrctick">✓</span> · ต่างแสดงจำนวนผลต่าง (ไฟล์ − TB). · Ending shown in <b>natural sign</b>. · <b>กรอง/เรียงแบบ Excel:</b> กดปุ่ม ▼ ที่หัวคอลัมน์.'+(_fsIsInterim()?' <b>งบเดือน:</b> ยอดคำนวณถึงสิ้นเดือน '+_FS_MON_TH[_fsEndM-1]+' '+(+_fsY1+543)+'.':'')+'</p>';
+    '<p class="fsnote"><b>📎 แนบไฟล์ประกอบต่อบัญชี:</b> กดไอคอน 📎 คอลัมน์ซ้ายสุดของแต่ละบัญชีเพื่อแนบไฟล์ Excel/CSV · <b>ยอดตามไฟล์ = เซลล์ A1 ของชีตที่ชื่อตรงกับ “ปีที่เลือก” (พ.ศ.)</b> — เลือกปี '+(+_fsY1+543)+' ระบบจะอ่าน A1 ของชีตชื่อ “'+(+_fsY1+543)+'” · เปลี่ยนปีแล้วยอดจะสลับตามชีตของปีนั้นให้อัตโนมัติ · <b class="fsnosheet-warn">ยังไม่มีชีตของปีที่เลือก → แสดง “No sheet data !” (เตือนสีแดง)</b> · ตรงกับ Ending แสดง <span class="fsrctick">✓</span> · ต่างแสดงจำนวนผลต่าง (ไฟล์ − TB). · Ending shown in <b>natural sign</b>. · <b>กรอง/เรียงแบบ Excel:</b> กดปุ่ม ▼ ที่หัวคอลัมน์.'+(_fsIsInterim()?' <b>งบเดือน:</b> ยอดคำนวณถึงสิ้นเดือน '+_FS_MON_TH[_fsEndM-1]+' '+(+_fsY1+543)+'.':'')+'</p>';
 }
 
 /* ---------- RENDER: Balance Sheet ---------- */
