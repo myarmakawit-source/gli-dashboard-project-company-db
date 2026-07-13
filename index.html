@@ -2732,6 +2732,32 @@ table.fsmanEq td.fsmanrt{font-weight:700}
 .cfdmovesel:focus{outline:none;border-color:#3AA0E6;box-shadow:0 0 0 2px rgba(58,160,230,.15)}
 .cfdmovesel.moved{border-color:#E08A2B;color:#9A5B12;font-weight:700;background:#FFF6EA}
 .cfdcode .r,.cfdvch .r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+/* v9.120: สรุปกระแสเงินสดรายโครงการ */
+.cfdproj{margin:14px 0 6px;border:1px solid var(--fx-hair,#E0E5E2);border-radius:12px;background:linear-gradient(180deg,#FBFCFB,#F4F7F5);overflow:hidden}
+.cfdproj>summary{cursor:pointer;list-style:none;padding:11px 15px;font-weight:800;font-size:13.5px;color:var(--brand-d,#0A463E);background:#EAF3EF;border-bottom:1px solid var(--fx-hair,#E0E5E2)}
+.cfdproj>summary::-webkit-details-marker{display:none}
+.cfdproj>summary .cfdproj-hint{font-weight:500;font-size:11px;color:var(--muted);margin-left:6px}
+.cfdprojwrap{padding:6px 14px 8px;overflow-x:auto}
+.cfdproj-foot{padding:2px 15px 12px}
+.cfdprojtbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px}
+.cfdprojtbl th,.cfdprojtbl td{padding:7px 10px;border-bottom:1px solid var(--fx-hair,#EBEFEC)}
+.cfdprojtbl th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;font-weight:700}
+.cfdprojtbl th.l,.cfdprojtbl td.l{text-align:left}
+.cfdprojtbl th.r,.cfdprojtbl td.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cfdprojtbl th span{display:block;font-size:9px;font-weight:600;text-transform:none;letter-spacing:0;color:#9AA7A1}
+.cfdprojtbl tbody tr:hover{background:#F0F6F3}
+.cfdproj-c{font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--brand-d,#0A463E)}
+.cfdproj-nm{color:#5A6B63}
+.cfdproj-none{color:var(--muted);font-style:italic}
+.cfdproj-net{font-weight:700}
+.cfdprojtbl .cfneg{color:#B42318}.cfdprojtbl .cfpos{color:#116A3E}
+.cfdproj-tot td{border-top:2px solid #CBD8D2;border-bottom:none;font-weight:800;background:#EEF4F1}
+.cfdproj-rectbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px;border-top:1px dashed #CBD8D2}
+.cfdproj-rectbl td{padding:4px 8px;vertical-align:baseline}
+.cfdproj-rectbl td.l{text-align:left}
+.cfdproj-rectbl td.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600;width:1%}
+.cfdproj-rc.net td{font-weight:800;background:#EAF3EF}
+.cfdproj-rc.end td{font-weight:800;color:var(--brand-d,#0A463E);border-top:2px solid #CBD8D2}
 .cfdvchwrap{margin:0 0 4px 0}
 .cfdvchs{margin:2px 6px 8px 26px;border-left:2px solid var(--blue);padding:4px 0 4px 12px}
 .cfdvch-v{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -12726,7 +12752,7 @@ function _cfdApComp(apCode,V){ var rows=V[apCode]; if(!rows)return null; var ite
     if(_cfdTaxKind(c,n)==='input'){vat+=dr-cr;continue;}
     var amt=dr-cr; if(Math.abs(amt)<0.005)continue; var g=_cfdG1(c);
     var kind=(g==='5'||g==='6'||g==='7'||g==='4')?'exp':'asset';
-    (items[c]||(items[c]={code:c,name:n,amt:0,kind:kind})).amt+=amt; tot+=amt; }
+    var it=items[c]||(items[c]={code:c,name:n,amt:0,kind:kind,proj:(''+(r[13]||'')).trim()}); it.amt+=amt; if(!it.proj)it.proj=(''+(r[13]||'')).trim(); tot+=amt; }   /* v9.120: โครงการจากขาตั้ง */
   var arr=[]; for(var k in items)arr.push(items[k]); return {items:arr,vat:vat,tot:tot+vat}; }
 /* composition of an AR standing voucher (ขาตั้งลูกหนี้): Cr-side revenue/other legs + output-VAT */
 function _cfdArComp(anCode,V){ var rows=V[anCode]; if(!rows)return null; var items={},ovat=0,tot=0;
@@ -12735,7 +12761,7 @@ function _cfdArComp(anCode,V){ var rows=V[anCode]; if(!rows)return null; var ite
     if(_cfdTaxKind(c,n)==='output'){ovat+=cr-dr;continue;}
     var amt=cr-dr; if(Math.abs(amt)<0.005)continue; var g=_cfdG1(c);
     var kind=(g==='4')?'rev':'other';
-    (items[c]||(items[c]={code:c,name:n,amt:0,kind:kind})).amt+=amt; tot+=amt; }
+    var it=items[c]||(items[c]={code:c,name:n,amt:0,kind:kind,proj:(''+(r[13]||'')).trim()}); it.amt+=amt; if(!it.proj)it.proj=(''+(r[13]||'')).trim(); tot+=amt; }   /* v9.120: โครงการจากขาตั้ง */
   var arr=[]; for(var k in items)arr.push(items[k]); return {items:arr,ovat:ovat,tot:tot+ovat}; }
 
 /* map a resolved (ultimate) account to a direct-method statement line */
@@ -12769,6 +12795,8 @@ var _CFD_LN={
 var _CFD_SEC=[['OP','กิจกรรมดำเนินงาน','Operating activities',['op_cust','op_cust_other','op_cogs','op_opex','op_emp','op_supp_other','op_tax','op_int','op_adv','op_wc']],
               ['INV','กิจกรรมลงทุน','Investing activities',['inv_ppe','inv_loan']],
               ['FIN','กิจกรรมจัดหาเงิน','Financing activities',['fin_st','fin_lt','fin_dep','fin_eq']]];
+/* v9.120: บรรทัดงบกระแสเงินสด → กิจกรรม (OP/INV/FIN) — ใช้สรุปกระแสเงินสดรายโครงการ */
+var _CFD_LINE_SEC=(function(){ var m={}; for(var s=0;s<_CFD_SEC.length;s++){ var sec=_CFD_SEC[s]; for(var i=0;i<sec[3].length;i++)m[sec[3][i]]=sec[0]; } return m; })();
 
 /* classify all cash-touching vouchers in a period → model {line:{amt,codes:{code:{name,amt,vch:{v:{amt,trace}}}}}} */
 /* v9.115: รายการปรับปรุง/ตั้งยอดยกมา (opening-balance restatement) — ไม่ใช่กระแสเงินสดจากกิจกรรม
@@ -12780,16 +12808,19 @@ function _cfdModelFor(y0,y1,endM,allY,cashSet){
   endM=(endM>=1&&endM<=12)?endM:12; var interim=(!allY && y0===y1 && endM<12);
   function inPeriod(r){ var y=+((''+(r[2]||'')).slice(0,4)); if(allY)return true; if(y<y0||y>y1)return false;
     if(interim && y===y1){ var m=(typeof _fsMonthOf==='function')?_fsMonthOf(r):12; if(m>endM)return false; } return true; }
-  var model={}, deltaCash=0, nV=0, nUnbal=0, unbalAmt=0, _curCash=null;
+  var model={}, deltaCash=0, nV=0, nUnbal=0, unbalAmt=0, _curCash=null, _curProj='', projAgg={};
   var _cfdOv=(typeof _fsMapCfd==='function')?_fsMapCfd():((FSMAP&&FSMAP.cfd)||{});   /* v9.118: override กิจกรรม/บรรทัด รายบัญชี */
   /* v9.116: _curCash = บัญชีเงินสด/ธนาคารที่เป็นคู่บัญชีอีกด้านของ Voucher ที่กำลังจำแนก (ตั้งไว้ต่อ Voucher)
      เก็บสะสมเข้าแต่ละคู่บัญชี (C.cash) เพื่อแสดง "คู่บัญชีธนาคาร (รหัส)" ในงบกระแสเงินสดทางตรง (drill-down) */
-  function push(line,code,name,amt,v,trace){ if(!isFinite(amt)||Math.abs(amt)<0.005)return;
+  function push(line,code,name,amt,v,trace,proj){ if(!isFinite(amt)||Math.abs(amt)<0.005)return;
     var _ov=_cfdOv[(''+(code==null?'':code)).trim()]; if(_ov&&_CFD_LN[_ov])line=_ov;   /* v9.118: ผู้ใช้ย้ายบัญชีนี้ไปกิจกรรม/บรรทัดอื่น */
     var L=model[line]||(model[line]={amt:0,codes:{}}); L.amt+=amt;
     var C=L.codes[code]||(L.codes[code]={name:name,amt:0,vch:{},cash:{}}); C.amt+=amt;
     var X=C.vch[v]||(C.vch[v]={amt:0,trace:trace||''}); X.amt+=amt; if(trace&&!X.trace)X.trace=trace;
-    if(_curCash){ if(!C.cash)C.cash={}; for(var _bk in _curCash){ var _bi=C.cash[_bk]||(C.cash[_bk]={name:_curCash[_bk].name,amt:0}); _bi.amt+=_curCash[_bk].amt; } } }
+    if(_curCash){ if(!C.cash)C.cash={}; for(var _bk in _curCash){ var _bi=C.cash[_bk]||(C.cash[_bk]={name:_curCash[_bk].name,amt:0}); _bi.amt+=_curCash[_bk].amt; } }
+    /* v9.120: สะสมกระแสเงินสดรายโครงการ (proj จากขาที่จำแนก) แยกตามกิจกรรม OP/INV/FIN (adj_open = ปรับปรุงยอดยกมา) */
+    var _pj=((proj!=null&&proj!=='')?proj:_curProj)||''; var _pa=projAgg[_pj]||(projAgg[_pj]={op:0,inv:0,fin:0,adj:0});
+    var _sc=_CFD_LINE_SEC[line]; if(_sc==='OP')_pa.op+=amt; else if(_sc==='INV')_pa.inv+=amt; else if(_sc==='FIN')_pa.fin+=amt; else _pa.adj+=amt; }
   function isCash(c){ return !!cashSet[(''+(c==null?'':c)).trim()]; }
   for(var v in V){ var rows=V[v]; var rp=[]; for(var i=0;i<rows.length;i++){ if(inPeriod(rows[i]))rp.push(rows[i]); }
     if(!rp.length)continue; var hasCash=false; for(var j=0;j<rp.length;j++){ if(isCash(rp[j][0])){hasCash=true;break;} }
@@ -12800,10 +12831,11 @@ function _cfdModelFor(y0,y1,endM,allY,cashSet){
     if(Math.abs(vd-vc)>0.005){ nUnbal++; unbalAmt+=(vd-vc); }
     deltaCash+=cd; nV++; _curCash=cashLegs;   /* v9.116: คู่บัญชีเงินสด/ธนาคารของ Voucher นี้ → ผูกเข้าคู่บัญชีที่จำแนก */
     if(_cfdIsOpeningAdj(rp)){ /* ปรับปรุงยอดยกมา — ไม่จำแนกเข้ากิจกรรม แต่แยกเป็นบรรทัดกระทบยอด (drill-down ได้) */
-      for(var oi=0;oi<rp.length;oi++){ var orr=rp[oi]; if(isCash(orr[0]))continue; var oc=(+orr[17]||0)-(+orr[16]||0); if(Math.abs(oc)>=0.005)push('adj_open',(''+(orr[0]||'')).trim(),orr[1],oc,v,'ปรับปรุงยอดยกมา · ไม่ใช่กระแสเงินสดจากกิจกรรม'); }
+      for(var oi=0;oi<rp.length;oi++){ var orr=rp[oi]; if(isCash(orr[0]))continue; var oc=(+orr[17]||0)-(+orr[16]||0); if(Math.abs(oc)<0.005)continue; _curProj=(''+(orr[13]||'')).trim(); push('adj_open',(''+(orr[0]||'')).trim(),orr[1],oc,v,'ปรับปรุงยอดยกมา · ไม่ใช่กระแสเงินสดจากกิจกรรม'); }
       continue; }
     for(var k=0;k<rp.length;k++){ var r2=rp[k],c=(''+(r2[0]||'')).trim(),n=r2[1],dr=+r2[16]||0,cr=+r2[17]||0,contrib=cr-dr;
       if(isCash(c))continue; if(Math.abs(contrib)<0.005)continue; var g=_cfdG1(c);
+      _curProj=(''+(r2[13]||'')).trim();   /* v9.120: โครงการของขาที่กำลังจำแนก (ค่าตั้งต้นของ push ในรอบนี้) */
       var tk=_cfdTaxKind(c,n);
       if(tk){ push('op_tax',c,n,contrib,v,''); continue; }
       if(g==='4'){ push('op_cust',c,n,contrib,v,'รายได้รับเป็นเงินสดโดยตรง'); continue; }
@@ -12815,7 +12847,7 @@ function _cfdModelFor(y0,y1,endM,allY,cashSet){
           if(T>0.005){ var alloc=0, tr='ผ่านเจ้าหนี้การค้า → ขาตั้ง '+aps.slice(0,4).join(', ')+(aps.length>4?' …':'');
             for(var ci=0;ci<comps.length;ci++){ var CM=comps[ci];
               for(var it=0;it<CM.items.length;it++){ var e=CM.items[it]; var sh=contrib*(e.amt/T);
-                var line=(e.kind==='exp')?_cfdLineExp(e.code,e.name):_cfdLineAsset(e.code,e.name); push(line,e.code,e.name,sh,v,tr); alloc+=sh; }
+                var line=(e.kind==='exp')?_cfdLineExp(e.code,e.name):_cfdLineAsset(e.code,e.name); push(line,e.code,e.name,sh,v,tr,e.proj||_curProj); alloc+=sh; }
               if(CM.vat>0.005){ var shv=contrib*(CM.vat/T); push('op_tax','1170511','ภาษีซื้อ (offset ผ่านเจ้าหนี้การค้า)',shv,v,tr); alloc+=shv; } }
             var resid=contrib-alloc; if(Math.abs(resid)>0.005)push('op_wc',c,n,resid,v,'ส่วนต่างชำระเจ้าหนี้ (ภาษีหัก ณ ที่จ่าย/ส่วนลด)'); done=true; } }
         if(!done)push('op_supp_other',c,n,contrib,v,'จ่ายชำระเจ้าหนี้การค้า (ไม่พบใบตั้งหนี้ในไฟล์ AP)'); continue; }
@@ -12824,7 +12856,7 @@ function _cfdModelFor(y0,y1,endM,allY,cashSet){
           if(T2>0.005){ var alloc2=0, tr2='ผ่านลูกหนี้การค้า → ขาตั้ง '+ans.slice(0,4).join(', ')+(ans.length>4?' …':'');
             for(var cj=0;cj<comps2.length;cj++){ var CM2=comps2[cj];
               for(var it2=0;it2<CM2.items.length;it2++){ var e2=CM2.items[it2]; var sh2=contrib*(e2.amt/T2);
-                push(e2.kind==='rev'?'op_cust':'op_wc',e2.code,e2.name,sh2,v,tr2); alloc2+=sh2; }
+                push(e2.kind==='rev'?'op_cust':'op_wc',e2.code,e2.name,sh2,v,tr2,e2.proj||_curProj); alloc2+=sh2; }
               if(CM2.ovat>0.005){ var shov=contrib*(CM2.ovat/T2); push('op_tax','2153001','ภาษีขาย (offset ผ่านลูกหนี้การค้า)',shov,v,tr2); alloc2+=shov; } }
             var resid2=contrib-alloc2; if(Math.abs(resid2)>0.005)push('op_wc',c,n,resid2,v,''); done2=true; } }
         if(!done2)push('op_cust_other',c,n,contrib,v,'รับชำระลูกหนี้ (ไม่พบใบแจ้งหนี้ในไฟล์ AR)'); continue; }
@@ -12839,7 +12871,7 @@ function _cfdModelFor(y0,y1,endM,allY,cashSet){
     }
   }
   var net=0; for(var lk in model)net+=model[lk].amt;
-  return {model:model,deltaCash:deltaCash,net:net,nV:nV,nUnbal:nUnbal,unbalAmt:unbalAmt};
+  return {model:model,deltaCash:deltaCash,net:net,nV:nV,nUnbal:nUnbal,unbalAmt:unbalAmt,projAgg:projAgg};
 }
 
 /* cash & cash-equivalent accounts + balances from a trial balance (BS-consistent, FSMAP-aware) */
@@ -12882,6 +12914,7 @@ function _cfdCompute(){
     beginCash:curBal.begin, endCash:curBal.end, move:curBal.move, net:grandCur, deltaCash:curBal.move,
     beginCashPri:priBal?priBal.begin:0, endCashPri:priBal?priBal.end:0, movePri:priBal?priBal.move:0, netPri:grandPri, deltaCashPri:priBal?priBal.move:0,
     residual:curBal.move-grandCur-adjCur, residualPri:priBal?(priBal.move-grandPri-adjPri):0,
+    projAgg:cur.projAgg||{},   /* v9.120: กระแสเงินสดรายโครงการ (ปีปัจจุบัน) */
     clean:(Math.abs(curBal.move-grandCur-adjCur)<0.5), nUnbal:cur.nUnbal, nUnbalPri:pri?pri.nUnbal:0, nVouchers:cur.nV };
 }
 
@@ -12948,9 +12981,39 @@ function _fsRenderCFD(){
     method+tie+
     '<table class="fstable fsstmt fsbs2 fscfd">'+_fsCols(pc)+head+'<tbody>'+body+recon+'</tbody></table>'+
     '<p class="fsnote">หมายเหตุ: ตัวเลขในวงเล็บ ( ) คือเงินสดจ่ายออก · รายการโอนภายในระหว่างบัญชีเงินสดด้วยกันถูกหักกลบอัตโนมัติ · ยอดปลายงวดตรงกับ “เงินสดและรายการเทียบเท่าเงินสด” ในงบแสดงฐานะการเงิน</p>'+
+    _cfdProjSummaryHtml()+
     cg+tie+
     '</div>';
 }
+/* v9.120: สรุปกระแสเงินสดรายโครงการ — โครงการ × (ดำเนินงาน/ลงทุน/จัดหาเงิน) แล้วกระทบเงินสดต้นงวด→ปลายงวด */
+function _cfdProjName(code){ code=(''+(code==null?'':code)).trim(); if(!code)return '';
+  try{ if(typeof NAMEOV!=='undefined'&&NAMEOV&&NAMEOV[code]!=null&&NAMEOV[code]!=='')return ''+NAMEOV[code]; }catch(e){}
+  try{ if(typeof PROJMASTER!=='undefined'&&PROJMASTER&&PROJMASTER.length){ for(var i=0;i<PROJMASTER.length;i++){ var m=PROJMASTER[i]; if(m&&(''+m.code).trim()===code)return m.name||''; } } }catch(e){}
+  return ''; }
+function _cfdPCell(v){ var cls='r'+(v<-0.0049?' cfneg':(v>0.0049?' cfpos':'')); return '<td class="'+cls+'">'+_fsMoney(v)+'</td>'; }
+function _cfdProjSummaryHtml(){ var R=_CFD; if(!R||!R.projAgg)return '';
+  var pa=R.projAgg, rows=[], tOp=0,tInv=0,tFin=0,tAdj=0;
+  for(var k in pa){ var o=pa[k]; var net=o.op+o.inv+o.fin; if(Math.abs(net)<0.005&&Math.abs(o.adj)<0.005)continue;
+    rows.push({proj:k,name:_cfdProjName(k),op:o.op,inv:o.inv,fin:o.fin,adj:o.adj,net:net}); tOp+=o.op; tInv+=o.inv; tFin+=o.fin; tAdj+=o.adj; }
+  if(!rows.length)return '';
+  rows.sort(function(a,b){ if(!a.proj&&b.proj)return 1; if(a.proj&&!b.proj)return -1; return Math.abs(b.net)-Math.abs(a.net); });
+  var h='<details class="cfdproj" open><summary>📊 สรุปกระแสเงินสดรายโครงการ · Cash flow by project — '+_fsE(_fsYL2())+' <span class="cfdproj-hint">(คลิกเพื่อดู/ซ่อน)</span></summary>'+
+    '<div class="cfdprojwrap"><table class="cfdprojtbl"><thead><tr><th class="l">โครงการ · Project</th>'+
+    '<th class="r">ดำเนินงาน<span>Operating</span></th><th class="r">ลงทุน<span>Investing</span></th><th class="r">จัดหาเงิน<span>Financing</span></th><th class="r">รวมสุทธิ<span>Net change</span></th></tr></thead><tbody>';
+  for(var i=0;i<rows.length;i++){ var x=rows[i];
+    var lbl=x.proj?('<span class="cfdproj-c">'+_fsE(x.proj)+'</span>'+(x.name?(' <span class="cfdproj-nm">'+_fsE(x.name)+'</span>'):'')):'<span class="cfdproj-none">(ไม่ระบุโครงการ / ส่วนกลาง)</span>';
+    h+='<tr><td class="l">'+lbl+'</td>'+_cfdPCell(x.op)+_cfdPCell(x.inv)+_cfdPCell(x.fin)+'<td class="r cfdproj-net">'+_fsMoney(x.net)+'</td></tr>'; }
+  h+='</tbody><tfoot><tr class="cfdproj-tot"><td class="l">รวมทุกโครงการ · All projects</td>'+_cfdPCell(tOp)+_cfdPCell(tInv)+_cfdPCell(tFin)+'<td class="r">'+_fsMoney(tOp+tInv+tFin)+'</td></tr></tfoot></table></div>';   /* v9.120: ปิด .cfdprojwrap (scroll) ตรงนี้ — กระทบยอดอยู่นอกกรอบเลื่อน */
+  var rc=function(label,val,cls){ return '<tr class="cfdproj-rc'+(cls?(' '+cls):'')+'"><td class="l">'+label+'</td><td class="r">'+_fsMoney(val)+'</td></tr>'; };
+  var recon='';
+  if(Math.abs(tAdj)>0.005)recon+=rc('ปรับปรุงยอดยกมา (ไม่ใช่กระแสเงินสดจากกิจกรรม)',tAdj);
+  if(Math.abs(R.residual)>0.005)recon+=rc('ผลต่างจาก Voucher เดบิต≠เครดิต (GL ไม่สมดุล)',R.residual);
+  recon+=rc('เงินสดและรายการเทียบเท่าเงินสด เพิ่มขึ้น(ลดลง) สุทธิ',R.deltaCash,'net');
+  recon+=rc('บวก: เงินสดและรายการเทียบเท่าเงินสด ต้นงวด',R.beginCash,'begin');
+  recon+=rc('เงินสดและรายการเทียบเท่าเงินสด ปลายงวด',R.endCash,'end');
+  h+='<div class="cfdproj-foot"><table class="cfdproj-rectbl"><tbody>'+recon+'</tbody></table>'+
+    '<p class="fsnote">แยกกระแสเงินสดตาม “โครงการ” (Ref. Code Proj./Dpt · ช่อง r13 ของ GL) ที่ติดกับขาที่จำแนกเข้ากิจกรรม (รายได้/ต้นทุน — รวม look-through ขาตั้งเจ้าหนี้/ลูกหนี้การค้า) · <b>รวมทุกโครงการ = เงินสดสุทธิจากกิจกรรมทั้งงบ</b> แล้วบวกเงินสดต้นงวด = เงินสดปลายงวด (ผูกกับงบแสดงฐานะการเงิน) · รายการที่ไม่มีรหัสโครงการรวมอยู่ใน “ไม่ระบุโครงการ/ส่วนกลาง”</p></div></details>';
+  return h; }
 
 /* ---------- drill-down: line → รหัสบัญชี → Voucher (current vs prior at line & code levels) ---------- */
 /* v9.116: ป้าย "คู่บัญชีธนาคาร" — บัญชีเงินสด/ธนาคารที่เป็นคู่บัญชีอีกด้านของรายการ (มาจาก Voucher จริง)
