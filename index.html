@@ -2706,31 +2706,31 @@ table.fsmanEq td.fsmanrt{font-weight:700}
 .fscfd .cfddetc{padding:0 !important;background:#FBFAF6}
 .cfdcodes{margin:2px 8px 8px 30px;border-left:2px solid var(--gold);padding:6px 0 6px 12px}
 .cfdcodes-h,.cfdvchs-h{display:grid;gap:8px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:2px 6px 5px}
-.cfdcodes-h{grid-template-columns:minmax(0,1fr) 110px 62px 128px}
+.cfdcodes{overflow-x:auto}
+.cfdcodes-h{grid-template-columns:minmax(150px,1fr) 240px 210px 100px 54px 122px}
 .cfdvchs-h{grid-template-columns:96px 1fr 1fr 130px}
 .cfdcodes-h .r,.cfdvchs-h .r{text-align:right}
 .cfdcode,.cfdvch{display:grid;gap:8px;align-items:center;padding:4px 6px;border-radius:7px;cursor:pointer;font-size:12px}
-.cfdcode{grid-template-columns:minmax(0,1fr) 110px 62px 128px}
-.cfdcodes.p2 .cfdcodes-h,.cfdcodes.p2 .cfdcode{grid-template-columns:minmax(0,1fr) 108px 56px 116px 116px}
+.cfdcode{grid-template-columns:minmax(150px,1fr) 240px 210px 100px 54px 122px}
+.cfdcodes.p2 .cfdcodes-h,.cfdcodes.p2 .cfdcode{grid-template-columns:minmax(130px,1fr) 220px 196px 92px 50px 108px 108px}
 .cfdvch{grid-template-columns:96px 1fr 1fr 130px}
 .cfdvch-none{color:var(--muted);font-size:11.5px;font-style:italic;padding:6px 8px}
 .cfdcode:hover,.cfdvch:hover{background:var(--gold-t)}
 .cfdcode.open,.cfdvch.open{background:var(--gold-t)}
 .cfdcode-c{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--brand-d);font-weight:600}
 .cfdvch-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cfdcode-n{display:flex;align-items:baseline;gap:6px;white-space:normal;line-height:1.35;font-weight:500;min-width:0}
-.cfdcode-n .cfdcode-nt{overflow-wrap:anywhere}
+.cfdcode-n{display:flex;align-items:center;gap:6px;white-space:nowrap;line-height:1.35;font-weight:500;min-width:0;overflow:hidden}
+.cfdcode-n .cfdcode-nt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .cfdcode-nv{color:var(--muted);font-size:11px}
-.cfdcode-bank{display:inline-flex;align-items:baseline;gap:4px;margin-left:6px;font-size:11px;font-weight:500;color:var(--muted);background:var(--gold-t);border:1px solid var(--gold);border-radius:6px;padding:1px 7px;white-space:nowrap;line-height:1.25}
+.cfdbankcell,.cfdmovecell{min-width:0}
+.cfdbankcell .cfdempty,.cfdmovecell .cfdempty{color:#B7C2BD}
+.cfdcode-bank{display:inline-block;max-width:100%;font-size:11px;font-weight:500;color:var(--muted);background:var(--gold-t);border:1px solid var(--gold);border-radius:6px;padding:1px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.6;vertical-align:middle}
 .cfdcode-bank .cfdbank-c{font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--brand-d)}
 .cfdcode-bank .cfdbank-more{color:var(--muted);font-weight:700}
-.cfdmove{display:inline-flex;align-items:center;gap:4px;margin-left:8px;vertical-align:middle;white-space:nowrap}
-.cfdmove .cfdmove-ic{font-size:10.5px;font-weight:700;color:#2E7D9A}
-.cfdmovesel{font:inherit;font-size:10.5px;max-width:230px;border:1px solid var(--fx-hair,#D7E0DC);border-radius:6px;padding:1px 5px;background:#fff;color:var(--fx-ink,#2A2A2A);cursor:pointer}
+.cfdmovesel{width:100%;box-sizing:border-box;font:inherit;font-size:10.5px;border:1px solid var(--fx-hair,#D7E0DC);border-radius:6px;padding:2px 5px;background:#fff;color:var(--fx-ink,#2A2A2A);cursor:pointer}
 .cfdmovesel:hover{border-color:#3AA0E6}
 .cfdmovesel:focus{outline:none;border-color:#3AA0E6;box-shadow:0 0 0 2px rgba(58,160,230,.15)}
-.cfdmove.moved .cfdmovesel{border-color:#E08A2B;color:#9A5B12;font-weight:700;background:#FFF6EA}
-.cfdmove.moved .cfdmove-ic{color:#C4791A}
+.cfdmovesel.moved{border-color:#E08A2B;color:#9A5B12;font-weight:700;background:#FFF6EA}
 .cfdcode .r,.cfdvch .r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .cfdvchwrap{margin:0 0 4px 0}
 .cfdvchs{margin:2px 6px 8px 26px;border-left:2px solid var(--blue);padding:4px 0 4px 12px}
@@ -12958,25 +12958,31 @@ function _fsRenderCFD(){
 function _cfdBankLabel(cash){ if(!cash)return ''; var arr=[]; for(var k in cash){ var o=cash[k]; if(o&&Math.abs(o.amt||0)>=0.005)arr.push({code:k,name:o.name,amt:o.amt}); }
   if(!arr.length)return ''; arr.sort(function(a,b){return Math.abs(b.amt)-Math.abs(a.amt);}); var top=arr[0];
   var more=arr.length>1?(' <span class="cfdbank-more">+'+(arr.length-1)+'</span>'):'';
-  var ttl='คู่บัญชีธนาคาร/เงินสด (อีกด้านของรายการนี้): '+arr.map(function(o){return (o.name||'')+' '+o.code;}).join(' · ');
-  return '<span class="cfdcode-bank" title="'+_fsE(ttl)+'">🏦 '+_fsE(top.name||'เงินสด/ธนาคาร')+' · <span class="cfdbank-c">'+_fsE(top.code)+'</span>'+more+'</span>'; }
+  var ttl='คู่บัญชีธนาคาร/เงินสด (อีกด้านของรายการนี้): '+arr.map(function(o){return (o.code+' '+(o.name||''));}).join(' · ');
+  /* v9.119: รหัสขึ้นก่อน (สำคัญ + เห็นเสมอ) แล้วชื่อ — ชื่อยาวตัดด้วย … · รายละเอียดเต็มดูได้ที่ tooltip */
+  return '<span class="cfdcode-bank" title="'+_fsE(ttl)+'">🏦 <span class="cfdbank-c">'+_fsE(top.code)+'</span> '+_fsE(top.name||'เงินสด/ธนาคาร')+more+'</span>'; }
 /* v9.118: ตัวเลือก "ย้ายกิจกรรม" — บรรทัดในงบกระแสเงินสด จัดกลุ่มตามกิจกรรม (ดำเนินงาน/ลงทุน/จัดหาเงิน) */
 function _cfdLineOpts(cur){ var h='<option value="">— อัตโนมัติ (ระบบจำแนกให้) —</option>';
   for(var s=0;s<_CFD_SEC.length;s++){ var sec=_CFD_SEC[s]; h+='<optgroup label="'+_fsE(sec[1])+' · '+_fsE(sec[2])+'">';
     for(var i=0;i<sec[3].length;i++){ var k=sec[3][i],lbl=_CFD_LN[k]?_CFD_LN[k][0]:k; h+='<option value="'+_fsE(k)+'"'+(k===cur?' selected':'')+'>'+_fsE(lbl)+'</option>'; }
     h+='</optgroup>'; }
   return h; }
-/* v9.118: ปุ่ม/dropdown ย้ายบัญชีไปกิจกรรม/บรรทัดอื่นของงบกระแสเงินสด — กรณีจำแนกไม่ตรงกิจกรรม */
+/* v9.118/9.119: dropdown ย้ายบัญชีไปกิจกรรม/บรรทัดอื่นของงบกระแสเงินสด (คอลัมน์ของตัวเอง) — กรณีจำแนกไม่ตรงกิจกรรม */
 function _cfdMoveCtl(code){ var ov=_fsMapCfd()[_fsRcCode(code)]||'';
-  return '<span class="cfdmove'+(ov?' moved':'')+'" title="ย้ายบัญชีนี้ไปกิจกรรม/บรรทัดอื่นของงบกระแสเงินสด (กรณีระบบจำแนกไม่ตรงกิจกรรม) — เลือก “อัตโนมัติ” เพื่อคืนค่า">'+
-    '<span class="cfdmove-ic">⇄ ย้ายกิจกรรม</span><select class="cfdmovesel" data-code="'+_fsE(code)+'">'+_cfdLineOpts(ov)+'</select></span>'; }
+  return '<select class="cfdmovesel'+(ov?' moved':'')+'" data-code="'+_fsE(code)+'" title="ย้ายบัญชีนี้ไปกิจกรรม/บรรทัดอื่นของงบกระแสเงินสด (กรณีระบบจำแนกไม่ตรงกิจกรรม) — เลือก “อัตโนมัติ” เพื่อคืนค่า">'+_cfdLineOpts(ov)+'</select>'; }
+/* v9.119: เปิดบรรทัดที่กางอยู่กลับหลัง re-render (กัน "เด้งกลับ/หุบ" หลังกดย้ายกิจกรรม) */
+function _cfdReopenLines(keys){ if(!keys||!keys.length)return; var seen={};
+  for(var i=0;i<keys.length;i++){ var k=keys[i]; if(!k||seen[k])continue; seen[k]=1;
+    var el=document.querySelector('.cfdln[data-cfdk="'+k+'"]'); if(el&&!el.classList.contains('open')){ try{_fsCFDToggle(el);}catch(e){} } } }
 function _cfdCodeHtml(lineKey){ var R=_CFD; if(!R)return ''; var L=R.lines[lineKey]; if(!L)return ''; var pc=R.hasPrev?1:0;
   var arr=[]; for(var c in L.codes){ var o=L.codes[c]; arr.push({code:c,name:o.name,cur:o.cur,pri:o.pri,nv:Object.keys(o.vch||{}).length,cash:o.cash}); }
   arr.sort(function(a,b){return Math.abs(b.cur)-Math.abs(a.cur);});
-  var h='<div class="cfdcodes'+(pc?' p2':'')+'"><div class="cfdcodes-h"><span>ชื่อบัญชี (คู่บัญชีที่จำแนกได้) · 🏦 คู่บัญชีธนาคาร · ⇄ ย้ายกิจกรรม</span><span>รหัส</span><span class="r">Voucher</span><span class="r">ปีปัจจุบัน</span>'+(pc?'<span class="r">ปีก่อน</span>':'')+'</div>';
-  for(var i=0;i<arr.length;i++){ var x=arr[i]; var clc='fsm'+(x.cur<-0.0049?' cfneg':(x.cur>0.0049?' cfpos':''));
+  var h='<div class="cfdcodes'+(pc?' p2':'')+'"><div class="cfdcodes-h"><span>ชื่อบัญชี (คู่บัญชีที่จำแนกได้)</span><span>🏦 คู่บัญชีธนาคาร</span><span>⇄ ย้ายกิจกรรม</span><span>รหัส</span><span class="r">Voucher</span><span class="r">ปีปัจจุบัน</span>'+(pc?'<span class="r">ปีก่อน</span>':'')+'</div>';
+  for(var i=0;i<arr.length;i++){ var x=arr[i]; var clc='fsm'+(x.cur<-0.0049?' cfneg':(x.cur>0.0049?' cfpos':'')); var nm=x.name||'(ไม่มีชื่อบัญชี)'; var bank=_cfdBankLabel(x.cash);
     h+='<div class="cfdcode" data-cfdact="code" data-cfdk="'+_fsE(lineKey)+'" data-code="'+_fsE(x.code)+'">'+
-       '<span class="cfdcode-n"><span class="cfdcar">▸</span><span class="cfdcode-nt">'+_fsE(x.name||'(ไม่มีชื่อบัญชี)')+'</span>'+_cfdBankLabel(x.cash)+_cfdMoveCtl(x.code)+'</span>'+
+       '<span class="cfdcode-n"><span class="cfdcar">▸</span><span class="cfdcode-nt" title="'+_fsE(nm)+'">'+_fsE(nm)+'</span></span>'+
+       '<span class="cfdbankcell">'+(bank||'<span class="cfdempty">–</span>')+'</span>'+
+       '<span class="cfdmovecell">'+_cfdMoveCtl(x.code)+'</span>'+
        '<span class="cfdcode-c mono">'+_fsE(x.code)+'</span>'+
        '<span class="r cfdcode-nv">'+x.nv+'</span><span class="r '+clc+'">'+_fsMoney(x.cur)+'</span>'+(pc?'<span class="r fsprev">'+_fsMoney(x.pri,true)+'</span>':'')+'</div>'+
        '<div class="cfdvchwrap" hidden></div>'; }
@@ -14003,7 +14009,7 @@ function _fsBind(w){ if(w._b)return; w._b=1;
     if(rtile){ _fsRatioModal(rtile.getAttribute('data-rt')); return; }
     var xb=t.closest?t.closest('.fsxlsb'):null; if(xb){_fsExportAccount(xb.getAttribute('data-code'),xb.getAttribute('data-dim'),xb);return;}
     var pr=t.closest?t.closest('.fsdet-party'):null; if(pr&&pr.getAttribute('data-key')!=null){_fsToggleParty(pr);return;}
-    if(t.closest&&t.closest('.cfdmove')){return;}   /* v9.118: คลิกที่ตัวเลือก "ย้ายกิจกรรม" — อย่ากาง/หุบแถว drill */
+    if(t.closest&&t.closest('.cfdmovecell')){return;}   /* v9.118: คลิกที่ตัวเลือก "ย้ายกิจกรรม" — อย่ากาง/หุบแถว drill */
     var cfx=t.closest?t.closest('[data-cfdact]'):null; if(cfx){_fsCFDToggle(cfx);return;}
     var gr=t.closest?t.closest('.fsgrprow[data-fsgrp]'):null; if(gr){if(_fsManEdit)return;/* v9.98: โหมดแก้งบเอง — งดกาง drill เพื่อให้คลิกแก้เซลล์ได้ */var op=gr.classList.toggle('open'); var dr=gr.nextElementSibling; if(dr&&dr.classList&&dr.classList.contains('fsgrpdetr'))dr.hidden=!op; return;}
     var lh=t.closest?t.closest('.fslineh'):null; if(lh){var col=lh.classList.toggle('fscollapsed'); var n=lh.nextElementSibling; while(n&&n.classList&&n.classList.contains('fsacc')){n.style.display=col?'none':''; n=n.nextElementSibling;} return;}
@@ -14019,7 +14025,10 @@ function _fsBind(w){ if(w._b)return; w._b=1;
   w.addEventListener('keydown',function(e){ if(e.key==='Enter'&&e.target&&e.target.getAttribute&&(e.target.getAttribute('data-fsmanamt')!=null||e.target.getAttribute('data-fsmanlbl')!=null)){ e.preventDefault(); try{e.target.blur();}catch(_e){} } });
   w.addEventListener('change',function(e){var t=e.target;
     if(t&&t.classList&&t.classList.contains('fstbgrpsel')){ _fsGrpSelApply(t.getAttribute('data-code'),t.value); try{_fsCompute();}catch(_ge){} _fsRenderBody(); try{if(typeof cloudPush==='function')cloudPush();}catch(_cp){} return; }
-    if(t&&t.classList&&t.classList.contains('cfdmovesel')){ _fsCfdSetLine(t.getAttribute('data-code'),t.value); try{_fsRenderBody();}catch(_ge){} return; }   /* v9.118: ย้ายกิจกรรมในงบกระแสเงินสดทางตรง */
+    if(t&&t.classList&&t.classList.contains('cfdmovesel')){ var _mc=t.getAttribute('data-code'),_mv=t.value;   /* v9.118/9.119: ย้ายกิจกรรม — คงบรรทัดที่กางไว้ (กันเด้งกลับ) */
+      var _open=[]; try{Array.prototype.forEach.call(document.querySelectorAll('.cfdln.open'),function(el){var k=el.getAttribute('data-cfdk'); if(k)_open.push(k);});}catch(_oe){}
+      if(_mv&&_open.indexOf(_mv)<0)_open.push(_mv);   /* เปิดบรรทัดปลายทางด้วย เพื่อให้เห็นว่าย้ายไปไหน */
+      _fsCfdSetLine(_mc,_mv); try{_fsRenderBody();}catch(_ge){} try{_cfdReopenLines(_open);}catch(_re){} return; }
     if(t&&t.classList&&t.classList.contains('fslmgr-cat')){ var box=t.closest('.fslmgr-add'); if(box){var thin=box.querySelector('.fslmgr-th'); if(thin)thin.focus();} return; }
     if(t&&t.id==='fsEndMSel'){var mv=parseInt(t.value,10);if(!(mv>=1&&mv<=12))mv=12;_fsEndM=mv;_fsCompute();w.innerHTML=_fsShell();_fsRenderBody();_fsLinesMgrRender();return;}
     if(t&&t.id==='fsReconFile'){_fsReconOnFile(t.files&&t.files[0]);return;}
