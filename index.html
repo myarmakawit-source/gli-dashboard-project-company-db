@@ -2721,6 +2721,9 @@ table.fsmanEq td.fsmanrt{font-weight:700}
 .cfdcode-n{display:flex;align-items:baseline;gap:6px;white-space:normal;line-height:1.35;font-weight:500;min-width:0}
 .cfdcode-n .cfdcode-nt{overflow-wrap:anywhere}
 .cfdcode-nv{color:var(--muted);font-size:11px}
+.cfdcode-bank{display:inline-flex;align-items:baseline;gap:4px;margin-left:6px;font-size:11px;font-weight:500;color:var(--muted);background:var(--gold-t);border:1px solid var(--gold);border-radius:6px;padding:1px 7px;white-space:nowrap;line-height:1.25}
+.cfdcode-bank .cfdbank-c{font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--brand-d)}
+.cfdcode-bank .cfdbank-more{color:var(--muted);font-weight:700}
 .cfdcode .r,.cfdvch .r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .cfdvchwrap{margin:0 0 4px 0}
 .cfdvchs{margin:2px 6px 8px 26px;border-left:2px solid var(--blue);padding:4px 0 4px 12px}
@@ -11738,7 +11741,7 @@ function _fsShell(){
   var tabs=''; _FS_TABS.forEach(function(t2){tabs+='<button class="fstab'+(t2[0]===_fsTab?' on':'')+'" data-fstab="'+t2[0]+'"><span class="fstic">'+(t2[2]||'')+'</span><span class="fstlbl">'+t2[1]+'</span></button>';});
   if(!t){ /* no GL loaded — statements are built automatically from the active GL file */
     return '<div class="fsbar"><div class="fsbar-l"><span class="fsbar-file">📊 Financial Statements</span><span class="fsfw">NPAEs</span><span class="fscmp dim">โหลด GL ในแท็บ Database เพื่อดูงบการเงินอัตโนมัติ</span></div></div>'+
-      '<div class="fstabs">'+tabs+'</div><div id="fsLinesMgrHost"></div><div id="fsBody"></div>';
+      '<div class="fstabs">'+tabs+'</div><div id="fsBody"></div>';
   }
   /* v9.88: งบการเงินประจำปี — single-year picker (prior year auto-compared) + ทุกปี option */
   var yrOpts=''; for(var i=_fsYears.length-1;i>=0;i--){var y=_fsYears[i];yrOpts+='<option value="'+y+'"'+((_fsYear!=='ALL'&&y===_fsY1)?' selected':'')+'>ปี '+(+y+543)+' ('+y+')</option>';}
@@ -11764,7 +11767,6 @@ function _fsShell(){
   return '<div class="fsbar">'+
     '<div class="fsbar-top">'+
       '<div class="fsbar-actions">'+
-        '<button class="fsexp map'+(_fsLinesMgr?' on':'')+'" id="fsMapEdit" title="จัดการบรรทัดงบการเงิน — แก้ชื่อบรรทัด + เพิ่มบรรทัดใหม่ (แบบ inline ไม่ใช่ป๊อปอัป) · การจัดกลุ่มบัญชี (Grouping) แก้ได้ที่แท็บ Trial Balance">'+(_fsLinesMgr?'✅ จัดการบรรทัดงบ: เปิด':'🧩 จัดการบรรทัดงบ')+'</button>'+
         (['bs','pl','cf'].indexOf(_fsTab)>=0?('<button class="fsexp man'+(_fsManEdit?' on':'')+'" id="fsManEditToggle" title="แก้งบเอง — คลิกที่ชื่อบรรทัด/ยอดในงบเพื่อพิมพ์ทับ (มีผลกับ PDF)">'+(_fsManEdit?'✅ แก้งบเอง: เปิด':'✏️ แก้งบเอง')+'</button>'):'')+
         '<button class="fsexp" id="fsExport" title="ส่งออกงบการเงิน 4 งบ + หมายเหตุ เป็น Excel (ตามแม่แบบ)">⤓ Excel งบการเงิน</button>'+
         '<button class="fsexp ghost" id="fsPrint" title="พิมพ์ / บันทึก PDF งบการเงิน 4 งบ + หมายเหตุ (ตามแม่แบบ)">🖨 PDF งบการเงิน</button>'+
@@ -11776,7 +11778,7 @@ function _fsShell(){
       '<div class="fsbar-health" id="fsChips">'+chipsInner+'</div>'+
     '</div>'+
     '</div>'+
-    '<div class="fstabs">'+tabs+'</div><div id="fsLinesMgrHost"></div><div id="fsBody"></div>';
+    '<div class="fstabs">'+tabs+'</div><div id="fsBody"></div>';
 }
 function _fsRenderChips(w){ var t=_fsT; var el=w.querySelector('#fsChips'); if(!el)return;
   var bal=Math.abs(t.movDiff)<0.5, bsb=Math.abs(t.bsDiff)<0.5;
@@ -12172,8 +12174,13 @@ function _fsMapGrpRow(o){ var ov=_fsMapGrps()[o.key]||{};
     '<td><input class="fsmap-in" data-fsmap="grp" data-k="'+_fsE(o.key)+'" data-f="th" value="'+_fsE(ov.th!=null?ov.th:o.th)+'" placeholder="'+_fsE(o.th)+'"></td>'+
     '<td><input class="fsmap-in fsmap-en" data-fsmap="grp" data-k="'+_fsE(o.key)+'" data-f="en" value="'+_fsE(ov.en!=null?ov.en:o.en)+'" placeholder="'+_fsE(o.en)+'"></td>'+
     '<td class="fsmap-rst">'+((ov.th!=null||ov.en!=null)?'<button type="button" class="fsmap-reset" data-rgrp="'+_fsE(o.key)+'" title="คืนค่าเดิม">↺</button>':'')+'</td></tr>'; }
-function _fsMapLineOpts(cur){ var all=_fsAllLines(),labels={A:'สินทรัพย์',L:'หนี้สิน',E:'ส่วนของผู้ถือหุ้น',R:'รายได้',X:'ค่าใช้จ่าย'},h='<option value="">— ค่าอัตโนมัติ (ระบบจัดให้) —</option>';
-  ['A','L','E','R','X'].forEach(function(cat){ h+='<optgroup label="'+labels[cat]+'">'; all[cat].forEach(function(ln){ h+='<option value="'+_fsE(ln)+'"'+(ln===cur?' selected':'')+'>'+_fsE(_fsLineTh(ln))+'</option>'; }); h+='</optgroup>'; }); return h; }
+/* v9.116: dropdown "จัดกลุ่มเข้างบการเงิน" — เอาหัวข้อกลุ่มประเภทบัญชี (optgroup: สินทรัพย์/หนี้สิน/…) ออก
+   ทำเป็นรายการเดียวเรียงกัน · ค่าตั้งต้น = บรรทัดที่บัญชีนี้เข้าอยู่ในงบการเงินปัจจุบัน (cur) ถูกเลือกไว้ให้อัตโนมัติ */
+function _fsMapLineOpts(cur){ var all=_fsAllLines(),h='<option value="">— ค่าอัตโนมัติ (ระบบจัดให้) —</option>',found=false;
+  ['A','L','E','R','X'].forEach(function(cat){ all[cat].forEach(function(ln){ var sel=(ln===cur); if(sel)found=true; h+='<option value="'+_fsE(ln)+'"'+(sel?' selected':'')+'>'+_fsE(_fsLineTh(ln))+'</option>'; }); });
+  /* ถ้าบรรทัดที่ใช้อยู่ปัจจุบันไม่อยู่ในรายการมาตรฐาน → เพิ่มเป็นตัวเลือกที่เลือกไว้ เพื่อให้ค่าตั้งต้นตรงกับงบเสมอ */
+  if(cur&&!found)h+='<option value="'+_fsE(cur)+'" selected>'+_fsE(_fsLineTh(cur))+'</option>';
+  return h; }
 function _fsMapAcctRows(q){ q=(q||'').trim().toLowerCase(); var rows='',arr=(typeof _fsTB!=='undefined'&&_fsTB)?_fsTB.slice():[];
   arr.sort(function(a,b){return a.code<b.code?-1:(a.code>b.code?1:0);});
   arr.forEach(function(x){ var code=_fsRcCode(x.code),nm=x.name||''; if(q&&(code+' '+nm+' '+_fsLineTh(x.cls.line)).toLowerCase().indexOf(q)<0)return;
@@ -12734,19 +12741,23 @@ function _cfdModelFor(y0,y1,endM,allY,cashSet){
   endM=(endM>=1&&endM<=12)?endM:12; var interim=(!allY && y0===y1 && endM<12);
   function inPeriod(r){ var y=+((''+(r[2]||'')).slice(0,4)); if(allY)return true; if(y<y0||y>y1)return false;
     if(interim && y===y1){ var m=(typeof _fsMonthOf==='function')?_fsMonthOf(r):12; if(m>endM)return false; } return true; }
-  var model={}, deltaCash=0, nV=0, nUnbal=0, unbalAmt=0;
+  var model={}, deltaCash=0, nV=0, nUnbal=0, unbalAmt=0, _curCash=null;
+  /* v9.116: _curCash = บัญชีเงินสด/ธนาคารที่เป็นคู่บัญชีอีกด้านของ Voucher ที่กำลังจำแนก (ตั้งไว้ต่อ Voucher)
+     เก็บสะสมเข้าแต่ละคู่บัญชี (C.cash) เพื่อแสดง "คู่บัญชีธนาคาร (รหัส)" ในงบกระแสเงินสดทางตรง (drill-down) */
   function push(line,code,name,amt,v,trace){ if(!isFinite(amt)||Math.abs(amt)<0.005)return;
     var L=model[line]||(model[line]={amt:0,codes:{}}); L.amt+=amt;
-    var C=L.codes[code]||(L.codes[code]={name:name,amt:0,vch:{}}); C.amt+=amt;
-    var X=C.vch[v]||(C.vch[v]={amt:0,trace:trace||''}); X.amt+=amt; if(trace&&!X.trace)X.trace=trace; }
+    var C=L.codes[code]||(L.codes[code]={name:name,amt:0,vch:{},cash:{}}); C.amt+=amt;
+    var X=C.vch[v]||(C.vch[v]={amt:0,trace:trace||''}); X.amt+=amt; if(trace&&!X.trace)X.trace=trace;
+    if(_curCash){ if(!C.cash)C.cash={}; for(var _bk in _curCash){ var _bi=C.cash[_bk]||(C.cash[_bk]={name:_curCash[_bk].name,amt:0}); _bi.amt+=_curCash[_bk].amt; } } }
   function isCash(c){ return !!cashSet[(''+(c==null?'':c)).trim()]; }
   for(var v in V){ var rows=V[v]; var rp=[]; for(var i=0;i<rows.length;i++){ if(inPeriod(rows[i]))rp.push(rows[i]); }
     if(!rp.length)continue; var hasCash=false; for(var j=0;j<rp.length;j++){ if(isCash(rp[j][0])){hasCash=true;break;} }
     if(!hasCash)continue;
-    var cd=0,vd=0,vc=0; for(var j2=0;j2<rp.length;j2++){ var r=rp[j2]; vd+=(+r[16]||0); vc+=(+r[17]||0); if(isCash(r[0]))cd+=(+r[16]||0)-(+r[17]||0); }
+    var cd=0,vd=0,vc=0,cashLegs={}; for(var j2=0;j2<rp.length;j2++){ var r=rp[j2]; vd+=(+r[16]||0); vc+=(+r[17]||0);
+      if(isCash(r[0])){ var _cc=(''+(r[0]||'')).trim(),_cm=(+r[16]||0)-(+r[17]||0); cd+=_cm; var _cl=cashLegs[_cc]||(cashLegs[_cc]={name:r[1],amt:0}); _cl.amt+=_cm; } }
     if(Math.abs(cd)<0.005)continue;   /* internal transfer between cash accounts — no external flow */
     if(Math.abs(vd-vc)>0.005){ nUnbal++; unbalAmt+=(vd-vc); }
-    deltaCash+=cd; nV++;
+    deltaCash+=cd; nV++; _curCash=cashLegs;   /* v9.116: คู่บัญชีเงินสด/ธนาคารของ Voucher นี้ → ผูกเข้าคู่บัญชีที่จำแนก */
     if(_cfdIsOpeningAdj(rp)){ /* ปรับปรุงยอดยกมา — ไม่จำแนกเข้ากิจกรรม แต่แยกเป็นบรรทัดกระทบยอด (drill-down ได้) */
       for(var oi=0;oi<rp.length;oi++){ var orr=rp[oi]; if(isCash(orr[0]))continue; var oc=(+orr[17]||0)-(+orr[16]||0); if(Math.abs(oc)>=0.005)push('adj_open',(''+(orr[0]||'')).trim(),orr[1],oc,v,'ปรับปรุงยอดยกมา · ไม่ใช่กระแสเงินสดจากกิจกรรม'); }
       continue; }
@@ -12812,7 +12823,7 @@ function _cfdCompute(){
   var lines={}, priEndByCode={};
   function L(k){ return lines[k]||(lines[k]={cur:0,pri:0,codes:{}}); }
   for(var k in cur.model){ var o=L(k); o.cur=cur.model[k].amt; var cs=cur.model[k].codes;
-    for(var c in cs){ var cc=o.codes[c]||(o.codes[c]={name:cs[c].name,cur:0,pri:0,vch:cs[c].vch}); cc.cur=cs[c].amt; cc.vch=cs[c].vch; } }
+    for(var c in cs){ var cc=o.codes[c]||(o.codes[c]={name:cs[c].name,cur:0,pri:0,vch:cs[c].vch}); cc.cur=cs[c].amt; cc.vch=cs[c].vch; cc.cash=cs[c].cash; } }
   if(pri)for(var k2 in pri.model){ var o2=L(k2); o2.pri=pri.model[k2].amt; var cs2=pri.model[k2].codes;
     for(var c2 in cs2){ var cc2=o2.codes[c2]||(o2.codes[c2]={name:cs2[c2].name,cur:0,pri:0,vch:{}}); cc2.pri=cs2[c2].amt; if(!cc2.name)cc2.name=cs2[c2].name; } }
   if(priBal)for(var pi=0;pi<priBal.accts.length;pi++)priEndByCode[priBal.accts[pi].code]=priBal.accts[pi];
@@ -12901,13 +12912,20 @@ function _fsRenderCFD(){
 }
 
 /* ---------- drill-down: line → รหัสบัญชี → Voucher (current vs prior at line & code levels) ---------- */
+/* v9.116: ป้าย "คู่บัญชีธนาคาร" — บัญชีเงินสด/ธนาคารที่เป็นคู่บัญชีอีกด้านของรายการ (มาจาก Voucher จริง)
+   เรียงตามจำนวนเงินสด (มากสุดก่อน) · ถ้ามีหลายบัญชี แสดงบัญชีหลัก + "+N" */
+function _cfdBankLabel(cash){ if(!cash)return ''; var arr=[]; for(var k in cash){ var o=cash[k]; if(o&&Math.abs(o.amt||0)>=0.005)arr.push({code:k,name:o.name,amt:o.amt}); }
+  if(!arr.length)return ''; arr.sort(function(a,b){return Math.abs(b.amt)-Math.abs(a.amt);}); var top=arr[0];
+  var more=arr.length>1?(' <span class="cfdbank-more">+'+(arr.length-1)+'</span>'):'';
+  var ttl='คู่บัญชีธนาคาร/เงินสด (อีกด้านของรายการนี้): '+arr.map(function(o){return (o.name||'')+' '+o.code;}).join(' · ');
+  return '<span class="cfdcode-bank" title="'+_fsE(ttl)+'">🏦 '+_fsE(top.name||'เงินสด/ธนาคาร')+' · <span class="cfdbank-c">'+_fsE(top.code)+'</span>'+more+'</span>'; }
 function _cfdCodeHtml(lineKey){ var R=_CFD; if(!R)return ''; var L=R.lines[lineKey]; if(!L)return ''; var pc=R.hasPrev?1:0;
-  var arr=[]; for(var c in L.codes){ var o=L.codes[c]; arr.push({code:c,name:o.name,cur:o.cur,pri:o.pri,nv:Object.keys(o.vch||{}).length}); }
+  var arr=[]; for(var c in L.codes){ var o=L.codes[c]; arr.push({code:c,name:o.name,cur:o.cur,pri:o.pri,nv:Object.keys(o.vch||{}).length,cash:o.cash}); }
   arr.sort(function(a,b){return Math.abs(b.cur)-Math.abs(a.cur);});
-  var h='<div class="cfdcodes'+(pc?' p2':'')+'"><div class="cfdcodes-h"><span>ชื่อบัญชี (คู่บัญชีที่จำแนกได้)</span><span>รหัส</span><span class="r">Voucher</span><span class="r">ปีปัจจุบัน</span>'+(pc?'<span class="r">ปีก่อน</span>':'')+'</div>';
+  var h='<div class="cfdcodes'+(pc?' p2':'')+'"><div class="cfdcodes-h"><span>ชื่อบัญชี (คู่บัญชีที่จำแนกได้) · 🏦 คู่บัญชีธนาคาร</span><span>รหัส</span><span class="r">Voucher</span><span class="r">ปีปัจจุบัน</span>'+(pc?'<span class="r">ปีก่อน</span>':'')+'</div>';
   for(var i=0;i<arr.length;i++){ var x=arr[i]; var clc='fsm'+(x.cur<-0.0049?' cfneg':(x.cur>0.0049?' cfpos':''));
     h+='<div class="cfdcode" data-cfdact="code" data-cfdk="'+_fsE(lineKey)+'" data-code="'+_fsE(x.code)+'">'+
-       '<span class="cfdcode-n"><span class="cfdcar">▸</span><span class="cfdcode-nt">'+_fsE(x.name||'(ไม่มีชื่อบัญชี)')+'</span></span>'+
+       '<span class="cfdcode-n"><span class="cfdcar">▸</span><span class="cfdcode-nt">'+_fsE(x.name||'(ไม่มีชื่อบัญชี)')+'</span>'+_cfdBankLabel(x.cash)+'</span>'+
        '<span class="cfdcode-c mono">'+_fsE(x.code)+'</span>'+
        '<span class="r cfdcode-nv">'+x.nv+'</span><span class="r '+clc+'">'+_fsMoney(x.cur)+'</span>'+(pc?'<span class="r fsprev">'+_fsMoney(x.pri,true)+'</span>':'')+'</div>'+
        '<div class="cfdvchwrap" hidden></div>'; }
