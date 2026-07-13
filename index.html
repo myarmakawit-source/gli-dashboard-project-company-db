@@ -10633,6 +10633,7 @@ function _fsClassify(code,name){
   }
   /* preliminary working-paper drill (per user): cat 1-3 (A/L/E) group by Project + Debit/Credit voucher matching; cat 4-5 keep nature grouping */
   if(cat==="A"||cat==="L"||cat==="E"){ var _crit=(r.detailTh&&r.detailTh.charAt(0)==="*")?(" · "+r.detailTh):""; r.detail="project"; r.detailTh="แยกตามโครงการ (Project) · จับคู่ Debit/Credit ราย Voucher"+_crit; }
+  r.natLine=r.line;   /* v9.117: บรรทัดงบตามการจัดของระบบ (ก่อน override) — ใช้ตัดสินว่าย้ายข้ามกลุ่มจริงหรือไม่ */
   /* v9.98: ผู้ใช้ย้ายบัญชีนี้ไปบรรทัดงบอื่น (FSMAP.code) — จัดหมวด/งบ/หมุนเวียนตามบรรทัดปลายทาง */
   try{ var _ov=FSMAP.code&&FSMAP.code[C]; if(_ov){ var _oc=_fsLineCat(_ov); r.line=_ov; if(_oc){ r.cat=_oc; r.stmt=(_oc==='R'||_oc==='X')?'PL':'BS'; r.normal=(_oc==='A'||_oc==='X')?'D':'C'; r.curr=_fsLineCurrent(_ov); } r.remapped=true; } }catch(_me){}
   return r;
@@ -10839,6 +10840,16 @@ var _FS_PL_GROUPS=[
  {sec:'X',key:'fin_cost',th:'ต้นทุนทางการเงิน',en:'Finance costs',members:['Finance costs']},
  {sec:'X',key:'tax_exp',th:'ค่าใช้จ่าย(รายได้)ภาษีเงินได้',en:'Tax expense (income)',members:['Income tax expense']}
 ];
+/* v9.117: reverse map "บรรทัดย่อย (FS line) → กลุ่มที่แสดงในงบการเงินจริง (statement line)"
+   ใช้ให้ dropdown "จัดกลุ่มเข้างบการเงิน" แสดง/เลือก "บรรทัดในงบ" (หัวข้อกลุ่ม) แทนบรรทัดย่อยภายใน */
+var _FS_LINE2GRP=(function(){ var m={};
+  (_FS_BS_GROUPS||[]).forEach(function(G){ G.members.forEach(function(mem){ if(!(mem in m))m[mem]=G; }); });
+  (_FS_PL_GROUPS||[]).forEach(function(G){ G.members.forEach(function(mem){ if(!(mem in m))m[mem]=G; }); });
+  return m; })();
+/* คีย์กลุ่มงบของบรรทัดย่อย (ถ้าไม่อยู่ในกลุ่ม เช่น ส่วนของผู้ถือหุ้น/บรรทัดที่เพิ่มเอง = ใช้ชื่อบรรทัดเป็นคีย์) */
+function _fsStmtGrpOf(line){ var G=_FS_LINE2GRP[line]; return G?G.key:(''+(line==null?'':line)); }
+/* ค่า (value) ของ dropdown ที่แทน "บรรทัดในงบ" ของบรรทัดย่อยนี้ = บรรทัดตัวแทนกลุ่ม (สมาชิกตัวแรก) หรือชื่อบรรทัดถ้าไม่มีกลุ่ม */
+function _fsStmtValOf(line){ var G=_FS_LINE2GRP[line]; return G?G.members[0]:line; }
 /* v9.98: บรรทัดงบ → หมวด (A/L/E/R/X) — ใช้ตอนย้ายบัญชีไปบรรทัดอื่น เพื่อจัดหมวด/งบให้ถูก */
 var _FS_LINE_CAT=(function(){ var m={};
   (_FS_BS_ASSET||[]).forEach(function(l){m[l]='A';}); m['Loans receivable']='A';
@@ -12174,12 +12185,20 @@ function _fsMapGrpRow(o){ var ov=_fsMapGrps()[o.key]||{};
     '<td><input class="fsmap-in" data-fsmap="grp" data-k="'+_fsE(o.key)+'" data-f="th" value="'+_fsE(ov.th!=null?ov.th:o.th)+'" placeholder="'+_fsE(o.th)+'"></td>'+
     '<td><input class="fsmap-in fsmap-en" data-fsmap="grp" data-k="'+_fsE(o.key)+'" data-f="en" value="'+_fsE(ov.en!=null?ov.en:o.en)+'" placeholder="'+_fsE(o.en)+'"></td>'+
     '<td class="fsmap-rst">'+((ov.th!=null||ov.en!=null)?'<button type="button" class="fsmap-reset" data-rgrp="'+_fsE(o.key)+'" title="คืนค่าเดิม">↺</button>':'')+'</td></tr>'; }
-/* v9.116: dropdown "จัดกลุ่มเข้างบการเงิน" — เอาหัวข้อกลุ่มประเภทบัญชี (optgroup: สินทรัพย์/หนี้สิน/…) ออก
-   ทำเป็นรายการเดียวเรียงกัน · ค่าตั้งต้น = บรรทัดที่บัญชีนี้เข้าอยู่ในงบการเงินปัจจุบัน (cur) ถูกเลือกไว้ให้อัตโนมัติ */
-function _fsMapLineOpts(cur){ var all=_fsAllLines(),h='<option value="">— ค่าอัตโนมัติ (ระบบจัดให้) —</option>',found=false;
-  ['A','L','E','R','X'].forEach(function(cat){ all[cat].forEach(function(ln){ var sel=(ln===cur); if(sel)found=true; h+='<option value="'+_fsE(ln)+'"'+(sel?' selected':'')+'>'+_fsE(_fsLineTh(ln))+'</option>'; }); });
-  /* ถ้าบรรทัดที่ใช้อยู่ปัจจุบันไม่อยู่ในรายการมาตรฐาน → เพิ่มเป็นตัวเลือกที่เลือกไว้ เพื่อให้ค่าตั้งต้นตรงกับงบเสมอ */
-  if(cur&&!found)h+='<option value="'+_fsE(cur)+'" selected>'+_fsE(_fsLineTh(cur))+'</option>';
+/* v9.117: dropdown "จัดกลุ่มเข้างบการเงิน" — ตัวเลือก = "บรรทัดในงบการเงินจริง" (หัวข้อกลุ่มที่โชว์ในงบ
+   เช่น "เงินสดและรายการเทียบเท่าเงินสด" ไม่ใช่บรรทัดย่อยภายในอย่าง "เงินฝากสถาบันการเงิน") · ค่าตั้งต้น =
+   บรรทัดงบที่บัญชีนี้เข้าอยู่ตอนนี้ · เปลี่ยนได้ = ย้ายบัญชีไปแสดงในอีกบรรทัดของงบ */
+function _fsMapLineOpts(cur){
+  var selVal=_fsStmtValOf(cur), custom=_fsMapCustom(), h='<option value="">— ค่าอัตโนมัติ (ระบบจัดให้) —</option>', found=false;
+  function opt(val,label){ var sel=(val===selVal); if(sel)found=true; h+='<option value="'+_fsE(val)+'"'+(sel?' selected':'')+'>'+_fsE(label)+'</option>'; }
+  function customLinesFor(cat){ for(var k in custom){ if(custom[k]&&custom[k].cat===cat)opt(k,_fsLineTh(k)); } }
+  (_FS_BS_GROUPS||[]).forEach(function(G){ if(G.cat==='A')opt(G.members[0],_fsGrpTh(G)); }); customLinesFor('A');   /* สินทรัพย์ */
+  (_FS_BS_GROUPS||[]).forEach(function(G){ if(G.cat==='L')opt(G.members[0],_fsGrpTh(G)); }); customLinesFor('L');   /* หนี้สิน */
+  (_FS_EQ||[]).forEach(function(ln){ opt(ln,_fsLineTh(ln)); }); customLinesFor('E');                               /* ส่วนของผู้ถือหุ้น (ไม่มีกลุ่มย่อย) */
+  (_FS_PL_GROUPS||[]).forEach(function(G){ if(G.sec==='R')opt(G.members[0],_fsGrpTh(G)); }); customLinesFor('R');  /* รายได้ */
+  (_FS_PL_GROUPS||[]).forEach(function(G){ if(G.sec==='X')opt(G.members[0],_fsGrpTh(G)); }); customLinesFor('X');  /* ค่าใช้จ่าย */
+  /* ถ้าบรรทัดปัจจุบันไม่ตรงกับตัวเลือกใด (เช่น 'Other'/บรรทัดพิเศษ) → เพิ่มเป็นตัวเลือกที่เลือกไว้ ให้ค่าตั้งต้นตรงกับงบเสมอ */
+  if(cur&&!found)h+='<option value="'+_fsE(selVal)+'" selected>'+_fsE(_fsLineTh(cur))+'</option>';
   return h; }
 function _fsMapAcctRows(q){ q=(q||'').trim().toLowerCase(); var rows='',arr=(typeof _fsTB!=='undefined'&&_fsTB)?_fsTB.slice():[];
   arr.sort(function(a,b){return a.code<b.code?-1:(a.code>b.code?1:0);});
@@ -12219,12 +12238,21 @@ function _fsMapRerenderModal(){ var m=document.getElementById('fsMapModal'); if(
   m.querySelectorAll('.fsmap-tab').forEach(function(t){t.classList.toggle('on',t.getAttribute('data-mtab')===_fsMapTab);}); }
 function _fsMapSetGrp(key,field,val){ var g=_fsMapGrps(),o=g[key]||{}; val=(''+val); var def=(_FS_BS_GROUPS.concat(_FS_PL_GROUPS).concat(typeof _FS_STMT_LINES!=='undefined'?_FS_STMT_LINES:[])).filter(function(x){return x.key===key;})[0]; var defv=def?(field==='th'?def.th:def.en):''; if(val===''||val===defv){ delete o[field]; } else o[field]=val; if(o.th==null&&o.en==null)delete g[key]; else g[key]=o; _fsMapSave(); }
 function _fsMapSetCode(code,line){ var c=_fsMapCodes(); code=_fsRcCode(code); if(line)c[code]=line; else delete c[code]; _fsMapSave(); }
+/* v9.117: เลือก "บรรทัดในงบ" ให้บัญชีจาก dropdown จัดกลุ่ม — ถ้าบรรทัดที่เลือกอยู่กลุ่มงบเดียวกับที่ระบบจัดให้
+   ตามธรรมชาติ (natLine) → ล้าง override (คงบรรทัดย่อยเดิม ไม่ขึ้นสถานะ "ย้ายแล้ว") · ถ้าต่างกลุ่ม → เก็บ override */
+function _fsGrpSelApply(code,val){
+  if(!val){ _fsMapSetCode(code,''); return; }
+  var nl=null,rc=_fsRcCode(code);
+  try{ if(typeof _fsTB!=='undefined'&&_fsTB){ for(var i=0;i<_fsTB.length;i++){ if(_fsRcCode(_fsTB[i].code)===rc){ nl=_fsTB[i].cls&&_fsTB[i].cls.natLine; break; } } } }catch(e){}
+  if(nl&&_fsStmtGrpOf(nl)===_fsStmtGrpOf(val)) _fsMapSetCode(code,'');
+  else _fsMapSetCode(code,val);
+}
 function _fsMapResetAll(){ if(!confirm('คืนค่าการปรับแต่งบรรทัดงบทั้งหมด (ชื่อ + การย้ายบัญชี)?'))return; FSMAP={}; _fsMapSave(); _fsMapRerenderModal(); _fsMapRefresh(); }
 function _fsMapOnInput(t){ if(t.classList.contains('fsmap-in')){ _fsMapSetGrp(t.getAttribute('data-k'),t.getAttribute('data-f'),t.value); if(_fsMapDebT)clearTimeout(_fsMapDebT); _fsMapDebT=setTimeout(_fsMapRefresh,450); }
   else if(t.id==='fsMapQ'){ var body=document.getElementById('fsMapAcctBody'); if(body)body.innerHTML=_fsMapAcctRows(t.value); } }
 var _fsMapDebT=null;
 function _fsMapUpdStat(){ var m=document.getElementById('fsMapModal'); if(!m)return; var hr=m.querySelector('.fsmap-hd-r'); if(!hr)return; var nMoved=Object.keys(_fsMapCodes()).length,nRen=Object.keys(_fsMapGrps()).length+Object.keys(_fsMapLines()).length; hr.innerHTML='<span class="fsmap-stat">ย้ายบัญชี '+nMoved+' · เปลี่ยนชื่อ '+nRen+'</span>'+(nMoved+nRen>0?'<button type="button" class="fsmap-resetall" id="fsMapResetAll">↺ คืนค่าทั้งหมด</button>':''); }
-function _fsMapOnChange(t){ if(t.classList.contains('fsmap-msel')){ _fsMapSetCode(t.getAttribute('data-code'),t.value); var tr=t.closest('tr'); if(tr){ tr.classList.toggle('moved',!!t.value); var nm=tr.querySelector('.fsmap-nm'); if(nm){ var b=nm.querySelector('.fsmap-movedb'); if(t.value&&!b)nm.insertAdjacentHTML('beforeend','<span class="fsmap-movedb">ย้ายแล้ว</span>'); else if(!t.value&&b)b.remove(); } } _fsMapUpdStat(); _fsMapRefresh(); } }
+function _fsMapOnChange(t){ if(t.classList.contains('fsmap-msel')){ var _c=t.getAttribute('data-code'); _fsGrpSelApply(_c,t.value); var _mv=!!_fsMapCodes()[_fsRcCode(_c)]; var tr=t.closest('tr'); if(tr){ tr.classList.toggle('moved',_mv); var nm=tr.querySelector('.fsmap-nm'); if(nm){ var b=nm.querySelector('.fsmap-movedb'); if(_mv&&!b)nm.insertAdjacentHTML('beforeend','<span class="fsmap-movedb">ย้ายแล้ว</span>'); else if(!_mv&&b)b.remove(); } } _fsMapUpdStat(); _fsMapRefresh(); } }
 function _fsMapOnClick(e){ var t=e.target,ov=document.getElementById('fsMapModal');
   if(t.closest&&t.closest('.rt-modal-x')){_fsMapClose();return;}
   if(t===ov&&_fsMapDownBg){_fsMapClose();return;}
@@ -13966,7 +13994,7 @@ function _fsBind(w){ if(w._b)return; w._b=1;
     var lk=t.getAttribute('data-fsmanlbl'); if(lk!=null){ _fsMapSetGrp(lk,'th',(t.textContent||'').trim()); try{_fsCompute();}catch(_e){} _fsRenderBody(); return; } });
   w.addEventListener('keydown',function(e){ if(e.key==='Enter'&&e.target&&e.target.getAttribute&&(e.target.getAttribute('data-fsmanamt')!=null||e.target.getAttribute('data-fsmanlbl')!=null)){ e.preventDefault(); try{e.target.blur();}catch(_e){} } });
   w.addEventListener('change',function(e){var t=e.target;
-    if(t&&t.classList&&t.classList.contains('fstbgrpsel')){ _fsMapSetCode(t.getAttribute('data-code'),t.value); try{_fsCompute();}catch(_ge){} _fsRenderBody(); try{if(typeof cloudPush==='function')cloudPush();}catch(_cp){} return; }
+    if(t&&t.classList&&t.classList.contains('fstbgrpsel')){ _fsGrpSelApply(t.getAttribute('data-code'),t.value); try{_fsCompute();}catch(_ge){} _fsRenderBody(); try{if(typeof cloudPush==='function')cloudPush();}catch(_cp){} return; }
     if(t&&t.classList&&t.classList.contains('fslmgr-cat')){ var box=t.closest('.fslmgr-add'); if(box){var thin=box.querySelector('.fslmgr-th'); if(thin)thin.focus();} return; }
     if(t&&t.id==='fsEndMSel'){var mv=parseInt(t.value,10);if(!(mv>=1&&mv<=12))mv=12;_fsEndM=mv;_fsCompute();w.innerHTML=_fsShell();_fsRenderBody();_fsLinesMgrRender();return;}
     if(t&&t.id==='fsReconFile'){_fsReconOnFile(t.files&&t.files[0]);return;}
