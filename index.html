@@ -2724,6 +2724,13 @@ table.fsmanEq td.fsmanrt{font-weight:700}
 .cfdcode-bank{display:inline-flex;align-items:baseline;gap:4px;margin-left:6px;font-size:11px;font-weight:500;color:var(--muted);background:var(--gold-t);border:1px solid var(--gold);border-radius:6px;padding:1px 7px;white-space:nowrap;line-height:1.25}
 .cfdcode-bank .cfdbank-c{font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--brand-d)}
 .cfdcode-bank .cfdbank-more{color:var(--muted);font-weight:700}
+.cfdmove{display:inline-flex;align-items:center;gap:4px;margin-left:8px;vertical-align:middle;white-space:nowrap}
+.cfdmove .cfdmove-ic{font-size:10.5px;font-weight:700;color:#2E7D9A}
+.cfdmovesel{font:inherit;font-size:10.5px;max-width:230px;border:1px solid var(--fx-hair,#D7E0DC);border-radius:6px;padding:1px 5px;background:#fff;color:var(--fx-ink,#2A2A2A);cursor:pointer}
+.cfdmovesel:hover{border-color:#3AA0E6}
+.cfdmovesel:focus{outline:none;border-color:#3AA0E6;box-shadow:0 0 0 2px rgba(58,160,230,.15)}
+.cfdmove.moved .cfdmovesel{border-color:#E08A2B;color:#9A5B12;font-weight:700;background:#FFF6EA}
+.cfdmove.moved .cfdmove-ic{color:#C4791A}
 .cfdcode .r,.cfdvch .r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .cfdvchwrap{margin:0 0 4px 0}
 .cfdvchs{margin:2px 6px 8px 26px;border-left:2px solid var(--blue);padding:4px 0 4px 12px}
@@ -12247,6 +12254,10 @@ function _fsGrpSelApply(code,val){
   if(nl&&_fsStmtGrpOf(nl)===_fsStmtGrpOf(val)) _fsMapSetCode(code,'');
   else _fsMapSetCode(code,val);
 }
+/* v9.118: ย้าย "กิจกรรม/บรรทัด" ในงบกระแสเงินสด (วิธีทางตรง) รายบัญชี — กรณีระบบจำแนกไม่ตรงกิจกรรม
+   FSMAP.cfd[code] = lineKey ของงบกระแสเงินสด (op_cust / inv_ppe / fin_lt ฯลฯ) · ว่าง = ใช้การจำแนกอัตโนมัติ */
+function _fsMapCfd(){ if(!FSMAP.cfd||typeof FSMAP.cfd!=='object')FSMAP.cfd={}; return FSMAP.cfd; }
+function _fsCfdSetLine(code,line){ var c=_fsMapCfd(); code=_fsRcCode(code); if(line)c[code]=line; else delete c[code]; _fsMapSave(); }
 function _fsMapResetAll(){ if(!confirm('คืนค่าการปรับแต่งบรรทัดงบทั้งหมด (ชื่อ + การย้ายบัญชี)?'))return; FSMAP={}; _fsMapSave(); _fsMapRerenderModal(); _fsMapRefresh(); }
 function _fsMapOnInput(t){ if(t.classList.contains('fsmap-in')){ _fsMapSetGrp(t.getAttribute('data-k'),t.getAttribute('data-f'),t.value); if(_fsMapDebT)clearTimeout(_fsMapDebT); _fsMapDebT=setTimeout(_fsMapRefresh,450); }
   else if(t.id==='fsMapQ'){ var body=document.getElementById('fsMapAcctBody'); if(body)body.innerHTML=_fsMapAcctRows(t.value); } }
@@ -12770,9 +12781,11 @@ function _cfdModelFor(y0,y1,endM,allY,cashSet){
   function inPeriod(r){ var y=+((''+(r[2]||'')).slice(0,4)); if(allY)return true; if(y<y0||y>y1)return false;
     if(interim && y===y1){ var m=(typeof _fsMonthOf==='function')?_fsMonthOf(r):12; if(m>endM)return false; } return true; }
   var model={}, deltaCash=0, nV=0, nUnbal=0, unbalAmt=0, _curCash=null;
+  var _cfdOv=(typeof _fsMapCfd==='function')?_fsMapCfd():((FSMAP&&FSMAP.cfd)||{});   /* v9.118: override กิจกรรม/บรรทัด รายบัญชี */
   /* v9.116: _curCash = บัญชีเงินสด/ธนาคารที่เป็นคู่บัญชีอีกด้านของ Voucher ที่กำลังจำแนก (ตั้งไว้ต่อ Voucher)
      เก็บสะสมเข้าแต่ละคู่บัญชี (C.cash) เพื่อแสดง "คู่บัญชีธนาคาร (รหัส)" ในงบกระแสเงินสดทางตรง (drill-down) */
   function push(line,code,name,amt,v,trace){ if(!isFinite(amt)||Math.abs(amt)<0.005)return;
+    var _ov=_cfdOv[(''+(code==null?'':code)).trim()]; if(_ov&&_CFD_LN[_ov])line=_ov;   /* v9.118: ผู้ใช้ย้ายบัญชีนี้ไปกิจกรรม/บรรทัดอื่น */
     var L=model[line]||(model[line]={amt:0,codes:{}}); L.amt+=amt;
     var C=L.codes[code]||(L.codes[code]={name:name,amt:0,vch:{},cash:{}}); C.amt+=amt;
     var X=C.vch[v]||(C.vch[v]={amt:0,trace:trace||''}); X.amt+=amt; if(trace&&!X.trace)X.trace=trace;
@@ -12947,13 +12960,23 @@ function _cfdBankLabel(cash){ if(!cash)return ''; var arr=[]; for(var k in cash)
   var more=arr.length>1?(' <span class="cfdbank-more">+'+(arr.length-1)+'</span>'):'';
   var ttl='คู่บัญชีธนาคาร/เงินสด (อีกด้านของรายการนี้): '+arr.map(function(o){return (o.name||'')+' '+o.code;}).join(' · ');
   return '<span class="cfdcode-bank" title="'+_fsE(ttl)+'">🏦 '+_fsE(top.name||'เงินสด/ธนาคาร')+' · <span class="cfdbank-c">'+_fsE(top.code)+'</span>'+more+'</span>'; }
+/* v9.118: ตัวเลือก "ย้ายกิจกรรม" — บรรทัดในงบกระแสเงินสด จัดกลุ่มตามกิจกรรม (ดำเนินงาน/ลงทุน/จัดหาเงิน) */
+function _cfdLineOpts(cur){ var h='<option value="">— อัตโนมัติ (ระบบจำแนกให้) —</option>';
+  for(var s=0;s<_CFD_SEC.length;s++){ var sec=_CFD_SEC[s]; h+='<optgroup label="'+_fsE(sec[1])+' · '+_fsE(sec[2])+'">';
+    for(var i=0;i<sec[3].length;i++){ var k=sec[3][i],lbl=_CFD_LN[k]?_CFD_LN[k][0]:k; h+='<option value="'+_fsE(k)+'"'+(k===cur?' selected':'')+'>'+_fsE(lbl)+'</option>'; }
+    h+='</optgroup>'; }
+  return h; }
+/* v9.118: ปุ่ม/dropdown ย้ายบัญชีไปกิจกรรม/บรรทัดอื่นของงบกระแสเงินสด — กรณีจำแนกไม่ตรงกิจกรรม */
+function _cfdMoveCtl(code){ var ov=_fsMapCfd()[_fsRcCode(code)]||'';
+  return '<span class="cfdmove'+(ov?' moved':'')+'" title="ย้ายบัญชีนี้ไปกิจกรรม/บรรทัดอื่นของงบกระแสเงินสด (กรณีระบบจำแนกไม่ตรงกิจกรรม) — เลือก “อัตโนมัติ” เพื่อคืนค่า">'+
+    '<span class="cfdmove-ic">⇄ ย้ายกิจกรรม</span><select class="cfdmovesel" data-code="'+_fsE(code)+'">'+_cfdLineOpts(ov)+'</select></span>'; }
 function _cfdCodeHtml(lineKey){ var R=_CFD; if(!R)return ''; var L=R.lines[lineKey]; if(!L)return ''; var pc=R.hasPrev?1:0;
   var arr=[]; for(var c in L.codes){ var o=L.codes[c]; arr.push({code:c,name:o.name,cur:o.cur,pri:o.pri,nv:Object.keys(o.vch||{}).length,cash:o.cash}); }
   arr.sort(function(a,b){return Math.abs(b.cur)-Math.abs(a.cur);});
-  var h='<div class="cfdcodes'+(pc?' p2':'')+'"><div class="cfdcodes-h"><span>ชื่อบัญชี (คู่บัญชีที่จำแนกได้) · 🏦 คู่บัญชีธนาคาร</span><span>รหัส</span><span class="r">Voucher</span><span class="r">ปีปัจจุบัน</span>'+(pc?'<span class="r">ปีก่อน</span>':'')+'</div>';
+  var h='<div class="cfdcodes'+(pc?' p2':'')+'"><div class="cfdcodes-h"><span>ชื่อบัญชี (คู่บัญชีที่จำแนกได้) · 🏦 คู่บัญชีธนาคาร · ⇄ ย้ายกิจกรรม</span><span>รหัส</span><span class="r">Voucher</span><span class="r">ปีปัจจุบัน</span>'+(pc?'<span class="r">ปีก่อน</span>':'')+'</div>';
   for(var i=0;i<arr.length;i++){ var x=arr[i]; var clc='fsm'+(x.cur<-0.0049?' cfneg':(x.cur>0.0049?' cfpos':''));
     h+='<div class="cfdcode" data-cfdact="code" data-cfdk="'+_fsE(lineKey)+'" data-code="'+_fsE(x.code)+'">'+
-       '<span class="cfdcode-n"><span class="cfdcar">▸</span><span class="cfdcode-nt">'+_fsE(x.name||'(ไม่มีชื่อบัญชี)')+'</span>'+_cfdBankLabel(x.cash)+'</span>'+
+       '<span class="cfdcode-n"><span class="cfdcar">▸</span><span class="cfdcode-nt">'+_fsE(x.name||'(ไม่มีชื่อบัญชี)')+'</span>'+_cfdBankLabel(x.cash)+_cfdMoveCtl(x.code)+'</span>'+
        '<span class="cfdcode-c mono">'+_fsE(x.code)+'</span>'+
        '<span class="r cfdcode-nv">'+x.nv+'</span><span class="r '+clc+'">'+_fsMoney(x.cur)+'</span>'+(pc?'<span class="r fsprev">'+_fsMoney(x.pri,true)+'</span>':'')+'</div>'+
        '<div class="cfdvchwrap" hidden></div>'; }
@@ -13980,6 +14003,7 @@ function _fsBind(w){ if(w._b)return; w._b=1;
     if(rtile){ _fsRatioModal(rtile.getAttribute('data-rt')); return; }
     var xb=t.closest?t.closest('.fsxlsb'):null; if(xb){_fsExportAccount(xb.getAttribute('data-code'),xb.getAttribute('data-dim'),xb);return;}
     var pr=t.closest?t.closest('.fsdet-party'):null; if(pr&&pr.getAttribute('data-key')!=null){_fsToggleParty(pr);return;}
+    if(t.closest&&t.closest('.cfdmove')){return;}   /* v9.118: คลิกที่ตัวเลือก "ย้ายกิจกรรม" — อย่ากาง/หุบแถว drill */
     var cfx=t.closest?t.closest('[data-cfdact]'):null; if(cfx){_fsCFDToggle(cfx);return;}
     var gr=t.closest?t.closest('.fsgrprow[data-fsgrp]'):null; if(gr){if(_fsManEdit)return;/* v9.98: โหมดแก้งบเอง — งดกาง drill เพื่อให้คลิกแก้เซลล์ได้ */var op=gr.classList.toggle('open'); var dr=gr.nextElementSibling; if(dr&&dr.classList&&dr.classList.contains('fsgrpdetr'))dr.hidden=!op; return;}
     var lh=t.closest?t.closest('.fslineh'):null; if(lh){var col=lh.classList.toggle('fscollapsed'); var n=lh.nextElementSibling; while(n&&n.classList&&n.classList.contains('fsacc')){n.style.display=col?'none':''; n=n.nextElementSibling;} return;}
@@ -13995,6 +14019,7 @@ function _fsBind(w){ if(w._b)return; w._b=1;
   w.addEventListener('keydown',function(e){ if(e.key==='Enter'&&e.target&&e.target.getAttribute&&(e.target.getAttribute('data-fsmanamt')!=null||e.target.getAttribute('data-fsmanlbl')!=null)){ e.preventDefault(); try{e.target.blur();}catch(_e){} } });
   w.addEventListener('change',function(e){var t=e.target;
     if(t&&t.classList&&t.classList.contains('fstbgrpsel')){ _fsGrpSelApply(t.getAttribute('data-code'),t.value); try{_fsCompute();}catch(_ge){} _fsRenderBody(); try{if(typeof cloudPush==='function')cloudPush();}catch(_cp){} return; }
+    if(t&&t.classList&&t.classList.contains('cfdmovesel')){ _fsCfdSetLine(t.getAttribute('data-code'),t.value); try{_fsRenderBody();}catch(_ge){} return; }   /* v9.118: ย้ายกิจกรรมในงบกระแสเงินสดทางตรง */
     if(t&&t.classList&&t.classList.contains('fslmgr-cat')){ var box=t.closest('.fslmgr-add'); if(box){var thin=box.querySelector('.fslmgr-th'); if(thin)thin.focus();} return; }
     if(t&&t.id==='fsEndMSel'){var mv=parseInt(t.value,10);if(!(mv>=1&&mv<=12))mv=12;_fsEndM=mv;_fsCompute();w.innerHTML=_fsShell();_fsRenderBody();_fsLinesMgrRender();return;}
     if(t&&t.id==='fsReconFile'){_fsReconOnFile(t.files&&t.files[0]);return;}
