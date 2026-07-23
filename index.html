@@ -3379,6 +3379,22 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-bbl .bblgtoggle{padding:5px 11px;font-size:11.5px}
 #page-bbl table.bbltbl-grace{min-width:520px}
 
+/* ---- v10.00b: larger, more readable schedule + voucher column + comma numbers ---- */
+#page-bbl .bblsched table.bbltbl{font-size:13.5px;min-width:960px}
+#page-bbl .bblsched thead th{font-size:11.5px;padding:9px 11px}
+#page-bbl .bblsched thead th small{font-size:9px}
+#page-bbl .bblsched tbody td{padding:5px 10px}
+#page-bbl .bblsched .bblseq{font-size:13.5px;font-weight:800}
+#page-bbl .bblsched td.bblopen,#page-bbl .bblsched td.bbltotal,#page-bbl .bblsched td.bblbal{font-size:13.5px}
+#page-bbl .bblsched table.bbltbl input.bblcin{font-size:13px}
+#page-bbl .bblsched table.bbltbl input.bblcin.bblnum{font-weight:800}
+#page-bbl .bblsched table.bbltbl input.bblcin.bbldate{width:104px;font-size:12.5px}
+#page-bbl .bblsched table.bbltbl input.bblcin.bblvch{width:138px;font-size:11.5px;color:var(--bbl-ink2);font-weight:600}
+#page-bbl .bblsched .bblstat{font-size:11px;padding:4px 12px}
+#page-bbl .bblsched tfoot td{font-size:13px;padding:9px 11px}
+/* right-align money inputs a touch tighter so commas read cleanly */
+#page-bbl input.bblcin.bblmoney,#page-bbl input.bblin.bblmoney{letter-spacing:.01em}
+
 /* v9.113: inline FS-line manager panel */
 #page-fs .fslmgr{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#FCFBF7,#fff);margin:8px 0 12px;padding:0 0 8px;box-shadow:0 4px 16px -8px rgba(20,30,40,.16);overflow:hidden}
 #page-fs .fslmgr-hd{display:flex;align-items:flex-start;gap:12px;justify-content:space-between;padding:11px 15px;background:linear-gradient(100deg,var(--brand-t),transparent);border-bottom:1px solid var(--line2)}
@@ -6207,13 +6223,14 @@ function _bblRenderLoan(lk){
     _bblKpi('ดอกเบี้ยจ่ายสะสม','INTEREST PAID',_bblFmt(t.intPaid),CG)+
     _bblKpi('งวดที่ชำระแล้ว','INSTALLMENTS',''+t.nPaid,CB,'/ '+t.nInst+' งวด')+
     '</div>';
-  function fld(lbl,f,val,isnum){ return '<div class="bblfld"><label>'+lbl+'</label><input class="bblin'+(isnum?' bblnum':'')+'" data-lk="'+lk+'" data-meta="'+f+'" value="'+_bblEsc(val)+'"></div>'; }
+  function fld(lbl,f,val,kind){ var cls='bblin'+(kind==='money'?' bblnum bblmoney':(kind==='int'?' bblnum':'')); var v=(kind==='money')?_bblFmt(_bblN(val),true):val;
+    return '<div class="bblfld"><label>'+lbl+'</label><input class="'+cls+'" data-lk="'+lk+'" data-meta="'+f+'" value="'+_bblEsc(v)+'"></div>'; }
   var ctr='<div class="bblcard"><div class="bblcard-h"><div class="bblcard-t">'+mt.emoji+' '+_bblEsc(mt.name)+' <span class="bblchip">'+_bblEsc(mt.contract)+'</span></div></div>'+
     '<div class="bblctr">'+
-      fld('เลขที่สัญญา','contract',mt.contract)+ fld('รหัสโครงการ','proj',mt.proj)+
-      fld('วงเงิน (บาท)','facility',_bblRaw(mt.facility),true)+ fld('อัตราดอกเบี้ย','rateNote',mt.rateNote)+
-      fld('จำนวนงวดผ่อน','nInst',mt.nInst,true)+ fld('ค่างวด 1–'+((+mt.nInst||54)-1)+' (บาท)','inst',_bblRaw(mt.inst),true)+
-      fld('งวดแรก เดือนที่','firstM',mt.firstM,true)+ fld('ครบกำหนด (เดือน)','termM',mt.termM,true)+
+      fld('เลขที่สัญญา','contract',mt.contract,'text')+ fld('รหัสโครงการ','proj',mt.proj,'text')+
+      fld('วงเงิน (บาท)','facility',mt.facility,'money')+ fld('อัตราดอกเบี้ย','rateNote',mt.rateNote,'text')+
+      fld('จำนวนงวดผ่อน','nInst',mt.nInst,'int')+ fld('ค่างวด 1–'+((+mt.nInst||54)-1)+' (บาท)','inst',mt.inst,'money')+
+      fld('งวดแรก เดือนที่','firstM',mt.firstM,'int')+ fld('ครบกำหนด (เดือน)','termM',mt.termM,'int')+
     '</div></div>';
   /* grace-period interest (before first principal instalment) */
   var st=_bblState();
@@ -6221,7 +6238,7 @@ function _bblRenderLoan(lk){
     graceRows+='<tr><td class="bblseq c">'+(i+1)+'</td>'+
       '<td class="l bblcell-in"><input class="bblcin bbldate" data-gk="'+lk+'" data-gidx="'+i+'" data-gf="date" value="'+_bblEsc(g.date)+'"></td>'+
       '<td class="l bblcell-in"><input class="bblcin bblvch" data-gk="'+lk+'" data-gidx="'+i+'" data-gf="voucher" value="'+_bblEsc(g.voucher)+'"></td>'+
-      '<td class="bblcell-in"><input class="bblcin bblnum" data-gk="'+lk+'" data-gidx="'+i+'" data-gf="interest" value="'+_bblRaw(g.interest)+'"></td>'+
+      '<td class="bblcell-in"><input class="bblcin bblnum bblmoney" data-gk="'+lk+'" data-gidx="'+i+'" data-gf="interest" value="'+_bblFmt(g.interest,true)+'"></td>'+
       '<td class="c"><button type="button" class="bbldelx" data-gdel="'+lk+'" data-gidx="'+i+'" title="ลบ">✕</button></td></tr>';
   });
   var grace='<div class="bblcard bblgrace'+(st.showgrace?'':' collapsed')+'"><div class="bblcard-h"><div class="bblcard-t" style="font-size:13px">💤 ดอกเบี้ยช่วงก่อนเริ่มผ่อนเงินต้น <span class="bblchip" style="color:var(--bbl-gold);background:var(--bbl-gold-t);border-color:var(--bbl-gold)">รวม '+_bblFmt(c.graceInt)+'</span></div>'+
@@ -6237,7 +6254,7 @@ function _bblRenderLoan(lk){
     '</div>';
   /* main schedule table */
   var head='<thead><tr>'+
-    '<th class="c">งวด<small>NO.</small></th><th class="l">กำหนดชำระ<small>DUE DATE</small></th>'+
+    '<th class="c">งวด<small>NO.</small></th><th class="l">กำหนดชำระ<small>DUE DATE</small></th><th class="l">เลขที่ใบสำคัญ<small>VOUCHER</small></th>'+
     '<th>เงินต้นยกมา<small>OPENING</small></th><th>ชำระเงินต้น<small>PRINCIPAL</small></th><th>ดอกเบี้ย<small>INTEREST</small></th>'+
     '<th>รวมชำระ<small>TOTAL</small></th><th>เงินต้นคงเหลือ<small>BALANCE</small></th><th class="c">สถานะ<small>STATUS</small></th></tr></thead>';
   var rowsH='';
@@ -6245,15 +6262,16 @@ function _bblRenderLoan(lk){
     rowsH+='<tr class="bblirow '+(r.paid?'paid':'pending')+(last?' balloon':'')+'" data-irow="'+lk+'-'+i+'">'+
       '<td class="bblseq c">'+x.n+(last?'<span class="bblballoon-tag">ก้อนท้าย</span>':'')+'</td>'+
       '<td class="l bblcell-in"><input class="bblcin bbldate" data-lk="'+lk+'" data-idx="'+i+'" data-f="due" value="'+_bblEsc(x.due)+'"></td>'+
+      '<td class="l bblcell-in"><input class="bblcin bblvch" data-lk="'+lk+'" data-idx="'+i+'" data-f="voucher" value="'+_bblEsc(x.voucher)+'" placeholder="—"></td>'+
       '<td class="bblopen" id="bblopen-'+lk+'-'+i+'">'+_bblFmt(r.open)+'</td>'+
-      '<td class="bblcell-in"><input class="bblcin bblnum bblprin" data-lk="'+lk+'" data-idx="'+i+'" data-f="principal" value="'+_bblRaw(x.principal)+'"></td>'+
-      '<td class="bblcell-in"><input class="bblcin bblnum bblintin" data-lk="'+lk+'" data-idx="'+i+'" data-f="interest" value="'+_bblRaw(x.interest)+'" placeholder="รอ"></td>'+
+      '<td class="bblcell-in"><input class="bblcin bblnum bblmoney bblprin" data-lk="'+lk+'" data-idx="'+i+'" data-f="principal" value="'+_bblFmt(x.principal,true)+'"></td>'+
+      '<td class="bblcell-in"><input class="bblcin bblnum bblmoney bblintin" data-lk="'+lk+'" data-idx="'+i+'" data-f="interest" value="'+_bblFmt(x.interest,true)+'" placeholder="รอ"></td>'+
       '<td class="bbltotal" id="bbltotal-'+lk+'-'+i+'">'+_bblFmt(r.total,true)+'</td>'+
       '<td class="bblbal" id="bblclose-'+lk+'-'+i+'">'+_bblFmt(r.close)+'</td>'+
       '<td class="c"><button type="button" class="bblstat '+(r.paid?'paid':'pending')+'" data-paid="'+lk+'" data-idx="'+i+'" id="bblstat-'+lk+'-'+i+'">'+(r.paid?'✅ ชำระแล้ว':'⏳ รอชำระ')+'</button></td>'+
     '</tr>';
   });
-  var foot='<tfoot><tr><td class="l" colspan="3">รวม '+t.nInst+' งวด · ชำระแล้ว '+t.nPaid+' งวด</td>'+
+  var foot='<tfoot><tr><td class="l" colspan="4">รวม '+t.nInst+' งวด · ชำระแล้ว '+t.nPaid+' งวด</td>'+
     '<td id="bbltot-prin-'+lk+'">'+_bblFmt(t.fac)+'</td><td id="bbltot-int-'+lk+'">'+_bblFmt(t.intInst)+'</td>'+
     '<td id="bbltot-total-'+lk+'">'+_bblFmt(t.fac+t.intInst)+'</td><td id="bbltot-end-'+lk+'">'+_bblFmt(t.schedEnd)+'</td><td></td></tr></tfoot>';
   var table='<div class="bbltblwrap bblsched"><table class="bbltbl">'+head+'<tbody>'+rowsH+'</tbody>'+foot+'</table></div>';
@@ -6303,14 +6321,14 @@ function _bblBind(wrap){
   var w=wrap.querySelector('.bblwrap'); if(!w)return;
   w.addEventListener('input',function(e){ var el=e.target; if(!el.classList)return;
     if(el.classList.contains('bblcin')&&el.hasAttribute('data-idx')){ var lk=el.getAttribute('data-lk'),idx=+el.getAttribute('data-idx'),f=el.getAttribute('data-f');
-      var L=_bblState().loans[lk]; if(!L||!L.insts[idx])return; L.insts[idx][f]=(f==='due')?el.value:_bblN(el.value); _bblLive(lk); _bblSaveState(); }
+      var L=_bblState().loans[lk]; if(!L||!L.insts[idx])return; L.insts[idx][f]=(f==='due'||f==='voucher')?el.value:_bblN(el.value); _bblLive(lk); _bblSaveState(); }
     else if(el.classList.contains('bblcin')&&el.hasAttribute('data-gidx')){ var gk=el.getAttribute('data-gk'),gi=+el.getAttribute('data-gidx'),gf=el.getAttribute('data-gf');
       var Lg=_bblState().loans[gk]; if(!Lg||!Lg.grace[gi])return; Lg.grace[gi][gf]=(gf==='interest')?_bblN(el.value):el.value; _bblLive(gk); _bblSaveState(); }
     else if(el.classList.contains('bblin')){ var lk2=el.getAttribute('data-lk'),mf=el.getAttribute('data-meta'); var L2=_bblState().loans[lk2]; if(!L2)return;
       L2.meta[mf]=(mf==='facility'||mf==='inst'||mf==='nInst'||mf==='termM'||mf==='firstM')?_bblN(el.value):el.value; _bblLive(lk2); _bblSaveState(); }
   });
-  w.addEventListener('focusin',function(e){ var el=e.target; if(el.classList&&el.classList.contains('bblnum')&&el.classList.contains('bblcin'))el.value=_bblRaw(_bblN(el.value)); });
-  w.addEventListener('change',function(e){ var el=e.target; if(el.classList&&el.classList.contains('bblnum')&&el.classList.contains('bblcin'))el.value=_bblRaw(_bblN(el.value)); });
+  w.addEventListener('focusin',function(e){ var el=e.target; if(el.classList&&el.classList.contains('bblmoney'))el.value=_bblRaw(_bblN(el.value)); });
+  w.addEventListener('change',function(e){ var el=e.target; if(el.classList&&el.classList.contains('bblmoney'))el.value=_bblFmt(_bblN(el.value),true); });
   w.addEventListener('click',function(e){ var el=e.target.closest?e.target.closest('[data-tab],[data-paid],[data-reset],[data-gracetoggle],[data-gadd],[data-gdel],[data-markall]'):null; if(!el)return;
     var S=_bblState();
     if(el.hasAttribute('data-tab')){ S.active=el.getAttribute('data-tab'); _bblSaveState(); renderBbl(); }
