@@ -3395,6 +3395,21 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 /* right-align money inputs a touch tighter so commas read cleanly */
 #page-bbl input.bblcin.bblmoney,#page-bbl input.bblin.bblmoney{letter-spacing:.01em}
 
+/* ---- v10.00c: GL setup card + dual voucher columns ---- */
+#page-bbl .bblglcard{border-color:#cfe0f5;background:linear-gradient(180deg,#ffffff,#f5f9fe)}
+#page-bbl .bblglcard .bblcard-h{margin-bottom:10px}
+#page-bbl .bblglbtn{white-space:nowrap}
+#page-bbl input.bblin.bblcode{font-weight:800;letter-spacing:.03em;color:var(--bbl-blue)}
+#page-bbl .bblglmsg{margin-top:10px;font-size:12px;font-weight:700;padding:7px 12px;border-radius:9px;background:var(--bbl-blue-bg);color:var(--bbl-blue);border:1px solid #cfe0f5}
+#page-bbl .bblglmsg.ok{background:var(--bbl-pos-bg);color:var(--bbl-pos);border-color:#bfe0c9}
+#page-bbl .bblglmsg.bad{background:var(--bbl-gold-t);color:var(--bbl-gold-d,#8A5E12);border-color:#e8d6a8}
+#page-bbl .bblglnote{margin-top:9px;font-size:10.5px;line-height:1.55;color:var(--bbl-muted)}
+#page-bbl .bblglnote b{color:var(--bbl-ink2)}
+/* wider schedule for the 10 columns incl two voucher columns */
+#page-bbl .bblsched table.bbltbl{min-width:1180px}
+#page-bbl .bblsched table.bbltbl input.bblcin.bblvch2{width:132px;font-size:11px;color:var(--bbl-ink2);font-weight:600}
+#page-bbl tr.bblirow.pending input.bblvch2::placeholder{color:var(--bbl-muted);opacity:.7}
+
 /* v9.113: inline FS-line manager panel */
 #page-fs .fslmgr{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#FCFBF7,#fff);margin:8px 0 12px;padding:0 0 8px;box-shadow:0 4px 16px -8px rgba(20,30,40,.16);overflow:hidden}
 #page-fs .fslmgr-hd{display:flex;align-items:flex-start;gap:12px;justify-content:space-between;padding:11px 15px;background:linear-gradient(100deg,var(--brand-t),transparent);border-bottom:1px solid var(--line2)}
@@ -6143,35 +6158,96 @@ var FSMAP={}; try{FSMAP=JSON.parse(localStorage.getItem('gli_fsmap')||'{}')||{};
 /* ===== v10.00: BBL Loan persistence + module ===== */
 var BBLLOAN={}; try{BBLLOAN=JSON.parse(localStorage.getItem('gli_bblloan')||'{}')||{};}catch(_ble){BBLLOAN={};}
 function saveBbl(){try{localStorage.setItem('gli_bblloan',JSON.stringify(BBLLOAN));}catch(e){} try{if(typeof _tsTouch==='function')_tsTouch('bbl');}catch(e){} try{if(typeof cloudPush==='function')cloudPush();}catch(e){}}
-var BBL_SEED={"A200":{"meta":{"key":"A200","emoji":"🏗️","name":"โครงการปฏิกูลหนองแขม ระยะที่ 7","short":"ปฏิกูลหนองแขม","contract":"BLC26800000090","proj":"GLI24007","facility":200000000,"inst":3700000,"nInst":54,"termM":60,"firstM":7,"spread":1.0,"rateNote":"MLR − 1.00%"},"grace":[{"date":"2025-02-23","voucher":"PL20250200055","interest":365939.01},{"date":"2025-03-23","voucher":"PL20250300074","interest":573154.81},{"date":"2025-04-23","voucher":"PL20250400048","interest":867452.61},{"date":"2025-05-23","voucher":"PL20250500071","interest":951369.87},{"date":"2025-06-23","voucher":"PL20250600061","interest":976712.33}],"insts":[{"n":1,"due":"2025-07-31","principal":3700000.0,"interest":945205.47,"prinPaid":true,"intPaid":true,"voucher":"PL20250700076"},{"n":2,"due":"2025-08-23","principal":3700000.0,"interest":946405.51,"prinPaid":true,"intPaid":true,"voucher":"PL20250800073"},{"n":3,"due":"2025-09-05","principal":3700000.0,"interest":889643.83,"prinPaid":true,"intPaid":true,"voucher":"PL20250900050"},{"n":4,"due":"2025-10-23","principal":3700000.0,"interest":853931.51,"prinPaid":true,"intPaid":true,"voucher":"PL20251000071"},{"n":5,"due":"2025-11-23","principal":3700000.0,"interest":857864.38,"prinPaid":true,"intPaid":true,"voucher":"PL20251100052"},{"n":6,"due":"2025-12-23","principal":3700000.0,"interest":805740.0,"prinPaid":true,"intPaid":true,"voucher":"PL20251200042"},{"n":7,"due":"2026-01-23","principal":3700000.0,"interest":805865.79,"prinPaid":true,"intPaid":true,"voucher":"PL20260100035"},{"n":8,"due":"2026-02-23","principal":3700000.0,"interest":796473.89,"prinPaid":true,"intPaid":true,"voucher":"PL20260200029"},{"n":9,"due":"2026-03-05","principal":3700000.0,"interest":690976.63,"prinPaid":true,"intPaid":true,"voucher":"PL20260300017"},{"n":10,"due":"2026-04-03","principal":3700000.0,"interest":744981.32,"prinPaid":true,"intPaid":true,"voucher":"PL20260400020"},{"n":11,"due":"2026-05-23","principal":3700000.0,"interest":704367.7,"prinPaid":true,"intPaid":true,"voucher":"PL20260500033"},{"n":12,"due":"2026-06-09","principal":3700000.0,"interest":0,"prinPaid":true,"intPaid":false,"voucher":"PL20260600024"},{"n":13,"due":"2026-07-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":14,"due":"2026-08-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":15,"due":"2026-09-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":16,"due":"2026-10-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":17,"due":"2026-11-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":18,"due":"2026-12-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":19,"due":"2027-01-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":20,"due":"2027-02-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":21,"due":"2027-03-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":22,"due":"2027-04-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":23,"due":"2027-05-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":24,"due":"2027-06-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":25,"due":"2027-07-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":26,"due":"2027-08-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":27,"due":"2027-09-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":28,"due":"2027-10-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":29,"due":"2027-11-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":30,"due":"2027-12-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":31,"due":"2028-01-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":32,"due":"2028-02-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":33,"due":"2028-03-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":34,"due":"2028-04-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":35,"due":"2028-05-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":36,"due":"2028-06-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":37,"due":"2028-07-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":38,"due":"2028-08-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":39,"due":"2028-09-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":40,"due":"2028-10-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":41,"due":"2028-11-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":42,"due":"2028-12-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":43,"due":"2029-01-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":44,"due":"2029-02-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":45,"due":"2029-03-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":46,"due":"2029-04-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":47,"due":"2029-05-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":48,"due":"2029-06-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":49,"due":"2029-07-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":50,"due":"2029-08-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":51,"due":"2029-09-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":52,"due":"2029-10-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":53,"due":"2029-11-09","principal":3700000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":54,"due":"2029-12-09","principal":3900000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""}],"drawdowns":[{"date":"2025-02-13","voucher":"RL20250200003","amount":73370000.0},{"date":"2025-03-19","voucher":"RL20250300003","amount":34800000.0},{"date":"2025-04-10","voucher":"RL20250400005","amount":42470000.0},{"date":"2025-05-31","voucher":"JV20250500043","amount":49360000.0}],"reclass":[{"date":"2025-08-31","voucher":"JV20250800031","amount":44400000.0}]},"B100":{"meta":{"key":"B100","emoji":"🧴","name":"โครงการไขมันหนองแขม ระยะที่ 3","short":"ไขมันหนองแขม","contract":"BLC26800000093","proj":"GLI24006","facility":100000000,"inst":1850000,"nInst":54,"termM":60,"firstM":7,"spread":1.0,"rateNote":"MLR − 1.00%"},"grace":[{"date":"2025-03-14","voucher":"PL20250300053","interest":421657.53},{"date":"2025-04-14","voucher":"PL20250400047","interest":494726.03},{"date":"2025-05-14","voucher":"PL20250500068","interest":477534.24},{"date":"2025-06-14","voucher":"PL20250600040","interest":488356.17},{"date":"2025-07-14","voucher":"PL20250700042","interest":472602.74},{"date":"2025-08-14","voucher":"PL20250800030","interest":488356.16}],"insts":[{"n":1,"due":"2025-09-14","principal":1850000.0,"interest":467123.29,"prinPaid":true,"intPaid":true,"voucher":"PL20250900039"},{"n":2,"due":"2025-10-14","principal":1850000.0,"interest":440346.57,"prinPaid":true,"intPaid":true,"voucher":"PL20251000067"},{"n":3,"due":"2025-11-14","principal":1850000.0,"interest":448724.66,"prinPaid":true,"intPaid":true,"voucher":"PL20251100051"},{"n":4,"due":"2025-12-14","principal":1850000.0,"interest":422505.48,"prinPaid":true,"intPaid":true,"voucher":"PL20251200041"},{"n":5,"due":"2026-01-14","principal":1850000.0,"interest":423285.28,"prinPaid":true,"intPaid":true,"voucher":"PL20260100030"},{"n":6,"due":"2026-02-14","principal":1850000.0,"interest":417850.75,"prinPaid":true,"intPaid":true,"voucher":"PL20260200028"},{"n":7,"due":"2026-03-04","principal":1850000.0,"interest":365066.44,"prinPaid":true,"intPaid":true,"voucher":"PL20260300016"},{"n":8,"due":"2026-04-22","principal":1850000.0,"interest":0,"prinPaid":true,"intPaid":false,"voucher":"PL20260400037"},{"n":9,"due":"2026-05-12","principal":1850000.0,"interest":0,"prinPaid":true,"intPaid":false,"voucher":"PL20260500029"},{"n":10,"due":"2026-06-05","principal":1850000.0,"interest":0,"prinPaid":true,"intPaid":false,"voucher":"PL20260600023"},{"n":11,"due":"2026-07-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":12,"due":"2026-08-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":13,"due":"2026-09-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":14,"due":"2026-10-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":15,"due":"2026-11-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":16,"due":"2026-12-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":17,"due":"2027-01-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":18,"due":"2027-02-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":19,"due":"2027-03-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":20,"due":"2027-04-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":21,"due":"2027-05-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":22,"due":"2027-06-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":23,"due":"2027-07-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":24,"due":"2027-08-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":25,"due":"2027-09-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":26,"due":"2027-10-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":27,"due":"2027-11-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":28,"due":"2027-12-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":29,"due":"2028-01-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":30,"due":"2028-02-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":31,"due":"2028-03-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":32,"due":"2028-04-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":33,"due":"2028-05-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":34,"due":"2028-06-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":35,"due":"2028-07-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":36,"due":"2028-08-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":37,"due":"2028-09-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":38,"due":"2028-10-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":39,"due":"2028-11-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":40,"due":"2028-12-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":41,"due":"2029-01-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":42,"due":"2029-02-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":43,"due":"2029-03-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":44,"due":"2029-04-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":45,"due":"2029-05-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":46,"due":"2029-06-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":47,"due":"2029-07-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":48,"due":"2029-08-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":49,"due":"2029-09-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":50,"due":"2029-10-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":51,"due":"2029-11-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":52,"due":"2029-12-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":53,"due":"2030-01-05","principal":1850000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""},{"n":54,"due":"2030-02-05","principal":1950000,"interest":0.0,"prinPaid":false,"intPaid":false,"voucher":""}],"drawdowns":[{"date":"2025-02-14","voucher":"RL20250200004","amount":70000000.0},{"date":"2025-02-20","voucher":"RL20250200007","amount":30000000.0}],"reclass":[{"date":"2025-08-31","voucher":"JV20250800031","amount":22200000.0}]}};
+var BBL_SEED={"A200":{"meta":{"key":"A200","emoji":"🏗️","name":"โครงการปฏิกูลหนองแขม ระยะที่ 7","short":"ปฏิกูลหนองแขม","contract":"BLC26800000090","proj":"GLI24007","facility":200000000,"inst":3700000,"nInst":54,"termM":60,"firstM":7,"spread":1.0,"rateNote":"MLR − 1.00%","glPrinCode":"2220400","glIntCode":"7100200","glProj":"GLI24007"},"raw":{"drawdowns":[{"date":"2025-02-13","voucher":"RL20250200003","amount":73370000.0,"desc":"New Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (73.37 mb.) วงเงิน 200.00 MB. วันที่ 13/02/2025 #เบิกเงินกู้ครั้งที่ 2 (73.37 mb.) วันที่ 13/02/2025(วงเงิน 200,000,000.-)"},{"date":"2025-03-19","voucher":"RL20250300003","amount":34800000.0,"desc":"New Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (34.80 mb.) วงเงิน 200.00 MB. วันที่ 19/03/2025"},{"date":"2025-04-10","voucher":"RL20250400005","amount":42470000.0,"desc":"New Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (42.47 mb.) #เบิกเงินกู้ครั้งที่ 4 (วงเงิน 200,000,000.-)"},{"date":"2025-05-31","voucher":"JV20250500043","amount":49360000.0,"desc":"ADJ.ปรับปรุง Bank  เนื่องจากบันทึกบัญชีผิด  PL20241000066,RL20250100004"}],"principal":[{"date":"2025-07-31","voucher":"PL20250700076","amount":3700000.0,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 31/07/2025"},{"date":"2025-08-23","voucher":"PL20250800073","amount":3700000.0,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 31/07/2025 # ชำระเงินกู้ครั้งที่ 2 (3.70 mb.)วันที่ 23/08/2025 (คงเหลือ 192,600,000.00 mb.)"},{"date":"2025-09-05","voucher":"PL20250900050","amount":3700000.0,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 30/09/2025 # ชำระเงินกู้ครั้งที่ 3 (3.70 mb.)วันที่ 23/09/2025 (คงเหลือ 188,900,000.00 mb.)"},{"date":"2025-10-23","voucher":"PL20251000071","amount":3700000.0,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 23/10/2025 # ชำระเงินกู้ครั้งที่ 4 (3.70 mb.)วันที่ 23/10/2025 (คงเหลือ 185,200,000.00 mb.)"},{"date":"2025-11-23","voucher":"PL20251100052","amount":3700000.0,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 23/11/2025 # ชำระเงินกู้ครั้งที่ 5 (3.70 mb.)วันที่ 23/11/2025 (คงเหลือ 181.50 mb.)"},{"date":"2025-12-23","voucher":"PL20251200042","amount":3700000.0,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 01/12/2025 # ชำระเงินกู้ครั้งที่ 6 (3.70 mb.)วันที่ 01/12/2025 (คงเหลือ 177.80 mb.)"},{"date":"2026-01-23","voucher":"PL20260100035","amount":3700000.0,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 24/12/2025 # ชำระเงินกู้ครั้งที่ 7 (3.70 mb.)วันที่ 24/12/2025 (คงเหลือ 174.10 mb.)"},{"date":"2026-02-23","voucher":"PL20260200029","amount":3700000.0,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 23/02/2026 # ชำระเงินกู้ครั้งที่ 8 (3.70 mb.)วันที่ 23/02/2026 (คงเหลือ 170.40 mb.)"},{"date":"2026-03-05","voucher":"PL20260300017","amount":3700000.0,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 05/03/2026 # ชำระเงินกู้ครั้งที่ 9 (3.70 mb.)วันที่ 05/03/2026 (คงเหลือ 166.70 mb.)"},{"date":"2026-04-03","voucher":"PL20260400020","amount":3700000.0,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 03/04/2026 # ชำระเงินกู้ครั้งที่ 10 (3.70 mb.)วันที่ 03/04/2026 (คงเหลือ 163.00 mb.)"},{"date":"2026-05-23","voucher":"PL20260500033","amount":3700000.0,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 23/05/2026 # ชำระเงินกู้ครั้งที่ 11 (3.70 mb.)วันที่ 23/05/2026 (คงเหลือ 159.30 mb.)"},{"date":"2026-06-09","voucher":"PL20260600024","amount":3700000.0,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 23/05/2026 # ชำระเงินกู้ครั้งที่ 12 (3.70 mb.)วันที่ 09/06/2026 (คงเหลือ 155.60 mb.)"}],"interest":[{"date":"2025-02-23","voucher":"PL20250200055","amount":365939.01,"desc":"Paid Interest Loan วงเงิน 200.00 MB. เลขที่สัญญา BLC26800000090 วันที่ 23/02/2025"},{"date":"2025-03-23","voucher":"PL20250300074","amount":573154.81,"desc":"Paid Interest Loan วงเงิน 200.00 MB. เลขที่สัญญา BLC26800000090 วันที่ 23/03/2025"},{"date":"2025-04-23","voucher":"PL20250400048","amount":867452.61,"desc":"Paid Interest Loan วงเงิน 200.00 MB. เลขที่สัญญา BLC26800000090 วันที่ 23/04/2025"},{"date":"2025-05-23","voucher":"PL20250500071","amount":951369.87,"desc":"Paid Interest Loan วงเงิน 200.00 MB. เลขที่สัญญา BLC26800000090 วันที่ 23/05/2025"},{"date":"2025-06-23","voucher":"PL20250600061","amount":976712.33,"desc":"Paid Interest Loan วงเงิน 200.00 MB. เลขที่สัญญา BLC26800000090 วันที่ 23/06/2025"},{"date":"2025-07-23","voucher":"PL20250700062","amount":945205.47,"desc":"Paid Interest Loan วงเงิน 200.00 MB. เลขที่สัญญา BLC26800000090 วันที่ 23/07/2025"},{"date":"2025-08-23","voucher":"PL20250800073","amount":946405.51,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 31/07/2025 # ชำระเงินกู้ครั้งที่ 2 (3.70 mb.)วันที่ 23/08/2025 (คงเหลือ 192,600,000.00 mb.)"},{"date":"2025-09-23","voucher":"PL20250900062","amount":889643.83,"desc":"Paid Interest Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 23/09/2025 #ชำระดอกเบี้ยเงินกู้ครั้งที่ 3 วันที่ 23/09/2025 (เงินกู้คงเหลือ 188,900,000.00 mb.)"},{"date":"2025-10-23","voucher":"PL20251000071","amount":853931.51,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 23/10/2025 # ชำระเงินกู้ครั้งที่ 4 (3.70 mb.)วันที่ 23/10/2025 (คงเหลือ 185,200,000.00 mb.)"},{"date":"2025-11-23","voucher":"PL20251100052","amount":857864.38,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 23/11/2025 # ชำระเงินกู้ครั้งที่ 5 (3.70 mb.)วันที่ 23/11/2025 (คงเหลือ 181.50 mb.)"},{"date":"2025-12-23","voucher":"PL20251200042","amount":805740.0,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 01/12/2025 # ชำระเงินกู้ครั้งที่ 6 (3.70 mb.)วันที่ 01/12/2025 (คงเหลือ 177.80 mb.)"},{"date":"2026-01-23","voucher":"PL20260100035","amount":805865.79,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 24/12/2025 # ชำระเงินกู้ครั้งที่ 7 (3.70 mb.)วันที่ 24/12/2025 (คงเหลือ 174.10 mb.)"},{"date":"2026-02-23","voucher":"PL20260200029","amount":796473.89,"desc":"Paid Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 23/02/2026 # ชำระเงินกู้ครั้งที่ 8 (3.70 mb.)วันที่ 23/02/2026 (คงเหลือ 170.40 mb.)"},{"date":"2026-03-23","voucher":"PL20260300047","amount":690976.63,"desc":"Paid Interest Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 23/03/2026 # ชำระเงินกู้ครั้งที่ 9 (3.70 mb.)วันที่ 23/03/2026 (คงเหลือ 166.70 mb.)"},{"date":"2026-04-23","voucher":"PL20260400040","amount":744981.32,"desc":"Paid Interest Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 23/04/2026 # ชำระเงินกู้ครั้งที่ 10 (3.70 mb.)วันที่ 23/04/2026 (คงเหลือ 163.00 mb.)"},{"date":"2026-05-23","voucher":"PL20260500032","amount":704367.7,"desc":"Paid Interest Loan Bank BBL โครงการปฏิกูลหนองแขม ระยะที่ 7 (3.70 mb.) วงเงิน 200.00 MB. วันที่ 23/05/2026 # ชำระเงินกู้ครั้งที่ 11 (3.70 mb.)วันที่ 23/05/2026 (คงเหลือ 159.30 mb.)"}],"reclass":[{"date":"2025-08-31","voucher":"JV20250800031","amount":44400000.0,"desc":"บันทึกจัดประเภทรายการเงินกู้ยืมระยะยาว GLI24006,GLI24007 - BBL Loan"}]}},"B100":{"meta":{"key":"B100","emoji":"🧴","name":"โครงการไขมันหนองแขม ระยะที่ 3","short":"ไขมันหนองแขม","contract":"BLC26800000093","proj":"GLI24006","facility":100000000,"inst":1850000,"nInst":54,"termM":60,"firstM":7,"spread":1.0,"rateNote":"MLR − 1.00%","glPrinCode":"2220400","glIntCode":"7100200","glProj":"GLI24006"},"raw":{"drawdowns":[{"date":"2025-02-14","voucher":"RL20250200004","amount":70000000.0,"desc":"New Loan Bank BBL โครงการไขมัน ระยะที่ 3 (70.00 mb.) วงเงิน 100.00 MB. วันที่ 14/02/2025 #เบิกเงินกู้ครั้งที่ 1 (70.00 mb.) วันที่ 14/02/2025(วงเงิน 100,000,000.-)"},{"date":"2025-02-20","voucher":"RL20250200007","amount":30000000.0,"desc":"New Loan Bank BBL โครงการไขมัน ระยะที่ 3 (30.00 mb.) วงเงิน 100.00 MB. วันที่ 20/02/2025 #เบิกเงินกู้ครั้งที่ 2 (30.00 mb.) วันที่ 20/02/2025(วงเงิน 100,000,000.-)"}],"principal":[{"date":"2025-09-14","voucher":"PL20250900039","amount":1850000.0,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 14/09/2025 # ชำระเงินกู้ครั้งที่ 1 (1.85 mb.)วันที่ 14/09/2025 (คงเหลือ 98.15 mb.)"},{"date":"2025-10-14","voucher":"PL20251000067","amount":1850000.0,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 02/10/2025 # ชำระเงินกู้ครั้งที่ 2 (1.85 mb.)วันที่ 02/10/2025 (คงเหลือ 96.30 mb.)"},{"date":"2025-11-14","voucher":"PL20251100051","amount":1850000.0,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 10/11/2025 # ชำระเงินกู้ครั้งที่ 3 (1.85 mb.)วันที่ 10/11/2025 (คงเหลือ 94.45 mb.)"},{"date":"2025-12-14","voucher":"PL20251200041","amount":1850000.0,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 02/12/2025 # ชำระเงินกู้ครั้งที่ 4 (1.85 mb.)วันที่ 02/12/2025 (คงเหลือ 92.60 mb.)"},{"date":"2026-01-14","voucher":"PL20260100030","amount":1850000.0,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 14/01/2026 # ชำระเงินกู้ครั้งที่ 5 (1.85 mb.)วันที่ 14/01/2026 (คงเหลือ 90.75 mb.)"},{"date":"2026-02-14","voucher":"PL20260200028","amount":1850000.0,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 14/02/2026 # ชำระเงินกู้ครั้งที่ 6 (1.85 mb.)วันที่ 14/02/2026 (คงเหลือ 88.90 mb.)"},{"date":"2026-03-04","voucher":"PL20260300016","amount":1850000.0,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 04/03/2026 # ชำระเงินกู้ครั้งที่ 7 (1.85 mb.)วันที่ 04/03/2026 (คงเหลือ 87.05 mb.)"},{"date":"2026-04-22","voucher":"PL20260400037","amount":1850000.0,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 22/04/2026 # ชำระเงินกู้ครั้งที่ 8 (1.85 mb.)วันที่ 22/04/2026 (คงเหลือ 85.20 mb.)"},{"date":"2026-05-12","voucher":"PL20260500029","amount":1850000.0,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 08/05/2026 # ชำระเงินกู้ครั้งที่ 9 (1.85 mb.)วันที่ 08/05/2026 (คงเหลือ 83.35 mb.)"},{"date":"2026-06-05","voucher":"PL20260600023","amount":1850000.0,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 05/06/2026 # ชำระเงินกู้ครั้งที่ 10 (1.85 mb.)วันที่ 05/06/2026 (คงเหลือ 81.50 mb.)"}],"interest":[{"date":"2025-03-14","voucher":"PL20250300053","amount":421657.53,"desc":"Paid Interest Loan วงเงิน 100.00 MB. เลขที่สัญญา BLC26800000093 วันที่ 14/03/2025"},{"date":"2025-04-14","voucher":"PL20250400047","amount":494726.03,"desc":"Paid Interest Loan วงเงิน 100.00 MB. เลขที่สัญญา BLC26800000093 วันที่ 14/04/2025"},{"date":"2025-05-14","voucher":"PL20250500068","amount":477534.24,"desc":"Paid Interest Loan วงเงิน 100.00 MB. เลขที่สัญญา BLC26800000093 วันที่ 14/05/2025"},{"date":"2025-06-14","voucher":"PL20250600040","amount":488356.17,"desc":"Paid Interest Loan วงเงิน 100.00 MB. เลขที่สัญญา BLC26800000093 วันที่ 14/06/2025"},{"date":"2025-07-14","voucher":"PL20250700042","amount":472602.74,"desc":"Paid Interest Loan วงเงิน 100.00 MB. เลขที่สัญญา BLC26800000093 วันที่ 14/07/2025"},{"date":"2025-08-14","voucher":"PL20250800030","amount":488356.16,"desc":"Paid Interest Loan วงเงิน 100.00 MB. เลขที่สัญญา BLC26800000093 วันที่ 14/08/2025"},{"date":"2025-09-14","voucher":"PL20250900039","amount":467123.29,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 14/09/2025 # ชำระเงินกู้ครั้งที่ 1 (1.85 mb.)วันที่ 14/09/2025 (คงเหลือ 98.15 mb.)"},{"date":"2025-10-14","voucher":"PL20251000067","amount":440346.57,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 02/10/2025 # ชำระเงินกู้ครั้งที่ 2 (1.85 mb.)วันที่ 02/10/2025 (คงเหลือ 96.30 mb.)"},{"date":"2025-11-14","voucher":"PL20251100051","amount":448724.66,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 10/11/2025 # ชำระเงินกู้ครั้งที่ 3 (1.85 mb.)วันที่ 10/11/2025 (คงเหลือ 94.45 mb.)"},{"date":"2025-12-14","voucher":"PL20251200041","amount":422505.48,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 02/12/2025 # ชำระเงินกู้ครั้งที่ 4 (1.85 mb.)วันที่ 02/12/2025 (คงเหลือ 92.60 mb.)"},{"date":"2026-01-14","voucher":"PL20260100030","amount":423285.28,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 14/01/2026 # ชำระเงินกู้ครั้งที่ 5 (1.85 mb.)วันที่ 14/01/2026 (คงเหลือ 90.75 mb.)"},{"date":"2026-02-14","voucher":"PL20260200028","amount":417850.75,"desc":"Paid Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 14/02/2026 # ชำระเงินกู้ครั้งที่ 6 (1.85 mb.)วันที่ 14/02/2026 (คงเหลือ 88.90 mb.)"},{"date":"2026-03-14","voucher":"PL20260300046","amount":365066.44,"desc":"Paid Interest Loan Bank BBL โครงการไขมันหนองแขม ระยะที่ 3 (1.85 mb.) วงเงิน 100.00 MB. วันที่ 14/03/2026 # ชำระเงินกู้ครั้งที่ 7 (1.85 mb.)วันที่ 14/03/2026 (คงเหลือ 87.05 mb.)"}],"reclass":[{"date":"2025-08-31","voucher":"JV20250800031","amount":22200000.0,"desc":"บันทึกจัดประเภทรายการเงินกู้ยืมระยะยาว GLI24006,GLI24007 - BBL Loan"}]}}};
 /* ===================== v10.00: BBL LOAN — Finance & Reconcile =====================
-   ตารางผ่อนชำระเงินกู้แบบเช่าซื้อ (Hire-Purchase style) — งวดครบทั้งจำนวน (54 งวด) พร้อมงวดรอชำระ
-   เงินต้น = ตามสัญญา · ดอกเบี้ย = ตามจริงจาก GL (งวดที่ยังไม่ถึง = รอ) · แก้ไขได้ทุกช่อง
-   ธนาคารกรุงเทพ · BLC26800000090 (200MB) · BLC26800000093 (100MB)                        */
-/* BBL_SEED (schedule: meta / grace / insts / drawdowns / reclass) is injected just above. */
+   ตารางผ่อนชำระเงินกู้แบบเช่าซื้อ — งวดครบทั้งจำนวน · ดึง/อัพเดทจาก GL จริงตามรหัสบัญชีที่ตั้งค่า
+   แสดงใบสำคัญจ่ายเงินต้น + ใบสำคัญจ่ายดอกเบี้ย (จาก Database GL) · แก้ไขได้ทุกช่อง
+   ธ.กรุงเทพ · BLC26800000090 (200MB · GLI24007) · BLC26800000093 (100MB · GLI24006)     */
+/* BBL_SEED = { A200:{meta:{...,glPrinCode,glIntCode,glProj}, raw:{drawdowns,principal,interest,reclass}}, ... } */
 
 function _bblEsc(s){ return (''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function _bblFmt(n,blankZero){ n=+n||0; if(blankZero&&Math.abs(n)<0.005)return ''; var neg=n<-0.004; n=Math.abs(n);
   var s=n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); return neg?('('+s+')'):s; }
 function _bblRaw(n){ n=+n||0; if(Math.abs(n)<0.0000001)return ''; return (Math.round(n*100)/100).toString(); }
 function _bblN(v){ if(v==null||v==='')return 0; var s=(''+v).replace(/,/g,'').replace(/[()]/g,'').trim(); var neg=/^\(/.test((''+v).trim()); var n=parseFloat(s); if(isNaN(n))return 0; return neg?-n:n; }
+function _bblYM(d){ return (''+d).slice(0,7); }
+function _bblAddMonths(ymd,k){ var m=(''+ymd).match(/(\d{4})-(\d{1,2})-(\d{1,2})/); if(!m)return ymd; var y=+m[1],mo=+m[2]-1+k,d=+m[3]; y+=Math.floor(mo/12); mo=((mo%12)+12)%12; var dim=new Date(y,mo+1,0).getDate(); if(d>dim)d=dim; return y+'-'+('0'+(mo+1)).slice(-2)+'-'+('0'+d).slice(-2); }
+function _bblNormProj(p){ return (''+(p==null?'':p)).trim().replace(/#.*$/,''); }
 
+/* ---------- schedule builder (shared by embedded default AND live GL refresh) ---------- */
+function _bblAggVch(list){ var g={},order=[]; (list||[]).forEach(function(x){ var k=(x.voucher||'')||('~'+x.date+'~'+order.length);
+    if(!g[k]){ g[k]={date:x.date,voucher:x.voucher||'',amount:0,desc:x.desc||''}; order.push(k); }
+    g[k].amount+=(+x.amount||0); if((''+x.date)<(''+g[k].date))g[k].date=x.date; }); return order.map(function(k){return g[k];}); }
+function _bblBuildSchedule(mt, raw){
+  var fac=+mt.facility||0, inst=+mt.inst||0, nInst=+mt.nInst||54;
+  function byDate(a,b){ return (a.date<b.date?-1:(a.date>b.date?1:0)); }
+  var prins=_bblAggVch(raw.principal).sort(byDate);
+  var ints=_bblAggVch(raw.interest).sort(byDate);
+  var firstYM=prins.length?_bblYM(prins[0].date):'9999-99';
+  var grace=[], intM={};
+  ints.forEach(function(x){ var y=_bblYM(x.date); if(y<firstYM){ grace.push({date:x.date,voucher:x.voucher,interest:Math.round(x.amount*100)/100}); }
+    else { if(!intM[y])intM[y]={amt:0,vch:[]}; intM[y].amt+=x.amount; if(x.voucher)intM[y].vch.push(x.voucher); } });
+  var nPaid=prins.length, lastDue=nPaid?prins[nPaid-1].date:'2025-01-01';
+  var insts=[];
+  for(var i=1;i<=nInst;i++){ var sched=(i<nInst)?inst:Math.round((fac-inst*(nInst-1))*100)/100;
+    if(i<=nPaid){ var pp=prins[i-1], y=_bblYM(pp.date), im=intM[y]||{amt:0,vch:[]};
+      insts.push({n:i,due:pp.date,principal:Math.round(pp.amount*100)/100,interest:Math.round(im.amt*100)/100,paid:true,prinVch:pp.voucher||'',intVch:im.vch.join(', ')});
+    } else { insts.push({n:i,due:_bblAddMonths(lastDue,i-nPaid),principal:sched,interest:0,paid:false,prinVch:'',intVch:''}); } }
+  return {grace:grace,insts:insts,
+    drawdowns:_bblAggVch(raw.drawdowns).sort(byDate).map(function(d){return {date:d.date,voucher:d.voucher,amount:Math.round(d.amount*100)/100};}),
+    reclass:(raw.reclass||[]).map(function(r){return {date:r.date,voucher:r.voucher,amount:Math.round((+r.amount||0)*100)/100};})};
+}
+
+/* ---------- read raw movements from the app's live GL (GLROWS) by account+project code ---------- */
+function _bblRawFromGL(mt){
+  var rows=(typeof GLROWS!=='undefined'&&GLROWS)?GLROWS:null; if(!rows||!rows.length)return null;
+  var pc=(''+(mt.glPrinCode||'')).trim(), ic=(''+(mt.glIntCode||'')).trim(), pj=_bblNormProj(mt.glProj);
+  var draw=[],prin=[],recl=[],intr=[];
+  for(var i=0;i<rows.length;i++){ var r=rows[i]; if(!r)continue;
+    if(pj && _bblNormProj(r[13])!==pj)continue;
+    var code=(''+(r[0]||'')).trim(), date=''+(r[3]||''), vch=''+(r[4]||''), desc=''+(r[8]||''), dr=+r[16]||0, cr=+r[17]||0;
+    if(pc&&code===pc){ if(cr>0.005)draw.push({date:date,voucher:vch,amount:cr,desc:desc});
+      else if(dr>0.005){ if(/^JV/i.test(vch))recl.push({date:date,voucher:vch,amount:dr,desc:desc}); else prin.push({date:date,voucher:vch,amount:dr,desc:desc}); } }
+    else if(ic&&code===ic){ if(dr>0.005)intr.push({date:date,voucher:vch,amount:dr,desc:desc}); } }
+  return {drawdowns:draw,principal:prin,interest:intr,reclass:recl};
+}
+function _bblEnsureGL(cb){
+  if(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length){cb(true);return;}
+  var done=false; function fin(ok){ if(done)return; done=true; cb(ok&&typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length); }
+  try{ if(typeof _fsEnsureGL==='function'){ _fsEnsureGL(function(ok){ fin(ok); }); return; } }catch(e){}
+  try{ if(typeof _pgEnsureGL==='function')_pgEnsureGL(); }catch(e){}
+  var t=0,iv=setInterval(function(){ t++; if(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length){clearInterval(iv);fin(true);} else if(t>44){clearInterval(iv);fin(false);} },250);
+}
+function _bblRefreshFromGL(lk){
+  var L=_bblState().loans[lk], mt=L.meta;
+  L._glMsg='⏳ กำลังโหลด/อ่านข้อมูลจาก GL…'; renderBbl();
+  _bblEnsureGL(function(ok){
+    L=_bblState().loans[lk];
+    if(!ok){ L._glMsg='⚠ ยังไม่พบข้อมูล GL ในเครื่องนี้ — เปิดโมดูล “Database” แล้วเลือก/นำเข้าไฟล์ GL ก่อน แล้วลองอีกครั้ง'; renderBbl(); return; }
+    var raw=_bblRawFromGL(mt);
+    if(!raw||(!raw.principal.length&&!raw.drawdowns.length&&!raw.interest.length)){
+      L._glMsg='⚠ ไม่พบรายการใน GL ตามรหัสที่ตั้งค่า (บัญชีเงินต้น '+_bblEsc(mt.glPrinCode)+' · ดอกเบี้ย '+_bblEsc(mt.glIntCode)+' · โครงการ '+_bblEsc(mt.glProj)+') — ตรวจรหัสบัญชี/รหัสโครงการอีกครั้ง'; renderBbl(); return; }
+    var b=_bblBuildSchedule(mt,raw); L.grace=b.grace; L.insts=b.insts; L.drawdowns=b.drawdowns; L.reclass=b.reclass;
+    var nPaid=b.insts.filter(function(x){return x.paid;}).length;
+    var nIntPaid=b.grace.length+b.insts.filter(function(x){return x.paid&&_bblN(x.interest)>0;}).length;
+    L._glMsg='✅ อัพเดทจาก GL แล้ว · ชำระต้น '+nPaid+' งวด · จ่ายดอกเบี้ย '+nIntPaid+' ครั้ง · เบิก '+b.drawdowns.length+' ครั้ง'+((b.reclass.length)?(' · จัดประเภท '+b.reclass.length):'');
+    _bblSaveState(); renderBbl();
+  });
+}
+
+/* ---------- state ---------- */
 function _bblDefault(){
-  var m={v:2,active:'A200',showgrace:true,loans:{}};
+  var m={v:3,active:'A200',showgrace:true,loans:{}};
   ['A200','B100'].forEach(function(lk){ var s=BBL_SEED[lk]; var meta={}; for(var k in s.meta)meta[k]=s.meta[k];
-    m.loans[lk]={ meta:meta,
-      grace:(s.grace||[]).map(function(g){return {date:g.date,voucher:g.voucher||'',interest:+g.interest||0};}),
-      insts:(s.insts||[]).map(function(x){return {n:x.n,due:x.due,principal:+x.principal||0,interest:+x.interest||0,paid:!!x.prinPaid,voucher:x.voucher||''};}),
-      drawdowns:(s.drawdowns||[]).map(function(d){return {date:d.date,voucher:d.voucher,amount:+d.amount||0};}),
-      reclass:(s.reclass||[]).map(function(r){return {date:r.date,voucher:r.voucher,amount:+r.amount||0};}) };
+    var b=_bblBuildSchedule(meta,s.raw);
+    m.loans[lk]={meta:meta,grace:b.grace,insts:b.insts,drawdowns:b.drawdowns,reclass:b.reclass,_glMsg:''};
   });
   return m;
 }
 function _bblState(){
   if(typeof BBLLOAN==='undefined'||!BBLLOAN||typeof BBLLOAN!=='object'){ try{BBLLOAN={};}catch(e){} }
-  if(!BBLLOAN.loans||!BBLLOAN.loans.A200||!BBLLOAN.loans.B100||!(BBLLOAN.v>=2)){ var d=_bblDefault(); for(var k in d)BBLLOAN[k]=d[k]; _bblSaveState(); }
-  if(BBLLOAN.showgrace==null)BBLLOAN.showgrace=true;
-  if(!BBLLOAN.active)BBLLOAN.active='A200';
+  if(!BBLLOAN.loans||!BBLLOAN.loans.A200||!BBLLOAN.loans.B100||!(BBLLOAN.v>=3)){ var d=_bblDefault(); for(var k in d)BBLLOAN[k]=d[k]; _bblSaveState(); }
+  if(BBLLOAN.showgrace==null)BBLLOAN.showgrace=true; if(!BBLLOAN.active)BBLLOAN.active='A200';
   return BBLLOAN;
 }
 var _bblSaveT=null;
@@ -6181,12 +6257,9 @@ function _bblSaveState(){ if(typeof saveBbl==='function'){ if(_bblSaveT)clearTim
 function _bblCalc(lk){
   var L=_bblState().loans[lk], mt=L.meta, fac=_bblN(mt.facility);
   var opening=fac, rows=[], prinPaid=0, intInst=0, nPaid=0;
-  L.insts.forEach(function(x){ var prin=_bblN(x.principal), intr=_bblN(x.interest);
-    var o=opening, c=o-prin; opening=c;
-    if(x.paid){ prinPaid+=prin; nPaid++; }
-    intInst+=intr;
-    rows.push({x:x,open:o,close:c,prin:prin,intr:intr,paid:!!x.paid,total:prin+intr});
-  });
+  L.insts.forEach(function(x){ var prin=_bblN(x.principal), intr=_bblN(x.interest); var o=opening, c=o-prin; opening=c;
+    if(x.paid){ prinPaid+=prin; nPaid++; } intInst+=intr;
+    rows.push({x:x,open:o,close:c,prin:prin,intr:intr,paid:!!x.paid,total:prin+intr}); });
   var graceInt=0; (L.grace||[]).forEach(function(g){ graceInt+=_bblN(g.interest); });
   var drawn=0; (L.drawdowns||[]).forEach(function(d){ drawn+=_bblN(d.amount); });
   return {L:L,rows:rows,graceInt:graceInt,tot:{fac:fac,drawn:drawn,prinPaid:prinPaid,intInst:intInst,
@@ -6199,85 +6272,84 @@ function renderBbl(){
   var tabs='<div class="bbltabs">';
   ['A200','B100'].forEach(function(lk){ var c=_bblCalc(lk), mt=c.L.meta;
     tabs+='<button type="button" class="bbltab'+(st.active===lk?' on':'')+'" data-tab="'+lk+'">'+mt.emoji+' '+_bblEsc(mt.short)
-        +' <span class="bbltab-amt">'+(mt.facility/1e6).toFixed(0)+'MB · คงเหลือ '+_bblFmt(c.tot.outstanding)+'</span></button>';
-  });
+        +' <span class="bbltab-amt">'+(mt.facility/1e6).toFixed(0)+'MB · คงเหลือ '+_bblFmt(c.tot.outstanding)+'</span></button>'; });
   tabs+='<button type="button" class="bbltab'+(st.active==='OV'?' on':'')+'" data-tab="OV">Σ ภาพรวม</button></div>';
   var body=(st.active==='OV')?_bblRenderOverview():_bblRenderLoan(st.active);
-  wrap.innerHTML=''+
-    '<div class="bblwrap">'+
-    '<div class="bblhint">🏦 <b>BBL Loan · ตารางผ่อนชำระเงินกู้ (แบบเช่าซื้อ)</b> — แสดง<b>งวดครบทั้ง '+_bblState().loans.A200.meta.nInst+' งวด</b> ตามสัญญา · งวดที่ชำระแล้วดึงจาก GL จริง · <b>งวดที่ยังไม่ถึง = รอชำระ</b> (เงินต้นเติมตามค่างวด, ดอกเบี้ยเว้นว่างไว้ให้กรอก) · ดอกเบี้ยใช้<b>ยอดจ่ายจริง</b> · ทุกช่อง <b>แก้ไขได้</b> (บันทึกอัตโนมัติ) · คลิกป้ายสถานะเพื่อสลับ ชำระแล้ว/รอชำระ</div>'+
+  wrap.innerHTML='<div class="bblwrap">'+
+    '<div class="bblhint">🏦 <b>BBL Loan · ตารางผ่อนชำระเงินกู้ (แบบเช่าซื้อ)</b> — ตารางอัพเดทจาก <b>Database GL จริง</b> ตามรหัสบัญชี/โครงการที่ตั้งค่าไว้ (กดปุ่ม <b>🔄 อัพเดทจาก GL</b>) · แสดงงวดครบทั้งจำนวน — งวดที่ยังไม่ถึง = รอชำระ · แสดง <b>ใบสำคัญจ่ายเงินต้น + ใบสำคัญจ่ายดอกเบี้ย</b> จาก GL · ทุกช่องแก้ไขได้ (บันทึกอัตโนมัติ)</div>'+
     tabs+body+'</div>';
   _bblBind(wrap);
 }
-
 function _bblKpi(th,en,val,color,sub){ return '<div class="bblkpi" style="--k:'+color+'"><div class="bblkpi-l"><span class="bblkpi-th">'+th+'</span><span class="bblkpi-en">'+en+'</span></div><div class="bblkpi-v">'+val+(sub?' <small>'+sub+'</small>':'')+'</div></div>'; }
 
 function _bblRenderLoan(lk){
-  var c=_bblCalc(lk), L=c.L, mt=L.meta, t=c.tot;
+  var c=_bblCalc(lk), L=c.L, mt=L.meta, t=c.tot, st=_bblState();
   var CB='var(--bbl-brand)',CBL='var(--bbl-blue)',CP='var(--bbl-pos)',CG='var(--bbl-gold)';
   var kpis='<div class="bblkpis">'+
-    _bblKpi('วงเงินสินเชื่อ','FACILITY',_bblFmt(mt.facility),CB)+
-    _bblKpi('เบิกใช้แล้ว','DRAWN',_bblFmt(t.drawn),CBL)+
-    _bblKpi('เงินต้นคงเหลือ','OUTSTANDING',_bblFmt(t.outstanding),CB)+
-    _bblKpi('ชำระต้นสะสม','PRINCIPAL PAID',_bblFmt(t.prinPaid),CP)+
-    _bblKpi('ดอกเบี้ยจ่ายสะสม','INTEREST PAID',_bblFmt(t.intPaid),CG)+
-    _bblKpi('งวดที่ชำระแล้ว','INSTALLMENTS',''+t.nPaid,CB,'/ '+t.nInst+' งวด')+
+    _bblKpi('วงเงินสินเชื่อ','FACILITY',_bblFmt(mt.facility),CB)+ _bblKpi('เบิกใช้แล้ว','DRAWN',_bblFmt(t.drawn),CBL)+
+    _bblKpi('เงินต้นคงเหลือ','OUTSTANDING',_bblFmt(t.outstanding),CB)+ _bblKpi('ชำระต้นสะสม','PRINCIPAL PAID',_bblFmt(t.prinPaid),CP)+
+    _bblKpi('ดอกเบี้ยจ่ายสะสม','INTEREST PAID',_bblFmt(t.intPaid),CG)+ _bblKpi('งวดที่ชำระแล้ว','INSTALLMENTS',''+t.nPaid,CB,'/ '+t.nInst+' งวด')+
     '</div>';
+  /* GL setup card */
+  function gfld(lbl,f,val,ph){ return '<div class="bblfld"><label>'+lbl+'</label><input class="bblin bblcode" data-lk="'+lk+'" data-meta="'+f+'" value="'+_bblEsc(val)+'" placeholder="'+(ph||'')+'"></div>'; }
+  var glmsg=L._glMsg?('<div class="bblglmsg'+(/^✅/.test(L._glMsg)?' ok':(/^⚠/.test(L._glMsg)?' bad':''))+'">'+_bblEsc(L._glMsg)+'</div>'):'';
+  var glcard='<div class="bblcard bblglcard"><div class="bblcard-h"><div class="bblcard-t" style="font-size:13.5px">⚙️ ตั้งค่าดึงข้อมูลจาก GL <span class="bblchip" style="color:var(--bbl-blue);background:var(--bbl-blue-bg);border-color:var(--bbl-blue)">Database GL</span></div>'+
+    '<button type="button" class="bblbtn primary bblglbtn" data-glrefresh="'+lk+'">🔄 อัพเดทตารางจาก GL</button></div>'+
+    '<div class="bblctr">'+
+      gfld('รหัสบัญชี เงินกู้/เงินต้น','glPrinCode',mt.glPrinCode,'เช่น 2220400')+
+      gfld('รหัสบัญชี ดอกเบี้ยจ่าย','glIntCode',mt.glIntCode,'เช่น 7100200')+
+      gfld('รหัสโครงการ (Ref./Proj.)','glProj',mt.glProj,'เช่น '+mt.proj)+
+    '</div>'+glmsg+
+    '<div class="bblglnote">ระบบจะกรอง GL ตาม <b>รหัสบัญชี</b> + <b>รหัสโครงการ</b> ข้างต้น แล้วสร้างตารางให้: เครดิตบัญชีเงินกู้ = เบิก, เดบิต = ชำระต้น (JV = จัดประเภท), เดบิตบัญชีดอกเบี้ย = ดอกเบี้ยจ่าย · ดึงเลขที่ใบสำคัญให้อัตโนมัติ</div></div>';
+  /* contract card */
   function fld(lbl,f,val,kind){ var cls='bblin'+(kind==='money'?' bblnum bblmoney':(kind==='int'?' bblnum':'')); var v=(kind==='money')?_bblFmt(_bblN(val),true):val;
     return '<div class="bblfld"><label>'+lbl+'</label><input class="'+cls+'" data-lk="'+lk+'" data-meta="'+f+'" value="'+_bblEsc(v)+'"></div>'; }
   var ctr='<div class="bblcard"><div class="bblcard-h"><div class="bblcard-t">'+mt.emoji+' '+_bblEsc(mt.name)+' <span class="bblchip">'+_bblEsc(mt.contract)+'</span></div></div>'+
     '<div class="bblctr">'+
-      fld('เลขที่สัญญา','contract',mt.contract,'text')+ fld('รหัสโครงการ','proj',mt.proj,'text')+
-      fld('วงเงิน (บาท)','facility',mt.facility,'money')+ fld('อัตราดอกเบี้ย','rateNote',mt.rateNote,'text')+
-      fld('จำนวนงวดผ่อน','nInst',mt.nInst,'int')+ fld('ค่างวด 1–'+((+mt.nInst||54)-1)+' (บาท)','inst',mt.inst,'money')+
-      fld('งวดแรก เดือนที่','firstM',mt.firstM,'int')+ fld('ครบกำหนด (เดือน)','termM',mt.termM,'int')+
+      fld('เลขที่สัญญา','contract',mt.contract,'text')+ fld('อัตราดอกเบี้ย','rateNote',mt.rateNote,'text')+
+      fld('วงเงิน (บาท)','facility',mt.facility,'money')+ fld('ค่างวด 1–'+((+mt.nInst||54)-1)+' (บาท)','inst',mt.inst,'money')+
+      fld('จำนวนงวดผ่อน','nInst',mt.nInst,'int')+ fld('งวดแรก เดือนที่','firstM',mt.firstM,'int')+ fld('ครบกำหนด (เดือน)','termM',mt.termM,'int')+
     '</div></div>';
-  /* grace-period interest (before first principal instalment) */
-  var st=_bblState();
-  var graceRows=''; (L.grace||[]).forEach(function(g,i){
-    graceRows+='<tr><td class="bblseq c">'+(i+1)+'</td>'+
+  /* grace */
+  var graceRows=''; (L.grace||[]).forEach(function(g,i){ graceRows+='<tr><td class="bblseq c">'+(i+1)+'</td>'+
       '<td class="l bblcell-in"><input class="bblcin bbldate" data-gk="'+lk+'" data-gidx="'+i+'" data-gf="date" value="'+_bblEsc(g.date)+'"></td>'+
       '<td class="l bblcell-in"><input class="bblcin bblvch" data-gk="'+lk+'" data-gidx="'+i+'" data-gf="voucher" value="'+_bblEsc(g.voucher)+'"></td>'+
       '<td class="bblcell-in"><input class="bblcin bblnum bblmoney" data-gk="'+lk+'" data-gidx="'+i+'" data-gf="interest" value="'+_bblFmt(g.interest,true)+'"></td>'+
-      '<td class="c"><button type="button" class="bbldelx" data-gdel="'+lk+'" data-gidx="'+i+'" title="ลบ">✕</button></td></tr>';
-  });
+      '<td class="c"><button type="button" class="bbldelx" data-gdel="'+lk+'" data-gidx="'+i+'" title="ลบ">✕</button></td></tr>'; });
   var grace='<div class="bblcard bblgrace'+(st.showgrace?'':' collapsed')+'"><div class="bblcard-h"><div class="bblcard-t" style="font-size:13px">💤 ดอกเบี้ยช่วงก่อนเริ่มผ่อนเงินต้น <span class="bblchip" style="color:var(--bbl-gold);background:var(--bbl-gold-t);border-color:var(--bbl-gold)">รวม '+_bblFmt(c.graceInt)+'</span></div>'+
     '<button type="button" class="bblbtn bblgtoggle" data-gracetoggle="1">'+(st.showgrace?'▾ ซ่อน':'▸ แสดง')+'</button></div>'+
     '<div class="bblgbody"><div class="bbltblwrap"><table class="bbltbl bbltbl-grace"><thead><tr><th class="c">#</th><th class="l">วันที่ชำระ<small>DATE</small></th><th class="l">เลขที่ใบสำคัญ<small>VOUCHER</small></th><th>ดอกเบี้ยจ่ายจริง<small>INTEREST</small></th><th class="c">ลบ</th></tr></thead><tbody>'+graceRows+
     '</tbody><tfoot><tr><td class="l" colspan="3">รวมดอกเบี้ยช่วงปลอดชำระต้น</td><td id="bblgtot-'+lk+'">'+_bblFmt(c.graceInt)+'</td><td><button type="button" class="bbladdg" data-gadd="'+lk+'" title="เพิ่มแถว">＋</button></td></tr></tfoot></table></div></div></div>';
   /* toolbar */
-  var tb='<div class="bbltoolbar">'+
-    '<span class="bblschh">📋 ตารางผ่อนชำระ '+t.nInst+' งวด</span>'+
-    '<span class="bblspacer"></span>'+
-    '<button type="button" class="bblbtn" data-markall="'+lk+'" title="ตั้งสถานะงวดที่มีดอกเบี้ยจริงเป็นชำระแล้ว">✓ อัปเดตสถานะจากยอดจริง</button>'+
-    '<button type="button" class="bblbtn warn" data-reset="'+lk+'">↺ รีเซ็ตเป็นข้อมูลตั้งต้น</button>'+
-    '</div>';
-  /* main schedule table */
+  var tb='<div class="bbltoolbar"><span class="bblschh">📋 ตารางผ่อนชำระ '+t.nInst+' งวด</span><span class="bblspacer"></span>'+
+    '<button type="button" class="bblbtn warn" data-reset="'+lk+'">↺ รีเซ็ตเป็นค่าตั้งต้น</button></div>';
+  /* schedule */
   var head='<thead><tr>'+
-    '<th class="c">งวด<small>NO.</small></th><th class="l">กำหนดชำระ<small>DUE DATE</small></th><th class="l">เลขที่ใบสำคัญ<small>VOUCHER</small></th>'+
-    '<th>เงินต้นยกมา<small>OPENING</small></th><th>ชำระเงินต้น<small>PRINCIPAL</small></th><th>ดอกเบี้ย<small>INTEREST</small></th>'+
+    '<th class="c">งวด<small>NO.</small></th><th class="l">กำหนดชำระ<small>DUE DATE</small></th>'+
+    '<th>เงินต้นยกมา<small>OPENING</small></th><th>ชำระเงินต้น<small>PRINCIPAL</small></th><th class="l">ใบสำคัญจ่ายต้น<small>PRIN. VOUCHER</small></th>'+
+    '<th>ดอกเบี้ย<small>INTEREST</small></th><th class="l">ใบสำคัญจ่าย ดบ.<small>INT. VOUCHER</small></th>'+
     '<th>รวมชำระ<small>TOTAL</small></th><th>เงินต้นคงเหลือ<small>BALANCE</small></th><th class="c">สถานะ<small>STATUS</small></th></tr></thead>';
   var rowsH='';
-  c.rows.forEach(function(r,i){ var x=r.x; var last=(i===c.rows.length-1);
+  c.rows.forEach(function(r,i){ var x=r.x, last=(i===c.rows.length-1);
     rowsH+='<tr class="bblirow '+(r.paid?'paid':'pending')+(last?' balloon':'')+'" data-irow="'+lk+'-'+i+'">'+
       '<td class="bblseq c">'+x.n+(last?'<span class="bblballoon-tag">ก้อนท้าย</span>':'')+'</td>'+
       '<td class="l bblcell-in"><input class="bblcin bbldate" data-lk="'+lk+'" data-idx="'+i+'" data-f="due" value="'+_bblEsc(x.due)+'"></td>'+
-      '<td class="l bblcell-in"><input class="bblcin bblvch" data-lk="'+lk+'" data-idx="'+i+'" data-f="voucher" value="'+_bblEsc(x.voucher)+'" placeholder="—"></td>'+
       '<td class="bblopen" id="bblopen-'+lk+'-'+i+'">'+_bblFmt(r.open)+'</td>'+
       '<td class="bblcell-in"><input class="bblcin bblnum bblmoney bblprin" data-lk="'+lk+'" data-idx="'+i+'" data-f="principal" value="'+_bblFmt(x.principal,true)+'"></td>'+
+      '<td class="l bblcell-in"><input class="bblcin bblvch2" data-lk="'+lk+'" data-idx="'+i+'" data-f="prinVch" value="'+_bblEsc(x.prinVch)+'" placeholder="—"></td>'+
       '<td class="bblcell-in"><input class="bblcin bblnum bblmoney bblintin" data-lk="'+lk+'" data-idx="'+i+'" data-f="interest" value="'+_bblFmt(x.interest,true)+'" placeholder="รอ"></td>'+
+      '<td class="l bblcell-in"><input class="bblcin bblvch2" data-lk="'+lk+'" data-idx="'+i+'" data-f="intVch" value="'+_bblEsc(x.intVch)+'" placeholder="—"></td>'+
       '<td class="bbltotal" id="bbltotal-'+lk+'-'+i+'">'+_bblFmt(r.total,true)+'</td>'+
       '<td class="bblbal" id="bblclose-'+lk+'-'+i+'">'+_bblFmt(r.close)+'</td>'+
       '<td class="c"><button type="button" class="bblstat '+(r.paid?'paid':'pending')+'" data-paid="'+lk+'" data-idx="'+i+'" id="bblstat-'+lk+'-'+i+'">'+(r.paid?'✅ ชำระแล้ว':'⏳ รอชำระ')+'</button></td>'+
-    '</tr>';
-  });
-  var foot='<tfoot><tr><td class="l" colspan="4">รวม '+t.nInst+' งวด · ชำระแล้ว '+t.nPaid+' งวด</td>'+
-    '<td id="bbltot-prin-'+lk+'">'+_bblFmt(t.fac)+'</td><td id="bbltot-int-'+lk+'">'+_bblFmt(t.intInst)+'</td>'+
+    '</tr>'; });
+  var foot='<tfoot><tr><td class="l" colspan="3">รวม '+t.nInst+' งวด · ชำระแล้ว '+t.nPaid+' งวด</td>'+
+    '<td id="bbltot-prin-'+lk+'">'+_bblFmt(t.fac)+'</td><td></td><td id="bbltot-int-'+lk+'">'+_bblFmt(t.intInst)+'</td><td></td>'+
     '<td id="bbltot-total-'+lk+'">'+_bblFmt(t.fac+t.intInst)+'</td><td id="bbltot-end-'+lk+'">'+_bblFmt(t.schedEnd)+'</td><td></td></tr></tfoot>';
   var table='<div class="bbltblwrap bblsched"><table class="bbltbl">'+head+'<tbody>'+rowsH+'</tbody>'+foot+'</table></div>';
-  var note='<div class="bblnote">📌 <b>ตารางแบบเช่าซื้อ:</b> เงินต้นผ่อน '+t.nInst+' งวด — งวดที่ 1–'+((+mt.nInst||54)-1)+' งวดละ '+_bblFmt(mt.inst)+' บาท และงวดสุดท้ายชำระส่วนที่เหลือทั้งหมด ('+_bblFmt(c.rows.length?c.rows[c.rows.length-1].prin:0)+' บาท) · ดอกเบี้ย '+_bblEsc(mt.rateNote)+' คิดจากเงินต้นคงเหลือ — ช่องที่เว้นว่าง "รอ" คือ<b>งวดที่ยังไม่ถึง/ยังไม่ทราบยอดจริง</b> กรอกได้ภายหลัง · <b>เบิกเงินกู้:</b> '+_bblFmt(t.drawn)+' ('+(L.drawdowns||[]).length+' ครั้ง)'+
-    (L.reclass&&L.reclass.length?(' · <b>รายการจัดประเภท (ไม่ใช่การชำระเงินสด):</b> '+L.reclass.map(function(x){return _bblEsc(x.voucher)+' '+_bblFmt(x.amount);}).join(', ')):'')+'</div>';
-  return kpis+ctr+grace+tb+table+note;
+  var note='<div class="bblnote">📌 <b>ตารางแบบเช่าซื้อ:</b> เงินต้นผ่อน '+t.nInst+' งวด — งวดที่ 1–'+((+mt.nInst||54)-1)+' งวดละ '+_bblFmt(mt.inst)+' บาท งวดสุดท้ายชำระส่วนที่เหลือ · ช่อง "รอ"/"—" คือ<b>งวดที่ยังไม่ถึงหรือยังไม่มีใน GL</b> · <b>เบิกเงินกู้:</b> '+_bblFmt(t.drawn)+' ('+(L.drawdowns||[]).length+' ครั้ง)'+
+    (L.reclass&&L.reclass.length?(' · <b>จัดประเภท (ไม่ใช่ชำระเงินสด):</b> '+L.reclass.map(function(x){return _bblEsc(x.voucher)+' '+_bblFmt(x.amount);}).join(', ')):'')+'</div>';
+  return kpis+glcard+ctr+grace+tb+table+note;
 }
 
 function _bblRenderOverview(){
@@ -6287,33 +6359,27 @@ function _bblRenderOverview(){
   var kpis='<div class="bblkpis">'+
     _bblKpi('วงเงินรวม','TOTAL FACILITY',_bblFmt(fac),CB)+ _bblKpi('เบิกใช้แล้ว','DRAWN',_bblFmt(drawn),CBL)+
     _bblKpi('เงินต้นคงเหลือรวม','OUTSTANDING',_bblFmt(out),CB)+ _bblKpi('ชำระต้นสะสม','PRINCIPAL PAID',_bblFmt(prin),CP)+
-    _bblKpi('ดอกเบี้ยจ่ายสะสม','INTEREST PAID',_bblFmt(intr),CG)+ _bblKpi('งวดชำระแล้ว (A/B)','INSTALLMENTS',A.tot.nPaid+' / '+B.tot.nPaid,CB)+
-    '</div>';
+    _bblKpi('ดอกเบี้ยจ่ายสะสม','INTEREST PAID',_bblFmt(intr),CG)+ _bblKpi('งวดชำระแล้ว (A/B)','INSTALLMENTS',A.tot.nPaid+' / '+B.tot.nPaid,CB)+'</div>';
   function row(lb,a,b,tt){ return '<tr><td class="l">'+lb+'</td><td>'+a+'</td><td>'+b+'</td><td>'+(tt||'')+'</td></tr>'; }
   var cmp='<div class="bblcard"><div class="bblcard-h"><div class="bblcard-t">Σ เปรียบเทียบสองสัญญา</div></div>'+
     '<div style="overflow-x:auto"><table class="bblcmp"><thead><tr><th class="l">รายการ</th><th>'+A.L.meta.emoji+' ปฏิกูล 200MB</th><th>'+B.L.meta.emoji+' ไขมัน 100MB</th><th>รวม</th></tr></thead><tbody>'+
-    row('วงเงินสินเชื่อ',_bblFmt(A.tot.fac),_bblFmt(B.tot.fac),_bblFmt(fac))+
-    row('เบิกใช้แล้ว',_bblFmt(A.tot.drawn),_bblFmt(B.tot.drawn),_bblFmt(drawn))+
-    row('ชำระเงินต้นสะสม',_bblFmt(A.tot.prinPaid),_bblFmt(B.tot.prinPaid),_bblFmt(prin))+
-    row('ดอกเบี้ยจ่ายสะสม',_bblFmt(A.tot.intPaid),_bblFmt(B.tot.intPaid),_bblFmt(intr))+
-    row('ค่างวด (1–53)',_bblFmt(A.L.meta.inst),_bblFmt(B.L.meta.inst),'')+
+    row('วงเงินสินเชื่อ',_bblFmt(A.tot.fac),_bblFmt(B.tot.fac),_bblFmt(fac))+ row('เบิกใช้แล้ว',_bblFmt(A.tot.drawn),_bblFmt(B.tot.drawn),_bblFmt(drawn))+
+    row('ชำระเงินต้นสะสม',_bblFmt(A.tot.prinPaid),_bblFmt(B.tot.prinPaid),_bblFmt(prin))+ row('ดอกเบี้ยจ่ายสะสม',_bblFmt(A.tot.intPaid),_bblFmt(B.tot.intPaid),_bblFmt(intr))+
     row('งวดที่ชำระแล้ว',A.tot.nPaid+' / '+A.tot.nInst+' งวด',B.tot.nPaid+' / '+B.tot.nInst+' งวด','')+
     '</tbody><tfoot>'+row('เงินต้นคงเหลือ',_bblFmt(A.tot.outstanding),_bblFmt(B.tot.outstanding),_bblFmt(out))+'</tfoot></table></div></div>';
-  var note='<div class="bblnote">📌 ทั้งสองสัญญาเป็นสินเชื่อ <b>ธนาคารกรุงเทพ (BBL)</b> อัตรา <b>MLR − 1.00% ต่อปี</b> ผ่อนเงินต้น 54 งวด (งวดสุดท้ายชำระส่วนที่เหลือ) ครบกำหนด 60 เดือน · เลือกแท็บด้านบนเพื่อดู/แก้ตารางผ่อนชำระรายสัญญา</div>';
+  var note='<div class="bblnote">📌 ทั้งสองสัญญาเป็นสินเชื่อ <b>ธนาคารกรุงเทพ (BBL)</b> อัตรา <b>MLR − 1.00% ต่อปี</b> ผ่อน 54 งวด (งวดสุดท้ายชำระส่วนที่เหลือ) ครบกำหนด 60 เดือน · เลือกแท็บด้านบนเพื่อดู/แก้ตาราง และกด “อัพเดทจาก GL” รายสัญญา</div>';
   return kpis+cmp+note;
 }
 
-/* ---------- live recalc (keeps input focus) ---------- */
+/* ---------- live recalc ---------- */
 function _bblSetTxt(id,txt){ var el=document.getElementById(id); if(el)el.textContent=txt; }
 function _bblLive(lk){
   var c=_bblCalc(lk), t=c.tot;
   c.rows.forEach(function(r,i){ _bblSetTxt('bblopen-'+lk+'-'+i,_bblFmt(r.open)); _bblSetTxt('bblclose-'+lk+'-'+i,_bblFmt(r.close)); _bblSetTxt('bbltotal-'+lk+'-'+i,_bblFmt(r.total,true)); });
   _bblSetTxt('bblgtot-'+lk,_bblFmt(c.graceInt));
   _bblSetTxt('bbltot-prin-'+lk,_bblFmt(t.fac)); _bblSetTxt('bbltot-int-'+lk,_bblFmt(t.intInst)); _bblSetTxt('bbltot-total-'+lk,_bblFmt(t.fac+t.intInst)); _bblSetTxt('bbltot-end-'+lk,_bblFmt(t.schedEnd));
-  // KPIs are re-derived on next render; update the tab caption + kpi values live
   var kv=document.querySelectorAll('#bblWrap .bblkpi-v');
-  if(kv.length>=6){ kv[1].textContent=_bblFmt(t.drawn); kv[2].textContent=_bblFmt(t.outstanding); kv[3].textContent=_bblFmt(t.prinPaid);
-    kv[4].textContent=_bblFmt(t.intPaid); kv[5].innerHTML=t.nPaid+' <small>/ '+t.nInst+' งวด</small>'; kv[0].textContent=_bblFmt(t.fac); }
+  if(kv.length>=6){ kv[0].textContent=_bblFmt(t.fac); kv[1].textContent=_bblFmt(t.drawn); kv[2].textContent=_bblFmt(t.outstanding); kv[3].textContent=_bblFmt(t.prinPaid); kv[4].textContent=_bblFmt(t.intPaid); kv[5].innerHTML=t.nPaid+' <small>/ '+t.nInst+' งวด</small>'; }
 }
 
 /* ---------- events ---------- */
@@ -6321,23 +6387,22 @@ function _bblBind(wrap){
   var w=wrap.querySelector('.bblwrap'); if(!w)return;
   w.addEventListener('input',function(e){ var el=e.target; if(!el.classList)return;
     if(el.classList.contains('bblcin')&&el.hasAttribute('data-idx')){ var lk=el.getAttribute('data-lk'),idx=+el.getAttribute('data-idx'),f=el.getAttribute('data-f');
-      var L=_bblState().loans[lk]; if(!L||!L.insts[idx])return; L.insts[idx][f]=(f==='due'||f==='voucher')?el.value:_bblN(el.value); _bblLive(lk); _bblSaveState(); }
+      var L=_bblState().loans[lk]; if(!L||!L.insts[idx])return; L.insts[idx][f]=(f==='due'||f==='prinVch'||f==='intVch')?el.value:_bblN(el.value); _bblLive(lk); _bblSaveState(); }
     else if(el.classList.contains('bblcin')&&el.hasAttribute('data-gidx')){ var gk=el.getAttribute('data-gk'),gi=+el.getAttribute('data-gidx'),gf=el.getAttribute('data-gf');
       var Lg=_bblState().loans[gk]; if(!Lg||!Lg.grace[gi])return; Lg.grace[gi][gf]=(gf==='interest')?_bblN(el.value):el.value; _bblLive(gk); _bblSaveState(); }
     else if(el.classList.contains('bblin')){ var lk2=el.getAttribute('data-lk'),mf=el.getAttribute('data-meta'); var L2=_bblState().loans[lk2]; if(!L2)return;
-      L2.meta[mf]=(mf==='facility'||mf==='inst'||mf==='nInst'||mf==='termM'||mf==='firstM')?_bblN(el.value):el.value; _bblLive(lk2); _bblSaveState(); }
+      L2.meta[mf]=(mf==='facility'||mf==='inst'||mf==='nInst'||mf==='termM'||mf==='firstM')?_bblN(el.value):el.value; if(mf==='facility'||mf==='inst'||mf==='nInst')_bblLive(lk2); _bblSaveState(); }
   });
   w.addEventListener('focusin',function(e){ var el=e.target; if(el.classList&&el.classList.contains('bblmoney'))el.value=_bblRaw(_bblN(el.value)); });
   w.addEventListener('change',function(e){ var el=e.target; if(el.classList&&el.classList.contains('bblmoney'))el.value=_bblFmt(_bblN(el.value),true); });
-  w.addEventListener('click',function(e){ var el=e.target.closest?e.target.closest('[data-tab],[data-paid],[data-reset],[data-gracetoggle],[data-gadd],[data-gdel],[data-markall]'):null; if(!el)return;
-    var S=_bblState();
+  w.addEventListener('click',function(e){ var el=e.target.closest?e.target.closest('[data-tab],[data-paid],[data-reset],[data-gracetoggle],[data-gadd],[data-gdel],[data-glrefresh]'):null; if(!el)return; var S=_bblState();
     if(el.hasAttribute('data-tab')){ S.active=el.getAttribute('data-tab'); _bblSaveState(); renderBbl(); }
-    else if(el.hasAttribute('data-paid')){ var lk=el.getAttribute('data-paid'),idx=+el.getAttribute('data-idx'); var L=S.loans[lk]; if(L&&L.insts[idx]){ L.insts[idx].paid=!L.insts[idx].paid; _bblSaveState(); renderBbl(); } }
+    else if(el.hasAttribute('data-glrefresh')){ var lk=el.getAttribute('data-glrefresh'); if(window.confirm('อัพเดทตารางจาก GL?\nระบบจะกรอง GL ตามรหัสบัญชี/โครงการที่ตั้งค่า แล้วแทนที่งวดที่ชำระแล้วด้วยยอด+ใบสำคัญล่าสุดจาก GL (การแก้ไขที่พิมพ์เองอาจถูกทับ)')){ _bblRefreshFromGL(lk); } }
+    else if(el.hasAttribute('data-paid')){ var lk3=el.getAttribute('data-paid'),idx=+el.getAttribute('data-idx'); var L=S.loans[lk3]; if(L&&L.insts[idx]){ L.insts[idx].paid=!L.insts[idx].paid; _bblSaveState(); renderBbl(); } }
     else if(el.hasAttribute('data-gracetoggle')){ S.showgrace=!S.showgrace; _bblSaveState(); renderBbl(); }
-    else if(el.hasAttribute('data-gadd')){ var lk3=el.getAttribute('data-gadd'); S.loans[lk3].grace.push({date:'',voucher:'',interest:0}); _bblSaveState(); renderBbl(); }
-    else if(el.hasAttribute('data-gdel')){ var lk4=el.getAttribute('data-gdel'),gi=+el.getAttribute('data-gidx'); var L4=S.loans[lk4]; if(L4&&L4.grace[gi]){ L4.grace.splice(gi,1); _bblSaveState(); renderBbl(); } }
-    else if(el.hasAttribute('data-markall')){ var lk5=el.getAttribute('data-markall'); var L5=S.loans[lk5]; L5.insts.forEach(function(x){ x.paid=(_bblN(x.interest)>0)|| x.paid; }); _bblSaveState(); renderBbl(); }
-    else if(el.hasAttribute('data-reset')){ var lk6=el.getAttribute('data-reset'); if(window.confirm('รีเซ็ตตารางของสัญญานี้กลับเป็นข้อมูลตั้งต้น (จากสัญญา + GL)?\nการแก้ไขที่ทำไว้จะหายไป')){ var d=_bblDefault(); S.loans[lk6]=d.loans[lk6]; _bblSaveState(); renderBbl(); } }
+    else if(el.hasAttribute('data-gadd')){ var lk4=el.getAttribute('data-gadd'); S.loans[lk4].grace.push({date:'',voucher:'',interest:0}); _bblSaveState(); renderBbl(); }
+    else if(el.hasAttribute('data-gdel')){ var lk5=el.getAttribute('data-gdel'),gi=+el.getAttribute('data-gidx'); var L5=S.loans[lk5]; if(L5&&L5.grace[gi]){ L5.grace.splice(gi,1); _bblSaveState(); renderBbl(); } }
+    else if(el.hasAttribute('data-reset')){ var lk6=el.getAttribute('data-reset'); if(window.confirm('รีเซ็ตตารางของสัญญานี้กลับเป็นค่าตั้งต้น?\nการแก้ไข/การอัพเดทจาก GL จะถูกล้าง')){ var d=_bblDefault(); S.loans[lk6]=d.loans[lk6]; _bblSaveState(); renderBbl(); } }
   });
 }
 try{ if(typeof window!=='undefined')window.renderBbl=renderBbl; }catch(e){}
