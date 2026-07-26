@@ -21425,4 +21425,93 @@ body{text-rendering:optimizeLegibility}
 .gltbl tbody tr:nth-child(even) td{ background:rgba(16,24,40,.014); }
 .gltbl tbody tr:hover td{ background:rgba(14,92,82,.05); }
 </style>
+<style id="fsTbPolish">
+/* ============================================================
+   v11 — Financial Statement · Trial Balance
+   design refinement: colour · type · spacing · presentation
+   (visual only — no markup or logic changes)
+   ============================================================ */
+#page-fs{
+  --tbx-line:#E3EDE9;      --tbx-line2:#EFF5F3;
+  --tbx-mint:#F4FBF8;      --tbx-mint2:#E9F5F0;   --tbx-mintH:#E2F3EC;
+  --tbx-teal:#12665B;      --tbx-teal-d:#0A463E;  --tbx-aqua:#4FD6C0;
+  --tbx-ink:#12252A;       --tbx-ink2:#41535A;
+  --tbx-shadow:0 14px 34px -26px rgba(9,58,50,.55),0 1px 3px rgba(16,40,36,.05);
+}
+
+/* ---------- tab rail: soft pills, one clear active state ---------- */
+#page-fs .fstabs{gap:6px;border-bottom:1px solid var(--tbx-line);padding-bottom:8px;margin-bottom:14px}
+#page-fs .fstab{border:1px solid var(--tbx-line);background:#fff;border-radius:999px;padding:7px 15px;
+  color:#4C5C62;font-weight:600;box-shadow:none;transition:background .15s,color .15s,border-color .15s,transform .12s,box-shadow .15s}
+#page-fs .fstab:hover{background:var(--tbx-mint);border-color:#C4DFD6;color:var(--tbx-teal-d);transform:translateY(-1px)}
+#page-fs .fstab.on{background:linear-gradient(180deg,#17705F 0%,#0C4E45 100%);color:#fff;font-weight:700;
+  border-color:#0C4E45;box-shadow:0 7px 15px -8px rgba(12,78,69,.85)}
+#page-fs .fstab.on .fstic{transform:none;filter:none}
+
+/* ---------- totals panel: rounder cards, calmer tints ---------- */
+#page-fs .fstbsum{border-radius:18px;border-color:var(--tbx-line);padding:14px 16px 15px;margin-bottom:14px;
+  background:linear-gradient(180deg,#FFFFFF 0%,#F6FBF9 100%);box-shadow:var(--tbx-shadow)}
+#page-fs .fstbsum-h{margin-bottom:11px}
+#page-fs .fstbsum-t{font-size:15px;letter-spacing:.01em}
+#page-fs .fstbsum-en{font-weight:600}
+#page-fs .fstbsum-bal{border-radius:999px;padding:5px 14px;font-weight:800;letter-spacing:.01em}
+#page-fs .fstbsum-grid{gap:11px}
+#page-fs .fstbsum-c{border-radius:14px;border-color:var(--tbx-line);padding:10px 14px 10px 17px;
+  box-shadow:0 2px 9px -7px rgba(9,58,50,.7);transition:transform .14s,box-shadow .14s}
+#page-fs .fstbsum-c:hover{transform:translateY(-1px);box-shadow:0 9px 18px -13px rgba(9,58,50,.75)}
+#page-fs .fstbsum-c::before{width:4px;border-radius:14px 0 0 14px}
+#page-fs .fstbsum-cl{font-size:11px;color:var(--tbx-ink2)}
+#page-fs .fstbsum-cen{font-size:9px;letter-spacing:.07em}
+#page-fs .fstbsum-cv{font-size:17.5px;letter-spacing:-.012em}
+#page-fs .fstbsum-cmp{border-radius:13px;margin-top:11px;padding-top:11px;border-top:1px dashed var(--tbx-line)}
+#page-fs .fstbsum-cmph{font-size:11.5px;line-height:1.6;color:var(--tbx-ink2);margin-bottom:9px}
+#page-fs .fstbsum-wait{font-size:11.5px;line-height:1.7;color:var(--tbx-ink2);background:var(--tbx-mint);
+  border:1px solid var(--tbx-line);border-radius:12px;padding:10px 14px}
+#page-fs .fsadj-openbtn{border-radius:999px}
+
+/* ---------- filter banner ---------- */
+#page-fs .fstbfbar{border-radius:999px;padding:8px 8px 8px 16px;background:#FFF8E9;border-color:#EEDCB2}
+#page-fs .fstbclr{border-radius:999px}
+
+/* ---------- table shell ---------- */
+#page-fs .fstbwrap{border-radius:16px;border-color:var(--tbx-line);box-shadow:var(--tbx-shadow)}
+#page-fs .fstb th,#page-fs .fstb td{padding:8px 13px}
+#page-fs .fstb thead th{padding-top:10px;padding-bottom:10px;font-size:11px;letter-spacing:.035em;
+  border-bottom:2px solid var(--tbx-aqua) !important}
+#page-fs .fstb thead th .fstbsort{line-height:1.3}
+#page-fs .fstb thead th .fstbfun{border-radius:7px;opacity:.72}
+#page-fs .fstb thead th .fstbfun:hover,#page-fs .fstb thead th .fstbfun.on{opacity:1}
+
+/* ---------- rows: quiet zebra, clear hover, roomier rhythm ---------- */
+#page-fs .fstb tbody tr{border-top:1px solid var(--tbx-line2)}
+#page-fs .fstb tbody tr:nth-child(odd){background:#FBFDFC}
+#page-fs .fstb tbody tr:nth-child(even){background:#FFFFFF}
+#page-fs .fstb tbody tr:hover{background:var(--tbx-mintH)}
+#page-fs .fstb tbody td{line-height:1.5;color:var(--tbx-ink)}
+#page-fs .fstb td.fsc{font-weight:700;font-size:11.5px;color:#3D4C52;border-left-width:4px}
+#page-fs .fstb .fsnm{font-weight:600;color:var(--tbx-ink)}
+#page-fs .fstb td.fsseq{font-size:10.5px}
+#page-fs .fstb td.fsm{font-size:12px}
+
+/* the balance that matters most — a soft column wash on Ending */
+#page-fs .fstb td.fsend{background:rgba(18,102,91,.055);font-weight:800;color:#0B4038}
+#page-fs .fstb tbody tr:hover td.fsend{background:rgba(18,102,91,.115)}
+
+/* ---------- inline controls: pill inputs ---------- */
+#page-fs .fstb .fstbidx{border-radius:999px;font-size:11.5px;padding:4px 6px}
+#page-fs .fstb .fstbidx:focus{outline:none;border-color:#3AA0E6;box-shadow:0 0 0 3px rgba(58,160,230,.18)}
+#page-fs .fsidxcolbtn{border-radius:50%;box-shadow:0 0 0 2px #fff,0 0 0 3px rgba(16,40,36,.10)}
+#page-fs .fstb .fstbgrpsel{border-radius:999px;padding:5px 13px;font-size:11.5px}
+#page-fs .fsattbtn,#page-fs .fsattview,#page-fs .fsattrm,#page-fs .fsattman,#page-fs .fsattmanedit{border-radius:999px}
+#page-fs .fsatt-gtag{border-radius:999px}
+
+/* ---------- totals row ---------- */
+#page-fs .fstb tfoot .fstot td{padding-top:11px;padding-bottom:11px;
+  box-shadow:0 -8px 16px -14px rgba(0,0,0,.65)}
+
+/* ---------- empty state + footnote ---------- */
+#page-fs .fstb .fstbempty td{text-align:center;padding:34px 16px;color:#7B8A90;font-weight:600;background:var(--tbx-mint)}
+#page-fs .fsnote{border-radius:14px;border:1px solid var(--tbx-line);border-left:4px solid var(--tbx-teal);
+  background:var(--tbx-mint);padding:11px 15px;line-height:1.75;margin-top:14px}
+</style>
 </body></html>
