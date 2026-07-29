@@ -1550,27 +1550,8 @@ h1{ background:var(--g-aurora) !important;
 }
 
 /* ============================ VAT ============================ */
-/* แถบหัวรายงาน ขาย/ซื้อ — ลดความจัด ให้นุ่มเรียบ */
-#page-vat .vreg{ box-shadow:0 5px 18px -10px rgba(28,37,53,.16) !important; border-radius:14px !important; overflow:hidden; }
-#page-vat .vreg.sell{ border-color:#CFEDE1 !important; }
-#page-vat .vreg.buy{ border-color:#F0E2BF !important; }
-#page-vat .vreg.sell .vreghd{ background:linear-gradient(180deg,#ECF8F3,#DDF1E9) !important; border-bottom:2px solid #38B89E !important; }
-#page-vat .vreg.buy .vreghd{ background:linear-gradient(180deg,#FBF4E4,#F4E8CE) !important; border-bottom:2px solid #DBA844 !important; }
-/* หัวคอลัมน์ตาราง — โทนอ่อนลง อ่านสบาย */
-#page-vat .vreg.sell .vtbl thead th{ background:#ECF7F1 !important; color:#0C7A5E !important; }
-#page-vat .vreg.buy .vtbl thead th{ background:#FAF1DF !important; color:#996C13 !important; }
-#page-vat .vreg.sell .vtbl tbody tr:nth-child(even){ background:rgba(56,184,158,.055) !important; }
-#page-vat .vreg.buy .vtbl tbody tr:nth-child(even){ background:rgba(219,168,68,.065) !important; }
-#page-vat .vreg.sell .vtbl tbody tr:hover{ background:#ECF8F3 !important; }
-#page-vat .vreg.buy .vtbl tbody tr:hover{ background:#FBF4E4 !important; }
-#page-vat .vreg.sell .vtbl tbody td{ border-bottom-color:#E5F2EB !important; }
-#page-vat .vreg.buy .vtbl tbody td{ border-bottom-color:#F3E9D0 !important; }
-/* ระยะห่างตารางสบายตา */
-#page-vat .vtbl thead th{ padding:10px 12px !important; font-size:10.5px !important; }
-#page-vat .vtbl tbody td{ padding:9px 12px !important; }
-/* การ์ดสรุป — เงานุ่มขึ้น */
-#page-vat .vsum{ gap:12px !important; margin-bottom:16px !important; }
-#page-vat .vsbox{ box-shadow:0 4px 15px -8px rgba(28,37,53,.14) !important; border-radius:14px !important; }
+/* v10.55: legacy !important re-skins retired — superseded by the modular
+   #page-vat redesign appended at the end of this style block. */
 
 /* ============================ WHT ============================ */
 /* การ์ดทะเบียน + ตาราง */
@@ -2223,6 +2204,264 @@ body{padding-left:236px;padding-right:8px}
 .v30tbl thead th i{font-size:8.5px;padding:2px 8px}
 .v30tbl tbody td{padding:12px 14px}
 .v30tbl tfoot td{font-size:14px;padding:13px 14px}
+/* =====================================================================
+   v10.55 · VALUE ADDED TAX — full-module redesign (modern fintech/SaaS · EN UI)
+   One authoritative #page-vat stylesheet re-skinning BOTH views over the
+   existing markup + JS hooks. Palette: teal (chrome) · gold (purchases/ref) ·
+   green=credit · red=payable · blue=info. Numbers in IBM Plex Mono.
+   ===================================================================== */
+#page-vat{--vx-sh:0 1px 2px rgba(16,24,40,.05),0 16px 34px -24px rgba(16,24,40,.22);--vx-sh-sm:0 1px 2px rgba(16,24,40,.06);--vx-r:16px}
+#page-vat .vwrap{color:var(--ink)}
+#page-vat .secsub{margin-bottom:18px}
+#page-vat :is(.vsh,.vsv,.vsb,.vregt,.vregsub,.v30dc-v,.vcon){font-feature-settings:'tnum'}
+/* ---------- view toggle: segmented pill ---------- */
+#page-vat .vviewtg{display:inline-flex;gap:4px;background:#EDE8DC;border:1px solid var(--line);border-radius:13px;padding:4px;margin:0 0 22px}
+#page-vat .vviewb{font-family:inherit;font-size:13px;font-weight:700;border:0;border-radius:9px;padding:9px 18px;cursor:pointer;background:transparent;color:var(--ink2);display:inline-flex;align-items:center;gap:8px;transition:.15s;box-shadow:none}
+#page-vat .vviewb:hover{color:var(--ink)}
+#page-vat .vviewb.on{background:var(--card);color:var(--brand-d);box-shadow:var(--vx-sh-sm)}
+#page-vat .vviewct{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:19px;padding:0 6px;border-radius:999px;background:var(--brand);color:#fff;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:700}
+#page-vat .vviewb:not(.on) .vviewct{background:#DED7C7;color:var(--ink2)}
+/* ---------- buttons ---------- */
+#page-vat .vbtn{font-family:inherit;font-size:12.5px;font-weight:700;border-radius:10px;padding:9px 15px;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink2);transition:.14s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+#page-vat .vbtn:hover{border-color:var(--brand);color:var(--brand-d);background:var(--brand-t)}
+#page-vat .vbtn.primary{background:linear-gradient(180deg,#12796B,var(--brand-d));border-color:transparent;color:#fff;box-shadow:0 7px 16px -9px rgba(10,70,62,.55)}
+#page-vat .vbtn.primary:hover{filter:brightness(1.06);color:#fff}
+#page-vat .vbtn.ghost{background:transparent}
+#page-vat .vbtn.danger{color:var(--neg);border-color:#EAC7C2;background:var(--card)}
+#page-vat .vbtn.danger:hover{background:var(--neg-bg);border-color:var(--neg);color:var(--neg)}
+#page-vat .vbtn.mini{padding:6px 12px;font-size:11.5px;border-radius:9px}
+/* ---------- register layout ---------- */
+#page-vat .vlayout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;align-items:start}
+@media(max-width:960px){#page-vat .vlayout{grid-template-columns:1fr}}
+#page-vat .vcocol{background:var(--card);border:1px solid var(--line);border-radius:var(--vx-r);padding:15px 15px 13px;box-shadow:var(--vx-sh-sm)}
+#page-vat .vmaincol{min-width:0}
+#page-vat .vcohd{font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:0 0 11px}
+/* company chips (register selector) */
+#page-vat .vcouni{display:flex;flex-direction:column;gap:7px}
+#page-vat .vcochip{width:100%;text-align:left;padding:10px 13px;border:1px solid var(--line);border-radius:11px;background:var(--card);cursor:pointer;transition:.13s;line-height:1.25}
+#page-vat .vcochip:hover{border-color:var(--brand);background:var(--brand-t)}
+#page-vat .vcochip.on{border-color:var(--brand);background:var(--brand-t);box-shadow:inset 0 0 0 1px var(--brand)}
+#page-vat .vcc-name{font-weight:700;font-size:13px;color:var(--ink)}
+#page-vat .vcc-meta{color:var(--muted);font-size:10px;font-weight:600;margin-top:2px;font-family:'IBM Plex Mono',ui-monospace,monospace}
+#page-vat .vcouniadd{display:flex;gap:8px;margin-top:9px}
+#page-vat .vcochip.add,#page-vat .vcochip.pull{width:auto;flex:1;display:flex;align-items:center;justify-content:center;border-style:dashed;padding:9px}
+#page-vat .vcc-add,#page-vat .vcc-pull{font-size:15px;font-weight:800;color:var(--brand);line-height:1}
+#page-vat .vcoleftact{display:flex;flex-direction:column;gap:9px;margin-top:13px;padding-top:13px;border-top:1px solid var(--line2)}
+#page-vat .vcoleftact .vbtn{width:100%}
+#page-vat .vupzone{display:flex;align-items:center;gap:10px;border:1.5px dashed var(--line);border-radius:12px;background:var(--brand-t);padding:11px 13px;cursor:pointer;transition:.15s}
+#page-vat .vupzone:hover,#page-vat .vupzone.drag{border-color:var(--brand);background:#DDEEE9}
+#page-vat .vupicon{width:30px;height:30px;border-radius:9px;background:linear-gradient(180deg,#12796B,var(--brand-d));color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;flex:none}
+#page-vat .vupbig{font-weight:700;color:var(--brand-d);font-size:12px;line-height:1.25}
+#page-vat .vupsmall{display:none}
+/* company info + period bar */
+#page-vat .vcobar{background:var(--card);border:1px solid var(--line);border-radius:var(--vx-r);padding:0;margin-bottom:16px;box-shadow:var(--vx-sh-sm);overflow:hidden}
+#page-vat .vcoinfo{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 18px;border-top:0}
+#page-vat .vcoinfoL{min-width:0;flex:1}
+#page-vat .vcon{font-size:17px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+#page-vat .vcom{font-size:12px;color:var(--ink2);margin-top:3px;font-family:'IBM Plex Mono',ui-monospace,monospace}
+#page-vat .vcoa{font-size:11.5px;color:var(--muted);margin-top:3px}
+#page-vat .vcoinfoR{flex:0 0 auto}
+#page-vat .vbarL{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+#page-vat .vyear{border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);background:var(--card);cursor:pointer}
+#page-vat .vmtabs{display:inline-flex;gap:3px;background:#EFEBE0;border-radius:11px;padding:3px;flex-wrap:wrap}
+#page-vat .vmtab{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:700;width:30px;height:30px;border:0;border-radius:8px;background:transparent;color:var(--ink2);cursor:pointer;transition:.12s}
+#page-vat .vmtab:hover{color:var(--ink)}
+#page-vat .vmtab.on{background:var(--card);color:var(--brand-d);box-shadow:var(--vx-sh-sm)}
+#page-vat .vupst{font-size:12.5px;font-weight:600;border-radius:0;padding:0;max-height:0;overflow:hidden;transition:.15s}
+#page-vat .vupst.ok,#page-vat .vupst.warn,#page-vat .vupst.err,#page-vat .vupst.load{padding:11px 18px;max-height:200px;border-top:1px solid var(--line2)}
+#page-vat .vupst.ok{background:var(--pos-bg);color:var(--pos)}#page-vat .vupst.warn{background:var(--gold-t);color:var(--gold-d)}#page-vat .vupst.err{background:var(--neg-bg);color:var(--neg)}#page-vat .vupst.load{background:var(--blue-bg);color:var(--blue)}
+/* summary cards (Output / Input / Net) */
+#page-vat .vsum{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:stretch;gap:12px;margin-bottom:18px}
+@media(max-width:820px){#page-vat .vsum{grid-template-columns:1fr;}#page-vat .vsop{display:none}}
+#page-vat .vsbox{background:var(--card);border:1px solid var(--line);border-radius:var(--vx-r);padding:16px 18px;box-shadow:var(--vx-sh);position:relative;overflow:hidden}
+#page-vat .vsbox::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--bd,#94A3B8)}
+#page-vat .vsbox.sell::before{background:var(--brand)}#page-vat .vsbox.buy::before{background:var(--gold)}
+#page-vat .vsbox.net.pay::before{background:var(--neg)}#page-vat .vsbox.net.ref::before{background:var(--pos)}#page-vat .vsbox.net.zero::before{background:var(--muted)}
+#page-vat .vsh{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+#page-vat .vsbox.sell .vsh{color:var(--brand-d)}#page-vat .vsbox.buy .vsh{color:var(--gold-d)}#page-vat .vsbox.net.pay .vsh{color:var(--neg)}#page-vat .vsbox.net.ref .vsh{color:var(--pos)}
+#page-vat .vsv{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:25px;font-weight:800;color:var(--ink);line-height:1.1;margin-top:7px}
+#page-vat .vsbox.net.pay .vsv{color:var(--neg)}#page-vat .vsbox.net.ref .vsv{color:var(--pos)}
+#page-vat .vsb{font-size:11px;color:var(--muted);margin-top:6px;font-weight:600}
+#page-vat .vsop{display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--muted)}
+/* filter bar */
+#page-vat .vfltbar{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:16px}
+#page-vat .vfltsearch{position:relative;flex:1;min-width:240px;max-width:460px}
+#page-vat .vflticon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:13px;opacity:.5;pointer-events:none}
+#page-vat .vfltsearch input{width:100%;font-family:inherit;font-size:13px;padding:10px 13px 10px 35px;border:1px solid var(--line);border-radius:11px;color:var(--ink);background:var(--card);box-sizing:border-box}
+#page-vat .vfltsearch input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-t)}
+#page-vat .vshow{display:inline-flex;gap:3px;background:#EFEBE0;border-radius:11px;padding:3px}
+#page-vat .vshowb{font-family:inherit;font-size:12px;font-weight:700;padding:7px 14px;border:0;border-radius:8px;background:transparent;color:var(--ink2);cursor:pointer;transition:.12s}
+#page-vat .vshowb:hover{color:var(--ink)}
+#page-vat .vshowb.on{background:var(--card);color:var(--ink);box-shadow:var(--vx-sh-sm)}
+#page-vat .vshowb.sell.on{color:var(--brand-d)}#page-vat .vshowb.buy.on{color:var(--gold-d)}
+/* registers */
+#page-vat .vreg{background:var(--card);border:1px solid var(--line);border-radius:var(--vx-r);overflow:hidden;box-shadow:var(--vx-sh);margin-bottom:18px}
+#page-vat .vreghd{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--line2)}
+#page-vat .vreg.sell .vreghd{background:linear-gradient(180deg,#EDF7F3,#E1F0EA)}
+#page-vat .vreg.buy .vreghd{background:linear-gradient(180deg,#FBF4E4,#F4E9CF)}
+#page-vat .vregic{font-size:13px}
+#page-vat .vreg.sell .vregic{color:var(--brand)}#page-vat .vreg.buy .vregic{color:var(--gold-d)}
+#page-vat .vregt{font-size:15px;font-weight:800}
+#page-vat .vreg.sell .vregt{color:var(--brand-d)}#page-vat .vreg.buy .vregt{color:var(--gold-d)}
+#page-vat .vregsub{font-size:11.5px;font-weight:700;margin-left:auto;color:var(--muted)}
+#page-vat .vreg .vaddbtn{margin-left:12px}
+/* register table */
+#page-vat .vtblwrap{overflow-x:auto}
+#page-vat .vtbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:920px}
+#page-vat .vtbl thead th{text-align:left;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:11px 13px;background:#FBF9F4;border-bottom:1px solid var(--line);white-space:nowrap}
+#page-vat .vreg.sell .vtbl thead th{background:#EDF6F2;color:var(--brand-d)}
+#page-vat .vreg.buy .vtbl thead th{background:#FAF2E2;color:var(--gold-d)}
+#page-vat .vtbl thead th.num{text-align:right}
+#page-vat .vtbl tbody td{padding:11px 13px;border-bottom:1px solid var(--line2);vertical-align:middle;color:var(--ink2)}
+#page-vat .vtbl tbody tr:nth-child(even) td{background:#FCFBF7}
+#page-vat .vreg.sell .vtbl tbody tr:hover td{background:var(--brand-t)}
+#page-vat .vreg.buy .vtbl tbody tr:hover td{background:var(--gold-t)}
+#page-vat .vtbl .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--ink)}
+#page-vat .vtbl .vmono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11.5px;color:var(--ink2)}
+#page-vat .vtbl .vd{white-space:nowrap;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--ink2)}
+#page-vat .vtbl .vnm{min-width:200px;font-weight:700;color:var(--ink)}
+#page-vat .vtbl .vbr{text-align:center;color:var(--muted)}
+#page-vat .vtbl .vx{white-space:nowrap;text-align:right}
+#page-vat .vedit,#page-vat .vdel{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;font-size:12px;margin-left:4px;transition:.13s}
+#page-vat .vedit:hover{background:var(--brand-t);color:var(--brand-d);border-color:var(--brand)}
+#page-vat .vdel:hover{background:var(--neg-bg);color:var(--neg);border-color:var(--neg)}
+#page-vat .vtbl tfoot td{padding:12px 13px;font-weight:800;color:var(--ink);background:#FBF9F4;border-top:2px solid var(--line)}
+#page-vat .vreg.sell .vtbl tfoot td{background:#EAF4F0;color:var(--brand-d);border-top-color:var(--brand)}
+#page-vat .vreg.buy .vtbl tfoot td{background:#F8F0DE;color:var(--gold-d);border-top-color:var(--gold)}
+#page-vat .vtbl tfoot .num{text-align:right;font-family:'IBM Plex Mono',ui-monospace,monospace}
+#page-vat .vnone{text-align:center;color:var(--muted);padding:26px;font-weight:500}
+/* add / edit forms */
+#page-vat .vaddform,#page-vat .vcoedit{background:#FBF9F4;border-bottom:1px solid var(--line2);padding:16px 18px}
+#page-vat .vaddgrid,#page-vat .vcoegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 14px}
+@media(max-width:820px){#page-vat .vaddgrid,#page-vat .vcoegrid{grid-template-columns:repeat(2,1fr)}}
+#page-vat .vaddgrid label,#page-vat .vcoegrid label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:700;color:var(--ink2)}
+#page-vat .vaddgrid label.wide,#page-vat .vcoegrid label.wide{grid-column:span 2}
+#page-vat .vaddgrid input,#page-vat .vcoegrid input{font-family:inherit;font-size:13px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+#page-vat .vaddgrid input:focus,#page-vat .vcoegrid input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-t)}
+#page-vat .vaddbtns{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+#page-vat .vaddhint{font-size:11px;color:var(--muted);font-weight:600}
+/* =============== P.P.30 SUMMARY view =============== */
+#page-vat .v30wrap{padding:0}
+/* dashboard */
+#page-vat .v30dash{background:var(--card);border:1px solid var(--line);border-radius:var(--vx-r);padding:18px 20px 20px;margin-bottom:16px;box-shadow:var(--vx-sh)}
+#page-vat .v30dash-hd{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+#page-vat .v30dash-t{font-size:13px;font-weight:800;letter-spacing:.02em;color:var(--ink);text-transform:none;display:flex;align-items:center;gap:8px}
+#page-vat .v30dash-y{font-size:11px;font-weight:700;color:var(--brand-d);background:var(--brand-t);border:1px solid #CBE1DA;border-radius:999px;padding:4px 12px}
+#page-vat .v30hero{display:grid;grid-template-columns:1.15fr 1fr;gap:13px;margin-bottom:13px}
+@media(max-width:1040px){#page-vat .v30hero{grid-template-columns:1fr}}
+#page-vat .v30hcard{border-radius:14px;padding:16px 18px;border:1px solid var(--line);background:var(--card);position:relative;overflow:hidden;box-shadow:var(--vx-sh-sm)}
+#page-vat .v30hcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--brand)}
+#page-vat .v30hnet.pay::before{background:var(--neg)}#page-vat .v30hnet.cr::before{background:var(--pos)}
+#page-vat .v30hn-k,#page-vat .v30hp-k{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
+#page-vat .v30hn-v{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:30px;font-weight:800;line-height:1.05;margin:7px 0 4px;color:var(--ink)}
+#page-vat .v30hnet.pay .v30hn-v{color:var(--neg)}#page-vat .v30hnet.cr .v30hn-v{color:var(--pos)}
+#page-vat .v30hn-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;border-radius:999px;padding:3px 11px}
+#page-vat .v30hnet.pay .v30hn-badge{background:var(--neg-bg);color:var(--neg)}#page-vat .v30hnet.cr .v30hn-badge{background:var(--pos-bg);color:var(--pos)}
+#page-vat .v30hn-split{display:flex;gap:20px;margin-top:13px;padding-top:12px;border-top:1px solid var(--line2)}
+#page-vat .v30hn-sp{flex:1;min-width:0}
+#page-vat .v30hn-sp .l{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);display:flex;align-items:center;gap:4px}
+#page-vat .v30hn-sp .v{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:16px;font-weight:800;margin-top:3px;color:var(--ink)}
+#page-vat .v30hn-sp.pay .v{color:var(--neg)}#page-vat .v30hn-sp.cr .v{color:var(--pos)}
+#page-vat .v30hp-big{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:27px;font-weight:800;color:var(--brand-d);line-height:1.05;margin:7px 0 9px}
+#page-vat .v30hp-big small{font-size:13px;color:var(--muted);font-weight:700}
+#page-vat .v30hp-track{height:10px;border-radius:999px;background:#EEEADF;overflow:hidden;border:1px solid var(--line2)}
+#page-vat .v30hp-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#2E9C88,var(--brand));min-width:3px}
+#page-vat .v30hp-s{font-size:10.5px;color:var(--ink2);margin-top:9px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+#page-vat .v30hp-s b{color:var(--brand-d)}
+/* KPI cards */
+#page-vat .v30dash-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
+@media(max-width:1040px){#page-vat .v30dash-cards{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){#page-vat .v30dash-cards{grid-template-columns:repeat(2,1fr)}}
+#page-vat .v30dc{position:relative;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px 15px;box-shadow:var(--vx-sh-sm);overflow:hidden}
+#page-vat .v30dc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--acc,#B9C0CC)}
+#page-vat .v30dc-ic{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;background:var(--acc-t,#EEF1F5);margin-bottom:10px}
+#page-vat .v30dc-k{font-size:9.5px;font-weight:800;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;line-height:1.3;min-height:2.5em}
+#page-vat .v30dc-v{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:22px;font-weight:800;color:var(--ink);line-height:1.1;margin-top:3px}
+#page-vat .v30dc-v.num{font-size:18px}
+#page-vat .v30dc-s{font-size:9.5px;color:var(--muted);margin-top:4px;font-weight:600}
+#page-vat .v30dc.acc-violet{--acc:var(--blue);--acc-t:var(--blue-bg)}
+#page-vat .v30dc.acc-teal{--acc:var(--brand);--acc-t:var(--brand-t)}
+#page-vat .v30dc.acc-blue{--acc:var(--blue);--acc-t:var(--blue-bg)}
+#page-vat .v30dc.acc-orange{--acc:var(--gold);--acc-t:var(--gold-t)}
+#page-vat .v30dc.acc-pink{--acc:var(--brand);--acc-t:var(--brand-t)}
+#page-vat .v30dc.acc-amber{--acc:var(--gold);--acc-t:var(--gold-t)}
+#page-vat .v30dc.acc-red{--acc:var(--neg);--acc-t:var(--neg-bg)}
+#page-vat .v30dc.acc-green{--acc:var(--pos);--acc-t:var(--pos-bg)}
+#page-vat .v30dc.acc-rose{--acc:var(--neg);--acc-t:var(--neg-bg)}
+#page-vat .v30dc.acc-red .v30dc-v,#page-vat .v30dc.acc-rose .v30dc-v{color:var(--neg)}
+#page-vat .v30dc.acc-green .v30dc-v{color:var(--pos)}
+/* sparkline */
+#page-vat .v30spark{margin-top:13px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px 16px;box-shadow:var(--vx-sh-sm)}
+#page-vat .v30sp-hd{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+#page-vat .v30sp-hd .pk{font-weight:700;color:var(--gold-d);text-transform:none;letter-spacing:0}
+#page-vat .v30sp-bars{display:grid;grid-template-columns:repeat(12,1fr);gap:7px;align-items:end;height:92px}
+#page-vat .v30sp-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px}
+#page-vat .v30sp-bar{width:100%;max-width:26px;background:linear-gradient(180deg,#3FB39D,var(--brand));border-radius:5px 5px 2px 2px;min-height:3px;transition:.14s}
+#page-vat .v30sp-col:hover .v30sp-bar{background:var(--gold)}
+#page-vat .v30sp-m{font-size:9px;color:var(--muted);font-weight:700;font-family:'IBM Plex Mono',ui-monospace,monospace}
+/* year bar */
+#page-vat .v30yearbar{display:flex;align-items:center;gap:9px;margin:2px 0 16px;flex-wrap:wrap}
+#page-vat .v30ylab{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+#page-vat .v30ynav{border:1px solid var(--line);background:var(--card);color:var(--brand-d);font-weight:800;border-radius:9px;width:32px;height:32px;cursor:pointer;font-size:12px;transition:.12s}
+#page-vat .v30ynav:hover{border-color:var(--brand);background:var(--brand-t)}
+#page-vat .v30ysel{border:1px solid var(--line);border-radius:9px;padding:7px 12px;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);background:var(--card);cursor:pointer}
+/* company list + panel grid */
+#page-vat .v30grid{display:grid;grid-template-columns:290px minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:940px){#page-vat .v30grid{grid-template-columns:1fr}}
+#page-vat .v30colist{display:flex;flex-direction:column;gap:8px;max-height:640px;overflow:auto;padding-right:3px}
+#page-vat .v30coitem{position:relative;border:1px solid var(--line);background:var(--card);border-radius:12px;overflow:hidden;transition:.12s;box-shadow:var(--vx-sh-sm)}
+#page-vat .v30coitem:hover{border-color:var(--brand)}
+#page-vat .v30coitem.on{border-color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand)}
+#page-vat .v30coitem-main{display:block;width:100%;min-width:0;text-align:left;border:0;background:transparent;cursor:pointer;padding:11px 46px 11px 13px;font-family:inherit}
+#page-vat .v30coitem-nm{font-size:13px;font-weight:700;color:var(--ink);line-height:1.35;margin-bottom:4px}
+#page-vat .vcouni .v30coitem-nm{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#page-vat .v30coitem-meta{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#page-vat .v30coitem-id{font-size:10.5px;color:var(--muted);font-family:'IBM Plex Mono',ui-monospace,monospace}
+#page-vat .v30coitem-meta b{font-size:10px;font-weight:800;border-radius:7px;padding:2px 8px;font-family:'IBM Plex Mono',ui-monospace,monospace}
+#page-vat .v30full{background:var(--pos-bg);color:var(--pos)}
+#page-vat .v30part{background:var(--gold-t);color:var(--gold-d)}
+#page-vat .v30none{background:#EFEBE0;color:var(--muted)}
+#page-vat .v30coitem-act{position:absolute;top:0;right:0;bottom:0;width:34px;display:flex;flex-direction:column;border-left:1px solid var(--line2)}
+#page-vat .v30coedit,#page-vat .v30codel{flex:1;border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:11px;padding:0 11px;transition:.12s}
+#page-vat .v30coedit:hover{background:var(--brand-t);color:var(--brand-d)}
+#page-vat .v30codel:hover{background:var(--neg-bg);color:var(--neg)}
+#page-vat .v30coitem-act .v30codel{border-top:1px solid var(--line2)}
+#page-vat .v30ceform{flex:1;padding:11px 13px;display:flex;flex-direction:column;gap:8px}
+#page-vat .v30cein{font-family:inherit;font-size:13px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink)}
+#page-vat .v30cein:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-t)}
+#page-vat .v30cebtns{display:flex;gap:7px}
+#page-vat .v30empty{padding:44px 20px;text-align:center;color:var(--muted);font-size:13px;background:var(--card);border:1px solid var(--line);border-radius:var(--vx-r)}
+/* panel head + stats */
+#page-vat .v30panel{min-width:0}
+#page-vat .v30co-head{background:linear-gradient(120deg,#12796B,var(--brand-d));color:#fff;border-radius:var(--vx-r) var(--vx-r) 0 0;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;box-shadow:var(--vx-sh-sm)}
+#page-vat .v30co-nm{font-size:18px;font-weight:800;letter-spacing:-.01em}
+#page-vat .v30co-id{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;text-align:right;line-height:1.6;display:flex;gap:18px}
+#page-vat .v30co-id span{opacity:.72;font-family:'Sarabun',sans-serif;font-size:10px;margin-right:5px;display:block}
+#page-vat .v30stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--card);border:1px solid var(--line);border-top:0}
+@media(max-width:760px){#page-vat .v30stats{grid-template-columns:repeat(2,1fr)}}
+#page-vat .v30stat{padding:14px 17px;border-right:1px solid var(--line2)}
+#page-vat .v30stat:last-child{border-right:0}
+#page-vat .v30stat-k{font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:800}
+#page-vat .v30stat-v{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:19px;font-weight:800;margin-top:4px;color:var(--ink)}
+#page-vat .v30stat-v.pos{color:var(--pos)}#page-vat .v30stat-v.neg{color:var(--neg)}
+#page-vat .v30stat-s{font-size:10px;color:var(--muted);margin-top:3px;font-weight:600}
+#page-vat .v30stat.accent{background:linear-gradient(160deg,var(--pos-bg),var(--card))}
+/* carry-forward chain */
+#page-vat .v30chain{background:var(--card);border:1px solid var(--line);border-top:0;border-radius:0 0 var(--vx-r) var(--vx-r);padding:18px 20px}
+#page-vat .v30chain h3{margin:0 0 4px;font-size:13px;font-weight:800;color:var(--brand-d)}
+#page-vat .v30chain-cap{font-size:11.5px;color:var(--muted);margin-bottom:16px}
+#page-vat .v30flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+#page-vat .v30node{flex:0 0 auto;text-align:center;padding:0 3px}
+#page-vat .v30node-l{font-size:10px;color:var(--muted);font-weight:700;margin-bottom:6px}
+#page-vat .v30node-a{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:15px;font-weight:800;padding:9px 14px;border-radius:10px;background:var(--brand-t);color:var(--brand-d);border:1px solid #CBE1DA}
+#page-vat .v30node.open .v30node-a{background:var(--gold-t);color:var(--gold-d);border-color:#ECD9AB}
+#page-vat .v30node.close .v30node-a{background:linear-gradient(180deg,#12796B,var(--brand-d));color:#fff;border-color:transparent}
+#page-vat .v30op{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 6px;min-width:70px}
+#page-vat .v30op-a{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:800}
+#page-vat .v30op-a.v30op-up{color:var(--pos)}#page-vat .v30op-a.v30op-dn{color:var(--neg)}
+#page-vat .v30op-s{font-size:9px;color:var(--muted);font-weight:700;margin-top:2px}
+#page-vat .v30op-arr{color:var(--gold);font-size:15px;line-height:1;margin-top:2px}
+#page-vat .v30tag-add,#page-vat .v30tag-late,#page-vat .v30tag-mn{vertical-align:middle}
 </style>
 <style id="whtSumCss">/* v9.32: WHT Summary — recurring-item detector + monthly reminder · vibrant · large type */
 .whtviewbar{margin:0 0 4px}
@@ -3571,6 +3810,7 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 /* v10.48: import / export toolbar */
 #page-pdrepjv .apjv-tools{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0 2px 18px}
 #page-pdrepjv .apjv-tools-sp{flex:1;min-width:8px}
+#page-pdrepjv .apjv-tools-sp2{align-self:stretch;width:1px;background:var(--line,#E6E0D4);margin:2px 4px}
 #page-pdrepjv .apjv-tbtn{display:inline-flex;align-items:center;gap:7px;font:inherit;font-size:12.5px;font-weight:800;padding:9px 16px;border-radius:11px;border:1.5px solid;cursor:pointer;font-family:'Sarabun',sans-serif;background:#fff;transition:transform .12s,box-shadow .12s,background .12s,color .12s,border-color .12s}
 #page-pdrepjv .apjv-tbtn:hover{transform:translateY(-1px);box-shadow:0 7px 17px -8px rgba(17,24,39,.42)}
 #page-pdrepjv .apjv-tbtn.imp{border-color:#5FBF9E;color:#0C6A56;background:#EAF7F1}
@@ -5115,7 +5355,7 @@ function _vApplyQ(rows){var q=(_vQ||'').toLowerCase().trim();if(!q)return rows;r
 function _vDMY_BE(iso){var p=(''+iso).split('-');if(p.length!==3)return iso||'';return p[2]+'/'+p[1]+'/'+(((+p[0])+543)%100<10?'0':'')+(((+p[0])+543)%100);}
 function _vDMY_CE(iso){var p=(''+iso).split('-');if(p.length!==3)return iso||'';return p[2]+'/'+p[1]+'/'+p[0];}
 function _vMoney(n){n=+n||0;return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function _vBranchTxt(b){b=(''+(b==null?'':b)).replace(/\D/g,'');if(!b||b==='00000')return 'สนญ.';return b;}
+function _vBranchTxt(b){b=(''+(b==null?'':b)).replace(/\D/g,'');if(!b||b==='00000')return 'HQ';return b;}
 function _vBranch5(b){b=(''+(b==null?'':b)).replace(/\D/g,'');if(!b)return '00000';return ('00000'+b).slice(-5);}
 function _vRows(kind){loadVat();var ym=_vYear+'-'+('0'+_vMonth).slice(-2);return VATDATA.filter(function(t){return t.co===_vCo&&t.kind===kind&&(''+t.date).slice(0,7)===ym;}).sort(function(a,b){var d=(''+a.date).localeCompare(''+b.date);if(d)return d;return (''+a.invno).localeCompare(''+b.invno);});}
 
@@ -5141,6 +5381,7 @@ function _vpHealB64(){
   })();
 }
 var _VPP30MON=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+var _VMONEN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];/* v10.55: English month labels for the redesigned VAT UI */
 var _VPP30MONF=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 function _ppNum(v){if(v==null||v===''||isNaN(v))return '';var n=Math.round((+v)*100)/100;return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function _vParseNum(v){if(v==null)return null;var s=(''+v).replace(/[^0-9.\-]/g,'');if(s===''||isNaN(s))return null;return Math.round(parseFloat(s)*100)/100;}
@@ -5629,79 +5870,79 @@ function _vPP30View(){loadVatPP30();_vPP30SeedGLR();
   /* v8.48: masthead (title + Attach P.P.30 button + ภ.พ.30 seal) removed per request — content sits flush at the top */
   var _spMax=0;for(var _si=0;_si<12;_si++){if(_agMon[_si]>_spMax)_spMax=_agMon[_si];}
   var _spPeak=0;for(var _sp=1;_sp<12;_sp++){if(_agMon[_sp]>_agMon[_spPeak])_spPeak=_sp;}
-  var _spTH=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  var _spBars='';for(var _sb=0;_sb<12;_sb++){var _hp=_spMax>0?Math.max(2,Math.round(_agMon[_sb]/_spMax*100)):2;_spBars+='<div class="v30sp-col" title="'+_spTH[_sb]+' — '+(_ppNum(_agMon[_sb])||'0.00')+' บาท"><div class="v30sp-bar" style="height:'+_hp+'%"></div><div class="v30sp-m">'+_spTH[_sb]+'</div></div>';}
-  var _spPkTxt=_spMax>0?('สูงสุด: '+_spTH[_spPeak]+' '+(Math.round(_spMax/100000)/10)+'M'):'ยังไม่มีข้อมูลรายเดือน';
+  var _spTH=_VMONEN;
+  var _spBars='';for(var _sb=0;_sb<12;_sb++){var _hp=_spMax>0?Math.max(2,Math.round(_agMon[_sb]/_spMax*100)):2;_spBars+='<div class="v30sp-col" title="'+_spTH[_sb]+' — '+(_ppNum(_agMon[_sb])||'0.00')+' THB"><div class="v30sp-bar" style="height:'+_hp+'%"></div><div class="v30sp-m">'+_spTH[_sb]+'</div></div>';}
+  var _spPkTxt=_spMax>0?('Peak: '+_spTH[_spPeak]+' '+(Math.round(_spMax/100000)/10)+'M'):'No monthly data yet';
   var _totP=cos.length*12,_prog=_totP>0?Math.round(_agF/_totP*100):0,_netCr=(_agN<0);
   var _pInt=function(v){return Math.round(+v||0).toLocaleString('en-US');};
-  h+='<div class="v30dash"><div class="v30dash-hd"><div class="v30dash-t">📊 ภาพรวมทั้งหมด · Portfolio Overview</div><div class="v30dash-y">ปีภาษี '+_vPP30Year+' / '+(_vPP30Year-543)+'</div></div>'
-   +'<div class="v30hero"><div class="v30hcard v30hnet '+(_netCr?'cr':'pay')+'"><div class="v30hn-k">💠 ภาษีสุทธิ · Net VAT position</div><div class="v30hn-v">'+(_agN>=0?'':'−')+_ppNum(Math.abs(_agN))+'</div><span class="v30hn-badge">'+(_netCr?'▼ เครดิต / ยกไป':'▲ ต้องชำระ')+'</span><div class="v30hn-split"><div class="v30hn-sp pay"><div class="l">▲ งวดที่ต้องชำระ</div><div class="v">'+(_ppNum(_agPay)||'0.00')+'</div></div><div class="v30hn-sp cr"><div class="l">▼ งวดที่เป็นเครดิต</div><div class="v">'+(_ppNum(_agCr)||'0.00')+'</div></div></div></div>'
-   +'<div class="v30hcard"><div class="v30hp-k">🗓️ ความคืบหน้าการยื่น · Filing progress</div><div class="v30hp-big">'+_agF+'<small> / '+_totP+' งวด</small></div><div class="v30hp-track"><div class="v30hp-fill" style="width:'+_prog+'%"></div></div><div class="v30hp-s"><span>ยื่นแล้ว <b>'+_prog+'%</b> ของทั้งปี</span><span>ครบ 12 เดือน: <b>'+_agC12+'</b> บริษัท · มีข้อมูล <b>'+_agC+'</b>/'+cos.length+'</span></div></div></div>'
+  h+='<div class="v30dash"><div class="v30dash-hd"><div class="v30dash-t">📊 Portfolio Overview</div><div class="v30dash-y">Tax Year '+_vPP30Year+' / '+(_vPP30Year-543)+'</div></div>'
+   +'<div class="v30hero"><div class="v30hcard v30hnet '+(_netCr?'cr':'pay')+'"><div class="v30hn-k">💠 Net VAT Position</div><div class="v30hn-v">'+(_agN>=0?'':'−')+_ppNum(Math.abs(_agN))+'</div><span class="v30hn-badge">'+(_netCr?'▼ Credit / carry-forward':'▲ Payable')+'</span><div class="v30hn-split"><div class="v30hn-sp pay"><div class="l">▲ Payable periods</div><div class="v">'+(_ppNum(_agPay)||'0.00')+'</div></div><div class="v30hn-sp cr"><div class="l">▼ Credit periods</div><div class="v">'+(_ppNum(_agCr)||'0.00')+'</div></div></div></div>'
+   +'<div class="v30hcard"><div class="v30hp-k">🗓️ Filing Progress</div><div class="v30hp-big">'+_agF+'<small> / '+_totP+' periods</small></div><div class="v30hp-track"><div class="v30hp-fill" style="width:'+_prog+'%"></div></div><div class="v30hp-s"><span><b>'+_prog+'%</b> of the year filed</span><span>12/12 filed: <b>'+_agC12+'</b> · with data <b>'+_agC+'</b>/'+cos.length+'</span></div></div></div>'
    +'<div class="v30dash-cards">'
-   +'<div class="v30dc acc-violet"><div class="v30dc-ic">🏢</div><div class="v30dc-k">บริษัท · Companies</div><div class="v30dc-v">'+cos.length+'</div><div class="v30dc-s">มีข้อมูลยื่น '+_agC+' บริษัท</div></div>'
-   +'<div class="v30dc acc-teal"><div class="v30dc-ic">🗓️</div><div class="v30dc-k">งวดที่ยื่น · Filed</div><div class="v30dc-v">'+_agF+'</div><div class="v30dc-s">เดือน-บริษัท</div></div>'
-   +'<div class="v30dc acc-blue"><div class="v30dc-ic">💰</div><div class="v30dc-k">ยอดขายรวม · Total Sales</div><div class="v30dc-v num">'+_pInt(_agS)+'</div><div class="v30dc-s">บาท</div></div>'
-   +'<div class="v30dc acc-orange"><div class="v30dc-ic">🛒</div><div class="v30dc-k">ยอดซื้อรวม · Total Purchases</div><div class="v30dc-v num">'+_pInt(_agP)+'</div><div class="v30dc-s">บาท</div></div>'
-   +'<div class="v30dc acc-pink"><div class="v30dc-ic">📤</div><div class="v30dc-k">ภาษีขายรวม · Output VAT</div><div class="v30dc-v num">'+_ppNum(_agO)+'</div><div class="v30dc-s">บาท</div></div>'
-   +'<div class="v30dc acc-amber"><div class="v30dc-ic">📥</div><div class="v30dc-k">ภาษีซื้อรวม · Input VAT</div><div class="v30dc-v num">'+_ppNum(_agI)+'</div><div class="v30dc-s">บาท</div></div>'
-   +'<div class="v30dc acc-red"><div class="v30dc-ic">▲</div><div class="v30dc-k">ภาษีต้องชำระ · VAT Payable</div><div class="v30dc-v num">'+(_ppNum(_agPay)||'0.00')+'</div><div class="v30dc-s">รวมงวดที่ต้องจ่าย</div></div>'
-   +'<div class="v30dc acc-green"><div class="v30dc-ic">▼</div><div class="v30dc-k">ภาษีเครดิต · VAT Credit</div><div class="v30dc-v num">'+(_ppNum(_agCr)||'0.00')+'</div><div class="v30dc-s">ขอคืน / ยกไป</div></div>'
-   +(_agPen>0?'<div class="v30dc acc-rose"><div class="v30dc-ic">⚠️</div><div class="v30dc-k">ค่าปรับ/เงินเพิ่ม · Penalty</div><div class="v30dc-v num">'+_ppNum(_agPen)+'</div><div class="v30dc-s">บาท</div></div>':'')
+   +'<div class="v30dc acc-violet"><div class="v30dc-ic">🏢</div><div class="v30dc-k">Companies</div><div class="v30dc-v">'+cos.length+'</div><div class="v30dc-s">'+_agC+' with filings</div></div>'
+   +'<div class="v30dc acc-teal"><div class="v30dc-ic">🗓️</div><div class="v30dc-k">Filed</div><div class="v30dc-v">'+_agF+'</div><div class="v30dc-s">period × company</div></div>'
+   +'<div class="v30dc acc-blue"><div class="v30dc-ic">💰</div><div class="v30dc-k">Total Sales</div><div class="v30dc-v num">'+_pInt(_agS)+'</div><div class="v30dc-s">THB</div></div>'
+   +'<div class="v30dc acc-orange"><div class="v30dc-ic">🛒</div><div class="v30dc-k">Total Purchases</div><div class="v30dc-v num">'+_pInt(_agP)+'</div><div class="v30dc-s">THB</div></div>'
+   +'<div class="v30dc acc-pink"><div class="v30dc-ic">📤</div><div class="v30dc-k">Output VAT</div><div class="v30dc-v num">'+_ppNum(_agO)+'</div><div class="v30dc-s">THB</div></div>'
+   +'<div class="v30dc acc-amber"><div class="v30dc-ic">📥</div><div class="v30dc-k">Input VAT</div><div class="v30dc-v num">'+_ppNum(_agI)+'</div><div class="v30dc-s">THB</div></div>'
+   +'<div class="v30dc acc-red"><div class="v30dc-ic">▲</div><div class="v30dc-k">VAT Payable</div><div class="v30dc-v num">'+(_ppNum(_agPay)||'0.00')+'</div><div class="v30dc-s">across payable periods</div></div>'
+   +'<div class="v30dc acc-green"><div class="v30dc-ic">▼</div><div class="v30dc-k">VAT Credit</div><div class="v30dc-v num">'+(_ppNum(_agCr)||'0.00')+'</div><div class="v30dc-s">refund / carry-forward</div></div>'
+   +(_agPen>0?'<div class="v30dc acc-rose"><div class="v30dc-ic">⚠️</div><div class="v30dc-k">Penalty &amp; Surcharge</div><div class="v30dc-v num">'+_ppNum(_agPen)+'</div><div class="v30dc-s">THB</div></div>':'')
    +'</div>'
-   +'<div class="v30spark"><div class="v30sp-hd"><span>📈 ยอดขายรายเดือน · Monthly Sales (12 เดือน)</span><span class="pk">'+_spPkTxt+'</span></div><div class="v30sp-bars">'+_spBars+'</div></div>'
+   +'<div class="v30spark"><div class="v30sp-hd"><span>📈 Monthly Sales · 12 months</span><span class="pk">'+_spPkTxt+'</span></div><div class="v30sp-bars">'+_spBars+'</div></div>'
    +'</div>';
   h+='<div id="pp30Diag" class="v30diag" hidden></div>';
   var yopts='';years.forEach(function(y){yopts+='<option value="'+y+'"'+(y===_vPP30Year?' selected':'')+'>'+y+' / '+(y-543)+'</option>';});
-  h+='<div class="v30yearbar"><span class="v30ylab">ปีภาษี (พ.ศ.)</span><button class="v30ynav" id="pp30YPrev" type="button" title="ปีก่อน">◀</button><select id="pp30Year" class="v30ysel">'+yopts+'</select><button class="v30ynav" id="pp30YNext" type="button" title="ปีถัดไป">▶</button></div>';
+  h+='<div class="v30yearbar"><span class="v30ylab">Tax Year (B.E.)</span><button class="v30ynav" id="pp30YPrev" type="button" title="Previous year">◀</button><select id="pp30Year" class="v30ysel">'+yopts+'</select><button class="v30ynav" id="pp30YNext" type="button" title="Next year">▶</button></div>';
   h+='<div class="v30grid"><div class="v30colist">';
-  if(!cos.length){h+='<div class="v30empty">ไม่พบรายชื่อบริษัท — ตั้งค่าบริษัทในโมดูล WHT ก่อน</div>';}
+  if(!cos.length){h+='<div class="v30empty">No companies found — set them up in the WHT module first.</div>';}
   cos.forEach(function(c){var filed=VATPP30.filter(function(r){return r.co===c.id&&(+r.beYear)===_vPP30Year&&r.normal!==false;}).length;var on=c.id===_vPP30Sel;
     if(_vPP30CoEdit===c.id){
-      h+='<div class="v30coitem editing"><div class="v30ceform"><input class="v30cein" id="v30ceName" type="text" value="'+_eatt(c.name||'')+'" placeholder="ชื่อบริษัท" autocomplete="off"><input class="v30cein" id="v30ceTax" type="text" inputmode="numeric" value="'+_eatt(c.taxid||'')+'" placeholder="เลขประจำตัวผู้เสียภาษี" autocomplete="off"><div class="v30cebtns"><button class="vbtn primary mini" data-pp30cosave="'+_eatt(c.id)+'" type="button">💾 บันทึก</button><button class="vbtn ghost mini" data-pp30cocancel="1" type="button">ยกเลิก</button></div></div></div>';
+      h+='<div class="v30coitem editing"><div class="v30ceform"><input class="v30cein" id="v30ceName" type="text" value="'+_eatt(c.name||'')+'" placeholder="Company name" autocomplete="off"><input class="v30cein" id="v30ceTax" type="text" inputmode="numeric" value="'+_eatt(c.taxid||'')+'" placeholder="Tax ID" autocomplete="off"><div class="v30cebtns"><button class="vbtn primary mini" data-pp30cosave="'+_eatt(c.id)+'" type="button">💾 Save</button><button class="vbtn ghost mini" data-pp30cocancel="1" type="button">Cancel</button></div></div></div>';
     }else{
-      h+='<div class="v30coitem'+(on?' on':'')+'"><button class="v30coitem-main" data-pp30co="'+_eatt(c.id)+'" type="button"><div class="v30coitem-nm">'+esc(c.name||'(ไม่มีชื่อ)')+'</div><div class="v30coitem-meta"><span class="v30coitem-id">'+esc(c.taxid||'-')+'</span><b class="'+(filed>=12?'v30full':(filed?'v30part':'v30none'))+'">'+filed+'/12</b></div></button><div class="v30coitem-act"><button class="v30coedit" data-pp30coedit="'+_eatt(c.id)+'" type="button" title="แก้ไขชื่อ / เลขผู้เสียภาษี">✎</button><button class="v30codel" data-pp30codel="'+_eatt(c.id)+'" type="button" title="ลบบริษัทออกจากรายการ">✕</button></div></div>';
+      h+='<div class="v30coitem'+(on?' on':'')+'"><button class="v30coitem-main" data-pp30co="'+_eatt(c.id)+'" type="button"><div class="v30coitem-nm">'+esc(c.name||'(no name)')+'</div><div class="v30coitem-meta"><span class="v30coitem-id">'+esc(c.taxid||'-')+'</span><b class="'+(filed>=12?'v30full':(filed?'v30part':'v30none'))+'">'+filed+'/12</b></div></button><div class="v30coitem-act"><button class="v30coedit" data-pp30coedit="'+_eatt(c.id)+'" type="button" title="Edit name / Tax ID">✎</button><button class="v30codel" data-pp30codel="'+_eatt(c.id)+'" type="button" title="Remove company from list">✕</button></div></div>';
     }
   });
   h+='</div><div class="v30panel">';
   var selCo=null;for(var ci=0;ci<cos.length;ci++)if(cos[ci].id===_vPP30Sel){selCo=cos[ci];break;}
-  if(!selCo){h+='<div class="v30empty">เลือกบริษัทด้านซ้ายเพื่อดูสรุป ภ.พ.30 รายเดือน</div>';}
+  if(!selCo){h+='<div class="v30empty">Select a company on the left to view its monthly P.P.30 summary.</div>';}
   else{
     var byMonth={};VATPP30.forEach(function(r){if(r.co===_vPP30Sel&&(+r.beYear)===_vPP30Year){byMonth[r.month]=r;}});
     var filled=[];for(var fmo=1;fmo<=12;fmo++)if(byMonth[fmo])filled.push(fmo);
     var tSales=0,tPur=0,tOut=0,tIn=0,tPay=0;
     filled.forEach(function(mo){var r=byMonth[mo];tSales+=(+r.sales||0);tPur+=(+r.purchases||0);tOut+=(+r.outputVat||0);tIn+=(+r.inputVat||0);var st=_vPP30Settle(r);if(st&&st.pay)tPay+=st.v;});
     var closingCF=null;if(filled.length){var lastR=byMonth[filled[filled.length-1]];var lst=_vPP30Settle(lastR);closingCF=(lst&&!lst.pay)?lst.v:(lastR.overpaidCarry!=null&&lastR.overpaidCarry!==''?+lastR.overpaidCarry:null);}
-    h+='<div class="v30co-head"><div class="v30co-nm">'+esc(selCo.name||'')+'</div><div class="v30co-id"><div><span>เลขผู้เสียภาษี</span>'+esc(selCo.taxid||'-')+'</div><div><span>ปีภาษี</span>'+_vPP30Year+' / '+(_vPP30Year-543)+'</div></div></div>';
+    h+='<div class="v30co-head"><div class="v30co-nm">'+esc(selCo.name||'')+'</div><div class="v30co-id"><div><span>Tax ID</span>'+esc(selCo.taxid||'-')+'</div><div><span>Tax Year</span>'+_vPP30Year+' / '+(_vPP30Year-543)+'</div></div></div>';
     h+='<div class="v30stats">';
-    h+='<div class="v30stat"><div class="v30stat-k">ยอดขายรวม</div><div class="v30stat-v">'+_ppNum(tSales)+'</div><div class="v30stat-s">'+filled.length+' เดือนที่ยื่น</div></div>';
-    h+='<div class="v30stat"><div class="v30stat-k">ยอดซื้อรวม</div><div class="v30stat-v">'+_ppNum(tPur)+'</div><div class="v30stat-s">ภาษีซื้อ '+_ppNum(tIn)+'</div></div>';
-    h+='<div class="v30stat"><div class="v30stat-k">ภาษีที่ต้องชำระ (สะสม)</div><div class="v30stat-v'+(tPay>0?' neg':'')+'">'+_ppNum(tPay)+'</div><div class="v30stat-s">'+(tPay>0?'มีภาษีต้องชำระ':'ไม่มีภาษีต้องชำระ')+'</div></div>';
-    h+='<div class="v30stat accent"><div class="v30stat-k">เครดิตภาษีซื้อยกไป</div><div class="v30stat-v pos">'+(closingCF!=null?_ppNum(closingCF):'—')+'</div><div class="v30stat-s">'+(filled.length?'ณ สิ้น '+_VPP30MON[filled[filled.length-1]-1]+' '+_vPP30Year:'ยังไม่มีข้อมูล')+'</div></div>';
+    h+='<div class="v30stat"><div class="v30stat-k">Total Sales</div><div class="v30stat-v">'+_ppNum(tSales)+'</div><div class="v30stat-s">'+filled.length+' periods filed</div></div>';
+    h+='<div class="v30stat"><div class="v30stat-k">Total Purchases</div><div class="v30stat-v">'+_ppNum(tPur)+'</div><div class="v30stat-s">Input VAT '+_ppNum(tIn)+'</div></div>';
+    h+='<div class="v30stat"><div class="v30stat-k">VAT Payable (cumulative)</div><div class="v30stat-v'+(tPay>0?' neg':'')+'">'+_ppNum(tPay)+'</div><div class="v30stat-s">'+(tPay>0?'Tax due':'No tax due')+'</div></div>';
+    h+='<div class="v30stat accent"><div class="v30stat-k">Input VAT credit c/f</div><div class="v30stat-v pos">'+(closingCF!=null?_ppNum(closingCF):'—')+'</div><div class="v30stat-s">'+(filled.length?'as of end '+_VMONEN[filled[filled.length-1]-1]+' '+_vPP30Year:'No data yet')+'</div></div>';
     h+='</div>';
-    h+='<div class="v30scroll"><table class="v30tbl"><thead><tr class="v30grp"><th class="l v30lead" rowspan="2">เดือนภาษี</th><th class="gS" colspan="2">ขาย · Sales</th><th class="gP gStart" colspan="2">ซื้อ · Purchases</th><th class="gN gStart" colspan="3">สุทธิ / เครดิต · Settlement</th><th class="gM gStart c" colspan="3">สถานะ · จัดการ</th></tr><tr class="v30sub"><th class="gS">ยอดขาย<i>ช่อง 1</i></th><th class="gS">ภาษีขาย<i>ช่อง 5</i></th><th class="gP gStart">ยอดซื้อ<i>ช่อง 6</i></th><th class="gP">ภาษีซื้อ<i>ช่อง 7</i></th><th class="gN gStart">สุทธิเดือนนี้<i>ช่อง 8/9</i></th><th class="gN">ยกมา<i>ช่อง 10</i></th><th class="gN">ยกไป<i>ช่อง 12</i></th><th class="gM gStart l">สถานะ</th><th class="gM c">ไฟล์</th><th class="gM c"></th></tr></thead><tbody>';
+    h+='<div class="v30scroll"><table class="v30tbl"><thead><tr class="v30grp"><th class="l v30lead" rowspan="2">Tax Month</th><th class="gS" colspan="2">Sales</th><th class="gP gStart" colspan="2">Purchases</th><th class="gN gStart" colspan="3">Settlement</th><th class="gM gStart c" colspan="3">Status &amp; Manage</th></tr><tr class="v30sub"><th class="gS">Sales<i>Box 1</i></th><th class="gS">Output VAT<i>Box 5</i></th><th class="gP gStart">Purchases<i>Box 6</i></th><th class="gP">Input VAT<i>Box 7</i></th><th class="gN gStart">Net this month<i>Box 8/9</i></th><th class="gN">Carried in<i>Box 10</i></th><th class="gN">Carried out<i>Box 12</i></th><th class="gM gStart l">Status</th><th class="gM c">File</th><th class="gM c"></th></tr></thead><tbody>';
     for(var mo=1;mo<=12;mo++){var r=byMonth[mo];
-      if(!r){h+='<tr class="v30blank"><td class="l v30mo v30mo-off"><span class="v30mo-i">'+('0'+mo).slice(-2)+'</span><span class="v30mo-nm">'+_VPP30MON[mo-1]+'</span></td><td class="v30na" colspan="7">— ยังไม่มีข้อมูล —</td><td class="l v30na2">รออัปโหลด</td><td class="c"></td><td class="c"><button class="v30add" data-pp30add="'+_eatt(_vPP30Sel)+'|'+mo+'|'+_vPP30Year+'" type="button" title="เพิ่มข้อมูลเดือนนี้">+</button></td></tr>';}
+      if(!r){h+='<tr class="v30blank"><td class="l v30mo v30mo-off"><span class="v30mo-i">'+('0'+mo).slice(-2)+'</span><span class="v30mo-nm">'+_VMONEN[mo-1]+'</span></td><td class="v30na" colspan="7">— No data —</td><td class="l v30na2">Awaiting upload</td><td class="c"></td><td class="c"><button class="v30add" data-pp30add="'+_eatt(_vPP30Sel)+'|'+mo+'|'+_vPP30Year+'" type="button" title="Add this month">+</button></td></tr>';}
       else{var net=_vPP30Net(r);var st=_vPP30Settle(r);
         var cfPrev=(r.carried!=null&&r.carried!=='')?+r.carried:null;
         var cfNext=(r.overpaidCarry!=null&&r.overpaidCarry!=='')?+r.overpaidCarry:null;
-        var stTxt=st?(st.pay?'<span class="v30pill pay">ชำระ '+_ppNum(st.v)+'</span>':'<span class="v30pill over">ชำระเกิน · ยกไป</span>'):'<span class="v30pill zero">—</span>';
-        h+='<tr class="'+(net>0?'v30r-pay':(net<0?'v30r-cr':'v30r-zero'))+(r.fromMN?' v30frommn':'')+'"><td class="l v30mo"><span class="v30mo-i">'+('0'+mo).slice(-2)+'</span><span class="v30mo-nm">'+_VPP30MON[mo-1]+'</span>'+(r.normal===false?' <span class="v30tag-add">เพิ่มเติม</span>':'')+(r.onTime===false?' <span class="v30tag-late">เกินกำหนด</span>':'')+(r.fromMN?' <span class="v30tag-mn" title="ดึงจาก Monitor → Accounting Routine — กรอกตัวเลขด้วยมือได้">↪ Monitor</span>':'')+'</td>'
+        var stTxt=st?(st.pay?'<span class="v30pill pay">Pay '+_ppNum(st.v)+'</span>':'<span class="v30pill over">Credit · c/f</span>'):'<span class="v30pill zero">—</span>';
+        h+='<tr class="'+(net>0?'v30r-pay':(net<0?'v30r-cr':'v30r-zero'))+(r.fromMN?' v30frommn':'')+'"><td class="l v30mo"><span class="v30mo-i">'+('0'+mo).slice(-2)+'</span><span class="v30mo-nm">'+_VMONEN[mo-1]+'</span>'+(r.normal===false?' <span class="v30tag-add">Amended</span>':'')+(r.onTime===false?' <span class="v30tag-late">Late</span>':'')+(r.fromMN?' <span class="v30tag-mn" title="Pulled from Monitor → Accounting Routine — figures are editable">↪ Monitor</span>':'')+'</td>'
           +'<td>'+(r.sales!=null&&r.sales!==''?_ppNum(r.sales):'—')+'</td><td class="b">'+(r.outputVat!=null&&r.outputVat!==''?_ppNum(r.outputVat):'—')+'</td>'
           +'<td>'+(r.purchases!=null&&r.purchases!==''?_ppNum(r.purchases):'—')+'</td><td class="b">'+(r.inputVat!=null&&r.inputVat!==''?_ppNum(r.inputVat):'—')+'</td>'
           +'<td class="v30net '+(net>0?'np':(net<0?'cf':''))+'">'+(net<0?'+'+_ppNum(-net):_ppNum(net))+'</td>'
           +'<td>'+(cfPrev!=null?_ppNum(cfPrev):'—')+'</td><td class="cf">'+(cfNext!=null?_ppNum(cfNext):'—')+'</td>'
           +'<td class="l">'+stTxt+'</td>'
-          +'<td class="c">'+(r.file&&_fCanView(r.file)?'<button class="v30fb" data-pp30v="'+r.id+'" type="button" title="เปิดดูไฟล์ ภ.พ.30">📄</button>':'<span class="v30nofile">—</span>')+'</td>'
-          +'<td class="c v30act"><button class="v30ed" data-pp30e="'+r.id+'" type="button" title="แก้ไข">✎</button><button class="v30del" data-pp30d="'+r.id+'" type="button" title="ลบ">✕</button></td></tr>';}}
+          +'<td class="c">'+(r.file&&_fCanView(r.file)?'<button class="v30fb" data-pp30v="'+r.id+'" type="button" title="View P.P.30 file">📄</button>':'<span class="v30nofile">—</span>')+'</td>'
+          +'<td class="c v30act"><button class="v30ed" data-pp30e="'+r.id+'" type="button" title="Edit">✎</button><button class="v30del" data-pp30d="'+r.id+'" type="button" title="Delete">✕</button></td></tr>';}}
     var tNet=tOut-tIn;
-    h+='</tbody><tfoot><tr><td class="l">รวม (ที่มีข้อมูล)</td><td>'+_ppNum(tSales)+'</td><td class="b">'+_ppNum(tOut)+'</td><td>'+_ppNum(tPur)+'</td><td class="b">'+_ppNum(tIn)+'</td><td class="v30net '+(tNet>0?'np':(tNet<0?'cf':''))+'">'+(tNet<0?'+'+_ppNum(-tNet):_ppNum(tNet))+'</td><td></td><td class="cf">'+(closingCF!=null?_ppNum(closingCF):'—')+'</td><td colspan="3"></td></tr></tfoot></table></div>';
+    h+='</tbody><tfoot><tr><td class="l">Total (with data)</td><td>'+_ppNum(tSales)+'</td><td class="b">'+_ppNum(tOut)+'</td><td>'+_ppNum(tPur)+'</td><td class="b">'+_ppNum(tIn)+'</td><td class="v30net '+(tNet>0?'np':(tNet<0?'cf':''))+'">'+(tNet<0?'+'+_ppNum(-tNet):_ppNum(tNet))+'</td><td></td><td class="cf">'+(closingCF!=null?_ppNum(closingCF):'—')+'</td><td colspan="3"></td></tr></tfoot></table></div>';
     var chainMonths=filled.filter(function(mo){var r=byMonth[mo];return (r.overpaidCarry!=null&&r.overpaidCarry!=='')||(r.overpaid!=null&&r.overpaid!=='');});
     if(chainMonths.length){
       var firstR=byMonth[chainMonths[0]];var opening=(firstR.carried!=null&&firstR.carried!=='')?+firstR.carried:0;
-      h+='<div class="v30chain"><h3>เครดิตภาษีซื้อยกไปสะสม (Carry-forward credit)</h3><div class="v30chain-cap">ภาษีซื้อมากกว่าภาษีขาย → เกิดเครดิตสะสมที่ขอคืน (ค.10 / พร้อมเพย์) หรือยกไปใช้เดือนถัดไปได้</div><div class="v30flow">';
-      h+='<div class="v30node open"><div class="v30node-l">ยกมาต้นงวด</div><div class="v30node-a">'+_ppNum(opening)+'</div></div>';
+      h+='<div class="v30chain"><h3>Carry-forward Credit</h3><div class="v30chain-cap">When input VAT exceeds output VAT, the surplus accumulates as a credit — refundable (Form P.20 / PromptPay) or carried forward to offset the next period.</div><div class="v30flow">';
+      h+='<div class="v30node open"><div class="v30node-l">Opening</div><div class="v30node-a">'+_ppNum(opening)+'</div></div>';
       var _prevC=opening;chainMonths.forEach(function(mo,ix){var r=byMonth[mo];var close=(r.overpaidCarry!=null&&r.overpaidCarry!=='')?+r.overpaidCarry:_prevC;var delta=Math.round((close-_prevC)*100)/100;var isLast=(ix===chainMonths.length-1);var dStr=(delta>=0?'+':'−')+_ppNum(Math.abs(delta));var dCls=delta>=0?'v30op-up':'v30op-dn';
-        h+='<div class="v30op"><div class="v30op-a '+dCls+'">'+dStr+'</div><div class="v30op-s">'+_VPP30MON[mo-1]+'</div><div class="v30op-arr">→</div></div><div class="v30node'+(isLast?' close':'')+'"><div class="v30node-l">สิ้น '+_VPP30MON[mo-1]+'</div><div class="v30node-a">'+_ppNum(close)+'</div></div>';_prevC=close;});
+        h+='<div class="v30op"><div class="v30op-a '+dCls+'">'+dStr+'</div><div class="v30op-s">'+_VMONEN[mo-1]+'</div><div class="v30op-arr">→</div></div><div class="v30node'+(isLast?' close':'')+'"><div class="v30node-l">End '+_VMONEN[mo-1]+'</div><div class="v30node-a">'+_ppNum(close)+'</div></div>';_prevC=close;});
       h+='</div></div>';
     }
   }
@@ -5738,29 +5979,29 @@ function renderVat(){
   h+=_vPP30Toggle();_vBindViewToggle();
   if(_vView==='pp30'){h+=_vPP30View();h+='</div>';el.innerHTML=h;_vPP30BindView();return;}
   // entity bar
-  h+='<div class="vlayout"><div class="vcocol"><div class="vcohd">กิจการ (ผู้ประกอบการ)</div>';
+  h+='<div class="vlayout"><div class="vcocol"><div class="vcohd">Business (VAT Registrant)</div>';
   h+='<div class="v30colist vcouni">'+_coUniListHTML(_vCo,'data-vco',function(c){return VATDATA.filter(function(t){return t.co===c.id;}).length;})+'</div>';
-  h+='<div class="vcorow vcouniadd"><div class="vcochip add" id="vCoAdd" title="เพิ่มกิจการ"><div class="vcc-add">+</div></div><div class="vcochip pull" id="vCoPull" title="ดึงรายชื่อกิจการจากฐานข้อมูล WHT"><div class="vcc-pull">⇄</div></div></div>';
-  h+='<div class="vcoleftact"><div class="vupwrap"><div id="vatPdfZone" class="vupzone"><div class="vupicon">⬆</div><div class="vuptext"><div class="vupbig">แนบรายงานภาษีซื้อ / ขาย (PDF)</div><div class="vupsmall">อ่านไฟล์อัตโนมัติ · แยกประเภท (ซื้อ/ขาย) · จับคู่กิจการจากเลขผู้เสียภาษี · นำเข้ารายการ + ตรวจยอดกับ PDF · อัปโหลดงวดเดิมซ้ำ = แทนที่</div></div><input id="vatPdfInput" type="file" accept="application/pdf,image/*,.pdf,.jpg,.jpeg,.png" hidden></div></div><button class="vbtn mini ghost" id="vCoEditT" type="button">✎ แก้ไขข้อมูลกิจการ</button></div></div>';
+  h+='<div class="vcorow vcouniadd"><div class="vcochip add" id="vCoAdd" title="Add business"><div class="vcc-add">+</div></div><div class="vcochip pull" id="vCoPull" title="Pull businesses from the WHT database"><div class="vcc-pull">⇄</div></div></div>';
+  h+='<div class="vcoleftact"><div class="vupwrap"><div id="vatPdfZone" class="vupzone"><div class="vupicon">⬆</div><div class="vuptext"><div class="vupbig">Attach Purchase / Sales VAT report (PDF)</div><div class="vupsmall">Auto-read · classify (purchase/sales) · match business by tax ID · import entries + reconcile with the PDF · re-uploading the same period replaces it</div></div><input id="vatPdfInput" type="file" accept="application/pdf,image/*,.pdf,.jpg,.jpeg,.png" hidden></div></div><button class="vbtn mini ghost" id="vCoEditT" type="button">✎ Edit business details</button></div></div>';
   // period tabs + attach moved into header (top-right cluster)
   var yopts='';for(var y=_vYear+1;y>=2018;y--)yopts+='<option value="'+y+'"'+(y===_vYear?' selected':'')+'>'+y+' / '+(y+543)+'</option>';
   var mt='';for(var m=1;m<=12;m++)mt+='<button class="vmtab'+(m===_vMonth?' on':'')+'" data-m="'+m+'" type="button">'+m+'</button>';
-  h+='<div class="vmaincol"><div class="vcobar vcoinfobar"><div class="vcoinfo"><div class="vcoinfoL"><div class="vcon">'+esc(co?co.name:'-')+'</div><div class="vcom">เลขประจำตัวผู้เสียภาษี '+esc(co?co.taxid:'-')+' · '+_vBranchTxt(co?co.branch:'')+'</div><div class="vcoa">'+esc(co?co.addr:'')+'</div></div>';
+  h+='<div class="vmaincol"><div class="vcobar vcoinfobar"><div class="vcoinfo"><div class="vcoinfoL"><div class="vcon">'+esc(co?co.name:'-')+'</div><div class="vcom">Tax ID '+esc(co?co.taxid:'-')+' · '+_vBranchTxt(co?co.branch:'')+'</div><div class="vcoa">'+esc(co?co.addr:'')+'</div></div>';
   h+='<div class="vcoinfoR"><div class="vbar"><div class="vbarL"><select id="vYear" class="vyear">'+yopts+'</select><div class="vmtabs">'+mt+'</div></div></div></div></div>';
   if(_vCoEditOpen)h+=_vCoEditHTML(co);
   h+='<div id="vatPdfStatus" class="vupst"></div>';
   h+='</div>';
   // comparison summary
   h+='<div class="vsum">';
-  h+='<div class="vsbox sell"><div class="vsh">ภาษีขาย (Output VAT)</div><div class="vsv">฿ '+_vMoney(sT)+'</div><div class="vsb">ยอดขาย ฿ '+_vMoney(sV)+' · '+sells.length+' ใบ</div></div>';
+  h+='<div class="vsbox sell"><div class="vsh">Output VAT</div><div class="vsv">฿ '+_vMoney(sT)+'</div><div class="vsb">Sales ฿ '+_vMoney(sV)+' · '+sells.length+' docs</div></div>';
   h+='<div class="vsop">−</div>';
-  h+='<div class="vsbox buy"><div class="vsh">ภาษีซื้อ (Input VAT)</div><div class="vsv">฿ '+_vMoney(bT)+'</div><div class="vsb">ยอดซื้อ ฿ '+_vMoney(bV)+' · '+buys.length+' ใบ</div></div>';
+  h+='<div class="vsbox buy"><div class="vsh">Input VAT</div><div class="vsv">฿ '+_vMoney(bT)+'</div><div class="vsb">Purchases ฿ '+_vMoney(bV)+' · '+buys.length+' docs</div></div>';
   h+='<div class="vsop">=</div>';
-  h+='<div class="vsbox net '+(net>0?'pay':(net<0?'ref':'zero'))+'"><div class="vsh">ภาษีสุทธิ '+(net>0?'ต้องชำระ':(net<0?'ชำระเกิน/ขอคืน':'พอดี'))+'</div><div class="vsv">฿ '+_vMoney(Math.abs(net))+'</div><div class="vsb">'+(net>0?'ภ.พ.30 ช่อง 11 — นำส่ง':(net<0?'ยกไปเครดิตเดือนถัดไป หรือขอคืน':'ไม่มีภาษีต้องชำระ'))+'</div></div>';
+  h+='<div class="vsbox net '+(net>0?'pay':(net<0?'ref':'zero'))+'"><div class="vsh">Net VAT '+(net>0?'Payable':(net<0?'Credit / Refund':'Balanced'))+'</div><div class="vsv">฿ '+_vMoney(Math.abs(net))+'</div><div class="vsb">'+(net>0?'P.P.30 Box 11 — remit':(net<0?'Carry forward as credit or claim a refund':'No tax due'))+'</div></div>';
   h+='</div>';
   /* v8.54: export/print toolbar (ภ.พ.30 .txt / print) removed per request */
   // filter bar
-  h+='<div class="vfltbar"><div class="vfltsearch"><span class="vflticon">🔍</span><input id="vSearch" type="text" placeholder="ค้นหา ชื่อคู่ค้า / เลขที่ใบกำกับ / เลขผู้เสียภาษี…" value="'+_eatt(_vQ)+'"'+_noAC()+'></div><div class="vshow"><button class="vshowb'+(_vShow==='both'?' on':'')+'" data-show="both" type="button">ทั้งคู่</button><button class="vshowb sell'+(_vShow==='sell'?' on':'')+'" data-show="sell" type="button">เฉพาะขาย</button><button class="vshowb buy'+(_vShow==='buy'?' on':'')+'" data-show="buy" type="button">เฉพาะซื้อ</button></div>'+((_vQ&&_vQ.trim())||_vShow!=='both'?'<button class="vbtn ghost mini" id="vClr" type="button">✕ Clear filters</button>':'')+'</div>';
+  h+='<div class="vfltbar"><div class="vfltsearch"><span class="vflticon">🔍</span><input id="vSearch" type="text" placeholder="Search counterparty / invoice no. / tax ID…" value="'+_eatt(_vQ)+'"'+_noAC()+'></div><div class="vshow"><button class="vshowb'+(_vShow==='both'?' on':'')+'" data-show="both" type="button">Both</button><button class="vshowb sell'+(_vShow==='sell'?' on':'')+'" data-show="sell" type="button">Sales</button><button class="vshowb buy'+(_vShow==='buy'?' on':'')+'" data-show="buy" type="button">Purchases</button></div>'+((_vQ&&_vQ.trim())||_vShow!=='both'?'<button class="vbtn ghost mini" id="vClr" type="button">✕ Clear filters</button>':'')+'</div>';
   // registers
   if(_vShow!=='buy')h+=_vReg('sell',sells,sV,sT);
   if(_vShow!=='sell')h+=_vReg('buy',buys,bV,bT);
@@ -5772,36 +6013,36 @@ function renderVat(){
 }
 function _vReg(kind,rows,sumV,sumT){
   var isSell=(kind==='sell');
-  var title=isSell?'รายงานภาษีขาย':'รายงานภาษีซื้อ';
-  var sub=isSell?'ผู้ซื้อสินค้า / ผู้รับบริการ':'ผู้ขายสินค้า / ผู้ให้บริการ';
+  var title=isSell?'Sales VAT Report':'Purchase VAT Report';
+  var sub=isSell?'Buyer / service recipient':'Seller / service provider';
   var disp=_vApplyQ(rows),flt=!!(_vQ&&_vQ.trim());var dV=0,dT=0;disp.forEach(function(t){dV+=+t.value||0;dT+=+t.vat||0;});
-  var h='<div class="vreg '+kind+'"><div class="vreghd"><span class="vregic">'+(isSell?'▲':'▼')+'</span><span class="vregt">'+title+'</span><span class="vregsub">'+(disp.length+(flt?(' / '+rows.length):'')+' รายการ · ภาษี ฿ '+_vMoney(dT))+'</span><button class="vbtn primary mini vaddbtn" data-k="'+kind+'" type="button">+ เพิ่มรายการ</button></div>';
+  var h='<div class="vreg '+kind+'"><div class="vreghd"><span class="vregic">'+(isSell?'▲':'▼')+'</span><span class="vregt">'+title+'</span><span class="vregsub">'+(disp.length+(flt?(' / '+rows.length):'')+' items · VAT ฿ '+_vMoney(dT))+'</span><button class="vbtn primary mini vaddbtn" data-k="'+kind+'" type="button">+ Add entry</button></div>';
   if(_vAddK===kind)h+=_vAddForm(kind);
-  h+='<div class="vtblwrap"><table class="vtbl"><thead><tr><th>#</th><th>วันที่</th><th>เลขที่ใบกำกับ</th>'+(isSell?'':'<th>เลขที่ออกใหม่</th>')+'<th>'+sub+'</th><th>เลขผู้เสียภาษี</th><th>สาขา</th><th class="num">มูลค่า</th><th class="num">ภาษีมูลค่าเพิ่ม</th><th></th></tr></thead><tbody>';
-  if(!disp.length)h+='<tr><td colspan="'+(isSell?9:10)+'" class="vnone">'+(flt?'ไม่พบรายการที่ตรงกับ “'+esc(_vQ.trim())+'” ในงวดนี้':'ไม่มีรายการในงวดนี้ — กด “+ เพิ่มรายการ” หรือเปลี่ยนเดือน/ปี')+'</td></tr>';
+  h+='<div class="vtblwrap"><table class="vtbl"><thead><tr><th>#</th><th>Date</th><th>Invoice no.</th>'+(isSell?'':'<th>New doc no.</th>')+'<th>'+sub+'</th><th>Tax ID</th><th>Branch</th><th class="num">Amount</th><th class="num">VAT</th><th></th></tr></thead><tbody>';
+  if(!disp.length)h+='<tr><td colspan="'+(isSell?9:10)+'" class="vnone">'+(flt?'No entries match “'+esc(_vQ.trim())+'” this period':'No entries this period — click “+ Add entry” or change month / year')+'</td></tr>';
   disp.forEach(function(t,i){
-    h+='<tr><td>'+(i+1)+'</td><td class="vd">'+_vDMY_BE(t.date)+'</td><td class="vmono">'+esc(t.invno||'-')+'</td>'+(isSell?'':'<td class="vmono">'+esc(t.invno2||'-')+'</td>')+'<td class="vnm">'+esc((typeof _whtFixThai==='function'?_whtFixThai(t.name||''):(t.name||''))||'-')+'</td><td class="vmono">'+esc(t.taxid||'-')+'</td><td class="vbr">'+_vBranchTxt(t.branch)+'</td><td class="num">'+_vMoney(t.value)+'</td><td class="num">'+_vMoney(t.vat)+'</td><td class="vx"><button class="vedit" data-id="'+t.id+'" type="button" title="แก้ไข">✎</button><button class="vdel" data-id="'+t.id+'" type="button" title="ลบ">✕</button></td></tr>';
+    h+='<tr><td>'+(i+1)+'</td><td class="vd">'+_vDMY_BE(t.date)+'</td><td class="vmono">'+esc(t.invno||'-')+'</td>'+(isSell?'':'<td class="vmono">'+esc(t.invno2||'-')+'</td>')+'<td class="vnm">'+esc((typeof _whtFixThai==='function'?_whtFixThai(t.name||''):(t.name||''))||'-')+'</td><td class="vmono">'+esc(t.taxid||'-')+'</td><td class="vbr">'+_vBranchTxt(t.branch)+'</td><td class="num">'+_vMoney(t.value)+'</td><td class="num">'+_vMoney(t.vat)+'</td><td class="vx"><button class="vedit" data-id="'+t.id+'" type="button" title="Edit">✎</button><button class="vdel" data-id="'+t.id+'" type="button" title="Delete">✕</button></td></tr>';
   });
-  h+='</tbody><tfoot><tr><td colspan="'+(isSell?6:7)+'">รวม'+(flt?'ที่กรอง':'ทั้งสิ้น')+' '+disp.length+' รายการ</td><td class="vbr"></td><td class="num">'+_vMoney(dV)+'</td><td class="num">'+_vMoney(dT)+'</td><td></td></tr></tfoot></table></div></div>';
+  h+='</tbody><tfoot><tr><td colspan="'+(isSell?6:7)+'">'+(flt?'Filtered':'Total')+' '+disp.length+' items</td><td class="vbr"></td><td class="num">'+_vMoney(dV)+'</td><td class="num">'+_vMoney(dT)+'</td><td></td></tr></tfoot></table></div></div>';
   return h;
 }
 function _vAddForm(kind){
   var isSell=(kind==='sell');var e=_vEdit&&_vEdit.kind===kind?_vEdit:null;
   var g=function(k,d){return e?(e[k]!=null?e[k]:(d||'')):(d||'');};
   var h='<div class="vaddform"><div class="vaddgrid">';
-  h+='<label>วันที่<input type="date" id="vfDate" value="'+_eatt(g('date',_vYear+'-'+('0'+_vMonth).slice(-2)+'-01'))+'"></label>';
-  h+='<label>เลขที่ใบกำกับ<input id="vfInv" value="'+_eatt(g('invno'))+'" placeholder="เลขที่"></label>';
-  if(!isSell)h+='<label>เลขที่ออกใหม่ / เอกสาร<input id="vfInv2" value="'+_eatt(g('invno2'))+'" placeholder="เลขที่ออกใหม่"></label>';
-  h+='<label class="wide">ชื่อ'+(isSell?'ผู้ซื้อ/ผู้รับบริการ':'ผู้ขาย/ผู้ให้บริการ')+'<input id="vfName" value="'+_eatt(g('name'))+'" placeholder="ชื่อคู่ค้า"></label>';
-  h+='<label>เลขผู้เสียภาษี (13 หลัก)<input id="vfTax" value="'+_eatt(g('taxid'))+'" maxlength="13" placeholder="0000000000000"></label>';
-  h+='<label>สาขา (สนญ.=00000)<input id="vfBr" value="'+_eatt(g('branch','00000'))+'" placeholder="00000"></label>';
-  h+='<label>มูลค่าสินค้า/บริการ<input id="vfVal" type="number" step="0.01" value="'+_eatt(''+(e?e.value:''))+'" placeholder="0.00"></label>';
-  h+='<label>ภาษีมูลค่าเพิ่ม (7%)<input id="vfVat" type="number" step="0.01" value="'+_eatt(''+(e?e.vat:''))+'" placeholder="auto 7%"></label>';
-  h+='</div><div class="vaddbtns"><button class="vbtn primary" id="vfSave" data-k="'+kind+'" type="button">'+(e?'บันทึกการแก้ไข':'เพิ่มรายการ')+'</button><button class="vbtn ghost" id="vfCancel" type="button">ยกเลิก</button>'+(e?'':'<span class="vaddhint">เว้นช่อง VAT ว่าง = คำนวณ 7% อัตโนมัติ</span>')+'</div></div>';
+  h+='<label>Date<input type="date" id="vfDate" value="'+_eatt(g('date',_vYear+'-'+('0'+_vMonth).slice(-2)+'-01'))+'"></label>';
+  h+='<label>Invoice no.<input id="vfInv" value="'+_eatt(g('invno'))+'" placeholder="No."></label>';
+  if(!isSell)h+='<label>New doc / reference no.<input id="vfInv2" value="'+_eatt(g('invno2'))+'" placeholder="New doc no."></label>';
+  h+='<label class="wide">'+(isSell?'Buyer / service recipient':'Seller / service provider')+'<input id="vfName" value="'+_eatt(g('name'))+'" placeholder="Counterparty name"></label>';
+  h+='<label>Tax ID (13 digits)<input id="vfTax" value="'+_eatt(g('taxid'))+'" maxlength="13" placeholder="0000000000000"></label>';
+  h+='<label>Branch (HQ = 00000)<input id="vfBr" value="'+_eatt(g('branch','00000'))+'" placeholder="00000"></label>';
+  h+='<label>Goods / service amount<input id="vfVal" type="number" step="0.01" value="'+_eatt(''+(e?e.value:''))+'" placeholder="0.00"></label>';
+  h+='<label>VAT (7%)<input id="vfVat" type="number" step="0.01" value="'+_eatt(''+(e?e.vat:''))+'" placeholder="auto 7%"></label>';
+  h+='</div><div class="vaddbtns"><button class="vbtn primary" id="vfSave" data-k="'+kind+'" type="button">'+(e?'Save changes':'Add entry')+'</button><button class="vbtn ghost" id="vfCancel" type="button">Cancel</button>'+(e?'':'<span class="vaddhint">Leave VAT blank to auto-calculate 7%</span>')+'</div></div>';
   return h;
 }
 function _vCoEditHTML(co){
-  return '<div class="vcoedit"><div class="vcoegrid"><label>ชื่อกิจการ<input id="vceName" value="'+_eatt(co?co.name:'')+'"></label><label>เลขผู้เสียภาษี<input id="vceTax" value="'+_eatt(co?co.taxid:'')+'" maxlength="13"></label><label>สาขา<input id="vceBr" value="'+_eatt(co?co.branch:'00000')+'"></label><label class="wide">ที่อยู่สถานประกอบการ<input id="vceAddr" value="'+_eatt(co?co.addr:'')+'"></label></div><div class="vaddbtns"><button class="vbtn primary" id="vceSave" type="button">บันทึก</button><button class="vbtn ghost" id="vceClose" type="button">ปิด</button><button class="vbtn danger mini" id="vceDel" type="button">ลบกิจการนี้</button></div></div>';
+  return '<div class="vcoedit"><div class="vcoegrid"><label>Business name<input id="vceName" value="'+_eatt(co?co.name:'')+'"></label><label>Tax ID<input id="vceTax" value="'+_eatt(co?co.taxid:'')+'" maxlength="13"></label><label>Branch<input id="vceBr" value="'+_eatt(co?co.branch:'00000')+'"></label><label class="wide">Business address<input id="vceAddr" value="'+_eatt(co?co.addr:'')+'"></label></div><div class="vaddbtns"><button class="vbtn primary" id="vceSave" type="button">Save</button><button class="vbtn ghost" id="vceClose" type="button">Close</button><button class="vbtn danger mini" id="vceDel" type="button">Delete this business</button></div></div>';
 }
 var _vCoEditOpen=false;
 function _vAdd(kind){_vEdit=null;_vAddK=(_vAddK===kind?'':kind);renderVat();}
@@ -5850,8 +6091,8 @@ function printVatReport(kind){
                   :['ลำดับ','วัน/เดือน/ปี','เลขที่','เลขที่ออกใหม่','ชื่อผู้ขายสินค้า/ผู้ให้บริการ','เลขประจำตัวผู้เสียภาษี','สาขา','มูลค่าสินค้าหรือบริการ','ภาษีมูลค่าเพิ่ม'];
   var th=cols.map(function(c,i){var cl=(i>=cols.length-2)?'num':'';return '<th class="'+cl+'">'+c+'</th>';}).join('');
   var tr='';rows.forEach(function(t,i){
-    var cells=isSell?['<td class="c">'+(i+1)+'</td>','<td class="c">'+_vDMY_BE(t.date)+'</td>','<td>'+esc(t.invno||'')+'</td>','<td>'+esc(typeof _whtFixThai==='function'?_whtFixThai(t.name||''):(t.name||''))+'</td>','<td class="c">'+esc(t.taxid||'')+'</td>','<td class="c">'+(_vBranchTxt(t.branch)==='สนญ.'?'สนญ.':t.branch)+'</td>','<td class="num">'+_vMoney(t.value)+'</td>','<td class="num">'+_vMoney(t.vat)+'</td>']
-                     :['<td class="c">'+(i+1)+'</td>','<td class="c">'+_vDMY_BE(t.date)+'</td>','<td>'+esc(t.invno||'')+'</td>','<td>'+esc(t.invno2||'')+'</td>','<td>'+esc(typeof _whtFixThai==='function'?_whtFixThai(t.name||''):(t.name||''))+'</td>','<td class="c">'+esc(t.taxid||'')+'</td>','<td class="c">'+(_vBranchTxt(t.branch)==='สนญ.'?'สนญ.':t.branch)+'</td>','<td class="num">'+_vMoney(t.value)+'</td>','<td class="num">'+_vMoney(t.vat)+'</td>'];
+    var cells=isSell?['<td class="c">'+(i+1)+'</td>','<td class="c">'+_vDMY_BE(t.date)+'</td>','<td>'+esc(t.invno||'')+'</td>','<td>'+esc(typeof _whtFixThai==='function'?_whtFixThai(t.name||''):(t.name||''))+'</td>','<td class="c">'+esc(t.taxid||'')+'</td>','<td class="c">'+(_vBranchTxt(t.branch)==='HQ'?'สนญ.':t.branch)+'</td>','<td class="num">'+_vMoney(t.value)+'</td>','<td class="num">'+_vMoney(t.vat)+'</td>']
+                     :['<td class="c">'+(i+1)+'</td>','<td class="c">'+_vDMY_BE(t.date)+'</td>','<td>'+esc(t.invno||'')+'</td>','<td>'+esc(t.invno2||'')+'</td>','<td>'+esc(typeof _whtFixThai==='function'?_whtFixThai(t.name||''):(t.name||''))+'</td>','<td class="c">'+esc(t.taxid||'')+'</td>','<td class="c">'+(_vBranchTxt(t.branch)==='HQ'?'สนญ.':t.branch)+'</td>','<td class="num">'+_vMoney(t.value)+'</td>','<td class="num">'+_vMoney(t.vat)+'</td>'];
     tr+='<tr>'+cells.join('')+'</tr>';
   });
   var span=isSell?6:7;
@@ -7665,6 +7906,30 @@ function _apjvExportXlsx(){
     XLSX.utils.book_append_sheet(wb,ws,sec.sheet);});
   XLSX.writeFile(wb,'Report_AP_JV_'+_apjvToday()+'.xlsx');
 }
+/* v10.56: export a single company (Payee Database · per-company) */
+function _apjvExportXlsxCo(co){
+  if(typeof XLSX==='undefined'){alert('The Excel library is still loading — please try again.');return;}
+  if(!co||APJV_COS.indexOf(co)<0){alert('No company selected.');return;}
+  var wb=XLSX.utils.book_new(),st=_apjvStats(co);
+  var sAoa=[['Report AP JV — Position Summary'],['Company',co],['Generated',_apjvToday()],[],
+    ['Metric','Amount'],
+    ['Total Liabilities',_apjvR2(st.totLiab)],
+    ['   · AP',_apjvR2(st.liab)],
+    ['   · Routine',_apjvR2(st.routine)],
+    ['Ready to Settle (Bank)',_apjvR2(st.ready)],
+    ['Awaiting Collection',_apjvR2(st.awaiting)],
+    ['   · Trade A/R (Operating)',_apjvR2(st.op)],
+    ['Net Position',_apjvR2(st.net)]];
+  var sws=XLSX.utils.aoa_to_sheet(sAoa);sws['!cols']=[{wch:28},{wch:18}];
+  XLSX.utils.book_append_sheet(wb,sws,'Summary');
+  _APJV_SECTIONS.forEach(function(sec){
+    var aoa=[sec.cols.slice()],arr=(APJV[co]&&APJV[co][sec.k])||[];
+    arr.forEach(function(r){var row=[];sec.fields.forEach(function(f){if(f==='amt')row.push(_apjvR2(_apjvNum(r.amt)));else if(f==='rcv')row.push(r.rcv?'Yes':'');else row.push(r[f]==null?'':(''+r[f]));});aoa.push(row);});
+    var ws=XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols']=sec.cols.map(function(c){return {wch:(/desc/i.test(c)?36:(/name/i.test(c)?24:15))};});
+    XLSX.utils.book_append_sheet(wb,ws,sec.sheet);});
+  XLSX.writeFile(wb,'Report_AP_JV_'+co+'_'+_apjvToday()+'.xlsx');
+}
 function _apjvDownloadTemplate(){
   if(typeof XLSX==='undefined'){alert('The Excel library is still loading — please try again.');return;}
   var wb=XLSX.utils.book_new();
@@ -7731,17 +7996,19 @@ function _apjvPdfSec(co,sec){
   var foot='<tr class="tot">'+sec.cols.map(function(c,ci){if(ci===amtIdx)return '<td class="n">'+M(tot)+'</td>';if(ci===0)return '<td>Total ('+arr.length+')</td>';return '<td></td>';}).join('')+'</tr>';
   return '<h4>'+esc(sec.label)+'</h4><table><thead>'+head+'</thead><tbody>'+body+'</tbody><tfoot>'+foot+'</tfoot></table>';
 }
-function _apjvExportPdf(){
+function _apjvExportPdf(onlyCo){
   var esc=_apjvE,M=_apjvMoney;
+  var single=!!(onlyCo&&APJV_COS.indexOf(onlyCo)>=0),cos=single?[onlyCo]:APJV_COS;
   var A={l:0,r:0,a:0,n:0},sumRows='';
-  for(var i=0;i<APJV_COS.length;i++){var co=APJV_COS[i],st=_apjvStats(co);A.l+=st.totLiab;A.r+=st.ready;A.a+=st.awaiting;A.n+=st.net;
+  for(var i=0;i<cos.length;i++){var co=cos[i],st=_apjvStats(co);A.l+=st.totLiab;A.r+=st.ready;A.a+=st.awaiting;A.n+=st.net;
     sumRows+='<tr><td class="c"><span class="cdot" style="background:'+_apjvCoColor(co)+'"></span>'+esc(co)+'</td><td class="n">'+M(st.totLiab)+'</td><td class="n">'+M(st.ready)+'</td><td class="n">'+M(st.awaiting)+'</td><td class="n '+(st.net<-0.004?'neg':'pos')+'">'+M(st.net)+'</td></tr>';}
   var detail='';
-  for(var i2=0;i2<APJV_COS.length;i2++){var co2=APJV_COS[i2],d=APJV[co2]||{};
+  for(var i2=0;i2<cos.length;i2++){var co2=cos[i2],d=APJV[co2]||{};
     if(!['liab','routine','asset','bank'].some(function(k){return (d[k]||[]).length;}))continue;
     detail+='<div class="cosec"><h3><span class="cdot" style="background:'+_apjvCoColor(co2)+'"></span>Company '+esc(co2)+'</h3>'+_APJV_SECTIONS.map(function(sec){return _apjvPdfSec(co2,sec);}).join('')+'</div>';}
   if(!detail)detail='<p style="color:#8C8676;font-style:italic;margin-top:14px">No ledger entries recorded yet.</p>';
-  var html='<!doctype html><html><head><meta charset="utf-8"><title>Report AP JV — Executive Report</title><style>'+
+  var _ttl=single?('Report AP JV — '+esc(onlyCo)):'Report AP JV — Executive Report';
+  var html='<!doctype html><html><head><meta charset="utf-8"><title>'+_ttl+'</title><style>'+
     'body{font-family:"Sarabun","Segoe UI",Arial,sans-serif;color:#19222E;margin:16px;font-size:12px}'+
     'h1{font-size:18px;color:#8E2A5F;margin:0 0 3px}h2{font-size:12px;color:#4A5563;margin:0 0 12px;font-weight:600}'+
     'h3{font-size:13.5px;margin:18px 0 7px;color:#5A2350;display:flex;align-items:center;gap:7px}h4{font-size:11px;margin:10px 0 4px;color:#4A5563}'+
@@ -7754,9 +8021,9 @@ function _apjvExportPdf(){
     '.sumtbl th{background:#472C7A}.sumtbl tfoot td{background:#EEE9F7;border-top-color:#9B7ED8}'+
     '.cosec{page-break-inside:avoid;margin-top:8px}@media print{body{margin:8mm}}'+
     '</style></head><body>'+
-    '<h1>📑 Report AP JV — Executive Report</h1><h2>Payee Database · Liabilities vs Assets · Generated '+_apjvToday()+'</h2>'+
+    '<h1>📑 '+_ttl+'</h1><h2>Payee Database · Liabilities vs Assets · Generated '+_apjvToday()+'</h2>'+
     '<table class="sumtbl"><thead><tr><th class="c">Company</th><th class="n">Total Liabilities</th><th class="n">Ready to Settle</th><th class="n">Awaiting Collection</th><th class="n">Net Position</th></tr></thead><tbody>'+sumRows+'</tbody>'+
-    '<tfoot><tr><td class="c">ALL</td><td class="n">'+M(A.l)+'</td><td class="n">'+M(A.r)+'</td><td class="n">'+M(A.a)+'</td><td class="n">'+M(A.n)+'</td></tr></tfoot></table>'+
+    (single?'':'<tfoot><tr><td class="c">ALL</td><td class="n">'+M(A.l)+'</td><td class="n">'+M(A.r)+'</td><td class="n">'+M(A.a)+'</td><td class="n">'+M(A.n)+'</td></tr></tfoot>')+'</table>'+
     detail+
     '<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print();},250);}</scr'+'ipt></body></html>';
   var w=window.open('','_blank');if(!w){alert('Please allow pop-ups to print / save as PDF.');return;}
@@ -7772,8 +8039,11 @@ function renderApjv(){
       +'<button class="apjv-tbtn imp" type="button" data-apjvact="import" title="Import rows from an Excel file — all companies, matched by the Company column">📥 Import Excel</button>'
       +'<button class="apjv-tbtn tpl" type="button" data-apjvact="template" title="Download a blank Excel template (Liability AP · Routine · Asset · Bank)">⬇ Template</button>'
       +'<span class="apjv-tools-sp"></span>'
-      +'<button class="apjv-tbtn xls" type="button" data-apjvact="xlsx" title="Export all companies to Excel — Summary + Liability / Routine / Asset / Bank sheets">⤓ Export Excel</button>'
-      +'<button class="apjv-tbtn pdf" type="button" data-apjvact="pdf" title="Executive PDF report — all companies, Liabilities vs Assets">🖨 Executive PDF</button>'
+      +'<button class="apjv-tbtn xls" type="button" data-apjvact="xlsxco" title="Export ONLY '+_apjvE(_apjvCo)+' to Excel — Summary + Liability / Routine / Asset / Bank">⤓ Excel · '+_apjvE(_apjvCo)+'</button>'
+      +'<button class="apjv-tbtn pdf" type="button" data-apjvact="pdfco" title="Executive PDF — '+_apjvE(_apjvCo)+' only">🖨 PDF · '+_apjvE(_apjvCo)+'</button>'
+      +'<span class="apjv-tools-sp2"></span>'
+      +'<button class="apjv-tbtn xls" type="button" data-apjvact="xlsx" title="Export ALL companies to Excel — Summary + Liability / Routine / Asset / Bank sheets">⤓ Excel · All</button>'
+      +'<button class="apjv-tbtn pdf" type="button" data-apjvact="pdf" title="Executive PDF report — all companies, Liabilities vs Assets">🖨 PDF · All</button>'
     +'</div>'
     +'<div id="apjvDash">'+_apjvDashHTML(_apjvCo)+'</div><div class="apjv-cols">'
     +'<div class="apjv-col apjv-liab"><div class="apjv-colhd">💳 Liability &middot; AP <span class="apjv-cohint">'+_apjvE(_apjvCo)+'</span></div>'+_apjvMainSec('liab')+_apjvRoutineSec()+'</div>'
@@ -7814,7 +8084,7 @@ function renderApjv(){
     w.addEventListener('click',function(e){
       var t=e.target;
       var actb=t.closest?t.closest('[data-apjvact]'):null;
-      if(actb){var _aa=actb.getAttribute('data-apjvact');if(_aa==='import'){var _fi=document.getElementById('apjvImportFile');if(_fi){_fi.value='';_fi.click();}}else if(_aa==='template'){_apjvDownloadTemplate();}else if(_aa==='xlsx'){_apjvExportXlsx();}else if(_aa==='pdf'){_apjvExportPdf();}return;}
+      if(actb){var _aa=actb.getAttribute('data-apjvact');if(_aa==='import'){var _fi=document.getElementById('apjvImportFile');if(_fi){_fi.value='';_fi.click();}}else if(_aa==='template'){_apjvDownloadTemplate();}else if(_aa==='xlsx'){_apjvExportXlsx();}else if(_aa==='xlsxco'){_apjvExportXlsxCo(_apjvCo);}else if(_aa==='pdf'){_apjvExportPdf();}else if(_aa==='pdfco'){_apjvExportPdf(_apjvCo);}return;}
       var cot=t.closest?t.closest('.apjv-cotab'):null;
       if(cot){_apjvCo=cot.getAttribute('data-co');try{localStorage.setItem('gli_apjv_co',_apjvCo);}catch(_e){}renderApjv();return;}
       var chk=t.closest?t.closest('.apjvchk'):null;
