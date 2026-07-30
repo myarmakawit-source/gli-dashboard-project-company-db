@@ -2517,6 +2517,57 @@ body{padding-left:236px;padding-right:8px}
 #page-vat .v30node-a{box-shadow:0 1px 4px rgba(14,90,70,.06);border-radius:10px}
 #page-vat .v30node.close .v30node-a{background:linear-gradient(120deg,#0A5C48,#118A68);box-shadow:0 6px 18px -6px rgba(10,92,72,.5)}
 #page-vat .v30chain h3::before{content:'';display:inline-block;width:12px;height:2px;border-radius:2px;background:linear-gradient(90deg,#0E7A5F,#7A5FD0);margin-right:8px;vertical-align:3px}
+/* ===== v10.57: dashboard left · grouped company selector right ===== */
+#page-vat .v30top{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:16px;align-items:stretch;margin-bottom:16px}
+@media(max-width:1180px){#page-vat .v30top{grid-template-columns:1fr}}
+#page-vat .v30top .v30dash{margin-bottom:0;min-width:0}
+#page-vat .v30top .v30hero{grid-template-columns:1fr}
+#page-vat .v30top .v30dash-cards{grid-template-columns:repeat(2,1fr)}
+#page-vat .v30copanel{min-width:0;background:linear-gradient(180deg,#E4F2EC,var(--card) 55%);border:1px solid var(--line);border-radius:16px;padding:16px 18px 18px;box-shadow:0 10px 30px -18px rgba(10,70,55,.25);display:flex;flex-direction:column;overflow:auto}
+#page-vat .v30cop-hd{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;color:#0A5C48;margin-bottom:6px}
+#page-vat .v30cop-n{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;font-weight:700;background:#E6F3EE;border:1px solid #CFE6DB;color:#0A5C48;border-radius:999px;padding:3px 11px}
+#page-vat .v30cop-sec{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:12px 0 8px}
+#page-vat .v30cop-sec::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+#page-vat .v30cop-sec i{font-style:normal;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;background:#F1EBFD;color:#6D28D9;border-radius:999px;padding:1px 8px}
+#page-vat .v30cop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media(max-width:640px){#page-vat .v30cop-grid{grid-template-columns:1fr}}
+#page-vat .v30cop-grid .v30coitem-nm{font-size:12.5px;line-height:1.3;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#page-vat .v30cop-grid .v30coitem-id{font-size:10.5px;letter-spacing:.03em}
+#page-vat .v30cop-grid .v30coitem-main{padding:10px 40px 10px 13px}
+#page-vat .v30grid.one{grid-template-columns:minmax(0,1fr)}
+/* ===== v10.58: P.P.30 monthly table — richer, less washed out ===== */
+#page-vat .v30co-head{background:linear-gradient(120deg,#0A5C48 0%,#118A68 55%,#1AA37B 100%)}
+#page-vat .v30stats{background:linear-gradient(180deg,#F7FBF9,var(--card))}
+#page-vat .v30stat{position:relative}
+#page-vat .v30stat::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;background:var(--sc,#0E7A5F)}
+#page-vat .v30stat:nth-child(1){--sc:#16A34A}
+#page-vat .v30stat:nth-child(2){--sc:#D97706}
+#page-vat .v30stat:nth-child(3){--sc:#7C3AED}
+#page-vat .v30stat:nth-child(4){--sc:#0E7A5F}
+/* group headers: stronger tints */
+#page-vat .v30tbl thead tr.v30grp th.gS{background:linear-gradient(180deg,#D6EEE2,#BFE3D2);color:#0A5C48}
+#page-vat .v30tbl thead tr.v30grp th.gP{background:linear-gradient(180deg,#F8E9C6,#F0DCA9);color:#8A5A10}
+#page-vat .v30tbl thead tr.v30grp th.gN{background:linear-gradient(180deg,#E6DEF9,#D8CCF3);color:#5B21B6}
+#page-vat .v30tbl thead tr.v30grp th.gM{background:linear-gradient(180deg,#E9E4F0,#DED8E8);color:#4B4560}
+#page-vat .v30tbl thead tr.v30sub th.gS{background:#EAF7F0;color:#0A5C48}
+#page-vat .v30tbl thead tr.v30sub th.gP{background:#FCF4E4;color:#8A5A10}
+#page-vat .v30tbl thead tr.v30sub th.gN{background:#F3EEFC;color:#5B21B6}
+#page-vat .v30tbl thead tr.v30sub th.gM{background:#F4F1F8;color:#4B4560}
+/* body: warmer zebra + tinted group columns so each block reads apart */
+#page-vat .v30tbl tbody tr:nth-child(even):not(.v30blank) td{background:#FAFCFB}
+#page-vat .v30tbl tbody tr:not(.v30blank) td:nth-child(2),#page-vat .v30tbl tbody tr:not(.v30blank) td:nth-child(3){background:rgba(22,163,74,.045)}
+#page-vat .v30tbl tbody tr:not(.v30blank) td:nth-child(4),#page-vat .v30tbl tbody tr:not(.v30blank) td:nth-child(5){background:rgba(217,119,6,.05)}
+#page-vat .v30tbl tbody tr:not(.v30blank) td:nth-child(6),#page-vat .v30tbl tbody tr:not(.v30blank) td:nth-child(7),#page-vat .v30tbl tbody tr:not(.v30blank) td:nth-child(8){background:rgba(124,58,237,.045)}
+#page-vat .v30tbl tbody tr:hover:not(.v30blank) td{background:#E9F6F0}
+#page-vat .v30tbl tbody tr:not(.v30blank) td:nth-child(3){color:#15803D;font-weight:700}
+#page-vat .v30tbl tbody tr:not(.v30blank) td:nth-child(5){color:#B45309;font-weight:700}
+#page-vat .v30tbl tbody td.cf{color:#15803D}
+#page-vat .v30tbl tbody td.v30net{font-size:15px}
+/* footer: teal band, clearly the total */
+#page-vat .v30tbl tfoot td{background:linear-gradient(180deg,#E3F1EA,#D2E8DE)!important;border-top:2px solid #0E7A5F;color:#0A5C48;font-weight:800}
+/* status pill + row action buttons get a little life */
+#page-vat .v30pill{border-radius:999px;font-weight:800}
+#page-vat .v30tbl tbody tr.v30blank td{background:#FBFAF7;color:#B8C4BE}
 </style>
 <style id="whtSumCss">/* v9.32: WHT Summary — recurring-item detector + monthly reminder · vibrant · large type */
 .whtviewbar{margin:0 0 4px}
@@ -5930,7 +5981,7 @@ function _vPP30View(){loadVatPP30();_vPP30SeedGLR();
   var _spPkTxt=_spMax>0?('Peak: '+_spTH[_spPeak]+' '+(Math.round(_spMax/100000)/10)+'M'):'No monthly data yet';
   var _totP=cos.length*12,_prog=_totP>0?Math.round(_agF/_totP*100):0,_netCr=(_agN<0);
   var _pInt=function(v){return Math.round(+v||0).toLocaleString('en-US');};
-  h+='<div class="v30dash"><div class="v30dash-hd"><div class="v30dash-t">📊 Portfolio Overview</div><div class="v30dash-y">Tax Year '+_vPP30Year+' / '+(_vPP30Year-543)+'</div></div>'
+  h+='<div class="v30top"><div class="v30dash"><div class="v30dash-hd"><div class="v30dash-t">📊 Portfolio Overview</div><div class="v30dash-y">Tax Year '+_vPP30Year+' / '+(_vPP30Year-543)+'</div></div>'
    +'<div class="v30hero"><div class="v30hcard v30hnet '+(_netCr?'cr':'pay')+'"><div class="v30hn-k">💠 Net VAT Position</div><div class="v30hn-v">'+(_agN>=0?'':'−')+_ppNum(Math.abs(_agN))+'</div><span class="v30hn-badge">'+(_netCr?'▼ Credit / carry-forward':'▲ Payable')+'</span><div class="v30hn-split"><div class="v30hn-sp pay"><div class="l">▲ Payable periods</div><div class="v">'+(_ppNum(_agPay)||'0.00')+'</div></div><div class="v30hn-sp cr"><div class="l">▼ Credit periods</div><div class="v">'+(_ppNum(_agCr)||'0.00')+'</div></div></div></div>'
    +'<div class="v30hcard"><div class="v30hp-k">🗓️ Filing Progress</div><div class="v30hp-big">'+_agF+'<small> / '+_totP+' periods</small></div><div class="v30hp-track"><div class="v30hp-fill" style="width:'+_prog+'%"></div></div><div class="v30hp-s"><span><b>'+_prog+'%</b> of the year filed</span><span>12/12 filed: <b>'+_agC12+'</b> · with data <b>'+_agC+'</b>/'+cos.length+'</span></div></div></div>'
    +'<div class="v30dash-cards">'
@@ -5946,19 +5997,22 @@ function _vPP30View(){loadVatPP30();_vPP30SeedGLR();
    +'</div>'
    +'<div class="v30spark"><div class="v30sp-hd"><span>📈 Monthly Sales · 12 months</span><span class="pk">'+_spPkTxt+'</span></div><div class="v30sp-bars">'+_spBars+'</div></div>'
    +'</div>';
+  /* v10.57: company selector moves up beside the dashboard — grouped, English names, 13-digit tax id */
+  var _enName=function(c){var map={'0993000444558':'GLR Joint Venture','0993000469607':'GLE Joint Venture','0993000397142':'CGL Joint Venture','0993000441184':'ECM GLI Joint Venture','0993000488482':'ARG Joint Venture','0993000521820':'GRW Joint Venture','0105558085184':'Ultimus Co., Ltd.','0105555079906':'Winn Point Co., Ltd.','0105563066923':'GLI Holding Co., Ltd.','0105553002230':'Grandline Innovation Co., Ltd.'};if(map[c.taxid])return map[c.taxid];var n=c.name||'';var m=n.match(/^กิจการร่วมค้า\s*(.+)$/);if(m)return m[1]+' Joint Venture';m=n.match(/^(?:บริษัท|บจก\.?)\s*(.+?)\s*(?:จำกัด)?$/);if(m)return m[1]+' Co., Ltd.';return n;};
+  var _coCard=function(c){var filed=VATPP30.filter(function(r){return r.co===c.id&&(+r.beYear)===_vPP30Year&&r.normal!==false;}).length;var on=c.id===_vPP30Sel;
+    if(_vPP30CoEdit===c.id){return '<div class="v30coitem editing"><div class="v30ceform"><input class="v30cein" id="v30ceName" type="text" value="'+_eatt(c.name||'')+'" placeholder="Company name" autocomplete="off"><input class="v30cein" id="v30ceTax" type="text" inputmode="numeric" value="'+_eatt(c.taxid||'')+'" placeholder="Tax ID" autocomplete="off"><div class="v30cebtns"><button class="vbtn primary mini" data-pp30cosave="'+_eatt(c.id)+'" type="button">💾 Save</button><button class="vbtn ghost mini" data-pp30cocancel="1" type="button">Cancel</button></div></div></div>';}
+    return '<div class="v30coitem'+(on?' on':'')+'"><button class="v30coitem-main" data-pp30co="'+_eatt(c.id)+'" type="button"><div class="v30coitem-nm">'+esc(_enName(c))+'</div><div class="v30coitem-meta"><span class="v30coitem-id">'+esc(c.taxid||'-')+'</span><b class="'+(filed>=12?'v30full':(filed?'v30part':'v30none'))+'">'+filed+'/12</b></div></button><div class="v30coitem-act"><button class="v30coedit" data-pp30coedit="'+_eatt(c.id)+'" type="button" title="Edit name / Tax ID">✎</button><button class="v30codel" data-pp30codel="'+_eatt(c.id)+'" type="button" title="Remove company from list">✕</button></div></div>';};
+  var _jvs=cos.filter(function(c){return /^กิจการร่วมค้า/.test(c.name||'')||String(c.taxid||'').slice(0,3)==='099';});
+  var _ltds=cos.filter(function(c){return _jvs.indexOf(c)<0;});
+  h+='<div class="v30copanel"><div class="v30cop-hd"><span>🏢 Companies</span><span class="v30cop-n">'+cos.length+'</span></div>';
+  if(!cos.length)h+='<div class="v30empty">No companies found — set them up in the WHT module first.</div>';
+  if(_jvs.length){h+='<div class="v30cop-sec">Joint Ventures <i>'+_jvs.length+'</i></div><div class="v30cop-grid">';_jvs.forEach(function(c){h+=_coCard(c);});h+='</div>';}
+  if(_ltds.length){h+='<div class="v30cop-sec">Limited Companies <i>'+_ltds.length+'</i></div><div class="v30cop-grid">';_ltds.forEach(function(c){h+=_coCard(c);});h+='</div>';}
+  h+='</div></div>';
   h+='<div id="pp30Diag" class="v30diag" hidden></div>';
   var yopts='';years.forEach(function(y){yopts+='<option value="'+y+'"'+(y===_vPP30Year?' selected':'')+'>'+y+' / '+(y-543)+'</option>';});
   h+='<div class="v30yearbar"><span class="v30ylab">Tax Year (B.E.)</span><button class="v30ynav" id="pp30YPrev" type="button" title="Previous year">◀</button><select id="pp30Year" class="v30ysel">'+yopts+'</select><button class="v30ynav" id="pp30YNext" type="button" title="Next year">▶</button></div>';
-  h+='<div class="v30grid"><div class="v30colist">';
-  if(!cos.length){h+='<div class="v30empty">No companies found — set them up in the WHT module first.</div>';}
-  cos.forEach(function(c){var filed=VATPP30.filter(function(r){return r.co===c.id&&(+r.beYear)===_vPP30Year&&r.normal!==false;}).length;var on=c.id===_vPP30Sel;
-    if(_vPP30CoEdit===c.id){
-      h+='<div class="v30coitem editing"><div class="v30ceform"><input class="v30cein" id="v30ceName" type="text" value="'+_eatt(c.name||'')+'" placeholder="Company name" autocomplete="off"><input class="v30cein" id="v30ceTax" type="text" inputmode="numeric" value="'+_eatt(c.taxid||'')+'" placeholder="Tax ID" autocomplete="off"><div class="v30cebtns"><button class="vbtn primary mini" data-pp30cosave="'+_eatt(c.id)+'" type="button">💾 Save</button><button class="vbtn ghost mini" data-pp30cocancel="1" type="button">Cancel</button></div></div></div>';
-    }else{
-      h+='<div class="v30coitem'+(on?' on':'')+'"><button class="v30coitem-main" data-pp30co="'+_eatt(c.id)+'" type="button"><div class="v30coitem-nm">'+esc(c.name||'(no name)')+'</div><div class="v30coitem-meta"><span class="v30coitem-id">'+esc(c.taxid||'-')+'</span><b class="'+(filed>=12?'v30full':(filed?'v30part':'v30none'))+'">'+filed+'/12</b></div></button><div class="v30coitem-act"><button class="v30coedit" data-pp30coedit="'+_eatt(c.id)+'" type="button" title="Edit name / Tax ID">✎</button><button class="v30codel" data-pp30codel="'+_eatt(c.id)+'" type="button" title="Remove company from list">✕</button></div></div>';
-    }
-  });
-  h+='</div><div class="v30panel">';
+  h+='<div class="v30grid one"><div class="v30panel">';
   var selCo=null;for(var ci=0;ci<cos.length;ci++)if(cos[ci].id===_vPP30Sel){selCo=cos[ci];break;}
   if(!selCo){h+='<div class="v30empty">Select a company on the left to view its monthly P.P.30 summary.</div>';}
   else{
