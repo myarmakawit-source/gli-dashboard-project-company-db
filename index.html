@@ -4123,8 +4123,11 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-pdrepjv .apjv-tbl th{position:relative;text-align:left;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;background:#FBF5EA;color:#A38F6C;padding:7px 8px;border-bottom:1.5px solid #F1EADD;white-space:nowrap}
 /* v10.51: drag-to-resize handle on each column header */
 #page-pdrepjv .apjv-rsz{position:absolute;top:0;right:-4px;width:9px;height:100%;cursor:col-resize;z-index:4;user-select:none}
-#page-pdrepjv .apjv-rsz::after{content:"";position:absolute;top:22%;bottom:22%;right:4px;width:2px;border-radius:2px;background:transparent;transition:background .12s}
-#page-pdrepjv .apjv-rsz:hover::after{background:rgba(142,42,95,.5)}
+#page-pdrepjv .apjv-rsz::after{content:"";position:absolute;top:20%;bottom:20%;right:4px;width:2px;border-radius:2px;background:rgba(120,124,150,.30);transition:background .12s}
+#page-pdrepjv .apjv-rsz:hover::after{background:rgba(142,42,95,.75);width:3px}
+#page-pdrepjv .apjv-clrall{font-size:11px;font-weight:800;color:#C22F45;background:rgba(255,255,255,.72);border:1px solid #E9B9B9;border-radius:9px;padding:4px 11px;cursor:pointer;white-space:nowrap;transition:.12s}
+#page-pdrepjv .apjv-clrall:hover{background:#FBEDEA;border-color:#DE9A9A}
+#page-pdrepjv .apjv-clrall:active{transform:translateY(1px)}
 body.apjv-resizing,body.apjv-resizing *{cursor:col-resize!important;user-select:none!important}
 /* v10.51: per-column filter row (Excel-style text boxes) */
 #page-pdrepjv .apjv-fltr td{padding:3px 5px;border-bottom:1.5px solid #F1EADD;background:#FCF8F4}
@@ -4176,14 +4179,22 @@ body.apjv-resizing,body.apjv-resizing *{cursor:col-resize!important;user-select:
 #page-pdrepjv .apjv-sub-bank tfoot td{background:#EFF5FC;border-top-color:#C6DBF4}
 #page-pdrepjv .apjv-sub-bank tfoot td.ra{color:#2A5B9D}
 #page-pdrepjv .apjvempty td{padding:16px;text-align:center;color:#AEA795;font-style:italic;font-size:12px}
-/* v10.52: Liability AP — grouped-by-Index header & per-group subtotal rows */
-#page-pdrepjv .apjv-liab .apjv-grp td{background:#EDF2FB;border-top:1.5px solid #D2DEF2;border-bottom:1px solid #DCE6F5;padding:6px 9px}
-#page-pdrepjv .apjv-liab .apjv-grp .apjv-grp-nm{font-weight:900;font-size:11px;color:#1E3A6E;letter-spacing:.01em}
-#page-pdrepjv .apjv-liab .apjv-grp .apjv-grp-ct{margin-left:8px;font-size:9px;font-weight:800;color:#6E86AD;text-transform:uppercase;letter-spacing:.04em}
-#page-pdrepjv .apjv-liab .apjv-grp-none .apjv-grp-nm{color:#8A94A6;font-style:italic}
-#page-pdrepjv .apjv-liab .apjv-grpsub td{background:#F4F8FD;border-top:1px dashed #CBD9F0;border-bottom:1.5px solid #DCE6F5;font-weight:800;font-size:11px;padding:5px 9px}
-#page-pdrepjv .apjv-liab .apjv-grpsub .apjv-grpsub-lbl{color:#4A6394}
-#page-pdrepjv .apjv-liab .apjv-grpsub td.apjv-grpsubtot{color:#15315E;font-weight:900;font-variant-numeric:tabular-nums}
+/* v10.52: grouped-by-Index header & per-group subtotal rows — BOTH Liability & Asset */
+#page-pdrepjv .apjv-main .apjv-grp td{background:#DBE6F7;border-top:1.5px solid #BECFEC;border-bottom:1px solid #CBD9F1;padding:6px 9px}
+#page-pdrepjv .apjv-main .apjv-grp .apjv-grp-nm{font-weight:900;font-size:11px;color:#16305A;letter-spacing:.01em}
+#page-pdrepjv .apjv-main .apjv-grp .apjv-grp-ct{margin-left:8px;font-size:9px;font-weight:800;color:#56709E;text-transform:uppercase;letter-spacing:.04em}
+#page-pdrepjv .apjv-main .apjv-grp-none .apjv-grp-nm{color:#8A94A6;font-style:italic}
+/* per-Index subtotal — darker, stronger band so the Sum stands out */
+#page-pdrepjv .apjv-main .apjv-grpsub td{background:#C4D6F0;border-top:1.5px solid #A2BCE3;border-bottom:2px solid #93AFDE;font-weight:800;font-size:11px;padding:6px 9px}
+#page-pdrepjv .apjv-main .apjv-grpsub .apjv-grpsub-lbl{color:#213C6C}
+#page-pdrepjv .apjv-main .apjv-grpsub td.apjv-grpsubtot{color:#0D2544;font-weight:900;font-variant-numeric:tabular-nums}
+/* Asset side — green tint to match its column theme */
+#page-pdrepjv .apjv-asset .apjv-grp td{background:#D9EEE5;border-top-color:#AFDAC7;border-bottom-color:#C4E3D4}
+#page-pdrepjv .apjv-asset .apjv-grp .apjv-grp-nm{color:#0B5744}
+#page-pdrepjv .apjv-asset .apjv-grp .apjv-grp-ct{color:#3B8870}
+#page-pdrepjv .apjv-asset .apjv-grpsub td{background:#B6DECC;border-top-color:#86C7AC;border-bottom-color:#7ABEA2}
+#page-pdrepjv .apjv-asset .apjv-grpsub .apjv-grpsub-lbl{color:#0B4E3D}
+#page-pdrepjv .apjv-asset .apjv-grpsub td.apjv-grpsubtot{color:#083B2D}
 /* v10.52: Description / Company / Account-name — wrap to multiple lines instead of truncating (row grows) */
 #page-pdrepjv .apjvin.ta{display:block;field-sizing:content;resize:none;overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;line-height:1.35;min-height:26px;margin:0}
 /* v10.52: negative totals & per-Index subtotals shown in red parentheses */
@@ -4191,7 +4202,7 @@ body.apjv-resizing,body.apjv-resizing *{cursor:col-resize!important;user-select:
 #page-pdrepjv .apjv-asset .apjv-sec:not(.apjv-sub) tfoot td.ra.neg,
 #page-pdrepjv .apjv-sub-routine tfoot td.ra.neg,
 #page-pdrepjv .apjv-sub-bank tfoot td.ra.neg,
-#page-pdrepjv .apjv-liab .apjv-grpsub td.apjv-grpsubtot.neg{color:#C0392B}
+#page-pdrepjv .apjv-main .apjv-grpsub td.apjv-grpsubtot.neg{color:#C0392B}
 
 /* ===== Report AP JV — Position Dashboard (Liabilities vs Assets ready / awaiting) ===== */
 #page-pdrepjv .apjv-dash{position:relative;background:linear-gradient(180deg,#FFFFFF,#FAFBFE);border:1.5px solid #E1E8F3;border-radius:20px;padding:16px 18px 17px;margin:0 2px 20px;box-shadow:0 8px 26px -16px rgba(20,40,90,.26)}
@@ -7922,6 +7933,12 @@ function _apjvAdd(side){
   try{var el=document.querySelector('#apjvWrap tr[data-id="'+id+'"] input');if(el)el.focus();}catch(e){}
 }
 function _apjvDel(side,id){var arr=_apjvArr(side);for(var i=0;i<arr.length;i++){if(arr[i].id===id){arr.splice(i,1);break;}}try{saveApjv();}catch(e){}renderApjv();}
+/* Clear ALL entries on one side (Liability/Asset) for the current company — with confirmation */
+function _apjvClearAll(side){var arr=_apjvArr(side);
+  var nm=(side==='liab'?'Liability · AP':(side==='asset'?'Asset':(side==='routine'?'Routine expenses':(side==='bank'?'Bank statement':side))));
+  if(!arr.length){try{alert('ฝั่ง '+nm+' (บริษัท '+_apjvCo+') ยังไม่มีข้อมูลให้ลบ');}catch(e){}return;}
+  var ok=false;try{ok=confirm('ลบข้อมูลทั้งหมดของ '+nm+' — บริษัท '+_apjvCo+' ('+arr.length+' รายการ)?\n\n⚠ การลบนี้ย้อนกลับไม่ได้');}catch(e){ok=true;}
+  if(!ok)return;arr.length=0;try{saveApjv();}catch(e){}renderApjv();}
 
 /* v10.52: Description/Company/Account-name wrap over multiple lines — auto-grow textareas.
    Modern Chromium sizes them via CSS field-sizing:content; older engines use this JS fallback. */
@@ -7935,7 +7952,7 @@ function _apjvRowMain(side,r,grp){
     +'<td><textarea class="apjvin ta" data-f="desc" rows="1" placeholder="Description">'+_apjvE(r.desc||'')+'</textarea></td>'
     +'<td><textarea class="apjvin ta" data-f="co" rows="1" placeholder="Company">'+_apjvE(r.co||'')+'</textarea></td>'
     +'<td class="camt">'+_apjvAmtIn(r)+'</td>'
-    +'<td class="cidx"><input class="apjvin idx" data-f="idx" list="apjvIdxList" value="'+_apjvE(r.idx||'')+'" placeholder="Index"></td>'
+    +'<td class="cidx"><input class="apjvin idx" data-f="idx" list="apjvIdxList" value="'+_apjvE(r.idx||'')+'" title="'+_apjvE(r.idx||'')+'" placeholder="Index"></td>'
     +'<td class="apjvx"><button class="apjvdel" type="button" title="Delete row">✕</button></td>'
   +'</tr>';
 }
@@ -8031,11 +8048,11 @@ function _apjvGroupedBody(side,arr){
 function _apjvTotCell(cls,attr,n){return '<td class="camt ra '+cls+((+n||0)<-0.004?' neg':'')+'" '+attr+'>'+_apjvFmtAmt(n)+'</td>';}
 function _apjvMainSec(side){
   var arr=_apjvArr(side);
-  var body=(side==='liab')
+  var body=(side==='liab'||side==='asset')
     ? _apjvGroupedBody(side,arr)+_apjvAddTr(side,7,'Add entry')
     : _apjvSortByDate(arr,'date').map(function(r){return _apjvRowMain(side,r);}).join('')+_apjvAddTr(side,7,'Add entry');
   return '<div class="apjv-sec">'
-    +'<div class="apjv-sechd"><span>🧾 Entries</span></div>'
+    +'<div class="apjv-sechd"><span>🧾 Entries</span><button class="apjv-clrall" type="button" data-clrside="'+side+'" title="ลบข้อมูลทั้งหมดในฝั่งนี้ (บริษัท '+_apjvE(_apjvCo)+')">🗑 ลบทั้งหมด</button></div>'
     +'<div class="apjv-tw"><table class="apjv-tbl apjv-main" data-fside="'+side+'">'+_apjvThead(side)
     +'<tbody>'+body+'</tbody>'
     +'<tfoot><tr><td colspan="4">Total</td>'+_apjvTotCell('apjvtot','data-tot="'+side+'"',_apjvSum(arr))+'<td colspan="2"></td></tr></tfoot></table></div></div>';
@@ -8335,7 +8352,7 @@ function renderApjv(){
       try{saveApjv();}catch(_e){}
       if(f==='amt'){var tot=w.querySelector('.apjvtot[data-tot="'+side+'"]');if(tot){var tv=_apjvSum(_apjvArr(side));tot.textContent=_apjvFmtAmt(tv);tot.classList.toggle('neg',tv<-0.004);}}
       /* v10.52: live per-Index subtotal in the grouped Liability AP table */
-      if(f==='amt'&&side==='liab'){var grp=tr.getAttribute('data-grp');if(grp!=null){var tbl=tr.closest('table');if(tbl){var gs=0,ger=tbl.querySelectorAll('tbody tr[data-id][data-grp="'+grp+'"]');for(var gi=0;gi<ger.length;gi++){var grr=_apjvFind('liab',ger[gi].getAttribute('data-id'));if(grr)gs+=_apjvNum(grr.amt);}var gsc=tbl.querySelector('.apjv-grpsubtot[data-grp="'+grp+'"]');if(gsc){gsc.textContent=_apjvFmtAmt(gs);gsc.classList.toggle('neg',gs<-0.004);}}}}
+      if(f==='amt'&&(side==='liab'||side==='asset')){var grp=tr.getAttribute('data-grp');if(grp!=null){var tbl=tr.closest('table');if(tbl){var gs=0,ger=tbl.querySelectorAll('tbody tr[data-id][data-grp="'+grp+'"]');for(var gi=0;gi<ger.length;gi++){var grr=_apjvFind(side,ger[gi].getAttribute('data-id'));if(grr)gs+=_apjvNum(grr.amt);}var gsc=tbl.querySelector('.apjv-grpsubtot[data-grp="'+grp+'"]');if(gsc){gsc.textContent=_apjvFmtAmt(gs);gsc.classList.toggle('neg',gs<-0.004);}}}}
       if(f==='amt'||f==='idx')_apjvSyncDash();
     });
     /* v10.50: amount cell edits raw while focused, shows formatted (commas / red parentheses) when blurred */
@@ -8344,7 +8361,7 @@ function renderApjv(){
     w.addEventListener('change',function(e){var el=e.target;
       if(el&&el.id==='apjvImportFile'){var f=el.files&&el.files[0];el.value='';if(f)_apjvImportExcel(f);return;}
       /* v10.52: an Index edit was committed on the Liability AP side — re-group (deferred so a click that re-renders wins first) */
-      if(el&&el.classList&&el.classList.contains('idx')){var tr=el.closest('tr');if(tr&&tr.getAttribute('data-side')==='liab'){_apjvPendingRegroup=true;setTimeout(function(){if(_apjvPendingRegroup){_apjvPendingRegroup=false;renderApjv();}},0);}}
+      if(el&&el.classList&&el.classList.contains('idx')){var tr=el.closest('tr');if(tr&&['liab','asset'].indexOf(tr.getAttribute('data-side'))>=0){_apjvPendingRegroup=true;setTimeout(function(){if(_apjvPendingRegroup){_apjvPendingRegroup=false;renderApjv();}},0);}}
     });
     w.addEventListener('click',function(e){
       var t=e.target;
@@ -8354,6 +8371,8 @@ function renderApjv(){
       if(cot){_apjvCo=cot.getAttribute('data-co');try{localStorage.setItem('gli_apjv_co',_apjvCo);}catch(_e){}renderApjv();return;}
       var chk=t.closest?t.closest('.apjvchk'):null;
       if(chk){var ctr=chk.closest('tr');if(ctr){var cr=_apjvFind(ctr.getAttribute('data-side'),ctr.getAttribute('data-id'));if(cr){cr.rcv=cr.rcv?0:1;try{saveApjv();}catch(_e){}chk.classList.toggle('on',!!cr.rcv);}}return;}
+      var clr=t.closest?t.closest('.apjv-clrall'):null;
+      if(clr){_apjvClearAll(clr.getAttribute('data-clrside'));return;}
       var add=t.closest?t.closest('.apjv-addr'):null;
       if(add){_apjvAdd(add.getAttribute('data-side'));return;}
       var del=t.closest?t.closest('.apjvdel'):null;
