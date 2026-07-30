@@ -2520,7 +2520,7 @@ body{padding-left:236px;padding-right:8px}
 #page-vat .v30node.close .v30node-a{background:linear-gradient(120deg,#0A5C48,#118A68);box-shadow:0 6px 18px -6px rgba(10,92,72,.5)}
 #page-vat .v30chain h3::before{content:'';display:inline-block;width:12px;height:2px;border-radius:2px;background:linear-gradient(90deg,#0E7A5F,#7A5FD0);margin-right:8px;vertical-align:3px}
 /* ===== v10.57: dashboard left · grouped company selector right ===== */
-#page-vat .v30top{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:16px;align-items:stretch;margin-bottom:16px}
+#page-vat .v30top{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:16px;align-items:start;margin-bottom:16px}
 @media(max-width:1180px){#page-vat .v30top{grid-template-columns:1fr}}
 #page-vat .v30top .v30dash{margin-bottom:0;min-width:0}
 #page-vat .v30top .v30hero{grid-template-columns:1fr}
@@ -2531,7 +2531,7 @@ body{padding-left:236px;padding-right:8px}
 #page-vat .v30cop-sec{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:12px 0 8px}
 #page-vat .v30cop-sec::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
 #page-vat .v30cop-sec i{font-style:normal;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;background:#F1EBFD;color:#6D28D9;border-radius:999px;padding:1px 8px}
-#page-vat .v30cop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#page-vat .v30cop-grid{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:8px}
 @media(max-width:640px){#page-vat .v30cop-grid{grid-template-columns:1fr}}
 #page-vat .v30cop-grid .v30coitem-nm{font-size:12.5px;line-height:1.3;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 #page-vat .v30cop-grid .v30coitem-id{font-size:10.5px;letter-spacing:.03em}
@@ -18938,6 +18938,9 @@ var _RT_FIX={
   arday:{act:'ทำ AR Aging เร่งเก็บหนี้/เรียกเงินประกันผลงาน กำหนดเครดิตเทอมให้ชัด และพิจารณา Factoring เปลี่ยนลูกหนี้เป็นเงินสด เพื่อลดระยะเวลาเก็บหนี้',keep:'คงรอบเก็บหนี้ให้สั้น เพื่อให้เงินเข้าเร็วและลดความเสี่ยงหนี้สูญ'},
   invday:{act:'บริหารสินค้าคงเหลือให้หมุนเร็วขึ้น: ลดของค้างสต็อก/ล้าสมัย วางแผนสั่งซื้อ-ผลิตตามความต้องการจริง เพื่อลดเงินจมในสต็อก',keep:'คงรอบขายสินค้าให้สั้น สินค้าหมุนเร็ว ไม่จมทุน'},
   invturn:{act:'เพิ่มรอบหมุนสินค้าคงเหลือ: ลดของค้างสต็อก/ล้าสมัย และวางแผนสั่งซื้อ-ผลิตตามความต้องการจริง เพื่อให้สินค้าหมุนหลายรอบต่อปี',keep:'คงรอบหมุนสินค้าให้สูง สินค้าหมุนเร็ว เงินไม่จมในสต็อก'},
+  arturn:{act:'เพิ่มรอบหมุนลูกหนี้: เร่งเก็บหนี้ ทำ AR Aging กำหนดเครดิตเทอมให้ชัด และพิจารณา Factoring เพื่อให้เก็บเงินได้หลายรอบต่อปี',keep:'คงรอบหมุนลูกหนี้ให้สูง เก็บเงินเร็ว เงินไม่จมในลูกหนี้'},
+  apturn:{info:'รอบหมุนเจ้าหนี้ต่ำ = ยืดจ่ายได้นาน ช่วยถนอมเงินสด แต่ไม่ควรต่ำจนเสียเครดิตกับซัพพลายเออร์ · ควรดูคู่กับรอบหมุนลูกหนี้และวงจรเงินสด'},
+  ccc:{act:'ลดวงจรเงินสด: เก็บหนี้เร็วขึ้น (ลด DSO) ขายสินค้าเร็วขึ้น (ลด DIO) และเจรจายืดจ่ายเจ้าหนี้พอประมาณ (เพิ่ม DPO) เพื่อลดเงินทุนหมุนเวียนที่จมในวงจรดำเนินงาน',keep:'คงวงจรเงินสดให้สั้น ใช้เงินทุนหมุนเวียนน้อย สภาพคล่องดี'},
   apday:{info:'บริหารรอบชำระเจ้าหนี้ให้สมดุล: จ่ายช้าลงพอประมาณเพื่อถนอมเงินสด แต่ไม่นานจนเสียเครดิตกับซัพพลายเออร์ · ควรดูคู่กับระยะเวลาเก็บหนี้ (วงจรเงินสด = เก็บหนี้ + ขายสินค้า − ชำระหนี้)'}
 };
 function _fsRatioFixText(key,rt){ var f=_RT_FIX[key]; if(!f)return ''; if(f.info)return f.info; return (rt==='good')?(f.keep||f.act||''):(f.act||''); }
@@ -18948,6 +18951,7 @@ function _fsRatioModal(key){
   var ctx=_fsRatioCtx; if(!ctx||!ctx.R[key])return; var R=ctx.R[key];
   _fsRatioModalClose();
   function calcStrOf(sp){ if(!sp)return '—'; var m=_fsMoney;
+    if(sp.ccc)return Math.round(sp.ar_d)+' + '+Math.round(sp.inv_d)+' − '+Math.round(sp.ap_d)+' วัน';
     if(sp.op==='−')return m(sp.nv)+' − '+m(sp.dv);
     if(sp.days)return m(sp.nv)+' ÷ '+m(sp.dv)+' × '+ctx.pdays;
     if(sp.pct)return m(sp.nv)+' ÷ '+m(sp.dv)+' × 100';
@@ -19059,7 +19063,7 @@ function _fsRenderRatio(){
       de:eqPos?dd.tl/dd.eq:null, debt:tav?dd.tl/dd.ta*100:null, eqr:tav?dd.eq/dd.ta*100:null, icov:(Math.abs(dd.fin)>=0.5)?dd.op/dd.fin:null,
       gm:rvv?dd.gp/dd.rev*100:null, om:rvv?dd.op/dd.rev*100:null, nm:rvv?dd.np/dd.rev*100:null,
       roa:tav?dd.np*ann/dd.ta*100:null, roe:eqPos?dd.np*ann/dd.eq*100:null,
-      ato:tav?dd.rev*ann/dd.ta:null, arday:rvv?dd.ar/dd.rev*pdays:null, invday:cgv?dd.inv/dd.cogs*pdays:null, invturn:(Math.abs(dd.inv)>=0.005)?dd.cogs*ann/dd.inv:null, apday:cgv?dd.ap/dd.cogs*pdays:null }; }
+      ato:tav?dd.rev*ann/dd.ta:null, arday:rvv?dd.ar/dd.rev*pdays:null, arturn:(Math.abs(dd.ar)>=0.005)?dd.rev*ann/dd.ar:null, invday:cgv?dd.inv/dd.cogs*pdays:null, invturn:(Math.abs(dd.inv)>=0.005)?dd.cogs*ann/dd.inv:null, apday:cgv?dd.ap/dd.cogs*pdays:null, apturn:(Math.abs(dd.ap)>=0.005)?dd.cogs*ann/dd.ap:null, ccc:(rvv&&cgv)?(dd.ar/dd.rev*pdays+dd.inv/dd.cogs*pdays-dd.ap/dd.cogs*pdays):null }; }
   var c=calc(d), p=pd?calc(pd):null;
   var DEFS={
     current:{th:'อัตราส่วนสภาพคล่อง',en:'Current ratio',unit:'x',good:1.5,ok:1,scale:3,formula:'สินทรัพย์หมุนเวียน ÷ หนี้สินหมุนเวียน',
@@ -19092,12 +19096,18 @@ function _fsRenderRatio(){
       desc:'รายได้เป็นกี่เท่าของสินทรัพย์ · บอกว่าใช้สินทรัพย์สร้างยอดขายได้มีประสิทธิภาพแค่ไหน · ยิ่งสูงยิ่งหมุนเงินเร็ว (ธุรกิจที่ใช้สินทรัพย์หนักมักมีค่านี้ต่ำโดยธรรมชาติ)'},
     arday:{th:'ระยะเวลาเก็บหนี้',en:'Collection days (DSO)',unit:'days',good:45,ok:75,rev:true,scale:120,formula:'ลูกหนี้ ÷ รายได้ × '+pdays,
       desc:'โดยเฉลี่ยใช้เวลากี่วันกว่าจะเก็บเงินจากลูกหนี้ได้ · ยิ่งน้อยยิ่งดี (เงินเข้าเร็ว) · นานเกินไปแปลว่าเงินจมอยู่ในลูกหนี้ เสี่ยงหนี้สูญและต้องหาเงินทุนหมุนเวียนมาประคอง'},
+    arturn:{th:'อัตราส่วนหมุนเวียนลูกหนี้',en:'Receivables turnover',unit:'x',good:8,ok:4,scale:15,formula:'รายได้ ÷ ลูกหนี้การค้า'+(interim?(' × '+ann.toFixed(2)):''),
+      desc:'จำนวนรอบที่เก็บเงินจากลูกหนี้ได้ในหนึ่งปี · ยิ่งสูงยิ่งดี (เก็บเงินเร็ว เงินไม่จมในลูกหนี้ เสี่ยงหนี้สูญน้อย) · เป็นส่วนกลับของระยะเวลาเก็บหนี้ (DSO ≈ '+pdays+' ÷ รอบหมุน)'},
     invday:{th:'ระยะเวลาขายสินค้า',en:'Inventory days (DIO)',unit:'days',good:60,ok:120,rev:true,scale:180,formula:'สินค้าคงเหลือ ÷ ต้นทุนขาย × '+pdays,
       desc:'โดยเฉลี่ยสินค้าอยู่ในสต็อกกี่วันก่อนขายออก · ยิ่งน้อยยิ่งดี (สินค้าหมุนเร็ว ไม่จมทุน ไม่เสี่ยงล้าสมัย/เสื่อมสภาพ)'},
     invturn:{th:'อัตราส่วนหมุนเวียนสินค้าคงเหลือ',en:'Inventory turnover',unit:'x',good:6,ok:3,scale:12,formula:'ต้นทุนขาย ÷ สินค้าคงเหลือ'+(interim?(' × '+ann.toFixed(2)):''),
       desc:'จำนวนรอบที่กิจการขายและเติมสินค้าคงเหลือใหม่ในหนึ่งปี · ยิ่งสูงยิ่งดี (สินค้าหมุนเร็ว เงินไม่จมในสต็อก ลดความเสี่ยงสินค้าล้าสมัย/เสื่อมสภาพ) · เป็นส่วนกลับของระยะเวลาขายสินค้า (DIO ≈ '+pdays+' ÷ รอบหมุน) · ค่าที่เหมาะสมขึ้นกับประเภทธุรกิจ (ค้าปลีก/อาหารมักหมุนเร็ว งานโครงการ/สินค้าทุนมักหมุนช้า)'},
     apday:{th:'ระยะเวลาชำระหนี้',en:'Payment days (DPO)',unit:'days',info:true,scale:180,formula:'เจ้าหนี้ ÷ ต้นทุนขาย × '+pdays,
-      desc:'โดยเฉลี่ยใช้เวลากี่วันกว่าจะจ่ายเจ้าหนี้การค้า · จ่ายช้าลงช่วยถนอมเงินสด แต่ถ้านานเกินไปอาจเสียเครดิตกับซัพพลายเออร์ · ควรดูคู่กับระยะเวลาเก็บหนี้ (วงจรเงินสด = เก็บหนี้ + ขายสินค้า − ชำระหนี้)'}
+      desc:'โดยเฉลี่ยใช้เวลากี่วันกว่าจะจ่ายเจ้าหนี้การค้า · จ่ายช้าลงช่วยถนอมเงินสด แต่ถ้านานเกินไปอาจเสียเครดิตกับซัพพลายเออร์ · ควรดูคู่กับระยะเวลาเก็บหนี้ (วงจรเงินสด = เก็บหนี้ + ขายสินค้า − ชำระหนี้)'},
+    apturn:{th:'อัตราส่วนหมุนเวียนเจ้าหนี้',en:'Payables turnover',unit:'x',info:true,scale:15,formula:'ต้นทุนขาย ÷ เจ้าหนี้การค้า'+(interim?(' × '+ann.toFixed(2)):''),
+      desc:'จำนวนรอบที่จ่ายเจ้าหนี้การค้าในหนึ่งปี · ยิ่งต่ำ = ยืดจ่ายได้นาน (ถนอมเงินสด) แต่ต่ำเกินไปอาจเสียเครดิตกับซัพพลายเออร์ · เป็นส่วนกลับของระยะเวลาชำระหนี้ (DPO) · ควรดูคู่กับรอบหมุนลูกหนี้และวงจรเงินสด'},
+    ccc:{th:'วงจรเงินสด',en:'Cash conversion cycle (CCC)',unit:'days',good:30,ok:60,rev:true,scale:150,formula:'ระยะเวลาเก็บหนี้ + ระยะเวลาขายสินค้า − ระยะเวลาชำระหนี้ (DSO + DIO − DPO)',
+      desc:'จำนวนวันที่เงินสดจมในวงจรดำเนินงาน ตั้งแต่จ่ายค่าซื้อของจนเก็บเงินจากลูกค้าได้ · ยิ่งน้อยยิ่งดี (ใช้เงินทุนหมุนเวียนน้อย) · ติดลบ = เก็บเงินจากลูกค้าได้ก่อนจ่ายซัพพลายเออร์ (ดีมาก) · เป็นตัวชี้วัดรวมของประสิทธิภาพการบริหารเงินทุนหมุนเวียน'}
   };
   function big(v,u){ if(v==null)return '<span class="rt-na">—</span>'; if(u==='x')return (v<0?'−':'')+Math.abs(v).toFixed(2)+'<i>×</i>'; if(u==='%')return v.toFixed(1)+'<i>%</i>'; if(u==='days')return Math.round(v)+'<i>วัน</i>'; if(u==='money')return _fsMoney(v); return ''+v; }
   function plain(v,u){ if(v==null)return '—'; if(u==='x')return (v<0?'−':'')+Math.abs(v).toFixed(2)+'×'; if(u==='%')return v.toFixed(1)+'%'; if(u==='days')return Math.round(v)+' วัน'; if(u==='money')return _fsMoney(v); return ''+v; }
@@ -19123,7 +19133,7 @@ function _fsRenderRatio(){
   var gL=group('💧','สภาพคล่อง','Liquidity',['current','quick','cash','wc']);
   var gS=group('🏛️','โครงสร้างเงินทุน','Solvency &amp; leverage',['de','debt','eqr','icov']);
   var gP=group('📈','ความสามารถในการทำกำไร','Profitability',['gm','om','nm','roa','roe']);
-  var gE=group('⚙️','ประสิทธิภาพการดำเนินงาน','Efficiency &amp; activity',['ato','arday','invday','invturn','apday']);
+  var gE=group('⚙️','ประสิทธิภาพการดำเนินงาน','Efficiency &amp; activity',['ato','arday','arturn','invday','invturn','apday','apturn','ccc']);
   function hero(th,en,key){ var def=DEFS[key],v=c[key],pv=p?p[key]:null,rt=rate(v,def);
     var f=0; if(v!=null){ if(def.rev)f=Math.min(100,Math.abs(v)/(def.scale||1)*100); else f=v<=0?0:Math.min(100,v/(def.scale||1)*100); }
     return '<div class="rt-hero rt-'+rt+'" data-rt="'+key+'">'+
@@ -19141,7 +19151,7 @@ function _fsRenderRatio(){
     eqr:{nv:dd.eq,dv:dd.ta,pct:1,src:['eq','ta']}, icov:{nv:dd.op,dv:dd.fin,src:['rev','cogs','sga','fin']},
     gm:{nv:dd.gp,dv:dd.rev,pct:1,src:['rev','cogs']}, om:{nv:dd.op,dv:dd.rev,pct:1,src:['rev','cogs','sga']}, nm:{nv:dd.np,dv:dd.rev,pct:1,src:['rev','xall']},
     roa:{nv:dd.np*ann,dv:dd.ta,pct:1,src:['rev','xall','ta']}, roe:{nv:dd.np*ann,dv:dd.eq,pct:1,src:['rev','xall','eq']},
-    ato:{nv:dd.rev*ann,dv:dd.ta,src:['rev','ta']}, arday:{nv:dd.ar,dv:dd.rev,days:1,src:['ar','rev']}, invday:{nv:dd.inv,dv:dd.cogs,days:1,src:['inv','cogs']}, invturn:{nv:dd.cogs*ann,dv:dd.inv,src:['cogs','inv']}, apday:{nv:dd.ap,dv:dd.cogs,days:1,src:['ap','cogs']}
+    ato:{nv:dd.rev*ann,dv:dd.ta,src:['rev','ta']}, arday:{nv:dd.ar,dv:dd.rev,days:1,src:['ar','rev']}, arturn:{nv:dd.rev*ann,dv:dd.ar,src:['rev','ar']}, invday:{nv:dd.inv,dv:dd.cogs,days:1,src:['inv','cogs']}, invturn:{nv:dd.cogs*ann,dv:dd.inv,src:['cogs','inv']}, apday:{nv:dd.ap,dv:dd.cogs,days:1,src:['ap','cogs']}, apturn:{nv:dd.cogs*ann,dv:dd.ap,src:['cogs','ap']}, ccc:{ccc:1,ar_d:(Math.abs(dd.rev)>=0.005?dd.ar/dd.rev*pdays:0),inv_d:(Math.abs(dd.cogs)>=0.005?dd.inv/dd.cogs*pdays:0),ap_d:(Math.abs(dd.cogs)>=0.005?dd.ap/dd.cogs*pdays:0),src:['ar','rev','inv','cogs','ap']}
   };}
   function cmpOf(v,pv,def){ if(v==null||pv==null)return null; var dd=v-pv, eps=(def.unit==='days')?0.5:0.005;
     if(Math.abs(dd)<eps)return {dir:'flat',text:'ทรงตัว'};
@@ -19167,7 +19177,7 @@ function _fsRenderRatio(){
     groups:[{icon:'💧',th:'สภาพคล่อง',en:'Liquidity',keys:['current','quick','cash','wc']},
       {icon:'🏛️',th:'โครงสร้างเงินทุน',en:'Solvency & leverage',keys:['de','debt','eqr','icov']},
       {icon:'📈',th:'ความสามารถในการทำกำไร',en:'Profitability',keys:['gm','om','nm','roa','roe']},
-      {icon:'⚙️',th:'ประสิทธิภาพการดำเนินงาน',en:'Efficiency & activity',keys:['ato','arday','invday','invturn','apday']}],
+      {icon:'⚙️',th:'ประสิทธิภาพการดำเนินงาน',en:'Efficiency & activity',keys:['ato','arday','arturn','invday','invturn','apday','apturn','ccc']}],
     meta:{sub:sub,cnt:cnt,company:(typeof _fsTplCo==='function'?_fsTplCo():'บริษัท'),yc:_fsRatioCtx.yc,yp:_fsRatioCtx.yp,hasP:hasP,verdict:an.verdict,vclass:an.vclass,interim:interim}}; }catch(_rle){}
   /* v9.203: ปุ่มแดชบอร์ด Ratio → PDF ย้ายมาอยู่ในแท็บ Ratio (จากแถบเครื่องมือด้านบน) — อยู่คู่กับอัตราส่วนที่มันสรุป */
   var dashBtn='<button class="fsexp pdf rt-dashbtn" id="fsRatioPdf" title="Build a professional financial-ratio dashboard as PDF (opens the print window → save as PDF)">📊 Ratio Dashboard → PDF</button>';
