@@ -3918,7 +3918,7 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 
 /* report table */
 #page-adv .advtblwrap{overflow-x:auto;border:1px solid var(--adv-line);border-radius:14px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-#page-adv table.advtbl{width:100%;border-collapse:collapse;font-size:13px;min-width:1360px}
+#page-adv table.advtbl{width:100%;border-collapse:collapse;font-size:13px;min-width:1480px}
 #page-adv .advtbl thead th{position:sticky;top:0;z-index:2;background:linear-gradient(180deg,var(--adv-brand),var(--adv-brand-d));color:#fff;font-weight:800;font-size:12.5px;text-align:right;padding:11px 12px;white-space:nowrap;border-bottom:2px solid var(--adv-brand-d)}
 #page-adv .advtbl thead th.l{text-align:left}#page-adv .advtbl thead th.c{text-align:center}
 #page-adv .advtbl thead th small{display:block;font-size:8.5px;font-weight:700;opacity:.82;letter-spacing:.04em}
@@ -3977,6 +3977,35 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-adv .advmini:hover{background:var(--adv-warn-t);border-color:var(--adv-warn)}
 #page-adv .advmini.pay{color:var(--adv-pos);margin-right:5px}
 #page-adv .advmini.pay:hover{background:var(--adv-pos-bg);border-color:var(--adv-pos)}
+#page-adv .advmini.pay.off{color:#9AA3AF;border-color:#E1E5EC;background:#F5F6F8;cursor:not-allowed;opacity:.85}
+#page-adv .advmini.pay.off:hover{background:#F5F6F8;border-color:#E1E5EC}
+/* Issue Document column */
+#page-adv .advmini.issue{color:#1E5FAE;border-color:#CBDCF0}
+#page-adv .advmini.issue:hover{background:#EAF1FB;border-color:#1E5FAE}
+#page-adv .advbadge.issued{background:#EAF1FB;color:#1E5FAE;border-color:#C6D8F1}
+#page-adv .advnostat{margin-top:3px;font-size:9.5px;font-weight:700;color:#AEB4BF;letter-spacing:.03em;text-transform:uppercase}
+#page-adv .advcode,#page-adv .advcode.empty{display:inline-block;margin-top:4px;font-family:'Courier New',ui-monospace,monospace;font-size:10.5px;font-weight:800;letter-spacing:.01em;color:#1E3A6E;background:#F1F5FB;border:1px dashed #C6D8F1;border-radius:7px;padding:2px 8px;cursor:pointer}
+#page-adv .advcode:hover{background:#E4EDF9;border-style:solid}
+#page-adv .advcode.empty{color:#8A94A6;font-family:inherit}
+#page-adv .advcode2{margin-top:4px;font-family:'Courier New',ui-monospace,monospace;font-size:10.5px;font-weight:800;color:#0C6A56}
+/* Feature: wrapping cells + Excel-like column resize & per-column filter dropdowns */
+#page-adv .advtbl td.l{white-space:normal;word-break:break-word;overflow-wrap:anywhere}
+#page-adv .advtbl thead th{position:relative}
+#page-adv .advth-l{display:inline-block;vertical-align:middle}
+#page-adv .advfltbtn{margin-left:5px;border:0;background:rgba(255,255,255,.22);color:#fff;font-size:9px;font-weight:900;line-height:1;padding:3px 5px;border-radius:5px;cursor:pointer;vertical-align:middle;transition:.1s}
+#page-adv .advfltbtn:hover{background:rgba(255,255,255,.45)}
+#page-adv .advfltbtn.on{background:#FFDE86;color:#7A4B00}
+#page-adv .advrsz{position:absolute;top:0;right:-3px;width:8px;height:100%;cursor:col-resize;z-index:3;user-select:none}
+#page-adv .advrsz::after{content:"";position:absolute;top:24%;bottom:24%;right:3px;width:2px;border-radius:2px;background:rgba(255,255,255,.38)}
+#page-adv .advrsz:hover::after{background:#fff;width:3px}
+body.adv-resizing{cursor:col-resize!important;user-select:none!important}
+.advfltpop{position:absolute;z-index:9999;background:#fff;border:1px solid #D8C9A6;border-radius:12px;box-shadow:0 18px 44px -18px rgba(60,40,10,.45);padding:11px;width:230px;font-family:-apple-system,'Sarabun',sans-serif}
+.advfltpop-t{font-size:11px;font-weight:800;color:#7A5A1E;margin-bottom:7px}
+.advfltpop-in{width:100%;box-sizing:border-box;border:1.5px solid #E0CFA6;border-radius:9px;padding:8px 10px;font-size:13px;font-family:inherit;outline:none}
+.advfltpop-in:focus{border-color:#C98A2E;box-shadow:0 0 0 3px rgba(201,138,46,.16)}
+.advfltpop-x{margin-top:8px;text-align:right}
+.advfltpop-clr{border:1px solid #E0CFA6;background:#FBF6EC;color:#7A5A1E;font-size:11px;font-weight:800;padding:5px 12px;border-radius:8px;cursor:pointer}
+.advfltpop-clr:hover{background:#F3E8D0}
 #page-adv .adviconbtn{border:1px solid var(--adv-line);background:#fff;color:var(--adv-ink2);font-size:13px;font-weight:800;width:30px;height:30px;line-height:1;border-radius:8px;cursor:pointer;margin-left:4px;transition:.1s}
 #page-adv .adviconbtn:hover{background:var(--adv-brand-t);border-color:var(--adv-brand);color:var(--adv-brand-d)}
 #page-adv .adviconbtn.del:hover{background:#FBEAE6;border-color:var(--adv-neg);color:var(--adv-neg)}
@@ -7442,6 +7471,62 @@ function _advSlipCell(e){
   if(e.slip)return '<span class="advchip slip" data-open="slip" data-id="'+e.id+'" title="'+_advEsc(e.slip.name)+' · '+_advBytes(e.slip.size)+'">🧾 Slip</span>';
   return '<button type="button" class="advmini" data-slip="'+e.id+'" title="Attach payment slip">＋ Add slip</button>';
 }
+/* v10.x: Excel-like column resize (drag) + per-column filter dropdowns + wrapping cells */
+var ADVCOLW={};try{ADVCOLW=JSON.parse(localStorage.getItem('gli_adv_colw')||'{}')||{};}catch(_ace){ADVCOLW={};}
+if(!ADVCOLW||typeof ADVCOLW!=='object')ADVCOLW={};
+function _advColwSave(){try{localStorage.setItem('gli_adv_colw',JSON.stringify(ADVCOLW));}catch(e){}}
+var _advFilt={};
+var _ADV_COLS=[
+  {k:'seq',l:'#',c:'c'},
+  {k:'company',l:'Company',c:'c',f:1,rsz:1},
+  {k:'date',l:'Payment Date',c:'l',f:1,rsz:1},
+  {k:'payer',l:'Payer',c:'l',f:1,rsz:1},
+  {k:'payee',l:'Payee',c:'l',f:1,rsz:1},
+  {k:'desc',l:'Description',c:'l',f:1,rsz:1},
+  {k:'ref',l:'Ref No.',c:'l',f:1,rsz:1},
+  {k:'amount',l:'Amount (THB)',c:'',f:1,rsz:1},
+  {k:'docs',l:'Documents',c:'l',rsz:1},
+  {k:'issue',l:'Issue Doc',c:'c',f:1,rsz:1},
+  {k:'status',l:'Status',c:'c',f:1,rsz:1},
+  {k:'slip',l:'Slip',c:'c'},
+  {k:'act',l:'Actions',c:'c'}
+];
+function _advThead(){
+  return '<thead><tr>'+_ADV_COLS.map(function(col,ci){
+    var w=ADVCOLW[col.k],st=(w?(' style="width:'+w+'px;min-width:'+w+'px"'):'');
+    return '<th class="'+(col.c||'')+'"'+st+'><span class="advth-l">'+_advEsc(col.l)+'</span>'
+      +(col.f?'<button type="button" class="advfltbtn'+(((_advFilt[col.k]||'')+'').trim()?' on':'')+'" data-fcol="'+col.k+'" title="Filter / ค้นหาแบบ Excel">▾</button>':'')
+      +(col.rsz?'<span class="advrsz" data-col="'+col.k+'" title="ลากเพื่อปรับความกว้างคอลัมน์"></span>':'')
+      +'</th>';
+  }).join('')+'</tr></thead>';
+}
+function _advApplyFilters(){
+  var tb=document.querySelector('#advWrap .advtbl');if(!tb)return;
+  var idx={};for(var c=0;c<_ADV_COLS.length;c++)idx[_ADV_COLS[c].k]=c;
+  var keys=Object.keys(_advFilt).filter(function(k){return ((_advFilt[k]||'')+'').trim()!=='';});
+  var rows=tb.querySelectorAll('tbody tr.advrow');
+  for(var i=0;i<rows.length;i++){var tr=rows[i],show=true;
+    for(var j=0;j<keys.length;j++){var k=keys[j],q=((_advFilt[k]||'')+'').trim().toLowerCase().replace(/,/g,'');
+      var cell=tr.children[idx[k]],v=cell?((cell.textContent||'')+'').toLowerCase().replace(/,/g,''):'';
+      if(v.indexOf(q)<0){show=false;break;}}
+    tr.style.display=show?'':'none';}
+}
+function _advCloseFltPop(){var p=document.getElementById('advFltPop');if(p&&p.parentNode)p.parentNode.removeChild(p);}
+function _advOpenFltPop(btn){
+  var key=btn.getAttribute('data-fcol');var open=(document.getElementById('advFltPop')||{}).getAttribute&&document.getElementById('advFltPop').getAttribute('data-fcol')===key;
+  _advCloseFltPop();if(open)return;
+  var r=btn.getBoundingClientRect();
+  var p=document.createElement('div');p.id='advFltPop';p.className='advfltpop';p.setAttribute('data-fcol',key);
+  p.innerHTML='<div class="advfltpop-t">🔎 ค้นหาในคอลัมน์นี้</div><input type="text" class="advfltpop-in" placeholder="พิมพ์เพื่อค้นหา…" value="'+_advEsc(_advFilt[key]||'')+'"><div class="advfltpop-x"><button type="button" class="advfltpop-clr">ล้างตัวกรอง</button></div>';
+  document.body.appendChild(p);
+  p.style.top=(r.bottom+window.scrollY+5)+'px';p.style.left=(Math.max(6,Math.min(r.left+window.scrollX,(window.scrollX+document.documentElement.clientWidth)-244)))+'px';
+  var inp=p.querySelector('.advfltpop-in');
+  function upd(){_advFilt[key]=inp.value;_advApplyFilters();var b=document.querySelector('.advfltbtn[data-fcol="'+key+'"]');if(b)b.classList.toggle('on',!!inp.value.trim());}
+  inp.addEventListener('input',upd);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key==='Escape')_advCloseFltPop();});
+  p.querySelector('.advfltpop-clr').addEventListener('click',function(){inp.value='';upd();_advCloseFltPop();});
+  setTimeout(function(){try{inp.focus();inp.select();}catch(e){}},20);
+}
 function _advTable(list){
   var rows=list.map(function(e,i){
     var paid=e.status==='paid';
@@ -7455,25 +7540,25 @@ function _advTable(list){
       '<td class="l advref">'+(e.ref?'<span class="advmono">'+_advEsc(e.ref)+'</span>':'<span class="advdash">—</span>')+'</td>'+
       '<td class="advamt">'+_advFmt(e.amount)+'</td>'+
       '<td class="l advdocs">'+_advFileChips(e)+'</td>'+
+      '<td class="c advissue">'+(e.issued
+        ?'<span class="advbadge issued" title="ออกเอกสารแล้ว">📄 Issue</span>'+(e.docCode?'<button type="button" class="advcode" data-issue="'+e.id+'" title="แก้ไขรหัส Document">'+_advEsc(e.docCode)+'</button>':'<button type="button" class="advcode empty" data-issue="'+e.id+'" title="เพิ่มรหัส Document">+ รหัส</button>')
+        :'<button type="button" class="advmini issue" data-issue="'+e.id+'" title="ออก Document — พิมพ์รหัสเอกสาร">📄 Issue</button><div class="advnostat">No issue</div>')+'</td>'+
       '<td class="c advstatus">'+(paid
-        ?'<span class="advbadge paid">✅ Paid</span>'
+        ?'<span class="advbadge paid">✅ Paid</span>'+(e.payCode?'<div class="advcode2" title="รหัสการจ่าย">'+_advEsc(e.payCode)+'</div>':'')
         :'<span class="advbadge unpaid">⏳ Unpaid</span>')+'</td>'+
       '<td class="c advslip">'+_advSlipCell(e)+'</td>'+
       '<td class="c advact">'+
-        (paid?'':'<button type="button" class="advmini pay" data-pay="'+e.id+'" title="Mark as paid">✓ Mark paid</button>')+
+        (paid?'':(e.issued
+          ?'<button type="button" class="advmini pay" data-pay="'+e.id+'" title="ทำการจ่าย — พิมพ์รหัสการจ่าย แล้วแนบสลิป">💵 Make payment</button>'
+          :'<button type="button" class="advmini pay off" disabled title="ต้องออก Document (กด Issue) ก่อนจึงจะจ่ายได้">💵 Make payment</button>'))+
         '<button type="button" class="adviconbtn" data-edit="'+e.id+'" title="Edit">✎</button>'+
         '<button type="button" class="adviconbtn del" data-del="'+e.id+'" title="Delete entry">✕</button>'+
       '</td></tr>';
   }).join('');
   var t=_advTotals(list);
   var foot='<tfoot><tr><td class="l" colspan="7">Total '+t.n+' entries \u00b7 Paid '+t.paidN+' \u00b7 Unpaid '+t.unpaidN+'</td>'+
-    '<td class="advamt">'+_advFmt(t.total)+'</td><td colspan="4" class="l"><span class="advfoot-x">Paid '+_advFmt(t.paidAmt)+' \u00b7 Unpaid '+_advFmt(t.unpaidAmt)+'</span></td></tr></tfoot>';
-  var head='<thead><tr>'+
-    '<th class="c">#</th><th class="c">Company</th><th class="l">Payment Date</th>'+
-    '<th class="l">Payer</th><th class="l">Payee</th><th class="l">Description</th>'+
-    '<th class="l">Ref No.</th>'+
-    '<th>Amount (THB)</th><th class="l">Documents</th>'+
-    '<th class="c">Status</th><th class="c">Slip</th><th class="c">Actions</th></tr></thead>';
+    '<td class="advamt">'+_advFmt(t.total)+'</td><td colspan="5" class="l"><span class="advfoot-x">Paid '+_advFmt(t.paidAmt)+' \u00b7 Unpaid '+_advFmt(t.unpaidAmt)+'</span></td></tr></tfoot>';
+  var head=_advThead();
   return '<div class="advtblwrap"><table class="advtbl">'+head+'<tbody>'+rows+'</tbody>'+foot+'</table></div>';
 }
 
@@ -7886,7 +7971,7 @@ function _advBind(wrap){
     var s2=document.getElementById('advSearch'); if(s2){ s2.focus(); try{s2.setSelectionRange(pos,pos);}catch(e){} } }); }
   var impf=w.querySelector('#advImpFile');
   if(impf){ impf.addEventListener('change',function(){ var f=impf.files&&impf.files[0]; impf.value=''; if(f)_advImportExcel(f); }); }
-  w.addEventListener('click',function(e){ var el=e.target.closest?e.target.closest('[data-filt],[data-cofilt],[data-edit],[data-del],[data-pay],[data-slip],[data-open],[data-xlsx],[data-pdf],[data-import],[data-template]'):null; if(!el)return;
+  w.addEventListener('click',function(e){ var el=e.target.closest?e.target.closest('[data-filt],[data-cofilt],[data-edit],[data-del],[data-pay],[data-slip],[data-issue],[data-open],[data-xlsx],[data-pdf],[data-import],[data-template]'):null; if(!el)return;
     if(el.getAttribute('data-import')!=null){ var fi=document.getElementById('advImpFile'); if(fi)fi.click(); return; }
     if(el.getAttribute('data-template')!=null){ _advDownloadTemplate(); return; }
     if(el.getAttribute('data-filt')!=null){ _advUI.filter=el.getAttribute('data-filt'); renderAdv(); }
@@ -7894,14 +7979,28 @@ function _advBind(wrap){
     else if(el.getAttribute('data-edit')!=null){ _advOpenModal(el.getAttribute('data-edit')); }
     else if(el.getAttribute('data-del')!=null){ var id=el.getAttribute('data-del'); var it=_advState().items[id];
       if(it&&confirm('Delete "'+(it.payee||'')+'" ('+_advFmt(it.amount)+')?')){ delete _advState().items[id]; _advSaveState(true); renderAdv(); } }
-    else if(el.getAttribute('data-pay')!=null){ _advOpenModal(el.getAttribute('data-pay')); if(_advDraft){ _advDraft.e.status='paid'; _advRenderModal(); } }
+    else if(el.getAttribute('data-issue')!=null){ var iid=el.getAttribute('data-issue'); var iit=_advState().items[iid]; if(iit){ var dc=prompt('พิมพ์รหัส Document (เลขที่เอกสาร):', iit.docCode||''); if(dc===null)return; dc=(''+dc).trim(); iit.docCode=dc; iit.issued=(dc!==''); if(!iit.issued&&iit.status==='paid'){ /* keep paid state */ } _advSaveState(true); renderAdv(); } }
+    else if(el.getAttribute('data-pay')!=null){ var pid=el.getAttribute('data-pay'); var pit=_advState().items[pid]; if(pit){ if(!pit.issued){ alert('กรุณากด "Issue" (ออก Document) ก่อน จึงจะทำการจ่ายได้'); return; } var pc=prompt('พิมพ์รหัสการจ่าย (เลขที่จ่าย / Payment ref):', pit.payCode||''); if(pc===null)return; pit.payCode=(''+pc).trim(); pit.status='paid'; _advSaveState(true); renderAdv(); } }
     else if(el.getAttribute('data-slip')!=null){ _advOpenModal(el.getAttribute('data-slip')); if(_advDraft){ _advDraft.e.status='paid'; _advRenderModal(); } }
     else if(el.getAttribute('data-open')==='doc'){ var e2=_advState().items[el.getAttribute('data-id')]; if(e2&&e2.files){ var f=e2.files[+el.getAttribute('data-idx')]; if(f)_advPreviewFile(f); } }
     else if(el.getAttribute('data-open')==='slip'){ _advPreviewFromRow(el.getAttribute('data-id'),'slip'); }
     else if(el.getAttribute('data-xlsx')!=null){ _advExportXlsx(); }
     else if(el.getAttribute('data-pdf')!=null){ _advExportPdf(); }
   });
+  /* Excel-like column resize (drag the header border; widths persist) */
+  w.addEventListener('mousedown',function(e){var h=e.target;if(!h||!h.classList||!h.classList.contains('advrsz'))return;e.preventDefault();e.stopPropagation();
+    var th=h.closest('th');if(!th)return;var field=h.getAttribute('data-col');
+    var startX=e.clientX,startW=th.getBoundingClientRect().width,lastW=startW;document.body.classList.add('adv-resizing');
+    function mm(ev){lastW=Math.max(48,Math.round(startW+(ev.clientX-startX)));th.style.width=lastW+'px';th.style.minWidth=lastW+'px';}
+    function mu(){document.removeEventListener('mousemove',mm,true);document.removeEventListener('mouseup',mu,true);document.body.classList.remove('adv-resizing');if(field){ADVCOLW[field]=lastW;_advColwSave();}}
+    document.addEventListener('mousemove',mm,true);document.addEventListener('mouseup',mu,true);});
+  /* per-column filter dropdown (▾ opens a search box) */
+  w.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('.advfltbtn'):null;if(b){e.preventDefault();e.stopPropagation();_advOpenFltPop(b);}});
+  try{_advApplyFilters();}catch(_fe){}
 }
+if(typeof window!=='undefined'&&!window._advFltDocBound){window._advFltDocBound=1;
+  document.addEventListener('mousedown',function(e){var p=document.getElementById('advFltPop');if(!p)return;if(e.target.closest&&(e.target.closest('#advFltPop')||e.target.closest('.advfltbtn')))return;_advCloseFltPop();},true);
+  window.addEventListener('resize',function(){_advCloseFltPop();});}
 try{ if(typeof window!=='undefined')window.renderAdv=renderAdv; }catch(e){}
 
 /* ===== v10.38: Report AP JV persistence + module ===== */
