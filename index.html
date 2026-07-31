@@ -7394,7 +7394,8 @@ function _advTotals(list){ var t={n:0,total:0,paidN:0,paidAmt:0,unpaidN:0,unpaid
 function _advNoSpace(s){ return (''+(s||'')).replace(/\s+/g,''); }
 /* built-in aliases: a truncated/OCR name whose no-space form starts with `match` → `full` */
 var _ADV_NAME_ALIASES=[
-  {match:'นายชัยธพัชร์', full:'นายชัยธพัชร์ เหล่าศิริรัตน์'}
+  {match:'นายชัยธพัชร์', full:'นายชัยธพัชร์ เหล่าศิริรัตน์'},
+  {match:'ชัยธพัชร์', full:'นายชัยธพัชร์ เหล่าศิริรัตน์'}
 ];
 function _advKnownNames(){ var it=_advState().items,seen={},out=[]; for(var k in it){ if(!it.hasOwnProperty(k))continue; var e=it[k]; if(!e)continue; ['payer','payee'].forEach(function(f){ var v=e[f]?(''+e[f]).trim():''; if(v&&!seen[v]){ seen[v]=1; out.push(v); } }); } return out; }
 function _advCompleteName(val,list){ val=(''+(val||'')).trim(); if(!val)return val; var nv=_advNoSpace(val);
@@ -7933,15 +7934,29 @@ function _advParseSlip(text){
   out.amount = kwC.length?pmax(kwC):(cands.length?pmax(cands):null);
   /* date */
   out.date=_advParseDate(T);
-  /* payer (1st party) + payee (2nd party = recipient) */
+  /* payer/payee — prefer explicit "จาก" (from→payer) & "ไปที่/ไปยัง" (to→payee) labels used by
+     most Thai bank slips (Bangkok Bank/SCB/KBank/KTB/TTB/…); fall back to top-to-bottom name order */
   var names=_advSlipNames(lines);
-  if(names.length>=2){ out.payer=names[0]; out.payee=names[1]; }
-  else if(names.length===1){ out.payee=names[0]; }
-  /* keyword-based recipient overrides the positional guess if present */
-  var reP=/(?:ไปยัง|ผู้รับเงิน|ผู้รับโอน|ผู้รับ|โอนไปยัง|โอนเข้าบัญชี|บัญชีปลายทาง|ชื่อบัญชีผู้รับ)[\s:：]*([^\n]*)/;
-  for(var i=0;i<lines.length;i++){ var mp=lines[i].match(reP); if(mp){ var nm=_advCleanName(mp[1]); if(nm){ out.payee=nm; break; } } }
+  var fromRe=/^\s*(?:จาก|from|ผู้โอน|ชื่อผู้โอน|บัญชีต้นทาง|โอนจาก)\s*[:：]?\s*(.*)$/i;
+  var toRe=/^\s*(?:ไปที่|ไปยัง|ถึง|to|ผู้รับเงิน|ผู้รับโอน|ผู้รับ|โอนไปยัง|โอนเข้าบัญชี|บัญชีปลายทาง|ชื่อบัญชีผู้รับ|เข้าบัญชี)\s*[:：]?\s*(.*)$/i;
+  function _advNameNear(idx,inlineVal){ var v=_advCleanName(inlineVal||''); if(v)return v;
+    for(var j=idx+1;j<Math.min(lines.length,idx+3);j++){ if(/(฿|thb|บาท|จำนวน|ค่าธรรมเนียม|amount)/i.test(lines[j]))break; var c=_advCleanName(lines[j]); if(c)return c; } return ''; }
+  var payerL=null,payeeL=null;
+  for(var i=0;i<lines.length;i++){ var mf=lines[i].match(fromRe); if(mf&&payerL==null){ var pv=_advNameNear(i,mf[1]); if(pv){payerL=pv;continue;} }
+    var mt=lines[i].match(toRe); if(mt&&payeeL==null){ var qv=_advNameNear(i,mt[1]); if(qv)payeeL=qv; } }
+  out.payer = payerL || (names.length>=2?names[0]:null);
+  out.payee = payeeL || (names.length>=2?names[1]:(names.length===1?names[0]:null));
   /* reference no. + memo→description */
-  out.ref=_advGrabAfter(lines,/(เลขที่รายการ|เลขที่อ้างอิง|รหัสอ้างอิง|หมายเลขอ้างอิง|reference\s*(?:no|code)?|ref\.?\s*(?:no|code)?|transaction\s*(?:id|no)?)/i,/[A-Za-z0-9]{8,}/);
+  /* reference no. — collect labelled + long standalone candidates, keep the LONGEST (the transaction
+     reference, e.g. "เลขที่อ้างอิง" 2026073108…), not a short "หมายเลขอ้างอิง" like 471871 */
+  var _refRe=/(เลขที่อ้างอิง|เลขที่รายการ|รหัสอ้างอิง|หมายเลขอ้างอิง|reference\s*(?:no|code|number)?|ref\.?\s*(?:no|code)?|transaction\s*(?:id|no|ref)?|trace)/i;
+  var _refs=[];
+  for(var ri=0;ri<lines.length;ri++){ var rmm=lines[ri].match(_refRe); if(!rmm)continue;
+    var rrest=lines[ri].slice(rmm.index+rmm[0].length).replace(/^[\s:：\-.]*/,'');
+    var rc=(rrest.match(/[A-Za-z0-9]{6,}/)||[])[0]; if(!rc){ var rnx=(lines[ri+1]||''); rc=(rnx.match(/[A-Za-z0-9]{6,}/)||[])[0]; }
+    if(rc)_refs.push(rc); }
+  for(var si=0;si<lines.length;si++){ var sm=lines[si].match(/\b[A-Za-z0-9]{12,}\b/); if(sm&&!/x{2,}/i.test(sm[0]))_refs.push(sm[0]); }
+  if(_refs.length){ _refs.sort(function(a,b){return b.length-a.length;}); out.ref=_refs[0]; }
   /* memo → description: colon optional (OCR often drops it); strip any orphan "จำ" vowel leak */
   var desc=null;
   for(var mi=0;mi<lines.length;mi++){ var mm=lines[mi].match(/บันทึกช่วยจ\s*[ำา]?\s*[:：]?\s*(.*)$/);
