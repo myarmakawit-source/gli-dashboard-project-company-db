@@ -16929,6 +16929,10 @@ function _fsTbOpenFilter(k,btn){ _fsTbCloseDrop(); var pg=document.getElementByI
 function _fsRenderTB(){
   var arr=_fsTbRows(); var rows='';
   var adjActive=_fsAdjActive();   /* v9.96: มีรายการปรับปรุงของปีนี้ + เปิดใช้ → แสดงคอลัมน์กระดาษทำการ */
+  /* v10.86.2: WP ADJ REC columns — show only for FY2568 (and only when the user's own adjusting-entries worksheet is not active) */
+  var wpAdjOn=(!adjActive)&&(typeof _fsWpTbAdjOn==='function')&&_fsWpTbAdjOn();
+  var wpCarry=(typeof _fsWpTbCarry==='function')&&_fsWpTbCarry();
+  var sWpDr=0,sWpCr=0,sWpNet=0;
   /* v9.94: per-account attachment columns (left) — 📎 แนบไฟล์ · ยอดตามไฟล์ · ผลต่าง (ไฟล์ − TB) */
   /* v9.202: opt = {code,nat,rowspan,grp} — กลุ่ม Index รวบไฟล์แนบ/ยอด เป็นชุดเดียว: แนบ/ดู/กรอกครั้งเดียว เทียบกับ "ยอดรวมของกลุ่ม" (rowspan คลุมทุกแถวในกลุ่ม) */
   function _attCells(x,opt){ opt=opt||{};
@@ -17048,10 +17052,10 @@ function _fsRenderTB(){
       '<td class="fsc">'+_fsE(x.code)+'</td>'+
       '<td class="fsacct"><span class="fsnm">'+_fsE(x.name)+badges+'</span></td>'+
       '<td class="fsgrpcol fsgrp-'+c.cat+((FSMAP.code&&FSMAP.code[x.code])?' fsgrp-moved':'')+'"><select class="fstbgrpsel" data-code="'+_fsE(x.code)+'" title="เลือกบรรทัดในงบการเงินที่บัญชีนี้จะวิ่งเข้า (จัดกลุ่ม) — บันทึกอัตโนมัติ">'+_fsMapLineOpts(c.line)+'</select></td>'+
-      '<td class="fsm">'+_fsMoney(x.openNat,true)+'</td>'+
+      '<td class="fsm'+(wpCarry&&Math.abs(_fsWpAdjNet(x.code))>0.005?' fsadj-after on':'')+'">'+_fsMoney(_fsWpTbOpenVal(x),true)+'</td>'+
       '<td class="fsm">'+_fsMoney(x.yd,true)+'</td><td class="fsm">'+_fsMoney(x.yc,true)+'</td>'+
-      _endCells(x)+'</tr>';});
-  if(!arr.length)rows='<tr class="fstbempty"><td colspan="'+(adjActive?15:12)+'">— ไม่มีบัญชีที่ตรงกับตัวกรอง —</td></tr>';
+      _endCells(x)+(wpAdjOn?_fsWpTbAdjTd(x):'')+'</tr>';});
+  if(!arr.length)rows='<tr class="fstbempty"><td colspan="'+((adjActive?15:12)+(wpAdjOn?3:0))+'">— ไม่มีบัญชีที่ตรงกับตัวกรอง —</td></tr>';
   var attHead=_fsTbTh('att_ic','📎','Attach','fsatthd-ic')+
     _fsTbTh('att_amt','Per File','A1 · Sheet FY '+((typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):''),'fsm fsatthd-amt')+
     _fsTbTh('att_diff','Diff','File − TB','fsm fsatthd-diff');
@@ -17074,11 +17078,12 @@ function _fsRenderTB(){
     _fsTbTh('opening','Opening',openSub,'fsm')+
     _fsTbTh('debit','Debit',movSub,'fsm')+
     _fsTbTh('credit','Credit',movSub,'fsm')+
-    endHead+'</tr></thead>';
+    endHead+(wpAdjOn?_fsWpTbAdjTh():'')+'</tr></thead>';
   var fyd=0,fyc=0,sOpen=0,sEnd=0,nAtt=0,attSum=0,nAttMatch=0,nAttMis=0,nAttNo=0,sBefore=0,sAdjDr=0,sAdjCr=0;
   var _grpAttDone={};   /* v9.202/9.204: นับไฟล์แนบต่อกลุ่ม — file=นับรายรหัส · manual=นับครั้งเดียว(เทียบยอดรวม) */
-  arr.forEach(function(x){fyd+=+x.yd||0;fyc+=+x.yc||0;sOpen+=+x.openNat||0;sEnd+=+x.nat||0;
+  arr.forEach(function(x){fyd+=+x.yd||0;fyc+=+x.yc||0;sOpen+=(wpCarry?_fsWpTbOpenVal(x):(+x.openNat||0));sEnd+=+x.nat||0;
     sBefore+=+x.unadjNat||0;sAdjDr+=+x.adjDr||0;sAdjCr+=+x.adjCr||0;
+    if(wpAdjOn){ var _wa=_fsWpAdjOf(x.code); if(_wa){ sWpDr+=(+_wa.dr||0); sWpCr+=(-(+_wa.cr||0)); sWpNet+=(+_wa.net||0); } }
     var _iv=_fsMapIdx()[x.code];
     if(_iv){ var _g=_grpInfo[_iv];
       if(_g.mode==='file'){   /* v9.204: ไฟล์กลุ่ม → ยอด/ผลต่าง รายรหัส (คอลัมน์ A/B) */
@@ -17148,7 +17153,8 @@ function _fsRenderTB(){
   return sumPanel+filterBar+'<div class="fstbwrap"><table class="fstable fstb fstb-att'+(adjActive?' fstb-adj':'')+'">'+head+
     '<tbody>'+rows+'</tbody><tfoot><tr class="fstot">'+attFoot+'<td class="fsseq"></td><td colspan="3">'+totLbl+'</td>'+
     '<td class="fsm">'+_fsMoney(sOpen)+'</td>'+
-    '<td class="fsm">'+_fsMoney(fyd)+'</td><td class="fsm">'+_fsMoney(fyc)+'</td>'+endFoot+'</tr></tfoot></table></div>'+
+    '<td class="fsm">'+_fsMoney(fyd)+'</td><td class="fsm">'+_fsMoney(fyc)+'</td>'+endFoot+
+    (wpAdjOn?('<td class="fsm fsadj-drc has">'+_fsMoney(sWpDr,true)+'</td><td class="fsm fsadj-drc has">'+_fsMoney(sWpCr,true)+'</td><td class="fsm fsadj-after on">'+_fsMoney(sEnd+sWpNet)+'</td>'):'')+'</tr></tfoot></table></div>'+
     '<p class="fsnote"><b>📎/✏️ เทียบยอดประกอบต่อบัญชี (เลือกได้ 2 วิธี):</b> คอลัมน์ซ้ายสุดของแต่ละบัญชี — <b>📎 ชนไฟล์ Excel/CSV</b> หรือ <b>✏️ กรอกจำนวนเงินเอง + ระบุที่มา</b> (เก็บยอดแยกต่อปี พ.ศ. · สลับปีแล้วกรอกของปีนั้นได้) · <b>ยอดตามไฟล์ = เซลล์ A1 ของชีตที่ชื่อตรงกับ “ปีที่เลือก” (พ.ศ.)</b> — เลือกปี '+(+_fsY1+543)+' ระบบจะอ่าน A1 ของชีตชื่อ “'+(+_fsY1+543)+'” · เปลี่ยนปีแล้วยอดจะสลับตามชีตของปีนั้นให้อัตโนมัติ · <b class="fsnosheet-warn">ยังไม่มีชีตของปีที่เลือก → Showing “No sheet data !” (เตือนสีแดง)</b> · ตรงกับ Ending Showing <span class="fsrctick">✓</span> · ต่างแสดงจำนวนผลต่าง (ไฟล์ − TB). · Ending shown in <b>natural sign</b>. · <b>กรอง/เรียงแบบ Excel:</b> กดปุ่ม ▼ ที่หัวคอลัมน์. · <b>☁ สำรองอัตโนมัติ:</b> ไฟล์แนบทุกบัญชีถูกสำรองขึ้นคลาวด์ (แยกจากข้อมูลหลัก · ประหยัดโควตา · เปิด/กู้คืนข้ามเครื่องได้).'+(_fsIsInterim()?' <b>งบเดือน:</b> ยอดคำนวณถึงสิ้นเดือน '+_FS_MON_TH[_fsEndM-1]+' '+(+_fsY1+543)+'.':'')+'</p>';
 }
 
@@ -19840,6 +19846,41 @@ function _fsWpBind(w){ if(!w||w._wpb)return; w._wpb=1;
   });
 }
 try{ window._fsWpReconOpen=_fsWpReconOpen; }catch(e){}
+
+/* ===== v10.86.2: WP ADJ REC → Trial Balance adjust columns =====================
+   TB stays GL-driven (Opening/Debit/Credit/Ending from the user's GL). We only
+   ADD 3 columns sourced from the working paper's ADJ REC detail:
+     ปรับปรุง Dr │ ปรับปรุง Cr │ หลังปรับปรุง (Ending = GL Ending + net adjust)
+   Rules:
+     • adjust numbers appear ONLY when a single fiscal year 2568 (2025) is picked
+     • when FY 2569 (2026) is picked, the FY2568 after-adjust Ending is carried
+       forward as the Opening (Balance-Sheet accounts only; P&L resets each year)
+   Nothing else is touched — x.nat and the financial statements are unchanged. */
+var _fsWpAdjMapCache=null;
+function _fsWpAdjMap(){ if(!_fsWpAvail())return {}; if(_fsWpAdjMapCache)return _fsWpAdjMapCache;
+  var m={}; (GLI_FS2025.codes||[]).forEach(function(c){ var dr=+c.ad||0, cr=+c.ac||0;   /* cr is stored negative (GLI2025 col K) */
+    if(Math.abs(dr)>0.005||Math.abs(cr)>0.005) m[(''+c.c).trim()]={dr:dr,cr:cr,net:dr+cr}; });
+  _fsWpAdjMapCache=m; return m; }
+function _fsWpAdjOf(code){ return _fsWpAdjMap()[(''+(code==null?'':code)).trim()]||null; }
+function _fsWpAdjNet(code){ var a=_fsWpAdjOf(code); return a?a.net:0; }
+function _fsWpTbSingle(){ return typeof _fsYear!=='undefined' && _fsYear!=='ALL' && _fsY0===_fsY1; }
+function _fsWpTbAdjOn(){ return _fsWpAvail() && _fsWpTbSingle() && _fsY1==='2025'; }   /* FY2568 only */
+function _fsWpTbCarry(){ return _fsWpAvail() && _fsWpTbSingle() && _fsY1==='2026'; }    /* FY2569 → carry FY2568 after-adjust */
+/* Opening value for a TB row — carry FY2568 after-adjust into FY2569 opening (BS accounts only) */
+function _fsWpTbOpenVal(x){ var o=(+x.openNat||0);
+  if(_fsWpTbCarry()){ var cat=x.cls&&x.cls.cat; if(cat==='A'||cat==='L'||cat==='E') o+=_fsWpAdjNet(x.code); }
+  return o; }
+/* 3 extra header cells (FY2568) */
+function _fsWpTbAdjTh(){
+  return '<th class="fsm fsadjhd fsadjhd-dr" title="เดบิตปรับปรุง — จากไฟล์ WP (ADJ REC)">ปรับปรุง Dr<span class="fsatthx">Adjust · WP</span></th>'+
+    '<th class="fsm fsadjhd fsadjhd-cr" title="เครดิตปรับปรุง — จากไฟล์ WP (ADJ REC)">ปรับปรุง Cr<span class="fsatthx">Adjust · WP</span></th>'+
+    '<th class="fsm fsadjhd fsadjhd-after" title="ยอดหลังปรับปรุง = Ending (GL) + ปรับปรุงสุทธิ">หลังปรับปรุง<span class="fsatthx">Ending</span></th>'; }
+/* 3 extra body cells for one account row (FY2568) */
+function _fsWpTbAdjTd(x){ var a=_fsWpAdjOf(x.code); var z='<span class="fsadj-z">–</span>';
+  var dr=a?(+a.dr||0):0, crRaw=a?(+a.cr||0):0, net=a?(+a.net||0):0, crDisp=-crRaw, ending=(+x.nat||0)+net;
+  return '<td class="fsm fsadj-drc'+(Math.abs(dr)>0.005?' has':'')+'">'+(Math.abs(dr)>0.005?_fsMoney(dr,true):z)+'</td>'+
+    '<td class="fsm fsadj-drc'+(Math.abs(crDisp)>0.005?' has':'')+'">'+(Math.abs(crDisp)>0.005?_fsMoney(crDisp,true):z)+'</td>'+
+    '<td class="fsm fsadj-after'+(Math.abs(net)>0.005?' on':'')+'">'+_fsMoney(ending)+'</td>'; }
 
 function renderFs(){ var w=document.getElementById('fsWrap'); if(!w)return;
   w.innerHTML='<div class="fsempty"><div class="fsempty-ic">⏳</div><p>Reading GL…</p></div>';
