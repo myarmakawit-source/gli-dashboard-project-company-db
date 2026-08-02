@@ -19470,7 +19470,7 @@ var _fsWpCodesCache=null;
 function _fsWpAvail(){ return !!(GLI_FS2025&&GLI_FS2025.bs&&GLI_FS2025.bs.length); }
 function _fsWpActive(){ return _fsWpAvail()&&_fsWpMode; }
 function _fsWpSetMode(on){ _fsWpMode=!!on; try{localStorage.setItem('gli_fswpmode',on?'1':'0');}catch(_e){} }
-function _fsWpTabOk(t){ return t==='tb'||t==='bs'||t==='pl'||t==='sce'; }
+function _fsWpTabOk(t){ return t==='bs'||t==='pl'||t==='sce'; }   /* v10.86.1: Trial Balance reverted to the original app view — WP owns BS/PL/SCE only */
 
 function _fsWpEsc(s){ return (''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function _fsWpN(v,dec){ dec=dec||0; v=+v||0; var eps=dec?0.005:0.5; if(Math.abs(v)<eps)v=0;
