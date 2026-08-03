@@ -17904,6 +17904,42 @@ function _cfdCashSet(){ var rows=(typeof GLROWS!=='undefined'&&GLROWS)?GLROWS:[]
   _CFD_CASHSET=set; _CFD_CASHSIG=sig; return set; }
 function _cfdCash(c){ var s=_cfdCashSet(); return !!s[(''+(c==null?'':c)).trim()]; }
 
+/* v10.99: reconcile the GL-computed cash to the AUDITED balance-sheet "เงินสดและรายการเทียบเท่าเงินสด".
+   The direct method sums every account _fsClassify treats as cash — which INCLUDES restricted/pledged
+   bank deposits (เงินฝากที่มีภาระค้ำประกัน, dcode 'G'). The issued BS shows those separately as a
+   non-current asset, so the cash-flow ending cash is higher than the BS cash line by the pledged
+   deposits (+ any JV/JO combine / audit residual). We surface that gap as an explicit bridge. */
+var _CFD_DMAP=null,_CFD_DMAPN=-1;
+function _cfdCodeDcode(code){ if(!(typeof GLI_FS2025!=='undefined'&&GLI_FS2025&&GLI_FS2025.codes))return '';
+  if(!_CFD_DMAP||_CFD_DMAPN!==GLI_FS2025.codes.length){ _CFD_DMAP={}; for(var i=0;i<GLI_FS2025.codes.length;i++){ var c=GLI_FS2025.codes[i]; _CFD_DMAP[(''+(c.c||'')).trim()]=(c.d||''); } _CFD_DMAPN=GLI_FS2025.codes.length; }
+  return _CFD_DMAP[(''+(code==null?'':code)).trim()]||''; }
+/* a cash account is "pledged/restricted" (shown apart from cash on the BS) when its FS grouping is 'G',
+   i.e. it maps to the "เงินฝากธนาคารที่มีภาระค้ำประกัน" line — NOT merely because the name says ค้ำ. */
+function _cfdIsPledged(code,name){ var d=_cfdCodeDcode(code); if(d==='G')return true; if(d==='A')return false;
+  return /ภาระค้ำประกัน|ติดภาระ|restrict|pledge/i.test(''+(name==null?'':name)); }
+/* audited BS cash & cash-equivalents (line d='A') for the current CF year (+ prior), from the issued statement */
+function _cfdBsCashTarget(){ try{
+    var ISS=(typeof GLI_ISSUED!=='undefined'&&GLI_ISSUED)?GLI_ISSUED:null; if(!ISS||!ISS.bs)return null;
+    var yhdr=null,cashV=null;
+    for(var i=0;i<ISS.bs.length;i++){ var r=ISS.bs[i];
+      if(r.k==='yhdr'&&!yhdr)yhdr=r.v;
+      if(r.k==='line'&&(r.d==='A')&&/เงินสดและรายการเทียบเท่า/.test(r.t||'')&&!cashV)cashV=r.v; }
+    if(!cashV||!yhdr)return null;
+    var curBE=(typeof _fsY1!=='undefined'&&_fsY1!=null)?(''+(+_fsY1+543)):'';
+    var idx=yhdr.indexOf(curBE); if(idx<0)return null;
+    return {cur:(+cashV[idx]||0), pri:((idx+1<cashV.length)?(+cashV[idx+1]||0):null)}; }catch(e){ return null; } }
+/* bridge model: pledged deposits to strip out + residual (audit/combine) plug → ties to the BS cash line */
+function _cfdCashRecon(R){
+  var pEndCur=0,pEndPri=0;
+  (R.cashAccts||[]).forEach(function(o){ if(_cfdIsPledged(o.code,o.name))pEndCur+=(+o.end||0); });
+  if(R.priEndByCode){ for(var k in R.priEndByCode){ var po=R.priEndByCode[k]; if(po&&_cfdIsPledged(po.code,po.name))pEndPri+=(+po.end||0); } }
+  var bs=_cfdBsCashTarget(), hasBs=!!bs, hasAdj=false, adjCur=0, adjPri=0, bsCur=0, bsPri=0;
+  if(bs){ bsCur=bs.cur; adjCur=bsCur-((R.endCash||0)-pEndCur);
+    if(bs.pri==null){ bsPri=(R.endCashPri||0)-pEndPri; } else { bsPri=bs.pri; adjPri=bsPri-((R.endCashPri||0)-pEndPri); }
+    hasAdj=(Math.abs(adjCur)>0.5||Math.abs(adjPri)>0.5); }
+  var show=(Math.abs(pEndCur)>0.5||Math.abs(pEndPri)>0.5||hasBs);
+  return {show:show,pEndCur:pEndCur,pEndPri:pEndPri,adjCur:adjCur,adjPri:adjPri,bsCur:bsCur,bsPri:bsPri,hasAdj:hasAdj,hasBs:hasBs}; }
+
 /* voucher index over ALL GL rows (needed to reach ขาตั้ง in prior years) — cached */
 function _cfdVIdx(){ var rows=(typeof GLROWS!=='undefined'&&GLROWS)?GLROWS:[];
   var sig=rows.length+'|'+((typeof GLACTIVE!=='undefined')?GLACTIVE:'');
@@ -18172,6 +18208,12 @@ function _fsCfdCleanCSS(){ if(document.getElementById('fsiss-cfd-css'))return;
    ".fsiss-cfd tr.sub td.n{font-weight:700;border-top:1px solid #123;padding-top:3px}",
    ".fsiss-cfd tr.tot td.l{font-weight:800;color:#08352e}",
    ".fsiss-cfd tr.cfinfo td{padding-top:2px}",".fsiss-cfd tr.cfinfo td.l{color:#234}",
+   /* v10.99: balance-sheet reconciliation bridge */
+   ".fsiss-cfd tr.cfrec-h td{padding-top:9px;font-size:11px;font-weight:700;color:#8a5a12;border-top:1px dashed #d9c6a0}",
+   ".fsiss-cfd tr.cfrec td.l{padding-left:24px;color:#5a4a22}",
+   ".fsiss-cfd tr.cfrec td.n{color:#5a4a22}",
+   ".fsiss-cfd tr.cfrec-tot td.l{font-weight:800;color:#08352e}",
+   ".fsiss-cfd tr.cfrec-tot td.n{font-weight:800;border-top:1px solid #123;border-bottom:3px double #123}",
    ".fsiss-cfd .fsiss-cap{background:linear-gradient(180deg,#eef7f3,#e2efe9);border-color:#bcd8cd;border-left-color:#0E7c52;color:#1b463c}",
    ".fsiss-cfd .fsiss-cap b{color:#0A463E}",
    ".fscfd-wrap .cfd-extras{max-width:900px;margin:12px auto 0;border:1px solid #dbe8e3;border-radius:12px;background:#fff;overflow:hidden}",
@@ -18215,7 +18257,20 @@ function _fsCfdCleanHTML(R){
   }
   h+=cashRow('tot','เงินสดและรายการเทียบเท่าเงินสด เพิ่มขึ้น(ลดลง) สุทธิ','__cash_move',R.deltaCash,R.deltaCashPri);
   h+=cashRow('cfinfo','เงินสดและรายการเทียบเท่าเงินสด ต้นงวด','__cash_begin',R.beginCash,R.beginCashPri);
-  h+=cashRow('tot','เงินสดและรายการเทียบเท่าเงินสด ปลายงวด','__cash_end',R.endCash,R.endCashPri);
+  /* v10.99: reconcile GL-computed ending cash to the audited balance-sheet cash line */
+  var _rec=(typeof _cfdCashRecon==='function')?_cfdCashRecon(R):{show:false};
+  h+=cashRow('tot','เงินสดและรายการเทียบเท่าเงินสด ปลายงวด'+(_rec.show?' (คำนวณจาก GL — รวมทุกบัญชีธนาคาร)':''),'__cash_end',R.endCash,R.endCashPri);
+  if(_rec.show){
+    function recRow(cls,label,cur,pri,ckey){ var da=ckey?(' data-cfdd="'+ckey+'" data-cfdl="'+_fsWpEsc(label)+'" title="คลิกเพื่อดูรหัสบัญชี + GL"'):'';
+      return '<tr class="'+cls+(ckey?' issline':'')+'"'+da+'><td class="l">'+_fsWpEsc(label)+'</td>'+cells(cur,pri)+'</tr>'; }
+    h+='<tr class="cfrec-h"><td class="l" colspan="'+(ncol+1)+'">รายการกระทบยอดกับงบแสดงฐานะการเงิน · Reconciliation to the balance-sheet cash line</td></tr>';
+    if(Math.abs(_rec.pEndCur)>0.5||Math.abs(_rec.pEndPri)>0.5)
+      h+=recRow('cfrec','หัก: เงินฝากธนาคารที่มีภาระค้ำประกัน (แสดงแยกเป็นสินทรัพย์ในงบแสดงฐานะการเงิน)',-_rec.pEndCur,-_rec.pEndPri,'__cash_pledged');
+    if(_rec.hasAdj)
+      h+=recRow('cfrec','บวก/(หัก): ผลต่างจากงบที่ตรวจสอบแล้ว (รายการปรับปรุง / รวมงบร่วมค้า·กิจการร่วมงาน)',_rec.adjCur,_rec.adjPri,'');
+    if(_rec.hasBs)
+      h+=recRow('cfrec-tot','เงินสดและรายการเทียบเท่าเงินสด ปลายงวด (ตามงบแสดงฐานะการเงิน)',_rec.bsCur,_rec.bsPri,'');
+  }
   h+='</tbody></table></div>';
   return h;
 }
@@ -18235,9 +18290,12 @@ function _fsRenderCFD(){
   /* v10.92: default view — clean BS/PL statement template + drill dock (edit mode still uses the editable table below) */
   if(!ed){
     var _cln=_fsCfdCleanHTML(R);
-    var _tieC='<div class="fsbscheck '+(R.clean?'ok':'cfdwarn')+'">'+(R.clean
-        ?('✓ กระทบยอดได้ · ยอดปลายงวด '+money(R.endCash)+' = เงินสดในงบแสดงฐานะการเงินปีปัจจุบัน')
-        :('✓ กระทบยอดได้ (มีบรรทัดกระทบยอด) · พบ Voucher เดบิต≠เครดิต '+R.nUnbal+' รายการ ควรตรวจสอบ'))+'</div>';
+    var _rrec=(typeof _cfdCashRecon==='function')?_cfdCashRecon(R):{show:false};
+    var _tieMsg;
+    if(_rrec&&_rrec.hasBs){ _tieMsg='✓ กระทบยอดได้ · ปลายงวดตาม GL '+money(R.endCash)+' − เงินฝากค้ำประกัน '+money(_rrec.pEndCur)+(_rrec.hasAdj?(' '+(_rrec.adjCur<0?'−':'+')+' ปรับปรุง/รวมงบ '+money(Math.abs(_rrec.adjCur))):'')+' = เงินสดตามงบแสดงฐานะการเงิน '+money(_rrec.bsCur); }
+    else if(R.clean){ _tieMsg='✓ กระทบยอดได้ · ยอดปลายงวด '+money(R.endCash)+' = เงินสดในงบแสดงฐานะการเงินปีปัจจุบัน'; }
+    else { _tieMsg='✓ กระทบยอดได้ (มีบรรทัดกระทบยอด) · พบ Voucher เดบิต≠เครดิต '+R.nUnbal+' รายการ ควรตรวจสอบ'; }
+    var _tieC='<div class="fsbscheck '+((R.clean||(_rrec&&_rrec.hasBs))?'ok':'cfdwarn')+'">'+_tieMsg+'</div>';
     var _cg='<div class="cfdcash"><div class="cfdcash-h">เงินสดและรายการเทียบเท่าเงินสด · อ้างอิงบรรทัดในงบแสดงฐานะการเงิน</div>'+
       '<table class="cfdcash-t"><thead><tr><th>รหัส</th><th>ชื่อบัญชี</th><th class="fsm">ต้นงวด</th><th class="fsm">เคลื่อนไหว</th><th class="fsm">ปลายงวด</th></tr></thead><tbody>';
     for(var _ci=0;_ci<R.cashAccts.length;_ci++){ var _o=R.cashAccts[_ci];
@@ -20590,13 +20648,15 @@ function _fsIssDrill(dcode,label,el){ if(!(GLI_FS2025&&GLI_FS2025.codes))return;
 function _fsCfdRenderCodes(key,label){ var p=_fsIssPanelEnsure(); p.classList.add('has-sel');
   /* v10.95: the three cash lines drill to the actual "เงินสดและรายการเทียบเท่าเงินสด" accounts
      (code · name · ต้นงวด/เคลื่อนไหว/ปลายงวด) — the old Direct-method cash grouping, in the new dock. */
-  var ck=(key==='__cash_begin'?'begin':(key==='__cash_end'?'end':(key==='__cash_move'?'move':null)));
+  var pledgedOnly=(key==='__cash_pledged');
+  var ck=(key==='__cash_begin'?'begin':((key==='__cash_end'||pledgedOnly)?'end':(key==='__cash_move'?'move':null)));
   var arr, note;
   if(ck){
     var ca=(typeof _CFD!=='undefined'&&_CFD&&_CFD.cashAccts)||[];
+    if(pledgedOnly)ca=ca.filter(function(o){ return (typeof _cfdIsPledged==='function')&&_cfdIsPledged(o.code,o.name); });
     arr=ca.map(function(o){ return {c:o.code,name:o.name||'',a:(+o[ck]||0),begin:(+o.begin||0),move:(+o.move||0),end:(+o.end||0)}; });
     arr.sort(function(a,b){ return Math.abs(b.end)-Math.abs(a.end); });
-    note='เงินสดและรายการเทียบเท่าเงินสด · '+arr.length+' บัญชี · อ้างอิงบรรทัดในงบแสดงฐานะการเงิน · คลิกรหัสเพื่อดู GL';
+    note=(pledgedOnly?'เงินฝากธนาคารที่มีภาระค้ำประกัน (แยกจากเงินสดในงบแสดงฐานะการเงิน) · ':'เงินสดและรายการเทียบเท่าเงินสด · ')+arr.length+' บัญชี · อ้างอิงบรรทัดในงบแสดงฐานะการเงิน · คลิกรหัสเพื่อดู GL';
   } else {
     var LL=(typeof _CFD!=='undefined'&&_CFD&&_CFD.lines&&_CFD.lines[key])||{codes:{}};
     var codes=LL.codes||{};
