@@ -18132,6 +18132,56 @@ function _cfdLnAddOpen(secCode,btn){ _cfdLnAddClose(); var pg=document.getElemen
   d.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();go();} else if(e.key==='Escape'){e.preventDefault();_cfdLnAddClose();} });
   setTimeout(function(){document.addEventListener('mousedown',_cfdLnAddDoc);},0); }
 /* ---------- RENDER: direct-method cash-flow statement (current vs prior) ---------- */
+/* v10.92: Cash Flow · Direct rendered in the clean BS/PL statement template (.fsiss),
+   with the same line grouping + click→codes→GL drill dock as the Balance Sheet / P&L. */
+function _fsCfdCleanCSS(){ if(document.getElementById('fsiss-cfd-css'))return;
+  var css=[
+   ".fsiss-cfd tr.sec td{padding-top:9px}",
+   ".fsiss-cfd tr.sub td.l{font-weight:700;color:#0A463E}",
+   ".fsiss-cfd tr.sub td.n{font-weight:700;border-top:1px solid #123;padding-top:3px}",
+   ".fsiss-cfd tr.tot td.l{font-weight:800;color:#08352e}",
+   ".fsiss-cfd tr.cfinfo td{padding-top:2px}",".fsiss-cfd tr.cfinfo td.l{color:#234}",
+   ".fsiss-cfd .fsiss-cap{background:linear-gradient(180deg,#eef7f3,#e2efe9);border-color:#bcd8cd;border-left-color:#0E7c52;color:#1b463c}",
+   ".fsiss-cfd .fsiss-cap b{color:#0A463E}",
+   ".fscfd-wrap .cfd-extras{max-width:900px;margin:12px auto 0;border:1px solid #dbe8e3;border-radius:12px;background:#fff;overflow:hidden}",
+   ".fscfd-wrap .cfd-extras>summary{cursor:pointer;padding:10px 14px;font-weight:700;color:#0A463E;background:#f3faf7;list-style:none;font-size:13px}",
+   ".fscfd-wrap .cfd-extras>summary::-webkit-details-marker{display:none}",
+   ".fscfd-wrap .cfd-extras[open]>summary{border-bottom:1px solid #e6efeb}"
+  ].join("");
+  var s=document.createElement('style'); s.id='fsiss-cfd-css'; s.textContent=css; (document.head||document.body).appendChild(s); }
+function _fsCfdCleanHTML(R){
+  _fsIssCSS(); try{_fsIssDrillCSS();}catch(e){} _fsCfdCleanCSS();
+  var pc=R.hasPrev?1:0, ncol=1+pc;
+  var meta=(typeof GLI_FS2025!=='undefined'&&GLI_FS2025&&GLI_FS2025.meta)||{};
+  var co=meta.coTh||'บริษัท แกรนด์ไลน์ อินโนเวชั่น จำกัด';
+  var curBE=(typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):'';
+  var prevBE=(typeof _fsPrevYear!=='undefined'&&_fsPrevYear!=null)?(+_fsPrevYear+543):(curBE?(curBE-1):'');
+  var yrs=[''+curBE]; if(pc)yrs.push(''+prevBE);
+  function cells(cur,pri){ var s='<td class="n">'+_fsIssN(cur)+'</td>'; if(pc)s+='<td class="n">'+_fsIssN(pri)+'</td>'; return s; }
+  var h='<div class="fsiss fsiss-cfd"><div class="fsiss-hd"><div class="co">'+_fsWpEsc(co)+'</div><div class="ti">งบกระแสเงินสด (วิธีทางตรง)</div><div class="dt">สำหรับปีสิ้นสุดวันที่ 31 ธันวาคม '+_fsWpEsc(''+curBE)+'</div></div>';
+  h+='<div class="fsiss-cap">คำนวณสดจากสมุดรายวัน (voucher-by-voucher) · จำแนกตามคู่บัญชีของบัญชีเงินสด · ยอดปลายงวดตรงกับเงินสดในงบแสดงฐานะการเงิน · <b>คลิกบรรทัดเพื่อดูรหัสบัญชี + GL</b></div>';
+  h+='<table class="fsiss-t"><thead><tr><th class="l"></th><th class="u" colspan="'+ncol+'">(หน่วย: บาท)</th></tr><tr><th class="l"></th>';
+  yrs.forEach(function(y,i){ h+='<th>'+_fsWpEsc(y)+(i>0?'<br><span class="rs">(ปีก่อน)</span>':'')+'</th>'; });
+  h+='</tr></thead><tbody>';
+  for(var s=0;s<_CFD_SEC.length;s++){ var sec=_CFD_SEC[s];
+    h+='<tr class="sec"><td class="l" colspan="'+(ncol+1)+'">'+_fsWpEsc(sec[1])+'</td></tr>';
+    var any=false;
+    for(var li=0;li<sec[3].length;li++){ var key=sec[3][li], LL=R.lines[key]||{cur:0,pri:0,codes:{}};
+      if(Math.abs(LL.cur)<0.005&&Math.abs(LL.pri)<0.005)continue; any=true;
+      var lab=(_CFD_LN[key]||[key,key])[0]; var nc=0; for(var _c in LL.codes)nc++;
+      var da=nc?(' data-cfdd="'+_fsWpEsc(key)+'" data-cfdl="'+_fsWpEsc(lab)+'" title="คลิกเพื่อดูรหัสบัญชี + GL"'):'';
+      h+='<tr'+(nc?' class="issline"':'')+da+'><td class="l ind1">'+_fsWpEsc(lab)+'</td>'+cells(LL.cur,LL.pri)+'</tr>'; }
+    if(!any)h+='<tr><td class="l ind1" style="color:#9aa">— ไม่มีรายการ —</td>'+cells(0,0)+'</tr>';
+    h+='<tr class="sub"><td class="l">เงินสดสุทธิจาก'+_fsWpEsc(sec[1])+'</td>'+cells(R.secTotCur[sec[0]]||0,R.secTotPri[sec[0]]||0)+'</tr>'; }
+  if(R.hasAdjOpen){ var alab='ปรับปรุงยอดยกมา (ไม่ใช่กระแสเงินสดจากกิจกรรม)'; var ak=(R.lines['adj_open']&&R.lines['adj_open'].codes)?Object.keys(R.lines['adj_open'].codes).length:0;
+    h+='<tr'+(ak?' class="issline"':'')+(ak?(' data-cfdd="adj_open" data-cfdl="'+_fsWpEsc(alab)+'"'):'')+'><td class="l ind1">'+_fsWpEsc(alab)+'</td>'+cells(R.adjOpen,R.adjOpenPri)+'</tr>'; }
+  if(Math.abs(R.residual)>0.005||Math.abs(R.residualPri)>0.005){ h+='<tr class="sub"><td class="l">ผลต่างจาก Voucher ที่เดบิต≠เครดิต (GL ไม่สมดุล)</td>'+cells(R.residual,R.residualPri)+'</tr>'; }
+  h+='<tr class="tot"><td class="l">เงินสดและรายการเทียบเท่าเงินสด เพิ่มขึ้น(ลดลง) สุทธิ</td>'+cells(R.deltaCash,R.deltaCashPri)+'</tr>';
+  h+='<tr class="cfinfo"><td class="l">เงินสดและรายการเทียบเท่าเงินสด ต้นงวด</td>'+cells(R.beginCash,R.beginCashPri)+'</tr>';
+  h+='<tr class="tot"><td class="l">เงินสดและรายการเทียบเท่าเงินสด ปลายงวด</td>'+cells(R.endCash,R.endCashPri)+'</tr>';
+  h+='</tbody></table></div>';
+  return h;
+}
 function _fsRenderCFD(){
   if(typeof GLROWS==='undefined'||!GLROWS||!GLROWS.length)
     return '<div class="fsstmtwrap"><div class="fsst-h"><span class="fssth-en">STATEMENT OF CASH FLOWS — DIRECT</span><span class="fssth-th">งบกระแสเงินสด · วิธีทางตรง</span></div><p class="fsnote big">ยังไม่มีข้อมูล GL — โปรดโหลด/ฝังข้อมูล General Ledger ก่อน</p></div>';
@@ -18145,6 +18195,23 @@ function _fsRenderCFD(){
   function amtPri(v){ return pc?('<td class="fsm fsprev">'+money(v,true)+'</td>'):''; }
   function rowspan2(){ return ''; }
   var ed=_cfdLnEdit;   /* v9.126: โหมดแก้ไข/เพิ่มบรรทัด */
+  /* v10.92: default view — clean BS/PL statement template + drill dock (edit mode still uses the editable table below) */
+  if(!ed){
+    var _cln=_fsCfdCleanHTML(R);
+    var _tieC='<div class="fsbscheck '+(R.clean?'ok':'cfdwarn')+'">'+(R.clean
+        ?('✓ กระทบยอดได้ · ยอดปลายงวด '+money(R.endCash)+' = เงินสดในงบแสดงฐานะการเงินปีปัจจุบัน')
+        :('✓ กระทบยอดได้ (มีบรรทัดกระทบยอด) · พบ Voucher เดบิต≠เครดิต '+R.nUnbal+' รายการ ควรตรวจสอบ'))+'</div>';
+    var _cg='<div class="cfdcash"><div class="cfdcash-h">เงินสดและรายการเทียบเท่าเงินสด · อ้างอิงบรรทัดในงบแสดงฐานะการเงิน</div>'+
+      '<table class="cfdcash-t"><thead><tr><th>รหัส</th><th>ชื่อบัญชี</th><th class="fsm">ต้นงวด</th><th class="fsm">เคลื่อนไหว</th><th class="fsm">ปลายงวด</th></tr></thead><tbody>';
+    for(var _ci=0;_ci<R.cashAccts.length;_ci++){ var _o=R.cashAccts[_ci];
+      _cg+='<tr><td class="mono">'+E(_o.code)+'</td><td>'+E(_o.name)+'</td><td class="fsm">'+money(_o.begin)+'</td>'+amtCur(_o.move)+'<td class="fsm">'+money(_o.end)+'</td></tr>'; }
+    _cg+='<tr class="cfdcash-tot"><td></td><td>รวม '+R.cashAccts.length+' บัญชี</td><td class="fsm">'+money(R.beginCash)+'</td>'+amtCur(R.move)+'<td class="fsm">'+money(R.endCash)+'</td></tr></tbody></table></div>';
+    var _extras='<details class="cfd-extras"><summary>▸ รายละเอียดเพิ่มเติม · กระแสเงินสดรายโครงการ · กลุ่มบัญชีเงินสด</summary>'+_cfdProjSummaryHtml()+_cg+'</details>';
+    return '<div class="fsstmtwrap fscfd-wrap">'+
+      '<div class="fswp-bar"><span class="fswp-bt">📘 WP FS · GLI '+((typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):'')+'<small>งบกระแสเงินสด · วิธีทางตรง · คำนวณสดจาก GL (voucher-by-voucher)</small></span><span class="fswp-sp"></span>'+
+        '<button type="button" id="cfdLnEditToggle" class="fswp-btn" title="แก้ไข/เพิ่มบรรทัดงบกระแสเงินสด — คลิกที่ชื่อบรรทัดเพื่อพิมพ์แก้ · ➕ เพิ่มบรรทัดใหม่ในแต่ละกิจกรรม">✏️ แก้ไข / เพิ่มบรรทัด</button></div>'+
+      _cln+_tieC+_extras+'</div>';
+  }
   var body='';
   for(var s=0;s<_CFD_SEC.length;s++){ var sec=_CFD_SEC[s];
     body+='<tr class="cfdsec"><td class="fsbsth" colspan="'+(2)+'"><span class="cfdsecen">'+E(sec[2])+'</span> · '+E(sec[1])+'</td><td></td>'+(pc?'<td></td>':'')+'</tr>';
@@ -19455,7 +19522,7 @@ function _fsRenderBody(){
   /* v10.86: legacy (GL) mode while the WP profile is available → offer a switch back to WP FS */
   if(typeof _fsWpAvail==='function' && _fsWpAvail() && !_fsWpMode && typeof _fsWpTabYearEligible==='function' && _fsWpTabYearEligible(_fsTab)){ try{ _fsWpCSS(); }catch(_e){} h=_fsWpBackBar()+h; }
   b.innerHTML=h;
-  try{ if(typeof _fsIssDockRemove==='function')_fsIssDockRemove(); }catch(_e4){}   /* v10.90: no drillable statement here → dock off */
+  try{ if(typeof _fsIssDrillDock==='function')_fsIssDrillDock(); }catch(_e4){}   /* v10.90/.92: keep the dock for drillable statements (BS/PL/Cash Flow Direct), remove otherwise */
   try{ if(_psc||_psl){ var _nw=b.querySelector('.fstbwrap,.fsstmtwrap'); if(_nw){ if(_psc)_nw.scrollTop=_psc; if(_psl)_nw.scrollLeft=_psl; } } }catch(_e){}   /* v9.138: คืนตำแหน่งเลื่อน (กันเด้งขึ้น) */
 }
 function _fsSyncTabs(w){ var tb=w.querySelectorAll('.fstab'); for(var i=0;i<tb.length;i++){tb[i].classList.toggle('on',tb[i].getAttribute('data-fstab')===_fsTab);} }
@@ -19952,6 +20019,7 @@ function _fsWpPrint(){
 function _fsWpBind(w){ if(!w||w._wpb)return; w._wpb=1;
   w.addEventListener('click',function(e){ var t=e.target; if(!t||!t.closest)return;
     var dd=t.closest('[data-issd]'); if(dd){ _fsIssDrill(dd.getAttribute('data-issd'),dd.getAttribute('data-issl'),dd); return; }   /* v10.86.5: issued FS line → codes → GL + contra */
+    var cfd=t.closest('[data-cfdd]'); if(cfd){ _fsCfdDrill(cfd.getAttribute('data-cfdd'),cfd.getAttribute('data-cfdl'),cfd); return; }   /* v10.92: cash-flow line → codes → GL (same dock as BS/PL) */
     var rec=t.closest('[data-wprec]'); if(rec){ e.stopPropagation(); _fsWpReconOpen(rec.getAttribute('data-wprec')); return; }
     var ln=t.closest('[data-wpline]'); if(ln){ var k=ln.getAttribute('data-wpline'); _fsWpOpen[k]=!_fsWpOpen[k]; _fsRenderBody(); return; }
     var vb=t.closest('[data-wpview]'); if(vb){ _fsWpView=vb.getAttribute('data-wpview'); _fsRenderBody(); return; }
@@ -20360,7 +20428,7 @@ function _fsIssCodeGLHTML(code){
 /* v10.90: drill = a PERSISTENT half-page dock on the right of the statement.
    It waits there (empty state) until a statement line is clicked, then shows the line's
    member codes → click a code → its GL in full double-entry (own leg gold). */
-var _fsIssDrillEsc=null,_fsIssActiveRow=null,_fsIssSelDcode=null,_fsIssSelLabel='',_fsIssDockOff=false,_fsIssPanelScroll=null,_fsIssPanelRaf=0;
+var _fsIssDrillEsc=null,_fsIssActiveRow=null,_fsIssSelDcode=null,_fsIssSelLabel='',_fsIssSelKind='iss',_fsIssDockOff=false,_fsIssPanelScroll=null,_fsIssPanelRaf=0;
 /* v10.91: lock the dock as a stable half-page pane — pinned under the sticky command bar,
    full remaining height, tracking scroll/resize so it never floats away from the statement. */
 function _fsIssPanelPos(panel){ panel=panel||document.getElementById('fsIssPanel'); if(!panel)return;
@@ -20417,13 +20485,17 @@ function _fsIssDrillClose(){
   _fsIssDockOff=true; _fsIssDockRemove(); }
 /* called after a BS/PL statement renders — keep the dock present (unless the user hid it) */
 function _fsIssDrillDock(){ var fb=document.getElementById('fsBody'); if(!fb)return;
-  var hasLines=!!fb.querySelector('[data-issd]');
-  if(!hasLines || _fsIssDockOff){ _fsIssDockRemove(); return; }
+  var hasIss=!!fb.querySelector('[data-issd]'), hasCfd=!!fb.querySelector('[data-cfdd]');
+  if((!hasIss&&!hasCfd) || _fsIssDockOff){ _fsIssDockRemove(); return; }
   _fsIssCSS(); _fsIssDrillCSS();
   fb.classList.add('fsiss-drillopen'); fb.classList.add('fsiss-dock');
   _fsIssPanelEnsure();
-  if(_fsIssSelDcode){ _fsIssRenderCodes(_fsIssSelDcode,_fsIssSelLabel);
-    try{ var ln=fb.querySelector('[data-issd="'+(''+_fsIssSelDcode).replace(/["\\]/g,'')+'"]'); if(ln){ _fsIssActiveRow=ln; ln.classList.add('issactive'); } }catch(e){}
+  /* reset a stale selection when the statement kind changed (e.g. BS → Cash Flow) */
+  var curKind=hasCfd?'cfd':'iss';
+  if(_fsIssSelDcode && _fsIssSelKind!==curKind){ _fsIssSelDcode=null; _fsIssSelLabel=''; if(_fsIssActiveRow){try{_fsIssActiveRow.classList.remove('issactive');}catch(e){}_fsIssActiveRow=null;} }
+  if(_fsIssSelDcode){
+    if(_fsIssSelKind==='cfd')_fsCfdRenderCodes(_fsIssSelDcode,_fsIssSelLabel); else _fsIssRenderCodes(_fsIssSelDcode,_fsIssSelLabel);
+    try{ var attr=(_fsIssSelKind==='cfd')?'cfdd':'issd'; var ln=fb.querySelector('['+'data-'+attr+'="'+(''+_fsIssSelDcode).replace(/["\\]/g,'')+'"]'); if(ln){ _fsIssActiveRow=ln; ln.classList.add('issactive'); } }catch(e){}
   } else { _fsIssRenderEmpty(); } }
 /* click a statement line → show its member codes in the dock */
 function _fsIssDrill(dcode,label,el){ if(!(GLI_FS2025&&GLI_FS2025.codes))return; _fsIssCSS(); _fsIssDrillCSS();
@@ -20431,8 +20503,27 @@ function _fsIssDrill(dcode,label,el){ if(!(GLI_FS2025&&GLI_FS2025.codes))return;
   var fb=document.getElementById('fsBody'); if(fb){ fb.classList.add('fsiss-drillopen'); fb.classList.add('fsiss-dock'); }
   if(_fsIssActiveRow&&_fsIssActiveRow!==el){ try{_fsIssActiveRow.classList.remove('issactive');}catch(e){} }
   _fsIssActiveRow=el||null; if(el){ try{el.classList.add('issactive');}catch(e){} }
-  _fsIssSelDcode=dcode; _fsIssSelLabel=label||'';
+  _fsIssSelKind='iss'; _fsIssSelDcode=dcode; _fsIssSelLabel=label||'';
   _fsIssRenderCodes(dcode,label);
+}
+/* v10.92: cash-flow line → its contributing account codes → GL, in the same right-side dock as BS/PL */
+function _fsCfdRenderCodes(key,label){ var p=_fsIssPanelEnsure(); p.classList.add('has-sel');
+  var LL=(typeof _CFD!=='undefined'&&_CFD&&_CFD.lines&&_CFD.lines[key])||{codes:{}};
+  var codes=LL.codes||{};
+  var arr=Object.keys(codes).map(function(c){ var o=codes[c]||{}; return {c:c,name:o.name||'',a:(+o.cur||0)}; });
+  arr.sort(function(a,b){ return Math.abs(b.a)-Math.abs(a.a); });
+  var body=arr.map(function(o){
+    return '<div class="fsiss-crow" data-isscode="'+_fsWpEsc(o.c)+'"><div class="cc-h"><span class="cc-code">'+_fsWpEsc(o.c)+'</span>'+
+      '<span class="cc-name">'+_fsWpEsc(o.name)+'</span><span class="cc-amt">'+_fsIssN(o.a)+'</span><span class="cc-ex">▸</span></div><div class="cc-det" hidden></div></div>'; }).join('');
+  if(!arr.length)body='<div class="fsiss-empty">— ไม่มีรหัสบัญชีในบรรทัดนี้ —</div>';
+  p.innerHTML=_fsIssHeadHTML(label||'','บรรทัดกระแสเงินสด · '+arr.length+' บัญชี · คลิกรหัสเพื่อดู GL + คู่บัญชี (เดบิต/เครดิต)')+'<div class="fsiss-pb">'+body+'</div>'; }
+function _fsCfdDrill(key,label,el){ if(!(typeof _CFD!=='undefined'&&_CFD))return; _fsIssCSS(); _fsIssDrillCSS();
+  _fsIssDockOff=false;
+  var fb=document.getElementById('fsBody'); if(fb){ fb.classList.add('fsiss-drillopen'); fb.classList.add('fsiss-dock'); }
+  if(_fsIssActiveRow&&_fsIssActiveRow!==el){ try{_fsIssActiveRow.classList.remove('issactive');}catch(e){} }
+  _fsIssActiveRow=el||null; if(el){ try{el.classList.add('issactive');}catch(e){} }
+  _fsIssSelKind='cfd'; _fsIssSelDcode=key; _fsIssSelLabel=label||'';
+  _fsCfdRenderCodes(key,label);
 }
 function _fsIssDate(s){ if(!s)return ''; var p=(''+s).split('-'); if(p.length!==3)return s; var mm=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.']; return (+p[2])+' '+mm[+p[1]]+' '+((+p[0])+543-2500); }
 function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
