@@ -18207,9 +18207,15 @@ function _fsCfdCleanHTML(R){
   if(R.hasAdjOpen){ var alab='ปรับปรุงยอดยกมา (ไม่ใช่กระแสเงินสดจากกิจกรรม)'; var ak=(R.lines['adj_open']&&R.lines['adj_open'].codes)?Object.keys(R.lines['adj_open'].codes).length:0;
     h+='<tr'+(ak?' class="issline"':'')+(ak?(' data-cfdd="adj_open" data-cfdl="'+_fsWpEsc(alab)+'"'):'')+'><td class="l ind1">'+_fsWpEsc(alab)+'</td>'+cells(R.adjOpen,R.adjOpenPri)+'</tr>'; }
   if(Math.abs(R.residual)>0.005||Math.abs(R.residualPri)>0.005){ h+='<tr class="sub"><td class="l">ผลต่างจาก Voucher ที่เดบิต≠เครดิต (GL ไม่สมดุล)</td>'+cells(R.residual,R.residualPri)+'</tr>'; }
-  h+='<tr class="tot"><td class="l">เงินสดและรายการเทียบเท่าเงินสด เพิ่มขึ้น(ลดลง) สุทธิ</td>'+cells(R.deltaCash,R.deltaCashPri)+'</tr>';
-  h+='<tr class="cfinfo"><td class="l">เงินสดและรายการเทียบเท่าเงินสด ต้นงวด</td>'+cells(R.beginCash,R.beginCashPri)+'</tr>';
-  h+='<tr class="tot"><td class="l">เงินสดและรายการเทียบเท่าเงินสด ปลายงวด</td>'+cells(R.endCash,R.endCashPri)+'</tr>';
+  /* v10.95: the three cash lines are drillable → the actual cash & cash-equivalents accounts (code · GL) */
+  var _cashN=(R.cashAccts&&R.cashAccts.length)||0;
+  function cashRow(cls,label,ckey,curv,priv){
+    var da=_cashN?(' data-cfdd="'+ckey+'" data-cfdl="'+_fsWpEsc(label)+'" title="คลิกเพื่อดูรหัสบัญชีเงินสด/รายการเทียบเท่าเงินสด + GL"'):'';
+    return '<tr class="'+cls+(_cashN?' issline':'')+'"'+da+'><td class="l">'+_fsWpEsc(label)+'</td>'+cells(curv,priv)+'</tr>';
+  }
+  h+=cashRow('tot','เงินสดและรายการเทียบเท่าเงินสด เพิ่มขึ้น(ลดลง) สุทธิ','__cash_move',R.deltaCash,R.deltaCashPri);
+  h+=cashRow('cfinfo','เงินสดและรายการเทียบเท่าเงินสด ต้นงวด','__cash_begin',R.beginCash,R.beginCashPri);
+  h+=cashRow('tot','เงินสดและรายการเทียบเท่าเงินสด ปลายงวด','__cash_end',R.endCash,R.endCashPri);
   h+='</tbody></table></div>';
   return h;
 }
@@ -20539,15 +20545,28 @@ function _fsIssDrill(dcode,label,el){ if(!(GLI_FS2025&&GLI_FS2025.codes))return;
 }
 /* v10.92: cash-flow line → its contributing account codes → GL, in the same right-side dock as BS/PL */
 function _fsCfdRenderCodes(key,label){ var p=_fsIssPanelEnsure(); p.classList.add('has-sel');
-  var LL=(typeof _CFD!=='undefined'&&_CFD&&_CFD.lines&&_CFD.lines[key])||{codes:{}};
-  var codes=LL.codes||{};
-  var arr=Object.keys(codes).map(function(c){ var o=codes[c]||{}; return {c:c,name:o.name||'',a:(+o.cur||0)}; });
-  arr.sort(function(a,b){ return Math.abs(b.a)-Math.abs(a.a); });
+  /* v10.95: the three cash lines drill to the actual "เงินสดและรายการเทียบเท่าเงินสด" accounts
+     (code · name · ต้นงวด/เคลื่อนไหว/ปลายงวด) — the old Direct-method cash grouping, in the new dock. */
+  var ck=(key==='__cash_begin'?'begin':(key==='__cash_end'?'end':(key==='__cash_move'?'move':null)));
+  var arr, note;
+  if(ck){
+    var ca=(typeof _CFD!=='undefined'&&_CFD&&_CFD.cashAccts)||[];
+    arr=ca.map(function(o){ return {c:o.code,name:o.name||'',a:(+o[ck]||0),begin:(+o.begin||0),move:(+o.move||0),end:(+o.end||0)}; });
+    arr.sort(function(a,b){ return Math.abs(b.end)-Math.abs(a.end); });
+    note='เงินสดและรายการเทียบเท่าเงินสด · '+arr.length+' บัญชี · อ้างอิงบรรทัดในงบแสดงฐานะการเงิน · คลิกรหัสเพื่อดู GL';
+  } else {
+    var LL=(typeof _CFD!=='undefined'&&_CFD&&_CFD.lines&&_CFD.lines[key])||{codes:{}};
+    var codes=LL.codes||{};
+    arr=Object.keys(codes).map(function(c){ var o=codes[c]||{}; return {c:c,name:o.name||'',a:(+o.cur||0)}; });
+    arr.sort(function(a,b){ return Math.abs(b.a)-Math.abs(a.a); });
+    note='บรรทัดกระแสเงินสด · '+arr.length+' บัญชี · คลิกรหัสเพื่อดู GL + คู่บัญชี (เดบิต/เครดิต)';
+  }
   var body=arr.map(function(o){
+    var sub=ck?('<span class="cc-sub">ต้นงวด '+_fsIssN(o.begin)+' · เคลื่อนไหว '+_fsIssN(o.move)+' · ปลายงวด '+_fsIssN(o.end)+'</span>'):'';
     return '<div class="fsiss-crow" data-isscode="'+_fsWpEsc(o.c)+'"><div class="cc-h"><span class="cc-code">'+_fsWpEsc(o.c)+'</span>'+
-      '<span class="cc-name">'+_fsWpEsc(o.name)+'</span><span class="cc-amt">'+_fsIssN(o.a)+'</span><span class="cc-ex">▸</span></div><div class="cc-det" hidden></div></div>'; }).join('');
+      '<span class="cc-name">'+_fsWpEsc(o.name)+sub+'</span><span class="cc-amt">'+_fsIssN(o.a)+'</span><span class="cc-ex">▸</span></div><div class="cc-det" hidden></div></div>'; }).join('');
   if(!arr.length)body='<div class="fsiss-empty">— ไม่มีรหัสบัญชีในบรรทัดนี้ —</div>';
-  p.innerHTML=_fsIssHeadHTML(label||'','บรรทัดกระแสเงินสด · '+arr.length+' บัญชี · คลิกรหัสเพื่อดู GL + คู่บัญชี (เดบิต/เครดิต)')+'<div class="fsiss-pb">'+body+'</div>'; }
+  p.innerHTML=_fsIssHeadHTML(label||'',note)+'<div class="fsiss-pb">'+body+'</div>'; }
 function _fsCfdDrill(key,label,el){ if(!(typeof _CFD!=='undefined'&&_CFD))return; _fsIssCSS(); _fsIssDrillCSS();
   _fsIssDockOff=false;
   var fb=document.getElementById('fsBody'); if(fb){ fb.classList.add('fsiss-drillopen'); fb.classList.add('fsiss-dock'); }
@@ -20592,7 +20611,8 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    ".fsiss-crow.open{border-color:#C7CCF7;box-shadow:0 2px 8px rgba(79,70,229,.10)}",
    ".fsiss-crow.open .cc-h{background:#E7E9FE;border-left-color:#4F46E5}",
    ".cc-code{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:800;color:#3730A3;background:#E7E9FE;border:1px solid #C7CCF7;border-radius:6px;padding:2px 7px;flex:none;letter-spacing:.02em}",
-   ".cc-name{flex:1;font-size:12.5px;font-weight:600;color:#1E2340;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+   ".cc-name{flex:1;min-width:0;font-size:12.5px;font-weight:600;color:#1E2340;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+   ".cc-sub{display:block;font-size:10px;font-weight:500;color:#5a7a72;margin-top:1px;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
    ".cc-amt{font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:#3730A3;flex:none}",
    ".cc-ex{color:#4F46E5;font-size:10px;flex:none;width:12px;text-align:center}",
    /* GL detail = TEAL layer */
