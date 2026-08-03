@@ -3829,6 +3829,12 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-fs .fstb .fsgrpcol.fsgrp-E .fstbgrpsel{color:#A06E12;background-color:#FBF3E1;border-color:#EED9A8}
 #page-fs .fstb .fsgrpcol.fsgrp-R .fstbgrpsel{color:#1E5FAE;background-color:#EAF2FC;border-color:#C4DCF5}
 #page-fs .fstb .fsgrpcol.fsgrp-X .fstbgrpsel{color:#7C3AED;background-color:#F3EDFD;border-color:#DCCBF5}
+/* v10.93: Cash-flow grouping column in the Trial Balance */
+#page-fs .fstb .fscfgrpcol{width:224px;white-space:normal;border-left:1px solid var(--fx-hair);padding:2px 7px;vertical-align:middle}
+#page-fs .fstb .fscfgrpcol .cfdmovesel{width:100%;box-sizing:border-box;border-radius:999px;padding:5px 12px;font-size:11px;background:#F6FAF9}
+#page-fs .fstb .fscfgrpcol .cfdmovesel:hover{border-color:#3AA0E6}
+#page-fs .fstb .fscfgrpcol .cfdmovesel.moved{color:#9A5B12;font-weight:700;background:#FFF6EA;border-color:#E7B877}
+#page-fs .fstb thead th.fscfgrphd{white-space:normal;width:188px;min-width:188px}
 /* v9.201: Index column — จับกลุ่มบรรทัดใน Trial Balance */
 #page-fs .fstb .fsidxhd{border-left:1px solid var(--fx-hair)}
 #page-fs .fstb .fsidxhd-s{display:block;font-size:9px;color:var(--fx-muted);font-weight:600;margin-top:1px;text-transform:none}
@@ -4604,7 +4610,7 @@ body.apjv-resizing,body.apjv-resizing *{cursor:col-resize!important;user-select:
 #page-fs .fstb .fsgrpcol.fsgrp-E .fsgrpth{color:#B4832A}
 #page-fs .fstb .fsgrpcol.fsgrp-R .fsgrpth{color:#1E5FAE}
 #page-fs .fstb .fsgrpcol.fsgrp-X .fsgrpth{color:#7C3AED}
-#page-fs .fstb thead th.fsgrphd{white-space:normal;min-width:160px}
+#page-fs .fstb thead th.fsgrphd{white-space:normal;width:172px;min-width:172px}
 #page-fs .fstb thead th .fsgrphd-en,#page-fs .fstb thead th .fsthy{display:block;font-weight:600;font-size:8.5px;
   letter-spacing:.02em;opacity:.82;text-transform:none;margin-top:2px}
 /* ---- v9.92: TB Excel-style header (sort on title-click + ▼ filter) ---- */
@@ -17018,6 +17024,7 @@ function _fsTbOpenFilter(k,btn){ _fsTbCloseDrop(); var pg=document.getElementByI
 /* ---------- RENDER: Trial Balance ---------- */
 function _fsRenderTB(){
   var arr=_fsTbRows(); var rows='';
+  try{ if(typeof _cfdApplyLineCustom==='function')_cfdApplyLineCustom(); }catch(_cae){}   /* v10.93: build cash-flow lines (incl. custom) so the CF-grouping column dropdown has options */
   var adjActive=_fsAdjActive();   /* v9.96: มีรายการปรับปรุงของปีนี้ + เปิดใช้ → แสดงคอลัมน์กระดาษทำการ */
   /* v10.86.2: WP ADJ REC columns — show only for FY2568 (and only when the user's own adjusting-entries worksheet is not active) */
   var wpAdjOn=(!adjActive)&&(typeof _fsWpTbAdjOn==='function')&&_fsWpTbAdjOn();
@@ -17142,10 +17149,11 @@ function _fsRenderTB(){
       '<td class="fsc">'+_fsE(x.code)+'</td>'+
       '<td class="fsacct"><span class="fsnm">'+_fsE(x.name)+badges+'</span></td>'+
       '<td class="fsgrpcol fsgrp-'+c.cat+((FSMAP.code&&FSMAP.code[x.code])?' fsgrp-moved':'')+'"><select class="fstbgrpsel" data-code="'+_fsE(x.code)+'" title="เลือกบรรทัดในงบการเงินที่บัญชีนี้จะวิ่งเข้า (จัดกลุ่ม) — บันทึกอัตโนมัติ">'+_fsMapLineOpts(c.line)+'</select></td>'+
+      '<td class="fscfgrpcol'+(_fsMapCfd()[_fsRcCode(x.code)]?' fscf-moved':'')+'">'+_cfdMoveCtl(x.code)+'</td>'+   /* v10.93: Cash-flow grouping — เลือกบรรทัดงบกระแสเงินสด (auto / override), บันทึกอัตโนมัติ */
       '<td class="fsm'+(wpCarry&&Math.abs(_fsWpAdjNet(x.code))>0.005?' fsadj-after on':'')+'">'+_fsMoney(_fsWpTbOpenVal(x),true)+'</td>'+
       '<td class="fsm">'+_fsMoney(x.yd,true)+'</td><td class="fsm">'+_fsMoney(x.yc,true)+'</td>'+
       _endCells(x)+(wpAdjOn?_fsWpTbAdjTd(x):'')+'</tr>';});
-  if(!arr.length)rows='<tr class="fstbempty"><td colspan="'+((adjActive?15:12)+(wpAdjOn?3:0))+'">— ไม่มีบัญชีที่ตรงกับตัวกรอง —</td></tr>';
+  if(!arr.length)rows='<tr class="fstbempty"><td colspan="'+((adjActive?16:13)+(wpAdjOn?3:0))+'">— ไม่มีบัญชีที่ตรงกับตัวกรอง —</td></tr>';
   var attHead=_fsTbTh('att_ic','📎','Attach','fsatthd-ic')+
     _fsTbTh('att_amt','Per File','A1 · Sheet FY '+((typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):''),'fsm fsatthd-amt')+
     _fsTbTh('att_diff','Diff','File − TB','fsm fsatthd-diff');
@@ -17165,6 +17173,7 @@ function _fsRenderTB(){
     _fsTbTh('code','Code','','')+
     _fsTbTh('acct','Account · Name','','')+
     _fsTbTh('group','FS Grouping','Group → FS line','fsgrphd')+
+    _fsTbTh('cfgroup','Cash Flow Grouping','Group → cash-flow line','fsgrphd fscfgrphd')+
     _fsTbTh('opening','Opening',openSub,'fsm')+
     _fsTbTh('debit','Debit',movSub,'fsm')+
     _fsTbTh('credit','Credit',movSub,'fsm')+
@@ -23766,7 +23775,7 @@ body{ text-rendering:optimizeLegibility; font-feature-settings:"kern" 1,"liga" 1
 #page-fs{--fx-ink:#0E1C21 !important;--fx-ink2:#384750 !important;--fx-muted:#616C72 !important}
 body{text-rendering:optimizeLegibility}
 #page-fs .fstbwrap{resize:both !important;overflow:auto !important;min-height:240px;height:560px;max-height:none;min-width:480px;max-width:100%}
-#page-fs .fstb{min-width:1460px;width:100%}
+#page-fs .fstb{min-width:1660px;width:100%}
 #page-fs .fstbwrap::-webkit-resizer{background:linear-gradient(135deg,transparent 46%,var(--fx-brand,#0E5C52) 46%,var(--fx-brand,#0E5C52) 60%,transparent 60%,transparent 70%,var(--fx-brand,#0E5C52) 70%,var(--fx-brand,#0E5C52) 84%,transparent 84%)}
 #page-fs .fstb thead th{background:linear-gradient(180deg,#12665B 0%,#0A463E 100%) !important;color:#fff !important;font-family:'Inter',sans-serif !important;border-color:rgba(255,255,255,.14) !important}
 #page-fs .fstb .fstot td{background:linear-gradient(180deg,#12665B 0%,#0A463E 100%) !important;color:#fff !important;font-weight:800 !important;border-top:2.5px solid #4FD6C0 !important;border-bottom:none !important;letter-spacing:.01em}
