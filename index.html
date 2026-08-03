@@ -16739,7 +16739,7 @@ function _fsShell(){
     (t.unmapped?('<span class="fschip warn">! '+t.unmapped+' unmapped code(s)</span>'):'<span class="fschip ok">✓ all codes mapped</span>');
   /* v10.42: grouped vertical cards (like the Database GL panel) — 3 groups per row */
   var _fsTabG=function(keys){var s='';for(var gi=0;gi<keys.length;gi++){for(var gj=0;gj<_FS_TABS.length;gj++){var d=_FS_TABS[gj];if(d[0]!==keys[gi])continue;s+='<button class="fstab'+(d[0]===_fsTab?' on':'')+'" data-fstab="'+d[0]+'"><span class="fstic">'+(d[2]||'')+'</span><span class="fstlbl">'+d[1]+'</span></button>';break;}}return s;};
-  var _issOn=(typeof _fsIssAvail==='function'&&_fsIssAvail());   /* v10.86.4: main Export = WP issued statements (GLI 2025) */
+  var _issOn=(typeof _fsWpStmtOn==='function'&&_fsWpStmtOn());   /* v10.86.4/.7: main Export = WP issued statements (FY2568 only) */
   var expBtns=(['bs','pl','cf'].indexOf(_fsTab)>=0?('<button class="fsexp man fscmd-man'+(_fsManEdit?' on':'')+'" id="fsManEditToggle" title="แก้งบเอง — คลิกที่ชื่อบรรทัด/ยอดในงบเพื่อพิมพ์ทับ (มีผลกับ PDF)">'+(_fsManEdit?'✅ แก้งบเอง: เปิด':'✏️ แก้งบเอง')+'</button>'):'')+
     '<details class="fscmd-dd"><summary class="fscmd-ddbtn" title="'+(_issOn?'Export งบการเงินตาม WP GLI 2025 (งบฐานะการเงิน · งบกำไรขาดทุน · งบเปลี่ยนแปลงส่วนของผู้ถือหุ้น)':'Export the four financial statements + 24 notes (statutory template)')+'">⤓ Export<i class="fscmd-car">▾</i></summary><div class="fscmd-ddm">'+
       '<button type="button" class="fscmd-ddi" id="fsExport" title="'+(_issOn?'ส่งออกงบการเงิน (WP GLI 2025) เป็น Excel — ตรงกับ FS_BS/FS_PL/FS Change':'Export the four financial statements + notes to Excel (statutory template)')+'"><b>📊 Excel workbook</b><small>'+(_issOn?'งบการเงิน WP GLI 2568 · BS · PL · การเปลี่ยนแปลงส่วนผู้ถือหุ้น':'4 statements + 24 notes · statutory template')+'</small></button>'+
@@ -16747,7 +16747,7 @@ function _fsShell(){
     '</div></details>';
   /* v10.43: Command Bar — one sticky control bar, two rows: (1) period · checks · export (2) all statement tabs. Layout only — every ID, class hook and event path is unchanged (delegated via closest()) */
   /* v10.86: in WP-FS mode the row-1 controls (GL year picker · GL balance chips · legacy export) are redundant — the WP toolbar in the body owns period/export — so hide row-1 on WP tabs */
-  var _wpOn=(typeof _fsWpActive==='function' && _fsWpActive() && typeof _fsWpTabOk==='function' && _fsWpTabOk(_fsTab));
+  var _wpOn=(typeof _fsWpStmtOn==='function' && _fsWpStmtOn() && typeof _fsWpTabOk==='function' && _fsWpTabOk(_fsTab));
   return '<div class="fscmd">'+
     (_wpOn?'':('<div class="fscmd-r1">'+filtersInner+
       '<span class="fscmd-sp"></span>'+
@@ -19349,7 +19349,7 @@ function _fsRenderBody(){
   var _psc=0,_psl=0; try{ var _pw=b.querySelector('.fstbwrap,.fsstmtwrap'); if(_pw){_psc=_pw.scrollTop||0;_psl=_pw.scrollLeft||0;} }catch(_e){}
   if(_fsTab==='mt')_fsTab='tb'; /* v9.51: งบตามแบบ (PAE) removed — fall back to Trial Balance */
   /* v10.86: WP FS (GLI 2025) — statutory grouping from the audit working paper (issued "Separate" figures) */
-  if(typeof _fsWpActive==='function' && _fsWpActive() && typeof _fsWpTabOk==='function' && _fsWpTabOk(_fsTab)){
+  if(typeof _fsWpStmtOn==='function' && _fsWpStmtOn() && typeof _fsWpTabOk==='function' && _fsWpTabOk(_fsTab)){
     try{ b.innerHTML=_fsWpBody(_fsTab);
       try{ if(_psc||_psl){ var _nw2=b.querySelector('.fswp-wrap'); if(_nw2){ if(_psc)_nw2.scrollTop=_psc; if(_psl)_nw2.scrollLeft=_psl; } } }catch(_e2){}
       return; }catch(_wpe){ if(window.console&&console.error)console.error('[WP FS]',_wpe); }
@@ -19365,7 +19365,7 @@ function _fsRenderBody(){
     h='<div class="fsmanhint">✏️ <b>โหมดแก้งบเอง เปิดอยู่</b> — คลิกที่ <b>ชื่อบรรทัด</b> หรือ <b>ยอดปีล่าสุด</b> ในงบเพื่อพิมพ์ทับ (กด Enter เพื่อยืนยัน) · ยอด/ชื่อที่แก้จะไหลเข้า <b>PDF และ Excel</b> · เซลล์ที่แก้จะไฮไลต์ '+(nOv?('· แก้แล้ว '+nOv+' รายการ '):'')+'· กด “✅ แก้งบเอง: เปิด” อีกครั้งเพื่อปิดโหมด</div>'+h;
   }
   /* v10.86: legacy (GL) mode while the WP profile is available → offer a switch back to WP FS */
-  if(typeof _fsWpAvail==='function' && _fsWpAvail() && !_fsWpMode && typeof _fsWpTabOk==='function' && _fsWpTabOk(_fsTab)){ try{ _fsWpCSS(); }catch(_e){} h=_fsWpBackBar()+h; }
+  if(typeof _fsWpAvail==='function' && _fsWpAvail() && !_fsWpMode && typeof _fsWpYearOk==='function' && _fsWpYearOk() && typeof _fsWpTabOk==='function' && _fsWpTabOk(_fsTab)){ try{ _fsWpCSS(); }catch(_e){} h=_fsWpBackBar()+h; }
   b.innerHTML=h;
   try{ if(_psc||_psl){ var _nw=b.querySelector('.fstbwrap,.fsstmtwrap'); if(_nw){ if(_psc)_nw.scrollTop=_psc; if(_psl)_nw.scrollLeft=_psl; } } }catch(_e){}   /* v9.138: คืนตำแหน่งเลื่อน (กันเด้งขึ้น) */
 }
@@ -19480,6 +19480,9 @@ function _fsWpAvail(){ return !!(GLI_FS2025&&GLI_FS2025.bs&&GLI_FS2025.bs.length
 function _fsWpActive(){ return _fsWpAvail()&&_fsWpMode; }
 function _fsWpSetMode(on){ _fsWpMode=!!on; try{localStorage.setItem('gli_fswpmode',on?'1':'0');}catch(_e){} }
 function _fsWpTabOk(t){ return t==='bs'||t==='pl'||t==='sce'; }   /* v10.86.1: Trial Balance reverted to the original app view — WP owns BS/PL/SCE only */
+/* v10.86.7: WP audited statements are FY2568-specific — for other fiscal years fall back to the app's GL statements (which follow the selected year with prior-year comparison) */
+function _fsWpYearOk(){ return typeof _fsYear!=='undefined' && _fsYear!=='ALL' && _fsY0===_fsY1 && _fsY1==='2025'; }
+function _fsWpStmtOn(){ return _fsWpActive() && _fsWpYearOk(); }
 
 function _fsWpEsc(s){ return (''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function _fsWpN(v,dec){ dec=dec||0; v=+v||0; var eps=dec?0.005:0.5; if(Math.abs(v)<eps)v=0;
@@ -19745,7 +19748,7 @@ function _fsWpReconOpen(key){ if(!_fsWpAvail())return; var r=_fsWpFindLine(key);
 /* ---------- Excel export (SpreadsheetML — BS + PL working paper + SCE) ---------- */
 function _fsWpXe(s){ return _fsWpEsc(s); }
 function _fsWpExcel(){
-  if(typeof _fsIssAvail==='function'&&_fsIssAvail()){ return _fsIssExcel(); }
+  if(typeof _fsWpStmtOn==='function'&&_fsWpStmtOn()){ return _fsIssExcel(); }
   var meta=GLI_FS2025.meta||{};
   function styles(){ var F='Tahoma';
     function fo(sz,b,i){ return '<Font ss:FontName="'+F+'" ss:Size="'+sz+'"'+(b?' ss:Bold="1"':'')+(i?' ss:Italic="1"':'')+'/>'; }
@@ -19813,7 +19816,7 @@ function _fsWpExcel(){
 
 /* ---------- print / PDF ---------- */
 function _fsWpPrint(){
-  if(typeof _fsIssAvail==='function'&&_fsIssAvail()){ return _fsIssPrint(); }
+  if(typeof _fsWpStmtOn==='function'&&_fsWpStmtOn()){ return _fsIssPrint(); }
   var meta=GLI_FS2025.meta||{};
   function stmtTbl(tab){ var rows=(tab==='bs')?GLI_FS2025.bs:GLI_FS2025.pl;
     var ti=(tab==='bs')?(meta.bsTitleTh||'งบแสดงฐานะการเงิน'):(meta.plTitleTh||'งบกำไรขาดทุนเบ็ดเสร็จ');
@@ -19842,7 +19845,7 @@ function _fsWpPrint(){
 /* ---------- delegated events (WP-only, bound once on #fsWrap) ---------- */
 function _fsWpBind(w){ if(!w||w._wpb)return; w._wpb=1;
   w.addEventListener('click',function(e){ var t=e.target; if(!t||!t.closest)return;
-    var dd=t.closest('[data-issd]'); if(dd){ _fsIssDrill(dd.getAttribute('data-issd'),dd.getAttribute('data-issl')); return; }   /* v10.86.5: issued FS line → codes → GL + contra */
+    var dd=t.closest('[data-issd]'); if(dd){ _fsIssDrill(dd.getAttribute('data-issd'),dd.getAttribute('data-issl'),dd); return; }   /* v10.86.5: issued FS line → codes → GL + contra */
     var rec=t.closest('[data-wprec]'); if(rec){ e.stopPropagation(); _fsWpReconOpen(rec.getAttribute('data-wprec')); return; }
     var ln=t.closest('[data-wpline]'); if(ln){ var k=ln.getAttribute('data-wpline'); _fsWpOpen[k]=!_fsWpOpen[k]; _fsRenderBody(); return; }
     var vb=t.closest('[data-wpview]'); if(vb){ _fsWpView=vb.getAttribute('data-wpview'); _fsRenderBody(); return; }
@@ -20142,51 +20145,67 @@ function _fsIssCodeGLHTML(code){
 }
 
 /* drill modal: line → codes → (click code) GL + contra */
-var _fsIssDrillEsc=null,_fsIssDrillBg=false;
-function _fsIssDrillClose(){ var m=document.getElementById('fsIssDrillModal'); if(m&&m.parentNode)m.parentNode.removeChild(m);
+var _fsIssDrillEsc=null,_fsIssActiveRow=null;
+function _fsIssDrillClose(){ var p=document.getElementById('fsIssPanel'); if(p&&p.parentNode)p.parentNode.removeChild(p);
+  if(_fsIssActiveRow){ try{_fsIssActiveRow.classList.remove('issactive');}catch(e){} _fsIssActiveRow=null; }
   try{if(_fsIssDrillEsc){document.removeEventListener('keydown',_fsIssDrillEsc);_fsIssDrillEsc=null;}}catch(e){} }
-function _fsIssDrill(dcode,label){ if(!(GLI_FS2025&&GLI_FS2025.codes))return; _fsIssDrillClose(); _fsIssCSS();
+/* v10.86.6: drill → floating LEFT side-panel (beautiful · scrollable · highlights the clicked row blue) */
+function _fsIssDrill(dcode,label,el){ if(!(GLI_FS2025&&GLI_FS2025.codes))return; _fsIssCSS(); _fsIssDrillCSS();
+  if(_fsIssActiveRow&&_fsIssActiveRow!==el){ try{_fsIssActiveRow.classList.remove('issactive');}catch(e){} }
+  _fsIssActiveRow=el||null; if(el){ try{el.classList.add('issactive');}catch(e){} }
   var codes=_fsIssCodesFor(dcode); var sign=1;
   try{ var cs=codes.reduce(function(a,c){return a+(+c.pa||0);},0); sign=(cs<0?-1:1); }catch(e){}
   var body=codes.map(function(c){
-    return '<tr class="fsiss-crow" data-isscode="'+_fsWpEsc(c.c)+'"><td class="l mono">'+_fsWpEsc(c.c)+'</td>'+
-      '<td class="l">'+_fsWpEsc(c.n)+'</td><td class="n">'+_fsIssN((+c.pa||0)*sign)+'</td><td class="ex">▸</td></tr>'+
-      '<tr class="fsiss-cdet" data-detfor="'+_fsWpEsc(c.c)+'" hidden><td colspan="4"></td></tr>'; }).join('');
-  if(!codes.length)body='<tr><td colspan="4" class="l" style="color:#8aa">— ไม่มีรหัสบัญชีในบรรทัดนี้ —</td></tr>';
-  var ov=document.createElement('div'); ov.className='rt-modal-ov'; ov.id='fsIssDrillModal';
-  ov.innerHTML='<div class="rt-modal fswp-recmodal" role="dialog" aria-modal="true"><button class="rt-modal-x" type="button" aria-label="ปิด">✕</button>'+
-    '<div class="fswp-mh">'+_fsWpEsc(label||'')+' <small>รหัสกลุ่มงบ '+_fsWpEsc(dcode)+' · '+codes.length+' บัญชี · คลิกรหัสเพื่อดู GL และคู่บัญชี (Dr/Cr)</small></div>'+
-    '<table class="fsiss-codetbl"><thead><tr><th class="l">รหัส</th><th class="l">ชื่อบัญชี</th><th>ยอด (หลัง ADJ)</th><th></th></tr></thead><tbody>'+body+'</tbody></table></div>';
-  var host=document.getElementById('page-fs')||document.body; host.appendChild(ov);
-  ov.addEventListener('mousedown',function(e){_fsIssDrillBg=(e.target===ov);});
-  ov.addEventListener('click',function(e){ var t=e.target;
-    if(t.closest&&t.closest('.rt-modal-x')){_fsIssDrillClose();return;}
-    if(t===ov&&_fsIssDrillBg){_fsIssDrillClose();return;}
-    var cr=t.closest&&t.closest('.fsiss-crow'); if(cr){ var code=cr.getAttribute('data-isscode');
-      var det=ov.querySelector('.fsiss-cdet[data-detfor="'+code.replace(/"/g,'')+'"]'); if(!det)return;
-      var ex=cr.querySelector('.ex');
-      if(det.hidden){ if(!det._f){ det.querySelector('td').innerHTML=_fsIssCodeGLHTML(code); det._f=1; } det.hidden=false; cr.classList.add('open'); if(ex)ex.textContent='▾'; }
-      else { det.hidden=true; cr.classList.remove('open'); if(ex)ex.textContent='▸'; }
-      return; }
-  });
-  _fsIssDrillEsc=function(e){ if(e.key==='Escape')_fsIssDrillClose(); }; document.addEventListener('keydown',_fsIssDrillEsc);
+    return '<div class="fsiss-crow" data-isscode="'+_fsWpEsc(c.c)+'"><div class="cc-h"><span class="cc-code">'+_fsWpEsc(c.c)+'</span>'+
+      '<span class="cc-name">'+_fsWpEsc(c.n)+'</span><span class="cc-amt">'+_fsIssN((+c.pa||0)*sign)+'</span><span class="cc-ex">▸</span></div><div class="cc-det" hidden></div></div>'; }).join('');
+  if(!codes.length)body='<div class="fsiss-empty">— ไม่มีรหัสบัญชีในบรรทัดนี้ —</div>';
+  var panel=document.getElementById('fsIssPanel');
+  if(!panel){ panel=document.createElement('div'); panel.id='fsIssPanel'; panel.className='fsiss-panel'; (document.getElementById('page-fs')||document.body).appendChild(panel); }
+  panel.innerHTML='<div class="fsiss-ph"><div class="fsiss-pt">'+_fsWpEsc(label||'')+
+      '<span class="fsiss-ps">รหัสกลุ่มงบ '+_fsWpEsc(dcode)+' · '+codes.length+' บัญชี · คลิกรหัสเพื่อดู GL + คู่บัญชี (Dr/Cr)</span></div>'+
+      '<button class="fsiss-px" type="button" aria-label="ปิด">✕</button></div><div class="fsiss-pb">'+body+'</div>';
+  try{ var fb=document.getElementById('fsBody')||document.getElementById('fsWrap'); var r=fb.getBoundingClientRect();
+    var top=Math.max(12,Math.round(r.top)); panel.style.top=top+'px'; panel.style.left=(Math.max(12,Math.round(r.left))+2)+'px';
+    panel.style.maxHeight='calc(100vh - '+(top+16)+'px)'; }catch(e){ panel.style.top='96px'; panel.style.left='16px'; panel.style.maxHeight='calc(100vh - 112px)'; }
+  panel.onclick=function(e){ var t=e.target;
+    if(t.closest&&t.closest('.fsiss-px')){_fsIssDrillClose();return;}
+    var cr=t.closest&&t.closest('.fsiss-crow'); if(cr){ var code=cr.getAttribute('data-isscode'),det=cr.querySelector('.cc-det'),ex=cr.querySelector('.cc-ex'); if(!det)return;
+      if(det.hidden){ if(!det._f){ det.innerHTML=_fsIssCodeGLHTML(code); det._f=1; } det.hidden=false; cr.classList.add('open'); if(ex)ex.textContent='▾'; }
+      else{ det.hidden=true; cr.classList.remove('open'); if(ex)ex.textContent='▸'; } return; } };
+  if(!_fsIssDrillEsc){ _fsIssDrillEsc=function(e){ if(e.key==='Escape')_fsIssDrillClose(); }; document.addEventListener('keydown',_fsIssDrillEsc); }
 }
 function _fsIssDate(s){ if(!s)return ''; var p=(''+s).split('-'); if(p.length!==3)return s; var mm=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.']; return (+p[2])+' '+mm[+p[1]]+' '+((+p[0])+543-2500); }
 function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
   var css=[
-   ".fsiss-t tr.issline{cursor:pointer}",
+   ".fsiss-t tr.issline{cursor:pointer;transition:background .12s}",
    ".fsiss-t tr.issline:hover{background:#eef7f3}",
    ".fsiss-t tr.issline td.l::after{content:' 🔎';font-size:10px;opacity:0;transition:opacity .1s}",
    ".fsiss-t tr.issline:hover td.l::after{opacity:.5}",
-   ".fsiss-codetbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}",
-   ".fsiss-codetbl th{background:#0E5C52;color:#fff;padding:6px 10px;text-align:right;font-size:11.5px}",
-   ".fsiss-codetbl th.l{text-align:left}",
-   ".fsiss-codetbl td{padding:5px 10px;border-bottom:1px solid #eef3f1}",
-   ".fsiss-codetbl td.l{text-align:left}.fsiss-codetbl td.n{text-align:right;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace}",
-   ".fsiss-codetbl td.mono{font-family:'IBM Plex Mono',monospace;color:#5a7a72}",
-   ".fsiss-codetbl td.ex{text-align:center;color:#0E5C52;width:26px}",
-   ".fsiss-crow{cursor:pointer}.fsiss-crow:hover{background:#f4f9f7}.fsiss-crow.open{background:#eaf4f0;font-weight:600}",
-   ".fsiss-cdet td{background:#fbfdfc;padding:6px 8px 10px 8px}",
+   ".fsiss-t tr.issactive{background:#DBEAFE!important}",
+   ".fsiss-t tr.issactive td{color:#1E3A8A!important;font-weight:700}",
+   ".fsiss-t tr.issactive td.l{box-shadow:inset 3px 0 0 #2563EB}",
+   /* floating LEFT side-panel */
+   ".fsiss-panel{position:fixed;width:min(440px,42vw);min-width:300px;background:#fff;border:1px solid #d3e6df;border-radius:16px;box-shadow:0 20px 55px rgba(8,40,34,.24);z-index:100060;display:flex;flex-direction:column;overflow:hidden;animation:fsissIn .16s ease-out}",
+   "@keyframes fsissIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}",
+   ".fsiss-ph{display:flex;align-items:flex-start;gap:8px;padding:13px 15px;background:linear-gradient(135deg,#0E5C52,#0A463E);color:#fff;flex:none}",
+   ".fsiss-pt{font-weight:700;font-size:14px;line-height:1.3;flex:1}",
+   ".fsiss-ps{display:block;font-weight:400;font-size:10.5px;color:#bfe3d8;margin-top:3px;line-height:1.4}",
+   ".fsiss-px{border:0;background:rgba(255,255,255,.16);color:#fff;border-radius:9px;width:28px;height:28px;cursor:pointer;font-size:13px;flex:none;line-height:1}",
+   ".fsiss-px:hover{background:rgba(255,255,255,.3)}",
+   ".fsiss-pb{overflow-y:auto;overflow-x:hidden;padding:8px;background:#f6faf8;flex:1}",
+   ".fsiss-pb::-webkit-scrollbar{width:9px}.fsiss-pb::-webkit-scrollbar-thumb{background:#c3ddd3;border-radius:6px;border:2px solid #f6faf8}",
+   ".fsiss-crow{border:1px solid #e6efeb;border-radius:11px;margin-bottom:6px;overflow:hidden;background:#fff}",
+   ".fsiss-crow .cc-h{display:flex;align-items:center;gap:9px;padding:9px 11px;cursor:pointer}",
+   ".fsiss-crow:hover .cc-h{background:#f1f8f5}",
+   ".fsiss-crow.open{border-color:#bcd8cd;box-shadow:0 2px 8px rgba(14,92,82,.08)}",
+   ".fsiss-crow.open .cc-h{background:#eaf4f0}",
+   ".cc-code{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5a7a72;flex:none;width:56px}",
+   ".cc-name{flex:1;font-size:12.5px;color:#123;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+   ".cc-amt{font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#0A463E;flex:none}",
+   ".cc-ex{color:#0E5C52;font-size:10px;flex:none;width:12px;text-align:center}",
+   ".cc-det{border-top:1px solid #eef3f1;padding:6px;background:#fbfdfc;max-height:44vh;overflow:auto}",
+   ".cc-det::-webkit-scrollbar{width:8px}.cc-det::-webkit-scrollbar-thumb{background:#c3ddd3;border-radius:6px}",
+   ".fsiss-empty{color:#8aa;font-size:12.5px;padding:16px;text-align:center}",
    ".fsiss-gl{width:100%;border-collapse:collapse;font-size:12px}",
    ".fsiss-gl th{background:#e7f1ed;color:#0A463E;padding:4px 8px;text-align:right;font-size:11px;border-bottom:1px solid #bcd8cd}",
    ".fsiss-gl th.l{text-align:left}",
