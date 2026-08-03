@@ -20141,7 +20141,24 @@ function _fsIssCSS(){ if(document.getElementById('fsiss-css'))return;
    ".fsiss-sign{margin-top:26px;text-align:center;font-size:13px;color:#234;line-height:2}",
    ".fsiss-note{max-width:860px;margin:8px auto 0;font-size:11.5px;color:#8aa;text-align:center}",
    ".fsiss-cap{margin:4px 0 8px;padding:8px 12px;background:linear-gradient(180deg,#fff8ec,#fdf1d8);border:1px solid #f0d9a6;border-left:4px solid #d99a1c;border-radius:8px;font-size:11.5px;line-height:1.5;color:#7a5a12}",
-   ".fsiss-cap b{color:#8a4b0a}"
+   ".fsiss-cap b{color:#8a4b0a}",
+   /* v10.98: Changes-in-Equity matrix — wide label column (no wrap, scroll horizontally) + drillable cells */
+   ".fsiss-sce{max-width:none;overflow-x:auto}",
+   ".fsiss-scet{min-width:960px}",
+   ".fsiss-scet th.l,.fsiss-scet td.l{min-width:250px;white-space:nowrap;position:sticky;left:0;background:#fff;z-index:1}",
+   ".fsiss-scet thead th.l{color:#0A463E;font-weight:700;border-bottom:1.5px solid #0A463E}",
+   ".fsiss-scet tr.sub td.l{background:#f3f9f6}",
+   ".fsiss-scet thead th{vertical-align:bottom;line-height:1.25}",
+   /* drillable header / cell / row-label affordances */
+   ".fsiss-scet th.sce-ch,.fsiss-scet td.sce-cell,.fsiss-scet td.sce-rl{cursor:pointer;transition:background .12s}",
+   ".fsiss-scet th.sce-ch:hover{background:#eef7f3;color:#08352e}",
+   ".fsiss-scet td.sce-cell:hover{background:#eef7f3}",
+   ".fsiss-scet td.sce-rl:hover{background:#e9f4ef;color:#08352e}",
+   ".fsiss-scet td.sce-rl::after{content:' 🔎';font-size:10px;opacity:0;transition:opacity .1s}",
+   ".fsiss-scet td.sce-rl:hover::after{opacity:.55}",
+   ".fsiss-scet td.sce-cell.issactive,.fsiss-scet td.sce-rl.issactive,.fsiss-scet th.sce-ch.issactive{background:#d8ecff;box-shadow:inset 0 0 0 2px #2f80c2}",
+   ".fsiss-scehint{margin:10px 2px 0;font-size:11.5px;color:#5a7a72;line-height:1.6}",
+   ".fsiss-scehint b{color:#0A463E}"
   ].join("");
   var s=document.createElement('style'); s.id='fsiss-css'; s.textContent=css; (document.head||document.body).appendChild(s);
 }
@@ -20277,14 +20294,34 @@ function _fsIssComputePL(yearAD){ var src=GLI_ISSUED.pl, n=src.length;
   return out; }
 
 /* on-screen HTML — statement of changes in equity (matrix) */
-function _fsIssSCEHTML(){ _fsIssCSS();
+/* v10.98: map a Changes-in-Equity column header → its equity FS-line dcode(s), so each cell/column
+   drills to member account codes → GL in the same right-side dock as BS/PL. */
+function _sceColDcode(label){ var s=(''+(label==null?'':label)).replace(/\n/g,' ');
+  if(/รวม/.test(s)) return 'UU,UUA,UUB,VVA,VV,OCI';                 /* total = all equity */
+  if(/องค์ประกอบอื่น/.test(s)) return 'OCI';
+  if(/ตีราคา/.test(s)) return 'UUB';                               /* revaluation surplus */
+  if(/ส่วนเกินมูลค่า/.test(s)) return 'UUA';                        /* share premium */
+  if(/ยังไม่จัดสรร|ขาดทุนสะสม|กำไรสะสม/.test(s)) return 'VV';        /* unappropriated retained earnings */
+  if(/สำรอง|จัดสรรแล้ว/.test(s)) return 'VVA';                      /* legal reserve */
+  if(/ทุนที่ชำระ|ทุนที่ออก|ทุนจดทะเบียน|^ทุน/.test(s)) return 'UU';  /* paid-up capital */
+  return ''; }
+function _fsIssSCEHTML(){ _fsIssCSS(); try{_fsIssDrillCSS();}catch(e){}
   var sce=GLI_ISSUED.sce||{cols:[],rows:[]}, m=(GLI_ISSUED.meta||{});
-  var h='<div class="fsiss" style="max-width:1040px"><div class="fsiss-hd"><div class="co">'+_fsWpEsc(m.coTh||'')+'</div><div class="ti">'+_fsWpEsc(m.sceTitle||'งบแสดงการเปลี่ยนแปลงส่วนของผู้ถือหุ้น')+'</div><div class="dt">'+_fsWpEsc(m.sceDate||'')+'</div></div>';
-  h+='<table class="fsiss-t"><thead><tr><th class="l"></th><th class="u" colspan="'+sce.cols.length+'">'+_fsWpEsc(m.unit||'(หน่วย: บาท)')+'</th></tr><tr><th class="l"></th>';
-  sce.cols.forEach(function(c){ h+='<th>'+_fsWpEsc(c).replace(/\n/g,'<br>')+'</th>'; }); h+='</tr></thead><tbody>';
-  sce.rows.forEach(function(r){ h+='<tr'+(r.bal?' class="sub"':'')+'><td class="l'+(r.bal?'':' ind0')+'">'+_fsWpEsc(r.t)+'</td>'+
-    (r.v||[]).map(function(x){return '<td class="n">'+_fsIssN(x)+'</td>';}).join('')+'</tr>'; });
-  h+='</tbody></table></div>';
+  var cols=sce.cols||[], dc=cols.map(_sceColDcode), allEq='UU,UUA,UUB,VVA,VV,OCI';
+  var h='<div class="fsiss fsiss-sce"><div class="fsiss-hd"><div class="co">'+_fsWpEsc(m.coTh||'')+'</div><div class="ti">'+_fsWpEsc(m.sceTitle||'งบแสดงการเปลี่ยนแปลงส่วนของผู้ถือหุ้น')+'</div><div class="dt">'+_fsWpEsc(m.sceDate||'')+'</div></div>';
+  h+='<table class="fsiss-t fsiss-scet"><thead><tr><th class="l"></th><th class="u" colspan="'+cols.length+'">'+_fsWpEsc(m.unit||'(หน่วย: บาท)')+'</th></tr><tr><th class="l">รายการ</th>';
+  cols.forEach(function(c,ci){ var d=dc[ci], lab=(''+c).replace(/\n/g,' ');
+    h+='<th'+(d?(' class="sce-ch" data-issd="'+_fsWpEsc(d)+'" data-issl="'+_fsWpEsc(lab)+'" title="คลิกเพื่อดูรหัสบัญชี + GL ขององค์ประกอบนี้"'):'')+'>'+_fsWpEsc(c).replace(/\n/g,'<br>')+'</th>'; });
+  h+='</tr></thead><tbody>';
+  sce.rows.forEach(function(r){ var rl=r.t||'';
+    h+='<tr'+(r.bal?' class="sub"':'')+'>'+
+       '<td class="l sce-rl'+(r.bal?'':' ind0')+'" data-issd="'+_fsWpEsc(allEq)+'" data-issl="'+_fsWpEsc('ส่วนของผู้ถือหุ้นทั้งหมด · '+rl)+'" title="คลิกเพื่อดูรหัสบัญชีส่วนของผู้ถือหุ้นทั้งหมด + GL">'+_fsWpEsc(rl)+'</td>'+
+       (r.v||[]).map(function(x,ci){ var d=dc[ci], lab=(''+(cols[ci]||'')).replace(/\n/g,' ');
+         return '<td class="n'+(d?' sce-cell':'')+'"'+(d?(' data-issd="'+_fsWpEsc(d)+'" data-issl="'+_fsWpEsc(lab+' · '+rl)+'" title="คลิกเพื่อดูรหัสบัญชี + GL"'):'')+'>'+_fsIssN(x)+'</td>'; }).join('')+
+       '</tr>'; });
+  h+='</tbody></table>';
+  h+='<p class="fsiss-scehint">💡 คลิกที่ <b>ชื่อบรรทัด</b> (ดูรหัสบัญชีส่วนของผู้ถือหุ้นทั้งหมดของบรรทัดนั้น) หรือ <b>ตัวเลขในแต่ละคอลัมน์</b> / <b>หัวคอลัมน์</b> (ดูเฉพาะองค์ประกอบนั้น) เพื่อเปิดรหัสบัญชี → GL + คู่บัญชี ทางด้านขวา · เลื่อนตารางแนวนอนเพื่อดูคอลัมน์ที่เหลือ</p>';
+  h+='</div>';
   return h;
 }
 
@@ -20412,8 +20449,9 @@ function _fsGlByVoucher(){ var rows=(typeof GLROWS!=='undefined'&&GLROWS)?GLROWS
   var m={}; for(var i=0;i<rows.length;i++){ var r=rows[i]; if(!r)continue; var v=(''+(r[4]||'')).trim(); if(!v)continue; (m[v]||(m[v]=[])).push(r); }
   _fsIssVchCache=m; _fsIssVchN=rows.length; return m; }
 /* member codes of an FS line (GLI2025 Type). VVO folds into VV. */
-function _fsIssCodesFor(dcode){ dcode=(''+(dcode==null?'':dcode)).trim(); var out=[];
-  (GLI_FS2025&&GLI_FS2025.codes||[]).forEach(function(c){ var d=(c.d||''); if(d==='VVO')d='VV'; if(d===dcode)out.push(c); });
+function _fsIssCodesFor(dcode){ var raw=(''+(dcode==null?'':dcode)).trim(); if(!raw)return [];
+  var set={}; raw.split(',').forEach(function(d){ d=d.trim(); if(d)set[d]=1; }); var out=[];   /* v10.98: accept comma-separated dcodes (e.g. all-equity for งบเปลี่ยนแปลงส่วนของผู้ถือหุ้น) */
+  (GLI_FS2025&&GLI_FS2025.codes||[]).forEach(function(c){ var d=(c.d||''); if(d==='VVO')d='VV'; if(set[d])out.push(c); });
   return out; }
 function _fsIssYr(){ try{ if(typeof _fsY1!=='undefined'&&_fsY1!=null)return ''+_fsY1; }catch(e){} try{ return (GLI_FS2025.meta&&GLI_FS2025.meta.curAD)||'2025'; }catch(e){ return '2025'; } }
 /* GL transactions of a code for the FS year (+ opening for BS accounts) with contra legs */
