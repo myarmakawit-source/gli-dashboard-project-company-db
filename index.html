@@ -4212,6 +4212,30 @@ body.apjv-resizing,body.apjv-resizing *{cursor:col-resize!important;user-select:
 #page-pdrepjv .apjv-sub-bank tfoot td{background:#EFF5FC;border-top-color:#C6DBF4}
 #page-pdrepjv .apjv-sub-bank tfoot td.ra{color:#2A5B9D}
 #page-pdrepjv .apjvempty td{padding:16px;text-align:center;color:#AEA795;font-style:italic;font-size:12px}
+/* v10.88: Routine expenses — drag-to-reorder grip (left) + per-row colour highlight */
+#page-pdrepjv .apjv-routine td.apjv-grip,#page-pdrepjv .apjv-routine th.apjv-grip{width:24px;min-width:24px;text-align:center;padding:2px 1px}
+#page-pdrepjv .apjv-drag{display:inline-flex;align-items:center;justify-content:center;width:18px;height:24px;color:#9DB0D4;cursor:grab;font-size:13px;line-height:1;border-radius:6px;user-select:none;transition:color .12s,background .12s}
+#page-pdrepjv .apjv-drag:hover{color:#33538C;background:#E6EDF9}
+#page-pdrepjv .apjv-drag:active{cursor:grabbing}
+#page-pdrepjv .apjv-routine tr.apjv-dragging{opacity:.4}
+#page-pdrepjv .apjv-routine tr.apjv-drop-before td{box-shadow:inset 0 3px 0 -1px #3A78C8}
+#page-pdrepjv .apjv-routine tr.apjv-drop-after td{box-shadow:inset 0 -3px 0 -1px #3A78C8}
+#page-pdrepjv .apjv-routine tr.apjv-hl td{background:var(--hl,transparent)}
+#page-pdrepjv .apjv-routine tr.apjv-hl .apjvin{background:transparent}
+#page-pdrepjv .apjv-routine tr.apjv-hl .apjvin:hover{background:rgba(255,255,255,.4)}
+#page-pdrepjv .apjv-routine tr.apjv-hl .apjvin:focus{background:#fff}
+#page-pdrepjv .apjv-routine td.apjvx{width:58px;white-space:nowrap;text-align:center}
+#page-pdrepjv .apjv-hlbtn{border:0;background:transparent;cursor:pointer;border-radius:7px;padding:3px;line-height:1;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle}
+#page-pdrepjv .apjv-hlbtn:hover{background:#F0ECF8}
+#page-pdrepjv .apjv-hlsw{width:14px;height:14px;border-radius:4px;border:1.5px solid #C9BFAE;box-sizing:border-box;display:inline-block}
+#page-pdrepjv .apjv-hlsw.none{background:repeating-linear-gradient(45deg,#fff,#fff 3px,#EFE6D4 3px,#EFE6D4 5px)}
+.apjv-hlpop{position:fixed;z-index:9999;background:#fff;border:1px solid #E2DAF0;border-radius:12px;box-shadow:0 12px 34px -8px rgba(40,30,80,.35);padding:9px;display:grid;grid-template-columns:repeat(4,26px);gap:7px}
+.apjv-hlpop button{width:26px;height:26px;border-radius:7px;border:1.5px solid rgba(0,0,0,.08);cursor:pointer;padding:0;transition:transform .1s}
+.apjv-hlpop button:hover{transform:scale(1.1)}
+.apjv-hlpop button.sel{outline:2px solid #3A5896;outline-offset:1px}
+.apjv-hlpop button.none{background:repeating-linear-gradient(45deg,#fff,#fff 4px,#EEE 4px,#EEE 7px)}
+#page-pdrepjv .apjv-sub-routine .apjv-sechint{margin-left:auto;font-size:10px;font-weight:600;color:#7C8BB0;letter-spacing:.01em;white-space:nowrap}
+#page-pdrepjv .apjv-sub-routine .apjv-sechd{display:flex;align-items:center;gap:8px}
 /* v10.52: grouped-by-Index header & per-group subtotal rows — BOTH Liability & Asset */
 #page-pdrepjv .apjv-main .apjv-grp td{background:#DBE6F7;border-top:1.5px solid #BECFEC;border-bottom:1px solid #CBD9F1;padding:6px 9px}
 #page-pdrepjv .apjv-main .apjv-grp .apjv-grp-nm{font-weight:900;font-size:11px;color:#16305A;letter-spacing:.01em}
@@ -8056,13 +8080,47 @@ function _apjvFind(side,id){var arr=_apjvArr(side);for(var i=0;i<arr.length;i++)
 function _apjvUid(){return (typeof _uid==='function')?_uid():('aj'+(''+(1e9+performance.now())).replace('.',''));}
 function _apjvAdd(side){
   var id=_apjvUid(),arr=_apjvArr(side),row;
-  if(side==='routine')row={id:id,desc:'',co:'',amt:'',due:'',rcv:0};
+  if(side==='routine')row={id:id,desc:'',co:'',amt:'',due:'',rcv:0,hl:''};
   else if(side==='bank')row={id:id,accNo:'',accName:'',amt:'',asOf:''};
   else row={id:id,date:'',vch:'',desc:'',co:'',amt:'',idx:''};
   arr.push(row);try{saveApjv();}catch(e){}renderApjv();
   try{var el=document.querySelector('#apjvWrap tr[data-id="'+id+'"] input');if(el)el.focus();}catch(e){}
 }
 function _apjvDel(side,id){var arr=_apjvArr(side);for(var i=0;i<arr.length;i++){if(arr[i].id===id){arr.splice(i,1);break;}}try{saveApjv();}catch(e){}renderApjv();}
+/* v10.88: Routine expenses — drag-to-reorder + per-row colour highlight */
+var _apjvDragId=null,_apjvDropTarget=null;
+var APJV_HLS=[{c:'',n:'ไม่มีสี'},{c:'#FFF3C4',n:'เหลือง'},{c:'#D5F2E3',n:'เขียว'},{c:'#DCE9FF',n:'ฟ้า'},{c:'#FCE1EC',n:'ชมพู'},{c:'#EBE2FF',n:'ม่วง'},{c:'#FFE6CC',n:'ส้ม'},{c:'#FBD7D2',n:'แดง'}];
+function _apjvClearDrop(){var w=document.getElementById('apjvWrap');if(!w)return;var rs=w.querySelectorAll('.apjv-routine tr.apjv-drop-before,.apjv-routine tr.apjv-drop-after');for(var i=0;i<rs.length;i++){rs[i].classList.remove('apjv-drop-before','apjv-drop-after');}}
+/* rebuild the routine array from the current on-screen order with the dragged row moved to its new slot */
+function _apjvRoutineReorder(dragId,targetId,after){
+  var w=document.getElementById('apjvWrap');var tbl=w&&w.querySelector('table[data-fside="routine"]');if(!tbl)return;
+  var domIds=[];var trs=tbl.querySelectorAll('tbody tr[data-id]');for(var i=0;i<trs.length;i++)domIds.push(trs[i].getAttribute('data-id'));
+  var from=domIds.indexOf(dragId);if(from<0)return;domIds.splice(from,1);
+  var to=domIds.indexOf(targetId);
+  if(to<0)domIds.push(dragId);else domIds.splice(after?to+1:to,0,dragId);
+  var arr=_apjvArr('routine'),byId={};arr.forEach(function(r){byId[r.id]=r;});
+  var neu=[];domIds.forEach(function(id){if(byId[id]){neu.push(byId[id]);delete byId[id];}});
+  arr.forEach(function(r){if(byId[r.id])neu.push(r);});   /* keep any rows not in the DOM (safety) */
+  var d=_apjvCoData();d.routine=neu;d.rord=1;try{saveApjv();}catch(e){}renderApjv();
+}
+function _apjvHlClose(){var p=document.getElementById('apjvHlPop');if(p&&p.parentNode)p.parentNode.removeChild(p);try{document.removeEventListener('mousedown',_apjvHlDoc,true);}catch(e){}}
+function _apjvHlDoc(e){var p=document.getElementById('apjvHlPop');if(p&&!p.contains(e.target))_apjvHlClose();}
+function _apjvHlOpen(id,anchor){_apjvHlClose();var r=_apjvFind('routine',id);if(!r)return;
+  var pop=document.createElement('div');pop.id='apjvHlPop';pop.className='apjv-hlpop';
+  pop.innerHTML=APJV_HLS.map(function(h){var sel=((r.hl||'')===h.c)?' sel':'';
+    return '<button type="button" class="'+(h.c?'':'none')+sel+'" data-hl="'+h.c+'" title="'+_apjvE(h.n)+'"'+(h.c?(' style="background:'+h.c+'"'):'')+'></button>';}).join('');
+  document.body.appendChild(pop);
+  var rc=anchor.getBoundingClientRect(),pw=pop.offsetWidth,ph=pop.offsetHeight;
+  var left=Math.min(rc.left,window.innerWidth-pw-8),top=rc.bottom+6;if(top+ph>window.innerHeight-8)top=rc.top-ph-6;
+  pop.style.left=Math.max(8,left)+'px';pop.style.top=Math.max(8,top)+'px';
+  pop.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('button[data-hl]');if(!b)return;
+    var c=b.getAttribute('data-hl')||'';r.hl=c;try{saveApjv();}catch(_e){}
+    var tr=document.querySelector('#apjvWrap tr[data-id="'+id+'"]');
+    if(tr){if(c){tr.classList.add('apjv-hl');tr.style.setProperty('--hl',c);}else{tr.classList.remove('apjv-hl');tr.style.removeProperty('--hl');}
+      var sw=tr.querySelector('.apjv-hlsw');if(sw){if(c){sw.classList.remove('none');sw.style.background=c;}else{sw.classList.add('none');sw.style.background='';}}}
+    _apjvHlClose();});
+  setTimeout(function(){document.addEventListener('mousedown',_apjvHlDoc,true);},0);
+}
 /* Clear ALL entries on one side (Liability/Asset) for the current company — with confirmation */
 function _apjvClearAll(side){var arr=_apjvArr(side);
   var nm=(side==='liab'?'Liability · AP':(side==='asset'?'Asset':(side==='routine'?'Routine expenses':(side==='bank'?'Bank statement':side))));
@@ -8087,13 +8145,16 @@ function _apjvRowMain(side,r,grp){
   +'</tr>';
 }
 function _apjvRowRoutine(r){
-  return '<tr data-id="'+r.id+'" data-side="routine">'
+  var hl=(r.hl||'');
+  return '<tr data-id="'+r.id+'" data-side="routine"'+(hl?(' class="apjv-hl" style="--hl:'+_apjvE(hl)+'"'):'')+'>'
+    +'<td class="apjv-grip"><span class="apjv-drag" draggable="true" title="กดค้างแล้วลากเพื่อจัดลำดับ / Drag to reorder">⠿</span></td>'
     +'<td><textarea class="apjvin ta" data-f="desc" rows="1" placeholder="Description">'+_apjvE(r.desc||'')+'</textarea></td>'
     +'<td><textarea class="apjvin ta" data-f="co" rows="1" placeholder="Company">'+_apjvE(r.co||'')+'</textarea></td>'
     +'<td class="camt">'+_apjvAmtIn(r)+'</td>'
     +'<td class="cdate"><input class="apjvin" data-f="due" type="date" title="วันกำหนดจ่าย / Payment due" value="'+_apjvE(r.due||'')+'"></td>'
     +'<td class="crcv"><button class="apjvchk'+(r.rcv?' on':'')+'" type="button" title="กดเมื่อได้รับเอกสารแล้ว / Click when document received">✓</button></td>'
-    +'<td class="apjvx"><button class="apjvdel" type="button" title="Delete row">✕</button></td>'
+    +'<td class="apjvx"><button class="apjv-hlbtn" type="button" title="ไฮไลท์สี — เลือกสีของแถว / Highlight colour"><span class="apjv-hlsw'+(hl?'':' none')+'"'+(hl?(' style="background:'+_apjvE(hl)+'"'):'')+'></span></button>'
+      +'<button class="apjvdel" type="button" title="Delete row">✕</button></td>'
   +'</tr>';
 }
 function _apjvRowBank(r){
@@ -8122,11 +8183,12 @@ var _APJV_COLS={
 };
 function _apjvThead(side){
   var cols=_APJV_COLS[side]||[],widths=(APJVCOLW[side]||{});
-  var h1='<tr>';
+  var grip=(side==='routine');   /* v10.88: routine has a leading drag-handle column */
+  var h1='<tr>'+(grip?'<th class="apjv-grip"></th>':'');
   cols.forEach(function(col){var w=widths[col.f],st=(w?(' style="width:'+w+'px;min-width:'+w+'px"'):'');
     h1+='<th class="'+col.c+(col.ra?' ra':'')+'"'+st+'>'+_apjvE(col.l)+(col.norsz?'':'<span class="apjv-rsz" data-col="'+col.f+'" title="Drag to resize"></span>')+'</th>';});
   h1+='<th class="apjvx"></th></tr>';
-  var h2='<tr class="apjv-fltr">';
+  var h2='<tr class="apjv-fltr">'+(grip?'<td class="apjv-grip"></td>':'');
   cols.forEach(function(col){ if(col.nofilter){h2+='<td class="'+col.c+'"></td>';}
     else h2+='<td class="'+col.c+'"><input class="apjv-fin" data-fside="'+side+'" data-fcol="'+col.f+'" placeholder="⌕" title="Filter '+_apjvE(col.l)+'" autocomplete="off"></td>';});
   h2+='<td class="apjvx"></td></tr>';
@@ -8188,13 +8250,15 @@ function _apjvMainSec(side){
     +'<tfoot><tr><td colspan="4">Total</td>'+_apjvTotCell('apjvtot','data-tot="'+side+'"',_apjvSum(arr))+'<td colspan="2"></td></tr></tfoot></table></div></div>';
 }
 function _apjvRoutineSec(){
-  var arr=_apjvArr('routine');
-  var body=_apjvSortByDate(arr,'due').map(_apjvRowRoutine).join('')+_apjvAddTr('routine',6,'Add item');
+  var d=_apjvCoData(),arr=_apjvArr('routine');
+  /* v10.88: once the user has drag-reordered, keep the manual order; until then, default to due-date order */
+  var view=d.rord?arr:_apjvSortByDate(arr,'due');
+  var body=view.map(_apjvRowRoutine).join('')+_apjvAddTr('routine',7,'Add item');
   return '<div class="apjv-sec apjv-sub apjv-sub-routine">'
-    +'<div class="apjv-sechd"><span>🔁 Routine expenses</span></div>'
+    +'<div class="apjv-sechd"><span>🔁 Routine expenses</span><span class="apjv-sechint">ลากปุ่ม ⠿ เพื่อจัดลำดับ · คลิกช่องสีเพื่อไฮไลท์แถว</span></div>'
     +'<div class="apjv-tw"><table class="apjv-tbl apjv-routine" data-fside="routine">'+_apjvThead('routine')
     +'<tbody>'+body+'</tbody>'
-    +'<tfoot><tr><td colspan="2">Total</td>'+_apjvTotCell('apjvtot','data-tot="routine"',_apjvSum(arr))+'<td colspan="3"></td></tr></tfoot></table></div></div>';
+    +'<tfoot><tr><td colspan="3">Total</td>'+_apjvTotCell('apjvtot','data-tot="routine"',_apjvSum(arr))+'<td colspan="3"></td></tr></tfoot></table></div></div>';
 }
 function _apjvBankSec(){
   var arr=_apjvArr('bank');
@@ -8505,9 +8569,28 @@ function renderApjv(){
       if(clr){_apjvClearAll(clr.getAttribute('data-clrside'));return;}
       var add=t.closest?t.closest('.apjv-addr'):null;
       if(add){_apjvAdd(add.getAttribute('data-side'));return;}
+      var hlb=t.closest?t.closest('.apjv-hlbtn'):null;
+      if(hlb){var htr=hlb.closest('tr');if(htr)_apjvHlOpen(htr.getAttribute('data-id'),hlb);return;}
       var del=t.closest?t.closest('.apjvdel'):null;
       if(del){var tr=del.closest('tr');if(tr)_apjvDel(tr.getAttribute('data-side'),tr.getAttribute('data-id'));return;}
     });
+    /* v10.88: routine drag-to-reorder (grip handle) */
+    w.addEventListener('dragstart',function(e){var g=e.target&&e.target.closest?e.target.closest('.apjv-drag'):null;if(!g)return;
+      var tr=g.closest('tr');if(!tr||tr.getAttribute('data-side')!=='routine'){return;}
+      _apjvDragId=tr.getAttribute('data-id');tr.classList.add('apjv-dragging');
+      try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',_apjvDragId);if(e.dataTransfer.setDragImage)e.dataTransfer.setDragImage(tr,24,14);}catch(_e){}});
+    w.addEventListener('dragover',function(e){if(!_apjvDragId)return;
+      var tr=e.target&&e.target.closest?e.target.closest('tr[data-id][data-side="routine"]'):null;
+      if(!tr||tr.getAttribute('data-id')===_apjvDragId)return;e.preventDefault();
+      try{e.dataTransfer.dropEffect='move';}catch(_e){}
+      var rect=tr.getBoundingClientRect(),after=(e.clientY>rect.top+rect.height/2);
+      _apjvClearDrop();tr.classList.add(after?'apjv-drop-after':'apjv-drop-before');
+      _apjvDropTarget={id:tr.getAttribute('data-id'),after:after};});
+    w.addEventListener('drop',function(e){if(!_apjvDragId)return;e.preventDefault();
+      var dt=_apjvDropTarget;_apjvClearDrop();var dragId=_apjvDragId;_apjvDragId=null;_apjvDropTarget=null;
+      if(dt&&dt.id&&dt.id!==dragId)_apjvRoutineReorder(dragId,dt.id,dt.after);});
+    w.addEventListener('dragend',function(e){_apjvDragId=null;_apjvDropTarget=null;_apjvClearDrop();
+      var d=w.querySelector('.apjv-routine tr.apjv-dragging');if(d)d.classList.remove('apjv-dragging');});
   }
   try{_apjvRestoreFilters(w);}catch(_e){}
   try{_apjvSizeTas(w);}catch(_e){}
