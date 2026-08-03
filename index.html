@@ -20506,7 +20506,7 @@ function _fsIssRenderCodes(dcode,label){ var p=_fsIssPanelEnsure(); p.classList.
 function _fsIssPanelClick(e){ var t=e.target;
   if(t.closest&&t.closest('.fsiss-px')){ _fsIssDrillClose(); return; }
   var cr=t.closest&&t.closest('.fsiss-crow'); if(cr){ var code=cr.getAttribute('data-isscode'),det=cr.querySelector('.cc-det'),ex=cr.querySelector('.cc-ex'); if(!det)return;
-    if(det.hidden){ if(!det._f){ det.innerHTML=_fsIssCodeGLHTML(code); det._f=1; } det.hidden=false; cr.classList.add('open'); if(ex)ex.textContent='▾'; }
+    if(det.hidden){ if(!det._f){ det.innerHTML=(cr.getAttribute('data-cash')==='1'&&typeof _fsCfdCashGLHTML==='function')?_fsCfdCashGLHTML(code):_fsIssCodeGLHTML(code); det._f=1; } det.hidden=false; cr.classList.add('open'); if(ex)ex.textContent='▾'; }
     else{ det.hidden=true; cr.classList.remove('open'); if(ex)ex.textContent='▸'; }
     return; } }
 /* remove the dock entirely (statement returns to full width) */
@@ -20563,10 +20563,47 @@ function _fsCfdRenderCodes(key,label){ var p=_fsIssPanelEnsure(); p.classList.ad
   }
   var body=arr.map(function(o){
     var sub=ck?('<span class="cc-sub">ต้นงวด '+_fsIssN(o.begin)+' · เคลื่อนไหว '+_fsIssN(o.move)+' · ปลายงวด '+_fsIssN(o.end)+'</span>'):'';
-    return '<div class="fsiss-crow" data-isscode="'+_fsWpEsc(o.c)+'"><div class="cc-h"><span class="cc-code">'+_fsWpEsc(o.c)+'</span>'+
+    return '<div class="fsiss-crow"'+(ck?' data-cash="1"':'')+' data-isscode="'+_fsWpEsc(o.c)+'"><div class="cc-h"><span class="cc-code">'+_fsWpEsc(o.c)+'</span>'+
       '<span class="cc-name">'+_fsWpEsc(o.name)+sub+'</span><span class="cc-amt">'+_fsIssN(o.a)+'</span><span class="cc-ex">▸</span></div><div class="cc-det" hidden></div></div>'; }).join('');
   if(!arr.length)body='<div class="fsiss-empty">— ไม่มีรหัสบัญชีในบรรทัดนี้ —</div>';
   p.innerHTML=_fsIssHeadHTML(label||'',note)+'<div class="fsiss-pb">'+body+'</div>'; }
+/* v10.96: cash/bank account GL with AP/AR look-through — for every cash payment (PV) / receipt (RE)
+   whose counterpart is a trade payable/receivable, also show the ตั้งหนี้ (source invoice) it settles:
+   PV → _AP_PVMAP → AP standing voucher · RE → _cfdArMap → AR standing voucher, then its GL legs. */
+function _fsCfdCashGLHTML(code){
+  if(!(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length)) return '<div class="fsiss-glempty">— ยังไม่ได้โหลด GL (เปิดแท็บ Database) —</div>';
+  try{ if(typeof _fsApEnsure==='function')_fsApEnsure(); }catch(e){}
+  try{ if(typeof _cfdArMap==='function')_cfdArMap(); }catch(e){}
+  var g=_fsIssCodeGL(code); var yr=_fsIssYr(); var ownNm=g.name||'';
+  if(!g.txns.length && Math.abs(g.open)<0.005) return '<div class="fsiss-glempty">— ไม่มีรายการ GL ของรหัส '+_fsWpEsc(code)+' —</div>';
+  var V=(typeof _cfdVIdx==='function')?_cfdVIdx():{};
+  var apMap=(typeof _AP_PVMAP!=='undefined'&&_AP_PVMAP)?_AP_PVMAP:{};
+  var arMap=(typeof _cfdArMap==='function')?_cfdArMap():{};
+  function amt(v){ return (Math.abs(v)>0.005)?_fsIssN(v):'<span class="gl-z">-</span>'; }
+  function leg(cd,name,dr,cr,bal,own){ return '<div class="glrow glleg'+(own?' glleg-own':'')+'">'+
+    '<span class="glleg-ac"><span class="glleg-code">'+_fsWpEsc(cd)+'</span><span class="glleg-nm">'+_fsWpEsc(name||'')+'</span></span>'+
+    '<span class="gl-dr">'+amt(dr)+'</span><span class="gl-cr">'+amt(cr)+'</span><span class="gl-bal">'+(bal==null?'':_fsIssN(bal))+'</span></div>'; }
+  var h='<div class="glwrap"><div class="glcols"><span class="glleg-ac">บัญชี · Account</span><span class="gl-dr">เดบิต</span><span class="gl-cr">เครดิต</span><span class="gl-bal">คงเหลือ</span></div>';
+  h+='<div class="glrow glop"><span class="glleg-ac">ยอดยกมา (สิ้นปี '+_fsWpEsc(((+yr-1)+543)+'')+')</span><span class="gl-dr"></span><span class="gl-cr"></span><span class="gl-bal">'+_fsIssN(g.open)+'</span></div>';
+  g.txns.forEach(function(t){
+    h+='<div class="glje"><div class="glje-hd"><span class="gl-d">'+_fsWpEsc(_fsIssDate(t.date))+'</span>'+
+       '<span class="glje-desc">'+_fsWpEsc(t.desc||'—')+'<span class="gl-vch">📄 '+_fsWpEsc(t.vch)+'</span></span></div>';
+    h+=leg(code,ownNm,t.dr,t.cr,t.run,true);
+    (t.contra||[]).forEach(function(c){ h+=leg(c.code,c.name,c.dr,c.cr,null,false); });
+    var v=t.vch, stands=[]; if(apMap[v]&&apMap[v].length)stands=stands.concat(apMap[v]); if(arMap[v]&&arMap[v].length)stands=stands.concat(arMap[v]);
+    var seen={};
+    for(var s=0;s<stands.length&&s<8;s++){ var st=stands[s]; if(!st||seen[st])continue; seen[st]=1; var sr=V[st]; if(!sr||!sr.length)continue;
+      h+='<div class="gllook"><div class="gllook-h">↳ ตั้งหนี้ (ที่มาของเอกสาร) · '+_fsWpEsc(st)+' — บันทึกลูกหนี้/เจ้าหนี้ในสมุดรายวัน</div>';
+      for(var j=0;j<sr.length;j++){ var r=sr[j]; var xdr=+r[16]||0,xcr=+r[17]||0; if(Math.abs(xdr)<0.005&&Math.abs(xcr)<0.005)continue;
+        h+='<div class="glrow glleg gllook-leg"><span class="glleg-ac"><span class="glleg-code">'+_fsWpEsc((''+(r[0]||'')).trim())+'</span><span class="glleg-nm">'+_fsWpEsc(r[1]||'')+'</span></span><span class="gl-dr">'+amt(xdr)+'</span><span class="gl-cr">'+amt(xcr)+'</span><span class="gl-bal"></span></div>'; }
+      h+='</div>';
+    }
+    h+='</div>';
+  });
+  h+='<div class="glrow glcl"><span class="glleg-ac">ยอดคงเหลือปลายงวด · '+_fsWpEsc((+yr+543)+'')+' ('+g.txns.length+' รายการ)</span><span class="gl-dr"></span><span class="gl-cr"></span><span class="gl-bal">'+_fsIssN(g.closing)+'</span></div>';
+  h+='</div>';
+  return h;
+}
 function _fsCfdDrill(key,label,el){ if(!(typeof _CFD!=='undefined'&&_CFD))return; _fsIssCSS(); _fsIssDrillCSS();
   _fsIssDockOff=false;
   var fb=document.getElementById('fsBody'); if(fb){ fb.classList.add('fsiss-drillopen'); fb.classList.add('fsiss-dock'); }
@@ -20644,6 +20681,12 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    ".glleg-own .glleg-code{color:#7A4E00;font-weight:800;background:#F7DE93;border:1px solid #E9C766;border-radius:5px;padding:1px 6px}",
    ".glleg-own .glleg-nm{color:#5C4200;font-weight:700}",
    ".glleg-own .gl-dr{color:#0369A1}.glleg-own .gl-cr{color:#9A3412}.glleg-own .gl-bal{color:#6b4a00;font-weight:800}",
+   /* look-through: the ตั้งหนี้ (source AP/AR invoice) settled by a cash payment/receipt */
+   ".gllook{margin:3px 6px 6px;border-radius:0 0 8px 8px;background:linear-gradient(90deg,#FBF4FF,#F1E6FE);box-shadow:inset 3px 0 0 #9061C2;overflow:hidden}",
+   ".gllook-h{font-size:10px;font-weight:700;color:#5B2A99;padding:5px 9px 3px;letter-spacing:.01em}",
+   ".gllook-leg{border-top:1px dashed #DCC9F0;padding:4px 9px}",
+   ".gllook-leg .glleg-code{color:#5B2A99;font-weight:600}",
+   ".gllook-leg .glleg-nm{color:#332047}",
    ".fsiss-glempty{color:#8aa;font-size:12px;padding:12px;text-align:center}"
   ].join("");
   var s=document.createElement('style'); s.id='fsiss-drill-css'; s.textContent=css; (document.head||document.body).appendChild(s); }
