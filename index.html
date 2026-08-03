@@ -20506,7 +20506,12 @@ function _fsIssRenderCodes(dcode,label){ var p=_fsIssPanelEnsure(); p.classList.
 function _fsIssPanelClick(e){ var t=e.target;
   if(t.closest&&t.closest('.fsiss-px')){ _fsIssDrillClose(); return; }
   var cr=t.closest&&t.closest('.fsiss-crow'); if(cr){ var code=cr.getAttribute('data-isscode'),det=cr.querySelector('.cc-det'),ex=cr.querySelector('.cc-ex'); if(!det)return;
-    if(det.hidden){ if(!det._f){ det.innerHTML=(cr.getAttribute('data-cash')==='1'&&typeof _fsCfdCashGLHTML==='function')?_fsCfdCashGLHTML(code):_fsIssCodeGLHTML(code); det._f=1; } det.hidden=false; cr.classList.add('open'); if(ex)ex.textContent='▾'; }
+    if(det.hidden){ if(!det._f){
+        var _isCash=(cr.getAttribute('data-cash')==='1'), _isCfd=(_fsIssSelKind==='cfd');
+        det.innerHTML=(_isCash&&typeof _fsCfdCashGLHTML==='function')?_fsCfdCashGLHTML(code)
+          :((_isCfd&&typeof _fsCfdCodeGLHTML==='function')?_fsCfdCodeGLHTML(code)
+          :_fsIssCodeGLHTML(code));
+        det._f=1; } det.hidden=false; cr.classList.add('open'); if(ex)ex.textContent='▾'; }
     else{ det.hidden=true; cr.classList.remove('open'); if(ex)ex.textContent='▸'; }
     return; } }
 /* remove the dock entirely (statement returns to full width) */
@@ -20604,6 +20609,49 @@ function _fsCfdCashGLHTML(code){
   h+='</div>';
   return h;
 }
+/* v10.97: cash-flow code drill (the ตั้งหนี้ side) — for an expense/asset/revenue code booked via
+   an accrual (ขาตั้งเจ้าหนี้/ลูกหนี้), show under each accrual voucher the PV/RE that actually settled
+   it and how much cash/bank moved: apCode → AP Payment → PV · arStanding → AR Receipt → RE, then read
+   that voucher's GL legs. This is the reverse of the cash-account look-through — here you start from the
+   expense/revenue and trace forward to the real cash outflow/inflow, so a cash-flow line ties to cash. */
+function _fsCfdCodeGLHTML(code){
+  if(!(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length)) return '<div class="fsiss-glempty">— ยังไม่ได้โหลด GL (เปิดแท็บ Database เพื่อโหลด General Ledger) —</div>';
+  try{ if(typeof _fsApEnsure==='function')_fsApEnsure(); }catch(e){}
+  try{ if(typeof _cfdArEnsure==='function')_cfdArEnsure(); }catch(e){}
+  var g=_fsIssCodeGL(code); var yr=_fsIssYr(); var ownNm=g.name||'';
+  if(!g.txns.length && Math.abs(g.open)<0.005) return '<div class="fsiss-glempty">— ไม่มีรายการ GL ของรหัส '+_fsWpEsc(code)+' ในปี '+_fsWpEsc(yr)+' —</div>';
+  var V=(typeof _cfdVIdx==='function')?_cfdVIdx():{};
+  /* reverse maps: accrual (ขาตั้ง) voucher → the PV/RE that settled it */
+  var revAP={}, revAR={};
+  try{ if(typeof APROWS!=='undefined'&&APROWS&&APROWS.length){ for(var ai=0;ai<APROWS.length;ai++){ var arw=APROWS[ai]; if(!arw)continue; var apv=(''+(arw[0]||'')).trim(), pv=(''+(arw[1]||'')).trim(); if(!apv||!pv)continue; var pa=(revAP[apv]||(revAP[apv]=[])); if(pa.indexOf(pv)<0)pa.push(pv); } } }catch(e){}
+  try{ if(typeof ARROWS!=='undefined'&&ARROWS&&ARROWS.length){ for(var ri=0;ri<ARROWS.length;ri++){ var rrw=ARROWS[ri]; if(!rrw)continue; var stnd=(''+(rrw[2]||'')).trim(), rl=(''+(rrw[23]||'')).trim(); if(!stnd||!rl)continue; var pb=(revAR[stnd]||(revAR[stnd]=[])); if(pb.indexOf(rl)<0)pb.push(rl); } } }catch(e){}
+  function amt(v){ return (Math.abs(v)>0.005)?_fsIssN(v):'<span class="gl-z">-</span>'; }
+  function leg(cd,name,dr,cr,bal,own){ return '<div class="glrow glleg'+(own?' glleg-own':'')+'">'+
+    '<span class="glleg-ac"><span class="glleg-code">'+_fsWpEsc(cd)+'</span><span class="glleg-nm">'+_fsWpEsc(name||'')+'</span></span>'+
+    '<span class="gl-dr">'+amt(dr)+'</span><span class="gl-cr">'+amt(cr)+'</span><span class="gl-bal">'+(bal==null?'':_fsIssN(bal))+'</span></div>'; }
+  var h='<div class="glwrap"><div class="glcols"><span class="glleg-ac">บัญชี · Account</span><span class="gl-dr">เดบิต</span><span class="gl-cr">เครดิต</span><span class="gl-bal">คงเหลือ</span></div>';
+  if(g.isBS)h+='<div class="glrow glop"><span class="glleg-ac">ยอดยกมา (สิ้นปี '+_fsWpEsc(((+yr-1)+543)+'')+')</span><span class="gl-dr"></span><span class="gl-cr"></span><span class="gl-bal">'+_fsIssN(g.open)+'</span></div>';
+  g.txns.forEach(function(t){
+    h+='<div class="glje"><div class="glje-hd"><span class="gl-d">'+_fsWpEsc(_fsIssDate(t.date))+'</span>'+
+       '<span class="glje-desc">'+_fsWpEsc(t.desc||'—')+'<span class="gl-vch">📄 '+_fsWpEsc(t.vch)+'</span></span></div>';
+    h+=leg(code,ownNm,t.dr,t.cr,t.run,true);
+    (t.contra||[]).forEach(function(c){ h+=leg(c.code,c.name,c.dr,c.cr,null,false); });
+    /* which PV/RE settled this accrual → its real cash/bank legs */
+    var apPvs=revAP[t.vch]||[], arRes=revAR[t.vch]||[], settle=apPvs.concat(arRes), seen={};
+    for(var s=0;s<settle.length&&s<8;s++){ var pvn=settle[s]; if(!pvn||seen[pvn])continue; seen[pvn]=1; var pr=V[pvn]; if(!pr||!pr.length)continue;
+      var isRE=(arRes.indexOf(pvn)>=0);
+      h+='<div class="gllook gllook-cash"><div class="gllook-h">↳ '+(isRE?'รับชำระเงิน (RE)':'จ่ายชำระเงิน (PV)')+' · '+_fsWpEsc(pvn)+' — เงินสด/ธนาคารที่เคลื่อนไหวจริง</div>';
+      for(var j=0;j<pr.length;j++){ var r=pr[j]; var xdr=+r[16]||0,xcr=+r[17]||0; if(Math.abs(xdr)<0.005&&Math.abs(xcr)<0.005)continue;
+        var rc=(''+(r[0]||'')).trim(), cash=false; try{ cash=(typeof _cfdCash==='function')&&_cfdCash(rc); }catch(e){}
+        h+='<div class="glrow glleg gllook-leg'+(cash?' gllook-cashleg':'')+'"><span class="glleg-ac"><span class="glleg-code">'+_fsWpEsc(rc)+'</span><span class="glleg-nm">'+_fsWpEsc(r[1]||'')+(cash?' 💵':'')+'</span></span><span class="gl-dr">'+amt(xdr)+'</span><span class="gl-cr">'+amt(xcr)+'</span><span class="gl-bal"></span></div>'; }
+      h+='</div>';
+    }
+    h+='</div>';
+  });
+  h+='<div class="glrow glcl"><span class="glleg-ac">ยอดคงเหลือปลายงวด · '+_fsWpEsc((+yr+543)+'')+' ('+g.txns.length+' รายการ)</span><span class="gl-dr"></span><span class="gl-cr"></span><span class="gl-bal">'+_fsIssN(g.closing)+'</span></div>';
+  h+='</div>';
+  return h;
+}
 function _fsCfdDrill(key,label,el){ if(!(typeof _CFD!=='undefined'&&_CFD))return; _fsIssCSS(); _fsIssDrillCSS();
   _fsIssDockOff=false;
   var fb=document.getElementById('fsBody'); if(fb){ fb.classList.add('fsiss-drillopen'); fb.classList.add('fsiss-dock'); }
@@ -20687,6 +20735,15 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    ".gllook-leg{border-top:1px dashed #DCC9F0;padding:4px 9px}",
    ".gllook-leg .glleg-code{color:#5B2A99;font-weight:600}",
    ".gllook-leg .glleg-nm{color:#332047}",
+   /* reverse look-through: the PV/RE that actually settled the accrual → real cash/bank movement (teal) */
+   ".gllook-cash{background:linear-gradient(90deg,#EEFBF6,#DAF4EA);box-shadow:inset 3px 0 0 #16A085}",
+   ".gllook-cash .gllook-h{color:#0A6B54}",
+   ".gllook-cash .gllook-leg{border-top:1px dashed #BEE7D8}",
+   ".gllook-cash .gllook-leg .glleg-code{color:#0A6B54}",
+   ".gllook-cash .gllook-leg .glleg-nm{color:#123}",
+   ".gllook-cashleg{background:#CFEEE1}",
+   ".gllook-cashleg .glleg-code{font-weight:800;background:#B4E4D2;border-radius:5px;padding:1px 6px}",
+   ".gllook-cashleg .gl-dr{color:#0369A1;font-weight:700}.gllook-cashleg .gl-cr{color:#9A3412;font-weight:700}",
    ".fsiss-glempty{color:#8aa;font-size:12px;padding:12px;text-align:center}"
   ].join("");
   var s=document.createElement('style'); s.id='fsiss-drill-css'; s.textContent=css; (document.head||document.body).appendChild(s); }
