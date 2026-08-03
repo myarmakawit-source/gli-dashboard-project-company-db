@@ -20360,15 +20360,26 @@ function _fsIssCodeGLHTML(code){
 /* v10.90: drill = a PERSISTENT half-page dock on the right of the statement.
    It waits there (empty state) until a statement line is clicked, then shows the line's
    member codes → click a code → its GL in full double-entry (own leg gold). */
-var _fsIssDrillEsc=null,_fsIssActiveRow=null,_fsIssSelDcode=null,_fsIssSelLabel='',_fsIssDockOff=false;
+var _fsIssDrillEsc=null,_fsIssActiveRow=null,_fsIssSelDcode=null,_fsIssSelLabel='',_fsIssDockOff=false,_fsIssPanelScroll=null,_fsIssPanelRaf=0;
+/* v10.91: lock the dock as a stable half-page pane — pinned under the sticky command bar,
+   full remaining height, tracking scroll/resize so it never floats away from the statement. */
+function _fsIssPanelPos(panel){ panel=panel||document.getElementById('fsIssPanel'); if(!panel)return;
+  var fb=document.getElementById('fsBody')||document.getElementById('fsWrap'); if(!fb)return;
+  var r=fb.getBoundingClientRect();
+  var top=Math.max(12,Math.round(r.top));
+  try{ var cmd=document.querySelector('#page-fs .fscmd'); if(cmd){ var cr=cmd.getBoundingClientRect(); if(cr.height)top=Math.max(top,Math.round(cr.bottom)+8); } }catch(e){}
+  top=Math.min(top,Math.max(12,window.innerHeight-180));
+  var right=Math.max(12,Math.round(window.innerWidth-r.right)+2);
+  panel.style.top=top+'px'; panel.style.left='auto'; panel.style.right=right+'px';
+  panel.style.height=Math.max(180,(window.innerHeight-top-12))+'px'; panel.style.maxHeight='';
+}
 function _fsIssPanelEnsure(){
   var panel=document.getElementById('fsIssPanel');
   if(!panel){ panel=document.createElement('div'); panel.id='fsIssPanel'; panel.className='fsiss-panel'; (document.getElementById('page-fs')||document.body).appendChild(panel);
     panel.addEventListener('click',_fsIssPanelClick); }
-  try{ var fb=document.getElementById('fsBody')||document.getElementById('fsWrap'); var r=fb.getBoundingClientRect();
-    var top=Math.max(12,Math.round(r.top)); panel.style.top=top+'px'; panel.style.left='auto';
-    panel.style.right=Math.max(12,Math.round(window.innerWidth-r.right)+2)+'px';
-    panel.style.maxHeight='calc(100vh - '+(top+16)+'px)'; }catch(e){ panel.style.top='96px'; panel.style.left='auto'; panel.style.right='16px'; panel.style.maxHeight='calc(100vh - 112px)'; }
+  _fsIssPanelPos(panel);
+  if(!_fsIssPanelScroll){ _fsIssPanelScroll=function(){ if(_fsIssPanelRaf)return; _fsIssPanelRaf=requestAnimationFrame(function(){ _fsIssPanelRaf=0; var p=document.getElementById('fsIssPanel'); if(p)_fsIssPanelPos(p); }); };
+    window.addEventListener('scroll',_fsIssPanelScroll,true); window.addEventListener('resize',_fsIssPanelScroll); }
   if(!_fsIssDrillEsc){ _fsIssDrillEsc=function(ev){ if(ev.key==='Escape')_fsIssDrillClose(); }; document.addEventListener('keydown',_fsIssDrillEsc); }
   return panel;
 }
@@ -20397,6 +20408,7 @@ function _fsIssPanelClick(e){ var t=e.target;
 function _fsIssDockRemove(){ var p=document.getElementById('fsIssPanel'); if(p&&p.parentNode)p.parentNode.removeChild(p);
   if(_fsIssActiveRow){ try{_fsIssActiveRow.classList.remove('issactive');}catch(e){} _fsIssActiveRow=null; }
   try{var fb=document.getElementById('fsBody'); if(fb)fb.classList.remove('fsiss-drillopen','fsiss-dock');}catch(e){}
+  try{if(_fsIssPanelScroll){window.removeEventListener('scroll',_fsIssPanelScroll,true);window.removeEventListener('resize',_fsIssPanelScroll);_fsIssPanelScroll=null;}}catch(e){}
   try{if(_fsIssDrillEsc){document.removeEventListener('keydown',_fsIssDrillEsc);_fsIssDrillEsc=null;}}catch(e){} }
 /* ✕ : clear the current selection back to the waiting state; if already empty, hide the dock */
 function _fsIssDrillClose(){
