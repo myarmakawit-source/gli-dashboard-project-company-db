@@ -16746,14 +16746,18 @@ function _fsShell(){
       '<button type="button" class="fscmd-ddi ghost" id="fsPrint" title="'+(_issOn?'พิมพ์ / บันทึกงบการเงิน (WP GLI 2025) เป็น PDF':'Print / save the four financial statements + notes as PDF (statutory template)')+'"><b>🖨 PDF</b><small>'+(_issOn?'งบการเงิน WP GLI 2568 · พร้อมพิมพ์ (A4)':'Print-ready statutory set')+'</small></button>'+
     '</div></details>';
   /* v10.43: Command Bar — one sticky control bar, two rows: (1) period · checks · export (2) all statement tabs. Layout only — every ID, class hook and event path is unchanged (delegated via closest()) */
-  /* v10.86: in WP-FS mode the row-1 controls (GL year picker · GL balance chips · legacy export) are redundant — the WP toolbar in the body owns period/export — so hide row-1 on WP tabs */
-  var _wpOn=(typeof _fsWpStmtOn==='function' && _fsWpStmtOn() && typeof _fsWpTabOk==='function' && _fsWpTabOk(_fsTab));
+  /* v10.86: in WP-FS mode the balance chips + legacy export are redundant (the WP toolbar owns export),
+     but the Fiscal Year picker must stay visible so the user can switch years (e.g. FY2568 → FY2569). */
+  var _wpOn=(typeof _fsWpBodyOn==='function' && _fsWpBodyOn(_fsTab));
+  var wpYearPicker='<span class="fsrange-w fsann-w"><span class="fsrlab">Fiscal Year</span><select id="fsYearSel" class="fsyr-rg">'+yrOpts+'</select>'+annCmp+'</span>';
   return '<div class="fscmd">'+
-    (_wpOn?'':('<div class="fscmd-r1">'+filtersInner+
-      '<span class="fscmd-sp"></span>'+
-      '<span class="fscmd-chips" id="fsChips">'+chipsInner+'</span>'+
-      '<span class="fscmd-exp">'+expBtns+'</span>'+
-    '</div>'))+
+    (_wpOn
+      ? ('<div class="fscmd-r1 fscmd-r1-wp">'+wpYearPicker+'<span class="fscmd-sp"></span></div>')
+      : ('<div class="fscmd-r1">'+filtersInner+
+        '<span class="fscmd-sp"></span>'+
+        '<span class="fscmd-chips" id="fsChips">'+chipsInner+'</span>'+
+        '<span class="fscmd-exp">'+expBtns+'</span>'+
+      '</div>'))+
     '<div class="fscmd-tabs">'+_fsTabG(['tb','bs','pl','sce','cf','cfd'])+'<span class="fscmd-div"></span>'+_fsTabG(['ratio','wk','an'])+'</div>'+
   '</div>'+
   '<div id="fsBody"></div>';
@@ -19349,7 +19353,7 @@ function _fsRenderBody(){
   var _psc=0,_psl=0; try{ var _pw=b.querySelector('.fstbwrap,.fsstmtwrap'); if(_pw){_psc=_pw.scrollTop||0;_psl=_pw.scrollLeft||0;} }catch(_e){}
   if(_fsTab==='mt')_fsTab='tb'; /* v9.51: งบตามแบบ (PAE) removed — fall back to Trial Balance */
   /* v10.86: WP FS (GLI 2025) — statutory grouping from the audit working paper (issued "Separate" figures) */
-  if(typeof _fsWpStmtOn==='function' && _fsWpStmtOn() && typeof _fsWpTabOk==='function' && _fsWpTabOk(_fsTab)){
+  if(typeof _fsWpBodyOn==='function' && _fsWpBodyOn(_fsTab)){
     try{ b.innerHTML=_fsWpBody(_fsTab);
       try{ if(_psc||_psl){ var _nw2=b.querySelector('.fswp-wrap'); if(_nw2){ if(_psc)_nw2.scrollTop=_psc; if(_psl)_nw2.scrollLeft=_psl; } } }catch(_e2){}
       return; }catch(_wpe){ if(window.console&&console.error)console.error('[WP FS]',_wpe); }
@@ -19365,7 +19369,7 @@ function _fsRenderBody(){
     h='<div class="fsmanhint">✏️ <b>โหมดแก้งบเอง เปิดอยู่</b> — คลิกที่ <b>ชื่อบรรทัด</b> หรือ <b>ยอดปีล่าสุด</b> ในงบเพื่อพิมพ์ทับ (กด Enter เพื่อยืนยัน) · ยอด/ชื่อที่แก้จะไหลเข้า <b>PDF และ Excel</b> · เซลล์ที่แก้จะไฮไลต์ '+(nOv?('· แก้แล้ว '+nOv+' รายการ '):'')+'· กด “✅ แก้งบเอง: เปิด” อีกครั้งเพื่อปิดโหมด</div>'+h;
   }
   /* v10.86: legacy (GL) mode while the WP profile is available → offer a switch back to WP FS */
-  if(typeof _fsWpAvail==='function' && _fsWpAvail() && !_fsWpMode && typeof _fsWpYearOk==='function' && _fsWpYearOk() && typeof _fsWpTabOk==='function' && _fsWpTabOk(_fsTab)){ try{ _fsWpCSS(); }catch(_e){} h=_fsWpBackBar()+h; }
+  if(typeof _fsWpAvail==='function' && _fsWpAvail() && !_fsWpMode && typeof _fsWpTabYearEligible==='function' && _fsWpTabYearEligible(_fsTab)){ try{ _fsWpCSS(); }catch(_e){} h=_fsWpBackBar()+h; }
   b.innerHTML=h;
   try{ if(_psc||_psl){ var _nw=b.querySelector('.fstbwrap,.fsstmtwrap'); if(_nw){ if(_psc)_nw.scrollTop=_psc; if(_psl)_nw.scrollLeft=_psl; } } }catch(_e){}   /* v9.138: คืนตำแหน่งเลื่อน (กันเด้งขึ้น) */
 }
@@ -19481,8 +19485,17 @@ function _fsWpActive(){ return _fsWpAvail()&&_fsWpMode; }
 function _fsWpSetMode(on){ _fsWpMode=!!on; try{localStorage.setItem('gli_fswpmode',on?'1':'0');}catch(_e){} }
 function _fsWpTabOk(t){ return t==='bs'||t==='pl'||t==='sce'; }   /* v10.86.1: Trial Balance reverted to the original app view — WP owns BS/PL/SCE only */
 /* v10.86.7: WP audited statements are FY2568-specific — for other fiscal years fall back to the app's GL statements (which follow the selected year with prior-year comparison) */
-function _fsWpYearOk(){ return typeof _fsYear!=='undefined' && _fsYear!=='ALL' && _fsY0===_fsY1 && _fsY1==='2025'; }
-function _fsWpStmtOn(){ return _fsWpActive() && _fsWpYearOk(); }
+function _fsWpYearSingle(){ return typeof _fsYear!=='undefined' && _fsYear!=='ALL' && _fsY0===_fsY1; }
+function _fsWpIsCur(){ try{ return _fsY1===((GLI_FS2025.meta&&GLI_FS2025.meta.curAD)||'2025'); }catch(e){ return _fsY1==='2025'; } }
+function _fsWpYearOk(){ return _fsWpYearSingle() && _fsWpIsCur(); }
+function _fsWpStmtOn(){ return _fsWpActive() && _fsWpYearOk(); }   /* issued-mode (FY2568) — used by Export */
+/* v10.87: which tab+year the WP profile can render (mode-independent). BS/PL work for any single fiscal
+   year (issued=audited, others=computed from GL); the Statement of Changes in Equity is issued-only. */
+function _fsWpTabYearEligible(tab){ if(!_fsWpAvail()||!_fsWpYearSingle())return false;
+  if(tab==='bs'||tab==='pl')return true;
+  if(tab==='sce')return _fsWpIsCur();
+  return false; }
+function _fsWpBodyOn(tab){ return _fsWpMode && _fsWpTabYearEligible(tab); }
 
 function _fsWpEsc(s){ return (''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function _fsWpN(v,dec){ dec=dec||0; v=+v||0; var eps=dec?0.005:0.5; if(Math.abs(v)<eps)v=0;
@@ -19573,9 +19586,13 @@ function _fsWpCSS(){ if(document.getElementById('fswp-css'))return;
 function _fsWpToolbar(tab){
   var meta=GLI_FS2025.meta||{};
   var sub=({tb:'งบทดลอง · Trial Balance',bs:'งบแสดงฐานะการเงิน · Statement of Financial Position',pl:'งบกำไรขาดทุน · Income Statement',sce:'งบแสดงการเปลี่ยนแปลงส่วนของผู้ถือหุ้น'})[tab]||'';
-  var seg=(tab==='bs'||tab==='pl')?('<span class="fswp-seg"><button type="button" class="fswp-vbtn'+(_fsWpView==='stmt'?' on':'')+'" data-wpview="stmt">งบการเงิน</button><button type="button" class="fswp-vbtn'+(_fsWpView==='wp'?' on':'')+'" data-wpview="wp">กระดาษทำการ</button></span>'):'';
+  var isCur=(typeof _fsWpIsCur==='function')?_fsWpIsCur():true;
+  var viewBE=isCur?(meta.curBE||'2568'):(''+((+_fsY1)+543));
+  var basis=isCur?'ยอด "Separate" (งบที่ออกจริง)':'คำนวณสดจาก GL (ก่อนสอบทาน)';
+  /* the working-paper (reconciliation) view exists only for the issued year */
+  var seg=((tab==='bs'||tab==='pl')&&isCur)?('<span class="fswp-seg"><button type="button" class="fswp-vbtn'+(_fsWpView==='stmt'?' on':'')+'" data-wpview="stmt">งบการเงิน</button><button type="button" class="fswp-vbtn'+(_fsWpView==='wp'?' on':'')+'" data-wpview="wp">กระดาษทำการ</button></span>'):'';
   return '<div class="fswp-bar">'+
-    '<span class="fswp-bt">📘 WP FS · GLI '+_fsWpEsc(meta.curBE||'2568')+'<small>'+_fsWpEsc(sub)+' · ยอด "Separate" (งบที่ออกจริง)</small></span>'+
+    '<span class="fswp-bt">📘 WP FS · GLI '+_fsWpEsc(viewBE)+'<small>'+_fsWpEsc(sub)+' · '+_fsWpEsc(basis)+'</small></span>'+
     '<span class="fswp-sp"></span>'+seg+
     '<button type="button" class="fswp-btn" data-wpexport="1" title="Export งบการเงิน (BS · PL · การเปลี่ยนแปลงส่วนของผู้ถือหุ้น) + กระดาษทำการ เป็น Excel">⤓ Excel</button>'+
     '<button type="button" class="fswp-btn" data-wpprint="1" title="พิมพ์ / บันทึกงบเป็น PDF">🖨 PDF</button>'+
@@ -19677,8 +19694,10 @@ function _fsWpStmtWP(tab){
   h+='</tbody></table></div>';
   return _fsWpStmtHead(tab)+h;
 }
-function _fsWpRenderBS(){ return _fsWpToolbar('bs')+(_fsWpView==='wp'?_fsWpStmtWP('bs'):((typeof _fsIssAvail==='function'&&_fsIssAvail())?_fsIssBSHTML():_fsWpStmtClean('bs'))); }
-function _fsWpRenderPL(){ return _fsWpToolbar('pl')+(_fsWpView==='wp'?_fsWpStmtWP('pl'):((typeof _fsIssAvail==='function'&&_fsIssAvail())?_fsIssPLHTML():_fsWpStmtClean('pl'))); }
+function _fsWpRenderBS(){ var wp=(_fsWpView==='wp'&&(typeof _fsWpIsCur!=='function'||_fsWpIsCur()));
+  return _fsWpToolbar('bs')+(wp?_fsWpStmtWP('bs'):((typeof _fsIssAvail==='function'&&_fsIssAvail())?_fsIssBSHTML():_fsWpStmtClean('bs'))); }
+function _fsWpRenderPL(){ var wp=(_fsWpView==='wp'&&(typeof _fsWpIsCur!=='function'||_fsWpIsCur()));
+  return _fsWpToolbar('pl')+(wp?_fsWpStmtWP('pl'):((typeof _fsIssAvail==='function'&&_fsIssAvail())?_fsIssPLHTML():_fsWpStmtClean('pl'))); }
 
 /* ---------- Statement of Changes in Equity ---------- */
 function _fsWpRenderSCE(){
@@ -19748,7 +19767,8 @@ function _fsWpReconOpen(key){ if(!_fsWpAvail())return; var r=_fsWpFindLine(key);
 /* ---------- Excel export (SpreadsheetML — BS + PL working paper + SCE) ---------- */
 function _fsWpXe(s){ return _fsWpEsc(s); }
 function _fsWpExcel(){
-  if(typeof _fsWpStmtOn==='function'&&_fsWpStmtOn()){ return _fsIssExcel(); }
+  /* Export always produces the official issued statements (FS_BS · FS_PL · FS Change), whatever fiscal year is on screen */
+  if(typeof _fsIssAvail==='function'&&_fsIssAvail()){ return _fsIssExcel(); }
   var meta=GLI_FS2025.meta||{};
   function styles(){ var F='Tahoma';
     function fo(sz,b,i){ return '<Font ss:FontName="'+F+'" ss:Size="'+sz+'"'+(b?' ss:Bold="1"':'')+(i?' ss:Italic="1"':'')+'/>'; }
@@ -19816,7 +19836,8 @@ function _fsWpExcel(){
 
 /* ---------- print / PDF ---------- */
 function _fsWpPrint(){
-  if(typeof _fsWpStmtOn==='function'&&_fsWpStmtOn()){ return _fsIssPrint(); }
+  /* Export always produces the official issued statements, whatever fiscal year is on screen */
+  if(typeof _fsIssAvail==='function'&&_fsIssAvail()){ return _fsIssPrint(); }
   var meta=GLI_FS2025.meta||{};
   function stmtTbl(tab){ var rows=(tab==='bs')?GLI_FS2025.bs:GLI_FS2025.pl;
     var ti=(tab==='bs')?(meta.bsTitleTh||'งบแสดงฐานะการเงิน'):(meta.plTitleTh||'งบกำไรขาดทุนเบ็ดเสร็จ');
@@ -19928,7 +19949,9 @@ function _fsIssCSS(){ if(document.getElementById('fsiss-css'))return;
    ".fsiss-t tr.sub td.n{font-weight:700;border-top:1px solid #123;padding-top:3px}",
    ".fsiss-t tr.tot td.n{font-weight:800;border-top:1px solid #123;border-bottom:3px double #123}",
    ".fsiss-sign{margin-top:26px;text-align:center;font-size:13px;color:#234;line-height:2}",
-   ".fsiss-note{max-width:860px;margin:8px auto 0;font-size:11.5px;color:#8aa;text-align:center}"
+   ".fsiss-note{max-width:860px;margin:8px auto 0;font-size:11.5px;color:#8aa;text-align:center}",
+   ".fsiss-cap{margin:4px 0 8px;padding:8px 12px;background:linear-gradient(180deg,#fff8ec,#fdf1d8);border:1px solid #f0d9a6;border-left:4px solid #d99a1c;border-radius:8px;font-size:11.5px;line-height:1.5;color:#7a5a12}",
+   ".fsiss-cap b{color:#8a4b0a}"
   ].join("");
   var s=document.createElement('style'); s.id='fsiss-css'; s.textContent=css; (document.head||document.body).appendChild(s);
 }
@@ -19942,12 +19965,13 @@ function _fsIssHead(rows){ var o={title:'',sub:'',date:'',unit:'(หน่วย
   return o; }
 function _fsIssSigns(rows){ var us=[]; rows.forEach(function(r){ if(r.k==='sign'&&us.indexOf(r.t)<0)us.push(r.t); }); return us; }
 
-/* on-screen HTML statement (BS/PL) */
-function _fsIssStmtHTML(rows){ _fsIssCSS(); try{_fsIssDrillCSS();}catch(e){}
+/* on-screen HTML statement (BS/PL). opts: {noRestate, caption} — used by FY-computed (non-issued) years */
+function _fsIssStmtHTML(rows,opts){ _fsIssCSS(); try{_fsIssDrillCSS();}catch(e){} opts=opts||{};
   var hd=_fsIssHead(rows), ncol=hd.yrs.length;
   var h='<div class="fsiss"><div class="fsiss-hd"><div class="co">'+_fsWpEsc(hd.title)+'</div><div class="ti">'+_fsWpEsc(hd.sub)+'</div><div class="dt">'+_fsWpEsc(hd.date)+'</div></div>';
+  if(opts.caption)h+='<div class="fsiss-cap">'+opts.caption+'</div>';
   h+='<table class="fsiss-t"><thead><tr><th class="l"></th><th class="u" colspan="'+ncol+'">'+_fsWpEsc(hd.unit)+'</th></tr><tr><th class="l"></th>';
-  hd.yrs.forEach(function(y,i){ h+='<th>'+_fsWpEsc(y)+(i>0?'<br><span class="rs">(ปรับปรุงใหม่)</span>':'')+'</th>'; });
+  hd.yrs.forEach(function(y,i){ h+='<th>'+_fsWpEsc(y)+((i>0&&!opts.noRestate)?'<br><span class="rs">(ปรับปรุงใหม่)</span>':(i>0?'<br><span class="rs">(ตรวจสอบแล้ว)</span>':''))+'</th>'; });
   h+='</tr></thead><tbody>';
   function cells(v){ return (v||[]).map(function(x){return '<td class="n">'+_fsIssN(x)+'</td>';}).join(''); }
   function empt(){ var s=''; for(var i=0;i<ncol;i++)s+='<td class="n"></td>'; return s; }
@@ -19965,8 +19989,102 @@ function _fsIssStmtHTML(rows){ _fsIssCSS(); try{_fsIssDrillCSS();}catch(e){}
   h+='</div>';
   return h;
 }
-function _fsIssBSHTML(){ return _fsIssStmtHTML(GLI_ISSUED.bs); }
-function _fsIssPLHTML(){ return _fsIssStmtHTML(GLI_ISSUED.pl); }
+function _fsIssBSHTML(){ var y=_fsIssSelYr();
+  if(_fsIssIsIssuedYr(y)) return _fsIssStmtHTML(GLI_ISSUED.bs);
+  if(!_fsGlLoaded()) return _fsIssComputedNotice(y,'งบแสดงฐานะการเงิน');
+  return _fsIssStmtHTML(_fsIssComputeBS(y),{noRestate:true,caption:_fsIssComputedCap(y)}); }
+function _fsIssPLHTML(){ var y=_fsIssSelYr();
+  if(_fsIssIsIssuedYr(y)) return _fsIssStmtHTML(GLI_ISSUED.pl);
+  if(!_fsGlLoaded()) return _fsIssComputedNotice(y,'งบกำไรขาดทุน');
+  return _fsIssStmtHTML(_fsIssComputePL(y),{noRestate:true,caption:_fsIssComputedCap(y)}); }
+
+/* ===== v10.87: FY-computed statements (non-issued years) — clean issued layout, values from GL =====
+   The audited "Separate" figures exist only for the issued year (FY2568 / AD2025). For any other
+   single fiscal year the user selects, we render the SAME clean statutory layout but compute every
+   FS line straight from the live General Ledger (GLROWS): cumulative balances for the balance sheet,
+   year activity for the income statement. This is a pre-audit / management view (no ADJ REC · JO/JV ·
+   ECM · Elimination), with the prior column showing the audited FY2568 figures for comparison.
+   The aggregation walk (subtotals · totals · equity residual · P&L running profit) is validated to
+   reproduce the audited FY2568 statement exactly when fed the audited leaf values. */
+function _fsGlLoaded(){ return !!(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length); }
+function _fsIssSelYr(){ try{ return (typeof _fsY1!=='undefined'&&_fsY1!=null)?(''+_fsY1):_fsIssYr(); }catch(e){ return _fsIssYr(); } }
+function _fsIssIssuedYr(){ try{ return (GLI_FS2025.meta&&GLI_FS2025.meta.curAD)||'2025'; }catch(e){ return '2025'; } }
+function _fsIssIsIssuedYr(y){ return (''+y)===_fsIssIssuedYr(); }
+function _fsIssBE(y){ return ''+((+y)+543); }
+function _fsIssComputedCap(y){ return '<b>งบจากบัญชีแยกประเภท (GL) · ปี '+_fsWpEsc(_fsIssBE(y))+'</b> — มุมมองก่อนสอบทาน · คำนวณสดจากสมุดรายวัน (ยังไม่รวมรายการปรับปรุง ADJ · JO/JV · ECM · Elimination) · คอลัมน์เทียบคือปี '+_fsWpEsc(_fsIssBE(_fsIssIssuedYr()))+' (ตรวจสอบแล้ว)'; }
+function _fsIssComputedNotice(y,ti){ _fsIssCSS();
+  return '<div class="fsiss"><div class="fsiss-hd"><div class="ti">'+_fsWpEsc(ti)+' · ปี '+_fsWpEsc(_fsIssBE(y))+'</div></div>'+
+    '<div class="fsiss-cap">งบปีนี้คำนวณสดจากบัญชีแยกประเภท (GL) — โปรดเปิดแท็บ <b>Database</b> เพื่อโหลด General Ledger ก่อน แล้วกลับมาที่งบนี้อีกครั้ง</div></div>'; }
+
+var _fsDcodeSignCache=null;
+function _fsDcodeSignMap(){ if(_fsDcodeSignCache)return _fsDcodeSignCache;
+  var m={}; try{ (GLI_FS2025&&GLI_FS2025.codes||[]).forEach(function(c){ var d=c.d||''; if(d==='VVO')d='VV'; if(!d)return; m[d]=(m[d]||0)+(+c.pa||0); }); }catch(e){}
+  var s={}; for(var k in m) s[k]=(m[k]<0?-1:1); _fsDcodeSignCache=s; return s; }
+function _fsDcodeSign(d){ var s=_fsDcodeSignMap(); return (d&&s[d]!=null)?s[d]:1; }
+/* GL balance of an FS line (dcode) in natural GL sign (Σ dr−cr). BS = cumulative through year-end; PL = year activity. */
+function _fsGlDcodeBal(dcode,yearAD,isBS){ dcode=(''+(dcode==null?'':dcode)).trim(); if(!dcode)return 0;
+  var codes=_fsIssCodesFor(dcode); if(!codes.length)return 0;
+  var cset={}; codes.forEach(function(c){ cset[(''+c.c).trim()]=1; });
+  var rows=(typeof GLROWS!=='undefined'&&GLROWS)?GLROWS:[]; var bal=0;
+  for(var i=0;i<rows.length;i++){ var r=rows[i]; if(!r)continue; var c=(''+(r[0]||'')).trim(); if(!cset[c])continue;
+    var y=(''+(r[2]||'')).slice(0,4); var dr=+r[16]||0, cr=+r[17]||0;
+    if(isBS){ if(y<=yearAD)bal+=dr-cr; } else { if(y===yearAD)bal+=dr-cr; } }
+  return bal; }
+function _fsGlStmtVal(dcode,yearAD,isBS){ return _fsDcodeSign(dcode)*_fsGlDcodeBal(dcode,yearAD,isBS); }
+/* clone a source row into a 2-column [computed, priorAudited] shape; adjust the year in the date/header rows */
+function _fsIssCloneRow(r,curBE,prevBE){ var c={k:r.k,i:r.i,d:r.d,t:r.t};
+  if(r.k==='yhdr'){ c.v=[curBE,prevBE]; }
+  else if(r.k==='date'){ c.t=(''+(r.t||'')).replace(/2568/g,curBE).replace(/2025/g,''+((+curBE)-543)); c.v=null; }
+  else if(r.v){ c.v=[null,(r.v[0]!=null?r.v[0]:0)]; }
+  else c.v=null;
+  return c; }
+/* Balance sheet: leaf lines from GL (cumulative); asset/liability subtotals & totals footed structurally;
+   equity carried forward + a single unappropriated-retained-earnings residual so the statement always balances. */
+function _fsIssComputeBS(yearAD){ var src=GLI_ISSUED.bs, n=src.length;
+  var curBE=_fsIssBE(yearAD), prevBE=_fsIssBE(_fsIssIssuedYr());
+  var idxEq=-1,idxFinalTot=-1,idxPlug=-1,idxTotEqSub=-1;
+  for(var i=0;i<n;i++){ var r=src[i]; if(r.k==='sec'&&(''+(r.t||'')).trim()==='ส่วนของผู้ถือหุ้น'&&idxEq<0)idxEq=i; if(r.k==='tot')idxFinalTot=i; }
+  for(var i2=0;i2<n;i2++){ var r2=src[i2]; if(idxEq>=0&&i2>idxEq){ if(r2.k==='line'&&/ยังไม่ได้จัดสรร/.test(''+(r2.t||''))&&idxPlug<0)idxPlug=i2; if(r2.k==='sub'&&i2<idxFinalTot)idxTotEqSub=i2; } }
+  var out=src.map(function(r){ return _fsIssCloneRow(r,curBE,prevBE); });
+  var grp=0,secSubs=0,totCount=0,TA=0,TL=0;
+  for(var j=0;j<n;j++){ var r=src[j],o=out[j],k=r.k;
+    if(k==='sec'){ grp=0; continue; }
+    if(['title','subtitle','date','unit','restate','yhdr','blank','sign','info'].indexOf(k)>=0)continue;
+    var eq=(idxEq>=0&&j>idxEq);
+    if(!eq){
+      if(k==='line'){ var val=r.d?_fsGlStmtVal(r.d,yearAD,true):(r.v?(+r.v[0]||0):0); o.v[0]=val; grp+=val; }
+      else if(k==='sub'){ o.v[0]=grp; secSubs+=grp; grp=0; }
+      else if(k==='tot'){ o.v[0]=secSubs; totCount++; if(totCount===1)TA=secSubs; else if(totCount===2)TL=secSubs; secSubs=0; }
+    } else {
+      if(k==='line'){ if(j!==idxPlug)o.v[0]=(r.v?(+r.v[0]||0):0); }
+      else if(k==='sub'){ if(j!==idxTotEqSub)o.v[0]=(r.v?(+r.v[0]||0):0); }
+    }
+  }
+  var TE=TA-TL;
+  var totEqV0=(idxTotEqSub>=0&&src[idxTotEqSub].v)?(+src[idxTotEqSub].v[0]||0):0;
+  var plugV0=(idxPlug>=0&&src[idxPlug].v)?(+src[idxPlug].v[0]||0):0;
+  if(idxPlug>=0)out[idxPlug].v[0]=plugV0+(TE-totEqV0);
+  if(idxTotEqSub>=0)out[idxTotEqSub].v[0]=TE;
+  if(idxFinalTot>=0)out[idxFinalTot].v[0]=TA;
+  return out; }
+/* Income statement: revenue/expense leaves from GL (year activity); the d-less lines are the running
+   subtotals — total revenue, total expense, profit before finance cost, before tax, and net profit. */
+function _fsIssComputePL(yearAD){ var src=GLI_ISSUED.pl, n=src.length;
+  var curBE=_fsIssBE(yearAD), prevBE=_fsIssBE(_fsIssIssuedYr());
+  var out=src.map(function(r){ return _fsIssCloneRow(r,curBE,prevBE); });
+  var mode='',revSum=0,expSum=0,running=0,gotExp=false;
+  for(var j=0;j<n;j++){ var r=src[j],o=out[j],k=r.k;
+    if(k==='sec'){ var tt=(''+(r.t||'')).trim(); if(tt==='รายได้')mode='rev'; else if(tt==='ค่าใช้จ่าย')mode='exp'; continue; }
+    if(k!=='line')continue;
+    if(r.d){ var val=_fsGlStmtVal(r.d,yearAD,false);
+      if(mode==='rev')revSum+=val; else if(mode==='exp'&&!gotExp)expSum+=val; else running-=val;
+      o.v[0]=val;
+    } else {
+      var v2; if(mode==='rev')v2=revSum; else if(mode==='exp'&&!gotExp){ v2=expSum; running=revSum-expSum; gotExp=true; } else v2=running;
+      o.v[0]=v2;
+    }
+  }
+  return out; }
 
 /* on-screen HTML — statement of changes in equity (matrix) */
 function _fsIssSCEHTML(){ _fsIssCSS();
@@ -20107,7 +20225,7 @@ function _fsGlByVoucher(){ var rows=(typeof GLROWS!=='undefined'&&GLROWS)?GLROWS
 function _fsIssCodesFor(dcode){ dcode=(''+(dcode==null?'':dcode)).trim(); var out=[];
   (GLI_FS2025&&GLI_FS2025.codes||[]).forEach(function(c){ var d=(c.d||''); if(d==='VVO')d='VV'; if(d===dcode)out.push(c); });
   return out; }
-function _fsIssYr(){ try{ return (GLI_FS2025.meta&&GLI_FS2025.meta.curAD)||'2025'; }catch(e){ return '2025'; } }
+function _fsIssYr(){ try{ if(typeof _fsY1!=='undefined'&&_fsY1!=null)return ''+_fsY1; }catch(e){} try{ return (GLI_FS2025.meta&&GLI_FS2025.meta.curAD)||'2025'; }catch(e){ return '2025'; } }
 /* GL transactions of a code for the FS year (+ opening for BS accounts) with contra legs */
 function _fsIssCodeGL(code){ code=(''+code).trim();
   var rows=(typeof GLROWS!=='undefined'&&GLROWS)?GLROWS:[]; var vm=_fsGlByVoucher();
@@ -20130,17 +20248,22 @@ function _fsIssCodeGLHTML(code){
   if(!(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length)) return '<div class="fsiss-glempty">— ยังไม่ได้โหลด GL (เปิดแท็บ Database เพื่อโหลด General Ledger) —</div>';
   var g=_fsIssCodeGL(code); var yr=_fsIssYr();
   if(!g.txns.length && Math.abs(g.open)<0.005) return '<div class="fsiss-glempty">— ไม่มีรายการ GL ของรหัส '+_fsWpEsc(code)+' ในปี '+_fsWpEsc(yr)+' —</div>';
-  var h='<table class="fsiss-gl"><thead><tr><th class="l">วันที่</th><th class="l">เลขที่ใบสำคัญ</th><th class="l">รายการ</th><th>เดบิต</th><th>เครดิต</th><th>คงเหลือ</th></tr></thead><tbody>';
-  if(g.isBS)h+='<tr class="op"><td class="l" colspan="5">ยอดยกมา · Opening ('+_fsWpEsc((+yr-1)+'')+')</td><td class="n">'+_fsIssN(g.open)+'</td></tr>';
+  var h='<div class="glwrap">';
+  h+='<div class="glcols"><span class="gl-d">วันที่</span><span class="gl-desc">รายการ · ใบสำคัญ</span><span class="gl-dr">เดบิต</span><span class="gl-cr">เครดิต</span><span class="gl-bal">คงเหลือ</span></div>';
+  if(g.isBS)h+='<div class="glrow glop"><span class="gl-d"></span><span class="gl-desc">ยอดยกมา (สิ้นปี '+_fsWpEsc(((+yr-1)+543)+'')+')</span><span class="gl-dr"></span><span class="gl-cr"></span><span class="gl-bal">'+_fsIssN(g.open)+'</span></div>';
   g.txns.forEach(function(t){
-    var contra=(t.contra||[]).map(function(c){ return '<span class="cc">'+_fsWpEsc(c.code)+' '+_fsWpEsc((c.name||'').slice(0,26))+' <i>'+(c.dr>0.005?('Dr '+_fsIssN(c.dr)):('Cr '+_fsIssN(c.cr)))+'</i></span>'; }).join('');
-    h+='<tr><td class="l">'+_fsWpEsc(_fsIssDate(t.date))+'</td><td class="l mono">'+_fsWpEsc(t.vch)+'</td>'+
-       '<td class="l">'+_fsWpEsc((t.desc||'').slice(0,44))+(contra?('<div class="fsiss-contra">คู่บัญชี: '+contra+'</div>'):'')+'</td>'+
-       '<td class="n">'+(Math.abs(t.dr)>0.005?_fsIssN(t.dr):'-')+'</td><td class="n">'+(Math.abs(t.cr)>0.005?_fsIssN(t.cr):'-')+'</td><td class="n">'+_fsIssN(t.run)+'</td></tr>';
+    h+='<div class="glrow"><span class="gl-d">'+_fsWpEsc(_fsIssDate(t.date))+'</span>'+
+       '<span class="gl-desc">'+_fsWpEsc(t.desc||'—')+'<span class="gl-vch">📄 '+_fsWpEsc(t.vch)+'</span></span>'+
+       '<span class="gl-dr">'+(Math.abs(t.dr)>0.005?_fsIssN(t.dr):'-')+'</span><span class="gl-cr">'+(Math.abs(t.cr)>0.005?_fsIssN(t.cr):'-')+'</span><span class="gl-bal">'+_fsIssN(t.run)+'</span></div>';
+    if(t.contra&&t.contra.length){
+      h+='<div class="glcontra"><div class="glc-lbl">↳ คู่บัญชี (บันทึกคู่)</div>'+
+        t.contra.map(function(c){ var isDr=(c.dr>0.005);
+          return '<div class="glc-line"><span class="glc-code">'+_fsWpEsc(c.code)+'</span><span class="glc-name">'+_fsWpEsc(c.name||'')+'</span>'+
+            '<span class="glc-tag '+(isDr?'dr':'cr')+'">'+(isDr?'Dr':'Cr')+'</span><span class="glc-amt">'+_fsIssN(isDr?c.dr:c.cr)+'</span></div>'; }).join('')+'</div>';
+    }
   });
-  h+='<tr class="cl"><td class="l" colspan="3">ยอดคงเหลือปลายงวด · Ending '+_fsWpEsc(yr)+' ('+g.txns.length+' รายการ)</td>'+
-     '<td class="n"></td><td class="n"></td><td class="n">'+_fsIssN(g.closing)+'</td></tr>';
-  h+='</tbody></table>';
+  h+='<div class="glrow glcl"><span class="gl-d"></span><span class="gl-desc">ยอดคงเหลือปลายงวด · '+_fsWpEsc((+yr+543)+'')+' ('+g.txns.length+' รายการ)</span><span class="gl-dr"></span><span class="gl-cr"></span><span class="gl-bal">'+_fsIssN(g.closing)+'</span></div>';
+  h+='</div>';
   return h;
 }
 
@@ -20171,7 +20294,9 @@ function _fsIssDrill(dcode,label,el){ if(!(GLI_FS2025&&GLI_FS2025.codes))return;
     if(t.closest&&t.closest('.fsiss-px')){_fsIssDrillClose();return;}
     var cr=t.closest&&t.closest('.fsiss-crow'); if(cr){ var code=cr.getAttribute('data-isscode'),det=cr.querySelector('.cc-det'),ex=cr.querySelector('.cc-ex'); if(!det)return;
       if(det.hidden){ if(!det._f){ det.innerHTML=_fsIssCodeGLHTML(code); det._f=1; } det.hidden=false; cr.classList.add('open'); if(ex)ex.textContent='▾'; }
-      else{ det.hidden=true; cr.classList.remove('open'); if(ex)ex.textContent='▸'; } return; } };
+      else{ det.hidden=true; cr.classList.remove('open'); if(ex)ex.textContent='▸'; }
+      panel.classList.toggle('wide', !!panel.querySelector('.cc-det:not([hidden])'));   /* v10.86.8: half-page widen while a GL detail is open */
+      return; } };
   if(!_fsIssDrillEsc){ _fsIssDrillEsc=function(e){ if(e.key==='Escape')_fsIssDrillClose(); }; document.addEventListener('keydown',_fsIssDrillEsc); }
 }
 function _fsIssDate(s){ if(!s)return ''; var p=(''+s).split('-'); if(p.length!==3)return s; var mm=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.']; return (+p[2])+' '+mm[+p[1]]+' '+((+p[0])+543-2500); }
@@ -20203,20 +20328,33 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    ".cc-name{flex:1;font-size:12.5px;color:#123;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
    ".cc-amt{font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#0A463E;flex:none}",
    ".cc-ex{color:#0E5C52;font-size:10px;flex:none;width:12px;text-align:center}",
-   ".cc-det{border-top:1px solid #eef3f1;padding:6px;background:#fbfdfc;max-height:44vh;overflow:auto}",
+   ".cc-det{border-top:1px solid #eef3f1;padding:8px;background:#fbfdfc;max-height:46vh;overflow:auto}",
    ".cc-det::-webkit-scrollbar{width:8px}.cc-det::-webkit-scrollbar-thumb{background:#c3ddd3;border-radius:6px}",
    ".fsiss-empty{color:#8aa;font-size:12.5px;padding:16px;text-align:center}",
-   ".fsiss-gl{width:100%;border-collapse:collapse;font-size:12px}",
-   ".fsiss-gl th{background:#e7f1ed;color:#0A463E;padding:4px 8px;text-align:right;font-size:11px;border-bottom:1px solid #bcd8cd}",
-   ".fsiss-gl th.l{text-align:left}",
-   ".fsiss-gl td{padding:4px 8px;border-bottom:1px solid #eef3f1;vertical-align:top}",
-   ".fsiss-gl td.l{text-align:left}.fsiss-gl td.n{text-align:right;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;white-space:nowrap}",
-   ".fsiss-gl td.mono{font-family:'IBM Plex Mono',monospace;font-size:11px}",
-   ".fsiss-gl tr.op td,.fsiss-gl tr.cl td{background:#f4f9f7;font-weight:600;color:#0A463E}",
-   ".fsiss-contra{margin-top:2px;color:#6b7f79;font-size:11px}",
-   ".fsiss-contra .cc{display:inline-block;margin-right:8px;background:#eef6f2;border-radius:5px;padding:1px 6px}",
-   ".fsiss-contra .cc i{font-style:normal;color:#0A463E}",
-   ".fsiss-glempty{color:#8aa;font-size:12px;padding:8px}"
+   /* half-page widen while a code's GL is expanded */
+   ".fsiss-panel.wide{width:min(52vw,860px)}",
+   /* GL detail — grid rows, contra accounts each on their own tidy line */
+   ".glwrap{font-size:12px}",
+   ".glcols,.glrow{display:grid;grid-template-columns:78px 1fr 96px 96px 108px;gap:6px;align-items:baseline;padding:5px 6px}",
+   ".glcols{color:#5a7a72;font-size:10.5px;font-weight:600;border-bottom:1.5px solid #bcd8cd;position:sticky;top:-8px;background:#fbfdfc}",
+   ".glcols .gl-dr,.glcols .gl-cr,.glcols .gl-bal{text-align:right}",
+   ".glrow{border-bottom:1px solid #eef3f1}",
+   ".gl-d{color:#5a7a72;font-size:11px;white-space:nowrap}",
+   ".gl-desc{color:#123;line-height:1.35}",
+   ".gl-vch{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#7a8f89;margin-top:1px}",
+   ".gl-dr,.gl-cr,.gl-bal{text-align:right;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;white-space:nowrap}",
+   ".gl-dr{color:#0369A1}.gl-cr{color:#9A3412}.gl-bal{color:#0A463E;font-weight:600}",
+   ".glrow.glop,.glrow.glcl{background:#eef6f2;font-weight:700}.glrow.glop .gl-bal,.glrow.glcl .gl-bal{color:#08352e}",
+   ".glcontra{margin:0 6px 8px 6px;padding:6px 10px;background:#f2f8f5;border-left:3px solid #9ecabd;border-radius:0 8px 8px 0}",
+   ".glc-lbl{color:#5a7a72;font-size:10.5px;font-weight:600;margin-bottom:3px}",
+   ".glc-line{display:grid;grid-template-columns:66px 1fr 34px 108px;gap:8px;align-items:center;padding:3px 0;border-top:1px dashed #d6e7e0}",
+   ".glc-line:first-of-type{border-top:0}",
+   ".glc-code{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5a7a72}",
+   ".glc-name{font-size:12px;color:#234;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+   ".glc-tag{font-size:10px;font-weight:700;text-align:center;border-radius:5px;padding:1px 0}",
+   ".glc-tag.dr{background:#E0F2FE;color:#0369A1}.glc-tag.cr{background:#FEF3C7;color:#9A3412}",
+   ".glc-amt{text-align:right;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#0A463E}",
+   ".fsiss-glempty{color:#8aa;font-size:12px;padding:12px;text-align:center}"
   ].join("");
   var s=document.createElement('style'); s.id='fsiss-drill-css'; s.textContent=css; (document.head||document.body).appendChild(s); }
 try{ window._fsIssDrill=_fsIssDrill; }catch(e){}
