@@ -4266,6 +4266,27 @@ body.apjv-resizing,body.apjv-resizing *{cursor:col-resize!important;user-select:
 #page-pdrepjv .apjv-sub-routine tfoot td.ra.neg,
 #page-pdrepjv .apjv-sub-bank tfoot td.ra.neg,
 #page-pdrepjv .apjv-main .apjv-grpsub td.apjv-grpsubtot.neg{color:#C0392B}
+/* v10.94: separate each Index-group block — spacer row + a clear card border around every block */
+#page-pdrepjv .apjv-main tr.apjv-grpgap td{padding:0;height:14px;background:transparent;border:0}
+#page-pdrepjv .apjv-liab .apjv-main tr.apjv-grp td,
+#page-pdrepjv .apjv-liab .apjv-main tr.apjv-grpsub td,
+#page-pdrepjv .apjv-liab .apjv-main tr[data-grp][data-id] td{border-left:0;border-right:0}
+#page-pdrepjv .apjv-liab .apjv-main tr.apjv-grp td:first-child,
+#page-pdrepjv .apjv-liab .apjv-main tr.apjv-grpsub td:first-child,
+#page-pdrepjv .apjv-liab .apjv-main tr[data-grp][data-id] td:first-child{border-left:2px solid #A9C2E8}
+#page-pdrepjv .apjv-liab .apjv-main tr.apjv-grp td:last-child,
+#page-pdrepjv .apjv-liab .apjv-main tr.apjv-grpsub td:last-child,
+#page-pdrepjv .apjv-liab .apjv-main tr[data-grp][data-id] td:last-child{border-right:2px solid #A9C2E8}
+#page-pdrepjv .apjv-liab .apjv-main tr.apjv-grp td{border-top:2px solid #8FB0DE}
+#page-pdrepjv .apjv-liab .apjv-main tr.apjv-grpsub td{border-bottom:2px solid #8FB0DE}
+#page-pdrepjv .apjv-asset .apjv-main tr.apjv-grp td:first-child,
+#page-pdrepjv .apjv-asset .apjv-main tr.apjv-grpsub td:first-child,
+#page-pdrepjv .apjv-asset .apjv-main tr[data-grp][data-id] td:first-child{border-left:2px solid #97D4BC}
+#page-pdrepjv .apjv-asset .apjv-main tr.apjv-grp td:last-child,
+#page-pdrepjv .apjv-asset .apjv-main tr.apjv-grpsub td:last-child,
+#page-pdrepjv .apjv-asset .apjv-main tr[data-grp][data-id] td:last-child{border-right:2px solid #97D4BC}
+#page-pdrepjv .apjv-asset .apjv-main tr.apjv-grp td{border-top:2px solid #79C1A4}
+#page-pdrepjv .apjv-asset .apjv-main tr.apjv-grpsub td{border-bottom:2px solid #79C1A4}
 
 /* ===== Report AP JV — Position Dashboard (Liabilities vs Assets ready / awaiting) ===== */
 #page-pdrepjv .apjv-dash{position:relative;background:linear-gradient(180deg,#FFFFFF,#FAFBFE);border:1.5px solid #E1E8F3;border-radius:20px;padding:16px 18px 17px;margin:0 2px 20px;box-shadow:0 8px 26px -16px rgba(20,40,90,.26)}
@@ -8212,7 +8233,7 @@ function _apjvApplyFilter(side){
     tr.style.display=show?'':'none';}
   var addtr=tbl.querySelector('tbody tr.apjv-addtr');if(addtr)addtr.style.display=keys.length?'none':'';
   /* v10.52: grouped liab view — hide group header/subtotal rows whose entries are all filtered out */
-  var grpRows=tbl.querySelectorAll('tbody tr.apjv-grp,tbody tr.apjv-grpsub');
+  var grpRows=tbl.querySelectorAll('tbody tr.apjv-grp,tbody tr.apjv-grpsub,tbody tr.apjv-grpgap');
   if(grpRows.length){var vis={};var er=tbl.querySelectorAll('tbody tr[data-id][data-grp]');
     for(var a=0;a<er.length;a++){if(er[a].style.display!=='none')vis[er[a].getAttribute('data-grp')]=true;}
     for(var b=0;b<grpRows.length;b++){var g=grpRows[b].getAttribute('data-grp');grpRows[b].style.display=(keys.length&&!vis[g])?'none':'';}}
@@ -8230,6 +8251,7 @@ function _apjvGroupedBody(side,arr){
     return (''+groups[a].label).localeCompare((''+groups[b].label),undefined,{numeric:true,sensitivity:'base'});});
   var out='';
   for(var g=0;g<order.length;g++){
+    if(g>0)out+='<tr class="apjv-grpgap" data-grp="'+g+'"><td colspan="7"></td></tr>';   /* v10.94: spacer between Index-group blocks */
     var gk2=order[g],grp=groups[gk2],rows=_apjvSortByDate(grp.rows,'date'),isNone=(gk2===NONE);
     var sub=0;for(var j=0;j<rows.length;j++)sub+=_apjvNum(rows[j].amt);
     var nm=isNone?'— ยังไม่ระบุ Index —':grp.label;
