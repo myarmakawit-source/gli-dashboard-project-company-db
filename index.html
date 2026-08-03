@@ -19439,6 +19439,7 @@ function _fsRenderBody(){
   if(typeof _fsWpBodyOn==='function' && _fsWpBodyOn(_fsTab)){
     try{ b.innerHTML=_fsWpBody(_fsTab);
       try{ if(_psc||_psl){ var _nw2=b.querySelector('.fswp-wrap'); if(_nw2){ if(_psc)_nw2.scrollTop=_psc; if(_psl)_nw2.scrollLeft=_psl; } } }catch(_e2){}
+      try{ if(typeof _fsIssDrillDock==='function')_fsIssDrillDock(); }catch(_e3){}   /* v10.90: keep the account drill-down docked half-page on the right */
       return; }catch(_wpe){ if(window.console&&console.error)console.error('[WP FS]',_wpe); }
   }
   if(!_fsT){ h=_fsEmpty(); }
@@ -19454,6 +19455,7 @@ function _fsRenderBody(){
   /* v10.86: legacy (GL) mode while the WP profile is available → offer a switch back to WP FS */
   if(typeof _fsWpAvail==='function' && _fsWpAvail() && !_fsWpMode && typeof _fsWpTabYearEligible==='function' && _fsWpTabYearEligible(_fsTab)){ try{ _fsWpCSS(); }catch(_e){} h=_fsWpBackBar()+h; }
   b.innerHTML=h;
+  try{ if(typeof _fsIssDockRemove==='function')_fsIssDockRemove(); }catch(_e4){}   /* v10.90: no drillable statement here → dock off */
   try{ if(_psc||_psl){ var _nw=b.querySelector('.fstbwrap,.fsstmtwrap'); if(_nw){ if(_psc)_nw.scrollTop=_psc; if(_psl)_nw.scrollLeft=_psl; } } }catch(_e){}   /* v9.138: คืนตำแหน่งเลื่อน (กันเด้งขึ้น) */
 }
 function _fsSyncTabs(w){ var tb=w.querySelectorAll('.fstab'); for(var i=0;i<tb.length;i++){tb[i].classList.toggle('on',tb[i].getAttribute('data-fstab')===_fsTab);} }
@@ -20313,8 +20315,9 @@ function _fsIssYr(){ try{ if(typeof _fsY1!=='undefined'&&_fsY1!=null)return ''+_
 function _fsIssCodeGL(code){ code=(''+code).trim();
   var rows=(typeof GLROWS!=='undefined'&&GLROWS)?GLROWS:[]; var vm=_fsGlByVoucher();
   var yr=_fsIssYr(); var cat=(typeof _fsCatOf==='function')?_fsCatOf(code):''; var isBS=(cat==='A'||cat==='L'||cat==='E');
-  var open=0, out=[];
+  var open=0, out=[], nm='';
   for(var i=0;i<rows.length;i++){ var r=rows[i]; if(!r||(''+(r[0]||'')).trim()!==code)continue;
+    if(!nm&&r[1])nm=(''+r[1]);
     var y=(''+(r[2]||'')).slice(0,4); var dr=+r[16]||0, cr=+r[17]||0;
     if(isBS && y<yr){ open+=dr-cr; continue; }
     if(y!==yr) continue;
@@ -20325,68 +20328,99 @@ function _fsIssCodeGL(code){ code=(''+code).trim();
     out.push({date:r[3]||'',vch:v,desc:(r[8]||r[15]||''),dr:dr,cr:cr,contra:contra}); }
   out.sort(function(a,b){ return (a.date<b.date?-1:(a.date>b.date?1:0)); });
   var run=open; out.forEach(function(t){ run+=t.dr-t.cr; t.run=run; });
-  return {open:open, txns:out, isBS:isBS, closing:run}; }
+  return {open:open, txns:out, isBS:isBS, closing:run, name:nm}; }
 
+/* v10.90: full double-entry journal view — every leg shows BOTH เดบิต & เครดิต columns (like the GL),
+   and the leg belonging to the account we clicked glows GOLD so it stands out among the entry legs. */
 function _fsIssCodeGLHTML(code){
   if(!(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length)) return '<div class="fsiss-glempty">— ยังไม่ได้โหลด GL (เปิดแท็บ Database เพื่อโหลด General Ledger) —</div>';
-  var g=_fsIssCodeGL(code); var yr=_fsIssYr();
+  var g=_fsIssCodeGL(code); var yr=_fsIssYr(); var ownNm=g.name||'';
   if(!g.txns.length && Math.abs(g.open)<0.005) return '<div class="fsiss-glempty">— ไม่มีรายการ GL ของรหัส '+_fsWpEsc(code)+' ในปี '+_fsWpEsc(yr)+' —</div>';
-  var h='<div class="glwrap">';
-  h+='<div class="glcols"><span class="gl-d">วันที่</span><span class="gl-desc">รายการ · ใบสำคัญ</span><span class="gl-dr">เดบิต</span><span class="gl-cr">เครดิต</span><span class="gl-bal">คงเหลือ</span></div>';
-  if(g.isBS)h+='<div class="glrow glop"><span class="gl-d"></span><span class="gl-desc">ยอดยกมา (สิ้นปี '+_fsWpEsc(((+yr-1)+543)+'')+')</span><span class="gl-dr"></span><span class="gl-cr"></span><span class="gl-bal">'+_fsIssN(g.open)+'</span></div>';
+  function amt(v){ return (Math.abs(v)>0.005)?_fsIssN(v):'<span class="gl-z">-</span>'; }
+  function leg(cd,name,dr,cr,bal,own){
+    return '<div class="glrow glleg'+(own?' glleg-own':'')+'">'+
+      '<span class="glleg-ac"><span class="glleg-code">'+_fsWpEsc(cd)+'</span><span class="glleg-nm">'+_fsWpEsc(name||'')+'</span></span>'+
+      '<span class="gl-dr">'+amt(dr)+'</span><span class="gl-cr">'+amt(cr)+'</span>'+
+      '<span class="gl-bal">'+(bal==null?'':_fsIssN(bal))+'</span></div>';
+  }
+  var h='<div class="glwrap"><div class="glcols"><span class="glleg-ac">บัญชี · Account</span><span class="gl-dr">เดบิต</span><span class="gl-cr">เครดิต</span><span class="gl-bal">คงเหลือ</span></div>';
+  if(g.isBS)h+='<div class="glrow glop"><span class="glleg-ac">ยอดยกมา (สิ้นปี '+_fsWpEsc(((+yr-1)+543)+'')+')</span><span class="gl-dr"></span><span class="gl-cr"></span><span class="gl-bal">'+_fsIssN(g.open)+'</span></div>';
   g.txns.forEach(function(t){
-    h+='<div class="glrow"><span class="gl-d">'+_fsWpEsc(_fsIssDate(t.date))+'</span>'+
-       '<span class="gl-desc">'+_fsWpEsc(t.desc||'—')+'<span class="gl-vch">📄 '+_fsWpEsc(t.vch)+'</span></span>'+
-       '<span class="gl-dr">'+(Math.abs(t.dr)>0.005?_fsIssN(t.dr):'-')+'</span><span class="gl-cr">'+(Math.abs(t.cr)>0.005?_fsIssN(t.cr):'-')+'</span><span class="gl-bal">'+_fsIssN(t.run)+'</span></div>';
-    if(t.contra&&t.contra.length){
-      h+='<div class="glcontra"><div class="glc-lbl">↳ คู่บัญชี (บันทึกคู่)</div>'+
-        t.contra.map(function(c){ var isDr=(c.dr>0.005);
-          return '<div class="glc-line"><span class="glc-code">'+_fsWpEsc(c.code)+'</span><span class="glc-name">'+_fsWpEsc(c.name||'')+'</span>'+
-            '<span class="glc-tag '+(isDr?'dr':'cr')+'">'+(isDr?'Dr':'Cr')+'</span><span class="glc-amt">'+_fsIssN(isDr?c.dr:c.cr)+'</span></div>'; }).join('')+'</div>';
-    }
+    h+='<div class="glje"><div class="glje-hd"><span class="gl-d">'+_fsWpEsc(_fsIssDate(t.date))+'</span>'+
+       '<span class="glje-desc">'+_fsWpEsc(t.desc||'—')+'<span class="gl-vch">📄 '+_fsWpEsc(t.vch)+'</span></span></div>';
+    h+=leg(code,ownNm,t.dr,t.cr,t.run,true);
+    (t.contra||[]).forEach(function(c){ h+=leg(c.code,c.name,c.dr,c.cr,null,false); });
+    h+='</div>';
   });
-  h+='<div class="glrow glcl"><span class="gl-d"></span><span class="gl-desc">ยอดคงเหลือปลายงวด · '+_fsWpEsc((+yr+543)+'')+' ('+g.txns.length+' รายการ)</span><span class="gl-dr"></span><span class="gl-cr"></span><span class="gl-bal">'+_fsIssN(g.closing)+'</span></div>';
+  h+='<div class="glrow glcl"><span class="glleg-ac">ยอดคงเหลือปลายงวด · '+_fsWpEsc((+yr+543)+'')+' ('+g.txns.length+' รายการ)</span><span class="gl-dr"></span><span class="gl-cr"></span><span class="gl-bal">'+_fsIssN(g.closing)+'</span></div>';
   h+='</div>';
   return h;
 }
 
-/* drill modal: line → codes → (click code) GL + contra */
-var _fsIssDrillEsc=null,_fsIssActiveRow=null;
-function _fsIssDrillClose(){ var p=document.getElementById('fsIssPanel'); if(p&&p.parentNode)p.parentNode.removeChild(p);
-  if(_fsIssActiveRow){ try{_fsIssActiveRow.classList.remove('issactive');}catch(e){} _fsIssActiveRow=null; }
-  try{var fb=document.getElementById('fsBody'); if(fb)fb.classList.remove('fsiss-drillopen','fsiss-drillwide');}catch(e){}
-  try{if(_fsIssDrillEsc){document.removeEventListener('keydown',_fsIssDrillEsc);_fsIssDrillEsc=null;}}catch(e){} }
-/* v10.86.6: drill → floating LEFT side-panel (beautiful · scrollable · highlights the clicked row blue) */
-function _fsIssDrill(dcode,label,el){ if(!(GLI_FS2025&&GLI_FS2025.codes))return; _fsIssCSS(); _fsIssDrillCSS();
-  if(_fsIssActiveRow&&_fsIssActiveRow!==el){ try{_fsIssActiveRow.classList.remove('issactive');}catch(e){} }
-  _fsIssActiveRow=el||null; if(el){ try{el.classList.add('issactive');}catch(e){} }
+/* v10.90: drill = a PERSISTENT half-page dock on the right of the statement.
+   It waits there (empty state) until a statement line is clicked, then shows the line's
+   member codes → click a code → its GL in full double-entry (own leg gold). */
+var _fsIssDrillEsc=null,_fsIssActiveRow=null,_fsIssSelDcode=null,_fsIssSelLabel='',_fsIssDockOff=false;
+function _fsIssPanelEnsure(){
+  var panel=document.getElementById('fsIssPanel');
+  if(!panel){ panel=document.createElement('div'); panel.id='fsIssPanel'; panel.className='fsiss-panel'; (document.getElementById('page-fs')||document.body).appendChild(panel);
+    panel.addEventListener('click',_fsIssPanelClick); }
+  try{ var fb=document.getElementById('fsBody')||document.getElementById('fsWrap'); var r=fb.getBoundingClientRect();
+    var top=Math.max(12,Math.round(r.top)); panel.style.top=top+'px'; panel.style.left='auto';
+    panel.style.right=Math.max(12,Math.round(window.innerWidth-r.right)+2)+'px';
+    panel.style.maxHeight='calc(100vh - '+(top+16)+'px)'; }catch(e){ panel.style.top='96px'; panel.style.left='auto'; panel.style.right='16px'; panel.style.maxHeight='calc(100vh - 112px)'; }
+  if(!_fsIssDrillEsc){ _fsIssDrillEsc=function(ev){ if(ev.key==='Escape')_fsIssDrillClose(); }; document.addEventListener('keydown',_fsIssDrillEsc); }
+  return panel;
+}
+function _fsIssHeadHTML(main,sub){ return '<div class="fsiss-ph"><div class="fsiss-pt">'+_fsWpEsc(main||'รายละเอียดบัญชี')+
+    '<span class="fsiss-ps">'+_fsWpEsc(sub||'')+'</span></div><button class="fsiss-px" type="button" aria-label="ปิด">✕</button></div>'; }
+function _fsIssRenderEmpty(){ var p=_fsIssPanelEnsure(); p.classList.remove('has-sel');
+  p.innerHTML=_fsIssHeadHTML('รายละเอียดบัญชี · Account drill-down','คลิกบรรทัดในงบการเงินเพื่อดูรหัสบัญชี · GL · คู่บัญชี (เดบิต/เครดิต)')+
+    '<div class="fsiss-pb"><div class="fsiss-wait"><div class="fsiss-wait-ic">👈</div>'+
+    '<div class="fsiss-wait-t">ยังไม่เลือกรายการในงบการเงิน</div>'+
+    '<div class="fsiss-wait-s">คลิกที่บรรทัดใดก็ได้ในงบ (ฝั่งซ้าย) เพื่อดู<b>รหัสบัญชี</b>ที่ประกอบเป็นยอดนั้น พร้อมรายการ <b>GL</b> และ<b>คู่บัญชี เดบิต/เครดิต</b></div></div></div>'; }
+function _fsIssRenderCodes(dcode,label){ var p=_fsIssPanelEnsure(); p.classList.add('has-sel');
   var codes=_fsIssCodesFor(dcode); var sign=1;
   try{ var cs=codes.reduce(function(a,c){return a+(+c.pa||0);},0); sign=(cs<0?-1:1); }catch(e){}
   var body=codes.map(function(c){
     return '<div class="fsiss-crow" data-isscode="'+_fsWpEsc(c.c)+'"><div class="cc-h"><span class="cc-code">'+_fsWpEsc(c.c)+'</span>'+
       '<span class="cc-name">'+_fsWpEsc(c.n)+'</span><span class="cc-amt">'+_fsIssN((+c.pa||0)*sign)+'</span><span class="cc-ex">▸</span></div><div class="cc-det" hidden></div></div>'; }).join('');
   if(!codes.length)body='<div class="fsiss-empty">— ไม่มีรหัสบัญชีในบรรทัดนี้ —</div>';
-  var panel=document.getElementById('fsIssPanel');
-  if(!panel){ panel=document.createElement('div'); panel.id='fsIssPanel'; panel.className='fsiss-panel'; (document.getElementById('page-fs')||document.body).appendChild(panel); }
-  panel.innerHTML='<div class="fsiss-ph"><div class="fsiss-pt">'+_fsWpEsc(label||'')+
-      '<span class="fsiss-ps">รหัสกลุ่มงบ '+_fsWpEsc(dcode)+' · '+codes.length+' บัญชี · คลิกรหัสเพื่อดู GL + คู่บัญชี (Dr/Cr)</span></div>'+
-      '<button class="fsiss-px" type="button" aria-label="ปิด">✕</button></div><div class="fsiss-pb">'+body+'</div>';
-  /* v10.89: float on the RIGHT edge of the statement (statement shifts left, stays visible) */
-  var fbEl=document.getElementById('fsBody'); if(fbEl)fbEl.classList.add('fsiss-drillopen');
-  try{ var fb=fbEl||document.getElementById('fsWrap'); var r=fb.getBoundingClientRect();
-    var top=Math.max(12,Math.round(r.top)); panel.style.top=top+'px'; panel.style.left='auto';
-    panel.style.right=Math.max(12,Math.round(window.innerWidth-r.right)+2)+'px';
-    panel.style.maxHeight='calc(100vh - '+(top+16)+'px)'; }catch(e){ panel.style.top='96px'; panel.style.left='auto'; panel.style.right='16px'; panel.style.maxHeight='calc(100vh - 112px)'; }
-  panel.onclick=function(e){ var t=e.target;
-    if(t.closest&&t.closest('.fsiss-px')){_fsIssDrillClose();return;}
-    var cr=t.closest&&t.closest('.fsiss-crow'); if(cr){ var code=cr.getAttribute('data-isscode'),det=cr.querySelector('.cc-det'),ex=cr.querySelector('.cc-ex'); if(!det)return;
-      if(det.hidden){ if(!det._f){ det.innerHTML=_fsIssCodeGLHTML(code); det._f=1; } det.hidden=false; cr.classList.add('open'); if(ex)ex.textContent='▾'; }
-      else{ det.hidden=true; cr.classList.remove('open'); if(ex)ex.textContent='▸'; }
-      var anyOpen=!!panel.querySelector('.cc-det:not([hidden])');
-      panel.classList.toggle('wide', anyOpen);   /* v10.86.8: half-page widen while a GL detail is open */
-      if(fbEl)fbEl.classList.toggle('fsiss-drillwide', anyOpen);
-      return; } };
-  if(!_fsIssDrillEsc){ _fsIssDrillEsc=function(e){ if(e.key==='Escape')_fsIssDrillClose(); }; document.addEventListener('keydown',_fsIssDrillEsc); }
+  p.innerHTML=_fsIssHeadHTML(label||'',(_fsWpEsc?'':'')+'รหัสกลุ่มงบ '+_fsWpEsc(dcode)+' · '+codes.length+' บัญชี · คลิกรหัสเพื่อดู GL + คู่บัญชี (Dr/Cr)')+'<div class="fsiss-pb">'+body+'</div>'; }
+function _fsIssPanelClick(e){ var t=e.target;
+  if(t.closest&&t.closest('.fsiss-px')){ _fsIssDrillClose(); return; }
+  var cr=t.closest&&t.closest('.fsiss-crow'); if(cr){ var code=cr.getAttribute('data-isscode'),det=cr.querySelector('.cc-det'),ex=cr.querySelector('.cc-ex'); if(!det)return;
+    if(det.hidden){ if(!det._f){ det.innerHTML=_fsIssCodeGLHTML(code); det._f=1; } det.hidden=false; cr.classList.add('open'); if(ex)ex.textContent='▾'; }
+    else{ det.hidden=true; cr.classList.remove('open'); if(ex)ex.textContent='▸'; }
+    return; } }
+/* remove the dock entirely (statement returns to full width) */
+function _fsIssDockRemove(){ var p=document.getElementById('fsIssPanel'); if(p&&p.parentNode)p.parentNode.removeChild(p);
+  if(_fsIssActiveRow){ try{_fsIssActiveRow.classList.remove('issactive');}catch(e){} _fsIssActiveRow=null; }
+  try{var fb=document.getElementById('fsBody'); if(fb)fb.classList.remove('fsiss-drillopen','fsiss-dock');}catch(e){}
+  try{if(_fsIssDrillEsc){document.removeEventListener('keydown',_fsIssDrillEsc);_fsIssDrillEsc=null;}}catch(e){} }
+/* ✕ : clear the current selection back to the waiting state; if already empty, hide the dock */
+function _fsIssDrillClose(){
+  if(_fsIssActiveRow){ try{_fsIssActiveRow.classList.remove('issactive');}catch(e){} _fsIssActiveRow=null; }
+  if(_fsIssSelDcode){ _fsIssSelDcode=null; _fsIssSelLabel=''; _fsIssRenderEmpty(); return; }
+  _fsIssDockOff=true; _fsIssDockRemove(); }
+/* called after a BS/PL statement renders — keep the dock present (unless the user hid it) */
+function _fsIssDrillDock(){ var fb=document.getElementById('fsBody'); if(!fb)return;
+  var hasLines=!!fb.querySelector('[data-issd]');
+  if(!hasLines || _fsIssDockOff){ _fsIssDockRemove(); return; }
+  _fsIssCSS(); _fsIssDrillCSS();
+  fb.classList.add('fsiss-drillopen'); fb.classList.add('fsiss-dock');
+  _fsIssPanelEnsure();
+  if(_fsIssSelDcode){ _fsIssRenderCodes(_fsIssSelDcode,_fsIssSelLabel);
+    try{ var ln=fb.querySelector('[data-issd="'+(''+_fsIssSelDcode).replace(/["\\]/g,'')+'"]'); if(ln){ _fsIssActiveRow=ln; ln.classList.add('issactive'); } }catch(e){}
+  } else { _fsIssRenderEmpty(); } }
+/* click a statement line → show its member codes in the dock */
+function _fsIssDrill(dcode,label,el){ if(!(GLI_FS2025&&GLI_FS2025.codes))return; _fsIssCSS(); _fsIssDrillCSS();
+  _fsIssDockOff=false;
+  var fb=document.getElementById('fsBody'); if(fb){ fb.classList.add('fsiss-drillopen'); fb.classList.add('fsiss-dock'); }
+  if(_fsIssActiveRow&&_fsIssActiveRow!==el){ try{_fsIssActiveRow.classList.remove('issactive');}catch(e){} }
+  _fsIssActiveRow=el||null; if(el){ try{el.classList.add('issactive');}catch(e){} }
+  _fsIssSelDcode=dcode; _fsIssSelLabel=label||'';
+  _fsIssRenderCodes(dcode,label);
 }
 function _fsIssDate(s){ if(!s)return ''; var p=(''+s).split('-'); if(p.length!==3)return s; var mm=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.']; return (+p[2])+' '+mm[+p[1]]+' '+((+p[0])+543-2500); }
 function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
@@ -20398,13 +20432,18 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    ".fsiss-t tr.issactive{background:#DBEAFE!important}",
    ".fsiss-t tr.issactive td{color:#1E3A8A!important;font-weight:700}",
    ".fsiss-t tr.issactive td.l{box-shadow:inset 3px 0 0 #2563EB}",
-   /* floating RIGHT side-panel — statement shifts left so it stays fully visible */
-   ".fsiss-panel{position:fixed;width:min(440px,42vw);min-width:300px;background:#fff;border:1px solid #d3e6df;border-radius:16px;box-shadow:0 20px 55px rgba(8,40,34,.24);z-index:100060;display:flex;flex-direction:column;overflow:hidden;animation:fsissIn .16s ease-out}",
+   /* persistent RIGHT half-page dock — statement shifts left so it stays fully visible */
+   ".fsiss-panel{position:fixed;width:min(760px,50vw);min-width:360px;background:#fff;border:1px solid #d3e6df;border-radius:16px;box-shadow:0 20px 55px rgba(8,40,34,.24);z-index:100060;display:flex;flex-direction:column;overflow:hidden;animation:fsissIn .16s ease-out}",
    "@keyframes fsissIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}",
    "#fsBody.fsiss-drillopen .fsiss,#fsBody.fsiss-drillopen .fsiss-cap{margin-left:0;margin-right:auto}",
    "#fsBody.fsiss-drillopen .fsiss-hd{text-align:left}",
-   "#fsBody.fsiss-drillopen{padding-right:min(462px,44vw);transition:padding .16s ease}",
-   "#fsBody.fsiss-drillwide{padding-right:min(640px,50vw)}",
+   "#fsBody.fsiss-drillopen{padding-right:min(788px,52vw);transition:padding .16s ease}",
+   /* empty / waiting state */
+   ".fsiss-wait{padding:40px 24px;text-align:center;color:#57736c}",
+   ".fsiss-wait-ic{font-size:38px;line-height:1;margin-bottom:12px;opacity:.9}",
+   ".fsiss-wait-t{font-weight:800;font-size:15px;color:#0A463E;margin-bottom:8px}",
+   ".fsiss-wait-s{font-size:12.5px;line-height:1.65;color:#5a7a72;max-width:340px;margin:0 auto}",
+   ".fsiss-wait-s b{color:#0E5C52}",
    ".fsiss-ph{display:flex;align-items:flex-start;gap:8px;padding:13px 15px;background:linear-gradient(135deg,#0E5C52,#0A463E);color:#fff;flex:none}",
    ".fsiss-pt{font-weight:700;font-size:14px;line-height:1.3;flex:1}",
    ".fsiss-ps{display:block;font-weight:400;font-size:10.5px;color:#bfe3d8;margin-top:3px;line-height:1.4}",
@@ -20426,29 +20465,31 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    ".cc-det{border-top:1px solid #dbe8e3;border-left:3px solid #9ecabd;padding:8px;background:#f3faf6;max-height:46vh;overflow:auto}",
    ".cc-det::-webkit-scrollbar{width:8px}.cc-det::-webkit-scrollbar-thumb{background:#c3ddd3;border-radius:6px}",
    ".fsiss-empty{color:#8aa;font-size:12.5px;padding:16px;text-align:center}",
-   /* half-page widen while a code's GL is expanded */
-   ".fsiss-panel.wide{width:min(52vw,860px)}",
-   /* GL detail — grid rows, contra accounts each on their own tidy line */
+   /* GL detail — full double-entry journal: every leg shows both เดบิต & เครดิต columns (like the GL) */
    ".glwrap{font-size:12px}",
-   ".glcols,.glrow{display:grid;grid-template-columns:78px 1fr 96px 96px 108px;gap:6px;align-items:baseline;padding:5px 6px}",
-   ".glcols{color:#5a7a72;font-size:10.5px;font-weight:600;border-bottom:1.5px solid #bcd8cd;position:sticky;top:-8px;background:#fbfdfc}",
+   ".glcols,.glrow{display:grid;grid-template-columns:1fr 92px 92px 104px;gap:6px;align-items:baseline;padding:5px 8px}",
+   ".glcols{color:#5a7a72;font-size:10.5px;font-weight:700;border-bottom:1.5px solid #bcd8cd;position:sticky;top:-8px;background:#f3faf6;z-index:1}",
    ".glcols .gl-dr,.glcols .gl-cr,.glcols .gl-bal{text-align:right}",
-   ".glrow{border-bottom:1px solid #eef3f1}",
-   ".gl-d{color:#5a7a72;font-size:11px;white-space:nowrap}",
-   ".gl-desc{color:#123;line-height:1.35}",
-   ".gl-vch{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#7a8f89;margin-top:1px}",
    ".gl-dr,.gl-cr,.gl-bal{text-align:right;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;white-space:nowrap}",
    ".gl-dr{color:#0369A1}.gl-cr{color:#9A3412}.gl-bal{color:#0A463E;font-weight:600}",
-   ".glrow.glop,.glrow.glcl{background:#eef6f2;font-weight:700}.glrow.glop .gl-bal,.glrow.glcl .gl-bal{color:#08352e}",
-   ".glcontra{margin:0 6px 8px 6px;padding:6px 10px;background:#f2f8f5;border-left:3px solid #9ecabd;border-radius:0 8px 8px 0}",
-   ".glc-lbl{color:#5a7a72;font-size:10.5px;font-weight:600;margin-bottom:3px}",
-   ".glc-line{display:grid;grid-template-columns:66px 1fr 34px 108px;gap:8px;align-items:center;padding:3px 0;border-top:1px dashed #d6e7e0}",
-   ".glc-line:first-of-type{border-top:0}",
-   ".glc-code{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5a7a72}",
-   ".glc-name{font-size:12px;color:#234;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
-   ".glc-tag{font-size:10px;font-weight:700;text-align:center;border-radius:5px;padding:1px 0}",
-   ".glc-tag.dr{background:#E0F2FE;color:#0369A1}.glc-tag.cr{background:#FEF3C7;color:#9A3412}",
-   ".glc-amt{text-align:right;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#0A463E}",
+   ".gl-z{color:#c2d4cd}",
+   ".glrow.glop,.glrow.glcl{background:#e4f0ea;font-weight:700;border-radius:7px;margin:2px 0}.glrow.glop .gl-bal,.glrow.glcl .gl-bal{color:#08352e}",
+   /* one voucher = one journal card */
+   ".glje{border:1px solid #dcebe4;border-radius:9px;margin:6px 0;overflow:hidden;background:#fff}",
+   ".glje-hd{display:flex;align-items:baseline;gap:8px;padding:5px 9px;background:#eef6f2;border-bottom:1px solid #dcebe4}",
+   ".glje-hd .gl-d{color:#5a7a72;font-size:11px;white-space:nowrap;flex:none}",
+   ".glje-desc{color:#123;font-size:11.5px;line-height:1.3;flex:1}",
+   ".gl-vch{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#7a8f89;margin-left:6px;white-space:nowrap}",
+   ".glleg{border-top:1px dashed #eef3f1;padding:5px 9px}",
+   ".glleg:first-of-type{border-top:0}",
+   ".glleg-ac{display:flex;align-items:baseline;gap:7px;min-width:0}",
+   ".glleg-code{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#5a7a72;flex:none}",
+   ".glleg-nm{font-size:11.5px;color:#234;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+   /* the account we clicked → radiant GOLD */
+   ".glleg-own{background:linear-gradient(90deg,#FFF7DC,#FDE9AE);box-shadow:inset 4px 0 0 #E0A008,0 1px 0 rgba(224,160,8,.18)}",
+   ".glleg-own .glleg-code{color:#7A4E00;font-weight:800;background:#F7DE93;border:1px solid #E9C766;border-radius:5px;padding:1px 6px}",
+   ".glleg-own .glleg-nm{color:#5C4200;font-weight:700}",
+   ".glleg-own .gl-dr{color:#0369A1}.glleg-own .gl-cr{color:#9A3412}.glleg-own .gl-bal{color:#6b4a00;font-weight:800}",
    ".fsiss-glempty{color:#8aa;font-size:12px;padding:12px;text-align:center}"
   ].join("");
   var s=document.createElement('style'); s.id='fsiss-drill-css'; s.textContent=css; (document.head||document.body).appendChild(s); }
