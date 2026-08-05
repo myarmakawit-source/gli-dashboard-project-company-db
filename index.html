@@ -20876,7 +20876,47 @@ function _fsCfdCashGLHTML(code){
    it and how much cash/bank moved: apCode → AP Payment → PV · arStanding → AR Receipt → RE, then read
    that voucher's GL legs. This is the reverse of the cash-account look-through — here you start from the
    expense/revenue and trace forward to the real cash outflow/inflow, so a cash-flow line ties to cash. */
+/* v10.108: voucher-centric drill — each cash voucher (RE/PV) shows ① ขาตั้งหนี้ (ที่มา) +
+   ② ขาล้างออก (เงินสด/ธนาคารเคลื่อนไหวจริง); ถ้าจ่าย/รับเลย (ไม่ผ่านตั้งหนี้) โชว์ขาเดียว
+   ผลรวมของทุกใบ = ยอดที่จำแนกเข้าบัญชีนี้ (ตรงกับ Grouping/Excel) */
 function _fsCfdCodeGLHTML(code){
+  if(!(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length)) return '<div class="fsiss-glempty">— ยังไม่ได้โหลด GL (เปิดแท็บ Database เพื่อโหลด General Ledger) —</div>';
+  try{ if(typeof _fsApEnsure==='function')_fsApEnsure(); }catch(e){}
+  try{ if(typeof _cfdArEnsure==='function')_cfdArEnsure(); }catch(e){}
+  var lineKey=(typeof _fsIssSelDcode!=='undefined')?_fsIssSelDcode:null;
+  var LL=(lineKey&&typeof _CFD!=='undefined'&&_CFD&&_CFD.lines&&_CFD.lines[lineKey])||null;
+  var codeObj=(LL&&LL.codes&&LL.codes[code])||null;
+  var vch=(codeObj&&codeObj.vch)||null;
+  if(!vch||!Object.keys(vch).length) return _fsCfdCodeGLHTML_accrual(code);
+  var V=(typeof _cfdVIdx==='function')?_cfdVIdx():{};
+  var apMap=(typeof _AP_PVMAP!=='undefined'&&_AP_PVMAP)?_AP_PVMAP:{};
+  var arMap=(typeof _cfdArMap==='function')?_cfdArMap():{};
+  function amt(v){ return (Math.abs(v)>0.005)?_fsIssN(v):'<span class="gl-z">-</span>'; }
+  function vdate(v){ var rows=V[v]||[]; for(var i=0;i<rows.length;i++){ if(rows[i][3])return ''+rows[i][3]; } return ''; }
+  function legRow(cd,name,dr,cr,cash,own){ return '<div class="glrow glleg'+(own?' glleg-own':'')+(cash?' gllook-cashleg':'')+'">'+
+    '<span class="glleg-ac"><span class="glleg-code">'+_fsWpEsc(cd)+'</span><span class="glleg-nm">'+_fsWpEsc(name||'')+(cash?' 💵':'')+'</span></span>'+
+    '<span class="gl-dr">'+amt(dr)+'</span><span class="gl-cr">'+amt(cr)+'</span><span class="gl-bal"></span></div>'; }
+  function vLegs(v,ownCode){ var rows=V[v]||[],out=''; for(var j=0;j<rows.length;j++){ var r=rows[j]; var dr=+r[16]||0,cr=+r[17]||0; if(Math.abs(dr)<0.005&&Math.abs(cr)<0.005)continue;
+    var rc=(''+(r[0]||'')).trim(),cash=false; try{ cash=(typeof _cfdCash==='function')&&_cfdCash(rc); }catch(e){}
+    out+=legRow(rc,r[1]||'',dr,cr,cash,(ownCode&&rc===ownCode)); } return out; }
+  var keys=Object.keys(vch); keys.sort(function(a,b){ var da=vdate(a),db=vdate(b); return da<db?-1:(da>db?1:(a<b?-1:1)); });
+  var h='<div class="glwrap"><div class="glcols"><span class="glleg-ac">บัญชี · Account</span><span class="gl-dr">เดบิต</span><span class="gl-cr">เครดิต</span><span class="gl-bal"></span></div>';
+  var tot=0;
+  for(var k=0;k<keys.length;k++){ var v=keys[k]; var camt=(+vch[v].amt||0), trace=(vch[v].trace||''); tot+=camt;
+    var viaAR=(arMap[v]&&arMap[v].length), viaAP=(apMap[v]&&apMap[v].length);
+    var stands=[]; if(viaAP)stands=stands.concat(apMap[v]); if(viaAR)stands=stands.concat(arMap[v]);
+    var direct=!stands.length, isRcpt=viaAR?true:(viaAP?false:(camt>=0));
+    h+='<div class="glje cfdvj"><div class="glje-hd"><span class="gl-d">'+_fsWpEsc(_fsIssDate(vdate(v)))+'</span>'+
+       '<span class="glje-desc"><b>'+(isRcpt?'รับชำระเงิน (RE)':'จ่ายชำระเงิน (PV)')+(direct?' · จ่าย/รับเลย (ไม่ผ่านตั้งหนี้)':'')+'</b><span class="gl-vch">📄 '+_fsWpEsc(v)+'</span><span class="cfdvj-amt">จำแนกเข้าบัญชีนี้ '+_fsIssN(camt)+'</span></span></div>';
+    if(!direct){ var seen={},sn=0; for(var s=0;s<stands.length&&sn<8;s++){ var st=stands[s]; if(!st||seen[st])continue; seen[st]=1; if(!(V[st]&&V[st].length))continue; sn++;
+      h+='<div class="gllook"><div class="gllook-h">① ขาตั้งหนี้ (ที่มาของเอกสาร) · '+_fsWpEsc(st)+'</div>'+vLegs(st,code)+'</div>'; } }
+    h+='<div class="gllook gllook-cash"><div class="gllook-h">'+(direct?'ขาจ่าย/รับ · ':'② ขาล้างออก · ')+_fsWpEsc(v)+' — เงินสด/ธนาคารที่เคลื่อนไหวจริง</div>'+vLegs(v,null)+'</div>';
+    h+='</div>';
+  }
+  h+='<div class="glrow glcl"><span class="glleg-ac">รวมยอดที่จำแนกเข้าบัญชี '+_fsWpEsc(code)+' ('+keys.length+' ใบ)</span><span class="gl-dr"></span><span class="gl-cr"></span><span class="gl-bal">'+_fsIssN(tot)+'</span></div>';
+  h+='</div>'; return h;
+}
+function _fsCfdCodeGLHTML_accrual(code){
   if(!(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length)) return '<div class="fsiss-glempty">— ยังไม่ได้โหลด GL (เปิดแท็บ Database เพื่อโหลด General Ledger) —</div>';
   try{ if(typeof _fsApEnsure==='function')_fsApEnsure(); }catch(e){}
   try{ if(typeof _cfdArEnsure==='function')_cfdArEnsure(); }catch(e){}
@@ -21422,6 +21462,9 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    /* look-through: the ตั้งหนี้ (source AP/AR invoice) settled by a cash payment/receipt */
    ".gllook{margin:3px 6px 6px;border-radius:0 0 8px 8px;background:linear-gradient(90deg,#FBF4FF,#F1E6FE);box-shadow:inset 3px 0 0 #9061C2;overflow:hidden}",
    ".gllook-h{font-size:10px;font-weight:700;color:#5B2A99;padding:5px 9px 3px;letter-spacing:.01em}",
+   /* v10.108: voucher-centric drill — badge showing the classified amount per voucher */
+   ".cfdvj-amt{display:inline-block;margin-left:8px;font-size:10px;font-weight:800;color:#0A6B54;background:#DAF4EA;border-radius:6px;padding:1px 7px;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;white-space:nowrap}",
+   ".cfdvj .glje-hd{flex-wrap:wrap;row-gap:3px}",
    ".gllook-leg{border-top:1px dashed #DCC9F0;padding:4px 9px}",
    ".gllook-leg .glleg-code{color:#5B2A99;font-weight:600}",
    ".gllook-leg .glleg-nm{color:#332047}",
