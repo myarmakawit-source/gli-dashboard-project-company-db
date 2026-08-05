@@ -17868,7 +17868,7 @@ function _fsCFCompute(tb,t){
 /* v10.100: Cash Flow · Indirect rendered in the SAME clean statement template as Direct (.fsiss-cfd),
    with sign-boxed amounts, line→codes→GL drill dock, and the balance-sheet cash reconciliation bridge. */
 function _fsCfIndCleanHTML(cur,pri,hasPri){
-  _fsIssCSS(); try{_fsIssDrillCSS();}catch(e){} _fsCfdCleanCSS();
+  _fsIssCSS(); try{_fsIssDrillCSS();}catch(e){} _fsCfdCleanCSS(); try{if(typeof _fsWpCSS==='function')_fsWpCSS();}catch(e){}/* v10.106: ให้หัวข้อ WP FS มีสไตล์เสมอ (ไม่ต้องเข้า Working Papers ก่อน) */
   var pc=hasPri?1:0, ncol=1+pc;
   var meta=(typeof GLI_FS2025!=='undefined'&&GLI_FS2025&&GLI_FS2025.meta)||{};
   var co=meta.coTh||'บริษัท แกรนด์ไลน์ อินโนเวชั่น จำกัด';
@@ -18338,7 +18338,7 @@ function _cfAmtHTML(v){ var n=_fsIssN(v); var r=Math.round(+v||0);
   if(v==null||r===0)return '<span class="cfamt zero">'+n+'</span>';
   return '<span class="cfamt '+(r>0?'pos':'neg')+'">'+n+'</span>'; }
 function _fsCfdCleanHTML(R){
-  _fsIssCSS(); try{_fsIssDrillCSS();}catch(e){} _fsCfdCleanCSS();
+  _fsIssCSS(); try{_fsIssDrillCSS();}catch(e){} _fsCfdCleanCSS(); try{if(typeof _fsWpCSS==='function')_fsWpCSS();}catch(e){}/* v10.106: ให้หัวข้อ WP FS มีสไตล์เสมอ (ไม่ต้องเข้า Working Papers ก่อน) */
   var pc=R.hasPrev?1:0, ncol=1+pc;
   var meta=(typeof GLI_FS2025!=='undefined'&&GLI_FS2025&&GLI_FS2025.meta)||{};
   var co=meta.coTh||'บริษัท แกรนด์ไลน์ อินโนเวชั่น จำกัด';
@@ -18409,6 +18409,7 @@ function _fsRenderCFD(){
     var _extras='<details class="cfd-extras"><summary>▸ รายละเอียดเพิ่มเติม · กระแสเงินสดรายโครงการ · กลุ่มบัญชีเงินสด</summary>'+_cfdProjSummaryHtml()+_cg+'</details>';
     return '<div class="fsstmtwrap fscfd-wrap">'+
       '<div class="fswp-bar"><span class="fswp-bt">📘 WP FS · GLI '+((typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):'')+'<small>งบกระแสเงินสด · วิธีทางตรง · คำนวณสดจาก GL (voucher-by-voucher)</small></span><span class="fswp-sp"></span>'+
+        '<button type="button" id="cfdExportAll" class="fswp-btn cfdxall" title="ส่งออก Excel รวมทุกบรรทัดในงบกระแสเงินสด — แต่ละบรรทัดมี Grouping (บัญชี · คู่บัญชีเงินสด/ธนาคาร · %) + GL กระทบยอด (RE/PV บวกแล้วตรงยอด)">⤓ Excel · ทุกบรรทัด</button>'+
         '<button type="button" id="cfdLnEditToggle" class="fswp-btn" title="แก้ไข/เพิ่มบรรทัดงบกระแสเงินสด — คลิกที่ชื่อบรรทัดเพื่อพิมพ์แก้ · ➕ เพิ่มบรรทัดใหม่ในแต่ละกิจกรรม">✏️ แก้ไข / เพิ่มบรรทัด</button></div>'+
       _cln+_tieC+_extras+'</div>';
   }
@@ -19761,6 +19762,7 @@ function _fsBind(w){ if(w._b)return; w._b=1;
     var lmadd=t.closest?t.closest('.fslmgr-addb'):null; if(lmadd){var cat=lmadd.getAttribute('data-cat');var box=lmadd.closest('.fslmgr-add');var thi=box.querySelector('.fslmgr-th'),eni=box.querySelector('.fslmgr-en'),cu=box.querySelector('.fslmgr-curchk');var thv=thi?thi.value.trim():'';if(!thv){if(thi)thi.focus();return;}var key=_fsMapAddCustom(cat,thv,eni?eni.value:'',cu?cu.checked:false);if(thi)thi.value='';if(eni)eni.value='';if(cu)cu.checked=false;try{_fsCompute();}catch(_e){}_fsRenderBody();_fsLinesMgrRender();try{if(typeof cloudPush==='function')cloudPush();}catch(_c){}return;}
     var lmdel=t.closest?t.closest('.fslmgr-del'):null; if(lmdel){_fsMapDelCustom(lmdel.getAttribute('data-line'));try{_fsCompute();}catch(_e){}_fsRenderBody();_fsLinesMgrRender();try{if(typeof cloudPush==='function')cloudPush();}catch(_c){}return;}
     var fmt=t.closest?t.closest('#fsManEditToggle'):null; if(fmt){_fsManEdit=!_fsManEdit;w.innerHTML=_fsShell();_fsRenderBody();_fsLinesMgrRender();return;}
+    var cea=t.closest?t.closest('#cfdExportAll'):null; if(cea){ try{ _cfdGroupExportAllXlsx(cea); }catch(_ce){ cea.disabled=false; alert('ส่งออก Excel ไม่สำเร็จ: '+((_ce&&_ce.message)||_ce)); } return; }   /* v10.107: ส่งออก Excel รวมทุกบรรทัด */
     var clet=t.closest?t.closest('#cfdLnEditToggle'):null; if(clet){var _ok=_cfdOpenLineKeys();_cfdLnEdit=!_cfdLnEdit;if(typeof _cfdLnAddClose==='function')_cfdLnAddClose();_fsRenderBody();if(!_cfdLnEdit){try{_cfdReopenLines(_ok);}catch(_re){}}return;}   /* v9.126: สลับโหมดแก้ไข/เพิ่มบรรทัดงบกระแสเงินสด (ปุ่มอยู่ในตัวงบ → re-render เฉพาะ body) */
     if(_fsManEdit&&t.closest&&t.closest('[data-fsmanamt],[data-fsmanlbl]'))return; /* v9.98: คลิกในเซลล์แก้งบเอง — ไม่ต้อง drill */
     var ex=t.closest?t.closest('#fsExport'):null; if(ex){_fsExport();return;}
@@ -19869,11 +19871,14 @@ function _fsWpSign(line){ var codes=_fsWpCodesByD()[line.d]||[];
 /* ---------- one-time CSS ---------- */
 function _fsWpCSS(){ if(document.getElementById('fswp-css'))return;
   var css=[
-  ".fswp-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;background:linear-gradient(180deg,#f3faf7,#eaf4f0);border:1px solid #d3e6df;border-radius:12px;margin-bottom:10px}",
-  ".fswp-bt{font-weight:700;color:#0A463E;font-size:15px;display:flex;flex-direction:column;line-height:1.15}",
-  ".fswp-bt small{display:block;margin-top:3px;font-weight:500;color:#5a7a72;font-size:11px;line-height:1.3}",
+  ".fswp-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 15px;background:linear-gradient(135deg,#f1f9f5,#e3f1ea);border:1px solid #cfe5db;border-left:3px solid #0E5C52;border-radius:13px;margin-bottom:12px}",
+  ".fswp-bt{font-weight:800;color:#0A463E;font-size:15px;display:flex;flex-direction:column;line-height:1.2;letter-spacing:.01em;-webkit-font-smoothing:antialiased}",
+  ".fswp-bt small{display:block;margin-top:4px;font-weight:500;color:#5f7c74;font-size:11.5px;line-height:1.45;letter-spacing:.01em}",
   ".fswp-sp{flex:1}",
   ".fswp-btn{border:1px solid #cfe3db;background:#fff;color:#0A463E;border-radius:9px;padding:6px 11px;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px}",
+  ".fswp-btn.cfdxall{background:linear-gradient(135deg,#0E5C52,#0A463E);color:#fff;border-color:#0A463E;font-weight:700}",
+  ".fswp-btn.cfdxall:hover{filter:brightness(1.12)}",
+  ".fswp-btn.cfdxall:disabled{opacity:.65;cursor:default}",
   ".fswp-btn:hover{background:#f0f8f5;border-color:#9ecabd}",
   ".fswp-btn.on{background:#0E5C52;color:#fff;border-color:#0E5C52}",
   ".fswp-seg{display:inline-flex;border:1px solid #cfe3db;border-radius:9px;overflow:hidden}",
@@ -20934,12 +20939,13 @@ function _cfdLibRace(ms){
 function _cfdGroupNum(v){ return (typeof _fsIssN==='function')?_fsIssN(v):(''+Math.round(+v||0)); }
 function _cfdGroupBankStr(bank){ if(!bank||!bank.length)return ''; return bank.map(function(b){ var v=Math.round(+b.amt||0); var s=(v<0?'-':'')+Math.abs(v).toLocaleString('en-US'); return b.code+' '+(b.name||'')+' ('+s+')'; }).join('  ·  '); }
 /* build the export model from the CURRENTLY SELECTED cash-flow-direct line (same source as the dock) */
-function _cfdGroupData(){
-  if(_fsIssSelKind!=='cfd'||!_fsIssSelDcode)return null;
+function _cfdGroupData(keyArg,labelArg){
+  var key=keyArg||_fsIssSelDcode;
+  if(!keyArg && (_fsIssSelKind!=='cfd'||!_fsIssSelDcode))return null;
+  if(!key)return null;
   var R=(typeof _CFD!=='undefined'&&_CFD)||null; if(!R)return null;
-  var key=_fsIssSelDcode;
   var yr=_fsIssYr(), be=((+yr)+543);
-  var lnTh=(typeof _CFD_LN!=='undefined'&&_CFD_LN[key]&&_CFD_LN[key][0])||_fsIssSelLabel||key;
+  var lnTh=(typeof _CFD_LN!=='undefined'&&_CFD_LN[key]&&_CFD_LN[key][0])||labelArg||_fsIssSelLabel||key;
   var lnEn=(typeof _CFD_LN!=='undefined'&&_CFD_LN[key]&&_CFD_LN[key][1])||'';
   var hasPrev=!!R.hasPrev;
   var pledgedOnly=(key==='__cash_pledged');
@@ -21187,6 +21193,129 @@ function _cfdGroupExportXlsxPlain(D,GL,fname){ if(typeof XLSX==='undefined')thro
     if(capped)a2.push(['— แสดงถึง '+cap.toLocaleString('en-US')+' แถวแรก (ข้อมูล Grouping ครบถ้วน) —']);
     var ws2=XLSX.utils.aoa_to_sheet(a2); ws2['!cols']=[{wch:13},{wch:18},{wch:50},{wch:20},{wch:36},{wch:18}]; XLSX.utils.book_append_sheet(wb,ws2,'GL_Detail');
   }
+  XLSX.writeFile(wb,fname);
+}
+/* ============================================================================
+   v10.107: Export ALL cash-flow (direct) lines in ONE workbook — every line's
+   grouping (accounts · cash/bank counter · % · #vouchers) + reconciling GL detail
+   ============================================================================ */
+function _cfdGroupAllData(){
+  var R=(typeof _CFD!=='undefined'&&_CFD)||null; if(!R||!R.lines)return null;
+  var yr=_fsIssYr(), be=((+yr)+543), hasPrev=!!R.hasPrev;
+  var SEC=(typeof _CFD_SEC!=='undefined'&&_CFD_SEC)?_CFD_SEC:[];
+  var sections=[], grand=0;
+  for(var s=0;s<SEC.length;s++){ var sec=SEC[s], keys=sec[3]||[], secLines=[], secTot=0;
+    for(var i=0;i<keys.length;i++){ var key=keys[i], LL=R.lines[key];
+      if(!LL)continue; var codeN=LL.codes?Object.keys(LL.codes).length:0;
+      if(Math.abs(+LL.cur||0)<0.005 && !codeN)continue;
+      var D=null; try{ D=_cfdGroupData(key); }catch(e){}
+      if(!D||D.kind!=='line')continue;
+      var VD=[]; try{ VD=_cfdGroupVchDetail(D); }catch(e){}
+      secLines.push({key:key,D:D,VD:VD}); secTot+=(+D.total||0); }
+    if(secLines.length){ sections.push({code:sec[0],th:sec[1],en:sec[2],lines:secLines,total:secTot}); grand+=secTot; } }
+  return {yr:yr,be:be,hasPrev:hasPrev,sections:sections,grand:grand};
+}
+function _cfdGroupExportAllXlsx(btn){
+  var A=_cfdGroupAllData();
+  if(!A||!A.sections.length){ alert('ยังไม่มีข้อมูลกระแสเงินสด (วิธีทางตรง) — เปิดแท็บ Cash Flow · Direct และโหลด GL ก่อน'); return; }
+  var old=btn?btn.textContent:''; if(btn){ btn.disabled=true; btn.textContent='กำลังเตรียม Excel…'; }
+  function done(){ if(btn){ btn.disabled=false; btn.textContent=old; } }
+  var fname='CashFlowDirect_AllLines_'+A.be+'.xlsx', GLCAP=45000;
+  _cfdLibRace(2500).then(function(ExcelJS){
+    var NF='#,##0.00;[Red]-#,##0.00', HLY='FFFFF3C4', HLS='FFFCE24A', actClr={OP:'FF0E7A5F',INV:'FF1D5FAE',FIN:'FFB0791C'};
+    var wb=new ExcelJS.Workbook(); wb.creator='Grandline · GLI';
+    function st(c,o){ o=o||{}; c.font={name:o.font||'Tahoma',size:o.sz||10,bold:!!o.b,color:{argb:o.fc||CLR.ink}};
+      if(o.fill)c.fill={type:'pattern',pattern:'solid',fgColor:{argb:o.fill}};
+      c.alignment={vertical:'middle',horizontal:o.al||'left',wrapText:!!o.wrap}; if(o.nf)c.numFmt=o.nf;
+      if(o.bd)c.border={top:{style:'thin',color:{argb:CLR.line}},left:{style:'thin',color:{argb:CLR.line}},bottom:{style:'thin',color:{argb:CLR.line}},right:{style:'thin',color:{argb:CLR.line}}}; }
+    /* ===== Sheet 1: grouping · every line ===== */
+    var S=wb.addWorksheet('สรุปทุกบรรทัด',{views:[{showGridLines:false}]});
+    S.columns=[{width:3},{width:15},{width:40},{width:18},{width:9},{width:50},{width:8},{width:3}]; var Le='G';
+    var q=2;
+    S.mergeCells('B'+q+':'+Le+q); st(S.getCell(q,2),{sz:15,b:true,fc:CLR.white,fill:CLR.brand,al:'center'}); S.getCell(q,2).value='งบกระแสเงินสด (วิธีทางตรง) · สรุปทุกบรรทัด'; S.getRow(q).height=28; q++;
+    S.mergeCells('B'+q+':'+Le+q); st(S.getCell(q,2),{sz:10,fc:CLR.white,fill:CLR.brandD,al:'center'}); S.getCell(q,2).value='Grandline Innovation · ปีบัญชี '+A.be+' ('+A.yr+') · เงินสดสุทธิจากกิจกรรม '+_cfdGroupNum(A.grand); S.getRow(q).height=18; q+=2;
+    var hh=[['รหัสบัญชี','left'],['ชื่อบัญชี','left'],['ยอด (เงินสด) '+A.be,'right'],['%','right'],['คู่บัญชีเงินสด/ธนาคาร (Voucher วิ่งเข้าจริง)','left'],['ใบ','right']];
+    for(var hi=0;hi<hh.length;hi++){ var hc=S.getCell(q,hi+2); st(hc,{sz:9,b:true,fc:CLR.white,fill:CLR.brandD,al:hh[hi][1],bd:1,wrap:true}); hc.value=hh[hi][0]; } S.getRow(q).height=24; q++;
+    S.views=[{showGridLines:false,state:'frozen',ySplit:q-1}];
+    for(var s=0;s<A.sections.length;s++){ var sec=A.sections[s];
+      S.mergeCells('B'+q+':C'+q); st(S.getCell(q,2),{sz:12,b:true,fc:CLR.white,fill:(actClr[sec.code]||CLR.brand)}); S.getCell(q,2).value='▍ '+sec.th;
+      st(S.getCell(q,4),{sz:12,b:true,al:'right',nf:NF,fc:CLR.white,fill:(actClr[sec.code]||CLR.brand)}); S.getCell(q,4).value=sec.total;
+      st(S.getCell(q,5),{fill:(actClr[sec.code]||CLR.brand)}); st(S.getCell(q,6),{fill:(actClr[sec.code]||CLR.brand)}); st(S.getCell(q,7),{fill:(actClr[sec.code]||CLR.brand)}); S.getRow(q).height=20; q++;
+      for(var li=0;li<sec.lines.length;li++){ var D=sec.lines[li].D, rows=D.rows||[];
+        S.mergeCells('B'+q+':C'+q); st(S.getCell(q,2),{sz:11,b:true,fill:CLR.lgreen,fc:CLR.brandD}); S.getCell(q,2).value='● '+D.lnTh;
+        st(S.getCell(q,4),{sz:11,b:true,al:'right',nf:NF,fill:HLS,fc:D.total<0?'FFB42318':'FF116A3E'}); S.getCell(q,4).value=D.total;
+        st(S.getCell(q,5),{fill:CLR.lgreen}); st(S.getCell(q,6),{fill:CLR.lgreen}); S.getCell(q,6).value=rows.length+' บัญชี'; st(S.getCell(q,7),{fill:CLR.lgreen}); S.getRow(q).height=18; q++;
+        for(var r=0;r<rows.length;r++){ var x=rows[r], zb=(r%2===1)?CLR.zebra:null, sh=(Math.abs(D.total)>0.005?(x.a/D.total):0);
+          st(S.getCell(q,2),{sz:9,b:true,bd:1,fill:zb,fc:CLR.brandD}); S.getCell(q,2).value=x.c;
+          st(S.getCell(q,3),{sz:9,bd:1,fill:zb}); S.getCell(q,3).value=x.name;
+          st(S.getCell(q,4),{sz:10,b:true,al:'right',nf:NF,bd:1,fill:HLY,fc:x.a<0?'FFB42318':'FF0A463E'}); S.getCell(q,4).value=x.a;
+          st(S.getCell(q,5),{sz:9,al:'right',nf:'0.0%',bd:1,fill:zb,fc:'FF5A7A72'}); S.getCell(q,5).value=sh;
+          st(S.getCell(q,6),{sz:9,bd:1,fill:zb,fc:'FF0A6B54',wrap:true}); S.getCell(q,6).value=_cfdGroupBankStr(x.bank);
+          st(S.getCell(q,7),{sz:9,al:'right',bd:1,fill:zb,fc:'FF8C8676'}); S.getCell(q,7).value=x.nvch; q++; }
+      }
+      q++;
+    }
+    st(S.getCell(q,2),{sz:12,b:true,fc:CLR.white,fill:CLR.brand}); S.getCell(q,2).value='เงินสดสุทธิจากกิจกรรม (ทุกบรรทัด)';
+    S.mergeCells('B'+q+':C'+q); st(S.getCell(q,4),{sz:12,b:true,al:'right',nf:NF,fc:CLR.white,fill:CLR.brand}); S.getCell(q,4).value=A.grand; S.getRow(q).height=22;
+    /* ===== Sheet 2: reconciling GL · every line ===== */
+    var G=wb.addWorksheet('รายละเอียด GL',{views:[{showGridLines:false}]});
+    G.columns=[{width:3},{width:13},{width:18},{width:46},{width:18},{width:34},{width:18},{width:3}]; var GLe='G';
+    var gq=2;
+    G.mergeCells('B'+gq+':'+GLe+gq); st(G.getCell(gq,2),{sz:14,b:true,fc:CLR.white,fill:CLR.brand,al:'center'}); G.getCell(gq,2).value='รายละเอียดกระทบยอดเงินสด · ทุกบรรทัด'; G.getRow(gq).height=26; gq++;
+    G.mergeCells('B'+gq+':'+GLe+gq); st(G.getCell(gq,2),{sz:9,fc:'FF5A7A72',al:'center'}); G.getCell(gq,2).value='ปีบัญชี '+A.be+' ('+A.yr+') · แต่ละบัญชีบวกใบสำคัญ (RE/PV) แล้ว = ยอดในชีตสรุป'; G.getRow(gq).height=16; gq+=2;
+    var glHdr=['วันที่','เลขที่ใบสำคัญ','ที่มา / คำอธิบาย','ยอดที่จำแนก (เงินสด)','💵 ธนาคาร/เงินสดที่เคลื่อนไหว','สะสม'];
+    var gw=0, capped=false;
+    for(var s2=0;s2<A.sections.length&&!capped;s2++){ var sec2=A.sections[s2];
+      G.mergeCells('B'+gq+':'+GLe+gq); st(G.getCell(gq,2),{sz:12,b:true,fc:CLR.white,fill:(actClr[sec2.code]||CLR.brand)}); G.getCell(gq,2).value='▍ '+sec2.th; G.getRow(gq).height=20; gq++;
+      for(var li2=0;li2<sec2.lines.length&&!capped;li2++){ var Ln=sec2.lines[li2], VD=Ln.VD||[];
+        G.mergeCells('B'+gq+':'+GLe+gq); st(G.getCell(gq,2),{sz:11,b:true,fc:CLR.white,fill:CLR.brandD}); G.getCell(gq,2).value='● '+Ln.D.lnTh+'   ·   '+_cfdGroupNum(Ln.D.total); G.getRow(gq).height=18; gq++;
+        for(var bi=0;bi<VD.length&&!capped;bi++){ var blk=VD[bi], rws=blk.rows||[];
+          st(G.getCell(gq,2),{sz:10,b:true,fill:CLR.lgold,fc:'FF7A4E00'}); G.getCell(gq,2).value='📂 '+blk.code+'  '+blk.name; G.mergeCells('B'+gq+':D'+gq);
+          st(G.getCell(gq,5),{sz:10,b:true,al:'right',nf:NF,fill:CLR.lgold,fc:'FF7A4E00'}); G.getCell(gq,5).value=blk.amt; st(G.getCell(gq,6),{fill:CLR.lgold}); st(G.getCell(gq,7),{fill:CLR.lgold}); gq++;
+          for(var ci=0;ci<glHdr.length;ci++){ var ghc=G.getCell(gq,ci+2); st(ghc,{sz:8,b:true,fc:'FF5A7A72',fill:CLR.zebra,al:(ci===3||ci===5?'right':'left'),bd:1}); ghc.value=glHdr[ci]; } gq++;
+          if(!rws.length){ G.mergeCells('B'+gq+':'+GLe+gq); st(G.getCell(gq,2),{sz:9,fc:'FF8C8676',al:'center',bd:1}); G.getCell(gq,2).value='— ไม่มีใบสำคัญเงินสด —'; gq+=2; continue; }
+          var run=0, zb=false;
+          for(var t=0;t<rws.length;t++){ if(gw>=GLCAP){ capped=true; break; } var rr=rws[t]; run+=rr.amt; zb=!zb; var zbf=zb?'FFFFFFFF':CLR.zebra;
+            st(G.getCell(gq,2),{sz:9,fill:zbf}); G.getCell(gq,2).value=(typeof _fsIssDate==='function')?_fsIssDate(rr.date):rr.date;
+            st(G.getCell(gq,3),{sz:9,b:true,fill:zbf,fc:'FF0A6B54'}); G.getCell(gq,3).value=rr.v;
+            st(G.getCell(gq,4),{sz:9,fill:zbf,fc:'FF5A5040',wrap:true}); G.getCell(gq,4).value=(rr.trace||rr.desc||'');
+            st(G.getCell(gq,5),{sz:10,b:true,al:'right',nf:NF,fill:HLY,fc:rr.amt<0?'FFB42318':'FF0A463E'}); G.getCell(gq,5).value=rr.amt;
+            st(G.getCell(gq,6),{sz:9,fill:zbf,fc:'FF0A6B54'}); G.getCell(gq,6).value=_cfdGroupBankStr2(rr.bank);
+            st(G.getCell(gq,7),{sz:9,al:'right',nf:NF,fill:zbf,fc:'FF6B4A00'}); G.getCell(gq,7).value=run; gq++; gw++; }
+          st(G.getCell(gq,2),{sz:9,b:true,fill:HLS,fc:'FF5C4200'}); G.getCell(gq,2).value='รวมบัญชี '+blk.code+' ('+rws.length+' ใบ)'; G.mergeCells('B'+gq+':D'+gq);
+          st(G.getCell(gq,5),{sz:10,b:true,al:'right',nf:NF,fill:HLS,fc:'FF7A4E00',bd:1}); G.getCell(gq,5).value=blk.amt; st(G.getCell(gq,6),{fill:HLS}); st(G.getCell(gq,7),{fill:HLS}); gq++; }
+        gq++;
+      }
+    }
+    if(capped){ G.mergeCells('B'+gq+':'+GLe+gq); st(G.getCell(gq,2),{sz:9,b:true,fc:'FFB42318',fill:CLR.lred,al:'center'}); G.getCell(gq,2).value='— แสดงรายละเอียด GL ถึง '+GLCAP.toLocaleString('en-US')+' แถวแรก (สรุปในชีตแรกครบทุกบรรทัด) —'; }
+    G.views=[{showGridLines:false}];
+    wb.xlsx.writeBuffer().then(function(buf){ _cfdDL(buf,fname); done(); }).catch(function(e){ done(); alert('สร้าง Excel ไม่สำเร็จ: '+((e&&e.message)||e)); });
+  }).catch(function(){ try{ _cfdGroupExportAllXlsxPlain(A,fname); done(); }catch(e){ done(); alert('ส่งออก Excel ไม่สำเร็จ: '+((e&&e.message)||e)); } });
+}
+function _cfdGroupExportAllXlsxPlain(A,fname){ if(typeof XLSX==='undefined')throw new Error('ไม่มีไลบรารี Excel');
+  var wb=XLSX.utils.book_new(), a1=[['งบกระแสเงินสด (วิธีทางตรง) · สรุปทุกบรรทัด · ปีบัญชี '+A.be],[]];
+  a1.push(['รหัสบัญชี','ชื่อบัญชี','ยอด (เงินสด)','สัดส่วน','คู่บัญชีเงินสด/ธนาคาร','ใบ']);
+  for(var s=0;s<A.sections.length;s++){ var sec=A.sections[s];
+    a1.push(['▍ '+sec.th,'',sec.total,'','','']);
+    for(var li=0;li<sec.lines.length;li++){ var D=sec.lines[li].D, rows=D.rows||[];
+      a1.push(['● '+D.lnTh,'',D.total,'',rows.length+' บัญชี','']);
+      for(var r=0;r<rows.length;r++){ var x=rows[r], sh=(Math.abs(D.total)>0.005?(x.a/D.total):0);
+        a1.push([x.c,x.name,x.a,sh,_cfdGroupBankStr(x.bank),x.nvch]); } }
+    a1.push([]); }
+  a1.push(['เงินสดสุทธิจากกิจกรรม (ทุกบรรทัด)','',A.grand,'','','']);
+  var ws1=XLSX.utils.aoa_to_sheet(a1); ws1['!cols']=[{wch:40},{wch:38},{wch:18},{wch:10},{wch:50},{wch:9}]; XLSX.utils.book_append_sheet(wb,ws1,'สรุปทุกบรรทัด');
+  var a2=[['รายละเอียดกระทบยอดเงินสด · ทุกบรรทัด · ปีบัญชี '+A.be],[]], gw=0, cap=45000, capped=false;
+  for(var s2=0;s2<A.sections.length&&!capped;s2++){ var sec2=A.sections[s2]; a2.push(['▍ '+sec2.th]);
+    for(var li2=0;li2<sec2.lines.length&&!capped;li2++){ var Ln=sec2.lines[li2], VD=Ln.VD||[]; a2.push(['● '+Ln.D.lnTh+' · '+_cfdGroupNum(Ln.D.total)]);
+      for(var bi=0;bi<VD.length&&!capped;bi++){ var blk=VD[bi], rws=blk.rows||[];
+        a2.push(['📂 '+blk.code+'  '+blk.name+' · '+_cfdGroupNum(blk.amt)]);
+        a2.push(['วันที่','เลขที่ใบสำคัญ','ที่มา / คำอธิบาย','ยอดที่จำแนก (เงินสด)','💵 ธนาคาร/เงินสด','สะสม']);
+        if(!rws.length){ a2.push(['— ไม่มีใบสำคัญเงินสด —']); continue; }
+        var run=0; for(var t=0;t<rws.length;t++){ if(gw>=cap){ capped=true; break; } var rr=rws[t]; run+=rr.amt;
+          a2.push([(typeof _fsIssDate==='function')?_fsIssDate(rr.date):rr.date,rr.v,(rr.trace||rr.desc||''),rr.amt,_cfdGroupBankStr2(rr.bank),run]); gw++; }
+        a2.push(['รวมบัญชี '+blk.code,'','',blk.amt,'','']); }
+      a2.push([]); } }
+  var ws2=XLSX.utils.aoa_to_sheet(a2); ws2['!cols']=[{wch:13},{wch:18},{wch:50},{wch:20},{wch:36},{wch:18}]; XLSX.utils.book_append_sheet(wb,ws2,'GL_Detail');
   XLSX.writeFile(wb,fname);
 }
 function _fsCfdDrill(key,label,el){ if(!(typeof _CFD!=='undefined'&&_CFD))return; _fsIssCSS(); _fsIssDrillCSS();
