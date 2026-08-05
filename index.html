@@ -20848,6 +20848,17 @@ function _fsCfdCodeGLHTML(code){
    ที่มาของตัวเลข: กระแสเงินสดวิธีทางตรงคำนวณจาก "ขาเงินสด/ธนาคาร/เงินสดย่อย" ที่
    เคลื่อนไหวจริงในแต่ละใบสำคัญ (Voucher · รับ RE / จ่าย PV) แล้วจำแนกตามคู่บัญชีอีกด้าน
    ============================================================================ */
+/* v10.102: ให้ ExcelJS โอกาสโหลดสั้นๆ — ถ้าไม่ทันใน ms ให้ reject เร็วเพื่อตกไปใช้ SheetJS (ฝังในตัว)
+   ทันที ไม่ปล่อยให้ผู้ใช้รอ CDN ที่อาจถูกบล็อกจนปุ่มค้าง "กำลังเตรียม Excel…" */
+function _cfdLibRace(ms){
+  if(typeof window!=='undefined'&&window.ExcelJS)return Promise.resolve(window.ExcelJS);
+  return new Promise(function(res,rej){
+    var settled=false;
+    setTimeout(function(){ if(!settled){ settled=true; rej(new Error('excel-timeout')); } },ms||2500);
+    try{ loadExcelJS().then(function(x){ if(!settled){ settled=true; res(x); } },function(e){ if(!settled){ settled=true; rej(e); } }); }
+    catch(e){ if(!settled){ settled=true; rej(e); } }
+  });
+}
 function _cfdGroupNum(v){ return (typeof _fsIssN==='function')?_fsIssN(v):(''+Math.round(+v||0)); }
 function _cfdGroupBankStr(bank){ if(!bank||!bank.length)return ''; return bank.map(function(b){ var v=Math.round(+b.amt||0); var s=(v<0?'-':'')+Math.abs(v).toLocaleString('en-US'); return b.code+' '+(b.name||'')+' ('+s+')'; }).join('  ·  '); }
 /* build the export model from the CURRENTLY SELECTED cash-flow-direct line (same source as the dock) */
@@ -20909,7 +20920,7 @@ function _cfdGroupExportXlsx(btn){
   var safe=(''+D.lnTh).replace(/[^0-9A-Za-z฀-๿]+/g,'_').replace(/^_+|_+$/g,'').slice(0,44)||'group';
   var fname='CashFlowDirect_Group_'+safe+'_'+D.be+'.xlsx';
   var GL=_cfdGroupGL(D), GLCAP=40000;
-  loadExcelJS().then(function(ExcelJS){
+  _cfdLibRace(2500).then(function(ExcelJS){
     var NF='#,##0.00;[Red]-#,##0.00';
     var wb=new ExcelJS.Workbook(); wb.creator='Grandline · GLI';
     function st(c,o){ o=o||{}; c.font={name:o.font||'Tahoma',size:o.sz||10,bold:!!o.b,color:{argb:o.fc||CLR.ink}};
@@ -23245,11 +23256,17 @@ function loadExcelJS(){
   if(window.ExcelJS)return Promise.resolve(window.ExcelJS);
   if(_exljsP)return _exljsP;
   _exljsP=new Promise(function(res,rej){
+    /* v10.102: กัน "ค้างไม่จบ" — เมื่อ CDN ถูกบล็อก/เน็ตช้า script tag อาจไม่ยิงทั้ง onload/onerror
+       ทำให้ปุ่มค้างที่ "กำลังเตรียม Excel…" ตลอด · ใส่ timeout + reset _exljsP เพื่อให้ผู้เรียก .catch()
+       ตกไปใช้ตัวสำรอง (SheetJS ฝังในตัว) ได้ทันที และครั้งถัดไปลองใหม่/ใช้ ExcelJS ที่โหลดมาช้าได้ */
+    var settled=false;
+    function fail(msg){ if(settled)return; settled=true; _exljsP=null; rej(new Error(msg||'load failed')); }
     var s=document.createElement('script');
     s.src='https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
-    s.onload=function(){window.ExcelJS?res(window.ExcelJS):rej(new Error('ExcelJS not found'));};
-    s.onerror=function(){rej(new Error('load failed'));};
+    s.onload=function(){ if(settled)return; if(window.ExcelJS){ settled=true; res(window.ExcelJS); } else { fail('ExcelJS not found'); } };
+    s.onerror=function(){ fail('load failed'); };
     (document.head||document.body).appendChild(s);
+    setTimeout(function(){ fail('timeout'); },6000);
   });
   return _exljsP;
 }
