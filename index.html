@@ -20690,10 +20690,11 @@ function _fsIssPanelPos(panel){ panel=panel||document.getElementById('fsIssPanel
   panel.style.top=top+'px';
   panel.style.height=Math.max(180,(window.innerHeight-top-12))+'px'; panel.style.maxHeight='';
 }
+function _fsIssPanelChange(e){ var t=e.target; if(t&&t.classList&&t.classList.contains('cfsum-rmk')){ try{ _cfdRmkSet(t.getAttribute('data-rk'),t.value); }catch(err){} } }
 function _fsIssPanelEnsure(){
   var panel=document.getElementById('fsIssPanel');
   if(!panel){ panel=document.createElement('div'); panel.id='fsIssPanel'; panel.className='fsiss-panel'; (document.getElementById('page-fs')||document.body).appendChild(panel);
-    panel.addEventListener('click',_fsIssPanelClick); }
+    panel.addEventListener('click',_fsIssPanelClick); panel.addEventListener('change',_fsIssPanelChange); }
   _fsIssPanelPos(panel);
   if(!_fsIssPanelScroll){ _fsIssPanelScroll=function(){ if(_fsIssPanelRaf)return; _fsIssPanelRaf=requestAnimationFrame(function(){ _fsIssPanelRaf=0; var p=document.getElementById('fsIssPanel'); if(p)_fsIssPanelPos(p); }); };
     window.addEventListener('scroll',_fsIssPanelScroll,true); window.addEventListener('resize',_fsIssPanelScroll); }
@@ -20718,6 +20719,12 @@ function _fsIssRenderCodes(dcode,label){ var p=_fsIssPanelEnsure(); p.classList.
 function _fsIssPanelClick(e){ var t=e.target;
   if(t.closest&&t.closest('.fsiss-px')){ _fsIssDrillClose(); return; }
   if(t.closest&&t.closest('.fsiss-xls')){ var _xb=t.closest('.fsiss-xls'); try{ _cfdGroupExportXlsx(_xb); }catch(err){ if(_xb){_xb.disabled=false;} alert('ส่งออก Excel ไม่สำเร็จ: '+((err&&err.message)||err)); } return; }
+  if(t.closest&&t.closest('.cfsum-rmk')) return; /* editing a Remark — never toggle the row */
+  var sr=t.closest&&t.closest('.cfsum-row'); if(sr){ var sdet=sr.nextElementSibling;
+    if(sdet&&sdet.classList&&sdet.classList.contains('cfsum-det')){
+      if(sdet.hidden){ if(!sdet._f){ try{ var scell=sdet.querySelector('td'); if(scell)scell.innerHTML=_fsCfdVchJournalHTML(sr.getAttribute('data-vch'),sr.getAttribute('data-code')); }catch(err2){} sdet._f=1; } sdet.hidden=false; sr.classList.add('open'); }
+      else{ sdet.hidden=true; sr.classList.remove('open'); } }
+    return; }
   var cr=t.closest&&t.closest('.fsiss-crow'); if(cr){ var code=cr.getAttribute('data-isscode'),det=cr.querySelector('.cc-det'),ex=cr.querySelector('.cc-ex'); if(!det)return;
     if(det.hidden){ if(!det._f){
         var _isCash=(cr.getAttribute('data-cash')==='1'), _isCfd=(_fsIssSelKind==='cfd');
@@ -20883,6 +20890,33 @@ function _fsCfdCashGLHTML(code){
 /* v10.108: voucher-centric drill — each cash voucher (RE/PV) shows ① ขาตั้งหนี้ (ที่มา) +
    ② ขาล้างออก (เงินสด/ธนาคารเคลื่อนไหวจริง); ถ้าจ่าย/รับเลย (ไม่ผ่านตั้งหนี้) โชว์ขาเดียว
    ผลรวมของทุกใบ = ยอดที่จำแนกเข้าบัญชีนี้ (ตรงกับ Grouping/Excel) */
+/* v10.110: on-screen account drill — per-voucher SUMMARY (date · voucher · source · classified cash ·
+   bank · running · Remark). Each row expands to its Debit/Credit journal (ขาตั้งหนี้ + ขาล้างออก).
+   Remark is an editable note kept per device (localStorage). */
+var _CFD_RMK=null;
+function _cfdRmkLoad(){ if(_CFD_RMK)return _CFD_RMK; _CFD_RMK={}; try{ var s=localStorage.getItem('gli_cfd_remarks'); if(s){ var o=JSON.parse(s); if(o&&typeof o==='object')_CFD_RMK=o; } }catch(e){ _CFD_RMK={}; } return _CFD_RMK; }
+function _cfdRmkGet(k){ var m=_cfdRmkLoad(); return (m&&m[k])||''; }
+function _cfdRmkSet(k,v){ if(!k)return; var m=_cfdRmkLoad(); v=(''+(v==null?'':v)); if(v.trim())m[k]=v; else delete m[k]; try{ localStorage.setItem('gli_cfd_remarks',JSON.stringify(m)); }catch(e){} }
+function _fsCfdVchJournalHTML(v,ownCode){
+  var V=(typeof _cfdVIdx==='function')?_cfdVIdx():{};
+  var apMap=(typeof _AP_PVMAP!=='undefined'&&_AP_PVMAP)?_AP_PVMAP:{};
+  var arMap=(typeof _cfdArMap==='function')?_cfdArMap():{};
+  function amt(x){ return (Math.abs(x)>0.005)?_fsIssN(x):'<span class="gl-z">-</span>'; }
+  function legRow(cd,name,dr,cr,cash,own){ return '<div class="glrow glleg'+(own?' glleg-own':'')+(cash?' gllook-cashleg':'')+'">'+
+    '<span class="glleg-ac"><span class="glleg-code">'+_fsWpEsc(cd)+'</span><span class="glleg-nm">'+_fsWpEsc(name||'')+(cash?' 💵':'')+'</span></span>'+
+    '<span class="gl-dr">'+amt(dr)+'</span><span class="gl-cr">'+amt(cr)+'</span><span class="gl-bal"></span></div>'; }
+  function vLegs(vv,own){ var rows=V[vv]||[],out=''; for(var j=0;j<rows.length;j++){ var r=rows[j]; var dr=+r[16]||0,cr=+r[17]||0; if(Math.abs(dr)<0.005&&Math.abs(cr)<0.005)continue;
+    var rc=(''+(r[0]||'')).trim(),cash=false; try{ cash=(typeof _cfdCash==='function')&&_cfdCash(rc); }catch(e){}
+    out+=legRow(rc,r[1]||'',dr,cr,cash,(own&&rc===own)); } return out; }
+  var viaAR=(arMap[v]&&arMap[v].length), viaAP=(apMap[v]&&apMap[v].length);
+  var stands=[]; if(viaAP)stands=stands.concat(apMap[v]); if(viaAR)stands=stands.concat(arMap[v]);
+  var direct=!stands.length;
+  var h='<div class="glwrap glwrap-in"><div class="glcols"><span class="glleg-ac">บัญชี · Account</span><span class="gl-dr">เดบิต</span><span class="gl-cr">เครดิต</span><span class="gl-bal"></span></div>';
+  if(!direct){ var seen={},sn=0; for(var s=0;s<stands.length&&sn<8;s++){ var stv=stands[s]; if(!stv||seen[stv])continue; seen[stv]=1; if(!(V[stv]&&V[stv].length))continue; sn++;
+    h+='<div class="gllook"><div class="gllook-h">① ขาตั้งหนี้ (ที่มาของเอกสาร) · '+_fsWpEsc(stv)+'</div>'+vLegs(stv,ownCode)+'</div>'; } }
+  h+='<div class="gllook gllook-cash"><div class="gllook-h">'+(direct?'ขาจ่าย/รับ · ':'② ขาล้างออก · ')+_fsWpEsc(v)+' — เงินสด/ธนาคารที่เคลื่อนไหวจริง</div>'+vLegs(v,null)+'</div>';
+  h+='</div>'; return h;
+}
 function _fsCfdCodeGLHTML(code){
   if(!(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length)) return '<div class="fsiss-glempty">— ยังไม่ได้โหลด GL (เปิดแท็บ Database เพื่อโหลด General Ledger) —</div>';
   try{ if(typeof _fsApEnsure==='function')_fsApEnsure(); }catch(e){}
@@ -20893,32 +20927,28 @@ function _fsCfdCodeGLHTML(code){
   var vch=(codeObj&&codeObj.vch)||null;
   if(!vch||!Object.keys(vch).length) return _fsCfdCodeGLHTML_accrual(code);
   var V=(typeof _cfdVIdx==='function')?_cfdVIdx():{};
-  var apMap=(typeof _AP_PVMAP!=='undefined'&&_AP_PVMAP)?_AP_PVMAP:{};
-  var arMap=(typeof _cfdArMap==='function')?_cfdArMap():{};
-  function amt(v){ return (Math.abs(v)>0.005)?_fsIssN(v):'<span class="gl-z">-</span>'; }
-  function vdate(v){ var rows=V[v]||[]; for(var i=0;i<rows.length;i++){ if(rows[i][3])return ''+rows[i][3]; } return ''; }
-  function legRow(cd,name,dr,cr,cash,own){ return '<div class="glrow glleg'+(own?' glleg-own':'')+(cash?' gllook-cashleg':'')+'">'+
-    '<span class="glleg-ac"><span class="glleg-code">'+_fsWpEsc(cd)+'</span><span class="glleg-nm">'+_fsWpEsc(name||'')+(cash?' 💵':'')+'</span></span>'+
-    '<span class="gl-dr">'+amt(dr)+'</span><span class="gl-cr">'+amt(cr)+'</span><span class="gl-bal"></span></div>'; }
-  function vLegs(v,ownCode){ var rows=V[v]||[],out=''; for(var j=0;j<rows.length;j++){ var r=rows[j]; var dr=+r[16]||0,cr=+r[17]||0; if(Math.abs(dr)<0.005&&Math.abs(cr)<0.005)continue;
-    var rc=(''+(r[0]||'')).trim(),cash=false; try{ cash=(typeof _cfdCash==='function')&&_cfdCash(rc); }catch(e){}
-    out+=legRow(rc,r[1]||'',dr,cr,cash,(ownCode&&rc===ownCode)); } return out; }
-  var keys=Object.keys(vch); keys.sort(function(a,b){ var da=vdate(a),db=vdate(b); return da<db?-1:(da>db?1:(a<b?-1:1)); });
-  var h='<div class="glwrap"><div class="glcols"><span class="glleg-ac">บัญชี · Account</span><span class="gl-dr">เดบิต</span><span class="gl-cr">เครดิต</span><span class="gl-bal"></span></div>';
-  var tot=0;
-  for(var k=0;k<keys.length;k++){ var v=keys[k]; var camt=(+vch[v].amt||0), trace=(vch[v].trace||''); tot+=camt;
-    var viaAR=(arMap[v]&&arMap[v].length), viaAP=(apMap[v]&&apMap[v].length);
-    var stands=[]; if(viaAP)stands=stands.concat(apMap[v]); if(viaAR)stands=stands.concat(arMap[v]);
-    var direct=!stands.length, isRcpt=viaAR?true:(viaAP?false:(camt>=0));
-    h+='<div class="glje cfdvj"><div class="glje-hd"><span class="gl-d">'+_fsWpEsc(_fsIssDate(vdate(v)))+'</span>'+
-       '<span class="glje-desc"><b>'+(isRcpt?'รับชำระเงิน (RE)':'จ่ายชำระเงิน (PV)')+(direct?' · จ่าย/รับเลย (ไม่ผ่านตั้งหนี้)':'')+'</b><span class="gl-vch">📄 '+_fsWpEsc(v)+'</span><span class="cfdvj-amt">จำแนกเข้าบัญชีนี้ '+_fsIssN(camt)+'</span></span></div>';
-    if(!direct){ var seen={},sn=0; for(var s=0;s<stands.length&&sn<8;s++){ var st=stands[s]; if(!st||seen[st])continue; seen[st]=1; if(!(V[st]&&V[st].length))continue; sn++;
-      h+='<div class="gllook"><div class="gllook-h">① ขาตั้งหนี้ (ที่มาของเอกสาร) · '+_fsWpEsc(st)+'</div>'+vLegs(st,code)+'</div>'; } }
-    h+='<div class="gllook gllook-cash"><div class="gllook-h">'+(direct?'ขาจ่าย/รับ · ':'② ขาล้างออก · ')+_fsWpEsc(v)+' — เงินสด/ธนาคารที่เคลื่อนไหวจริง</div>'+vLegs(v,null)+'</div>';
-    h+='</div>';
+  function cashLegs(rows){ var a=[]; if(!rows)return a; for(var i=0;i<rows.length;i++){ var r=rows[i]; var c=(''+(r[0]||'')).trim(); var isC=false; try{ isC=(typeof _cfdCash==='function')&&_cfdCash(c); }catch(e){} if(isC){ var mv=(+r[16]||0)-(+r[17]||0); if(Math.abs(mv)>=0.005)a.push({code:c,name:r[1]||'',amt:mv}); } } return a; }
+  var list=Object.keys(vch).map(function(v){ var rows=V[v]||[]; var date=''; for(var i=0;i<rows.length;i++){ if(rows[i][3]){date=''+rows[i][3];break;} }
+    return {v:v,date:date,amt:(+vch[v].amt||0),trace:(vch[v].trace||''),bank:cashLegs(rows)}; });
+  list.sort(function(a,b){ return (a.date<b.date?-1:(a.date>b.date?1:(a.v<b.v?-1:1))); });
+  var run=0,tot=0,h='<div class="cfsum-wrap"><table class="cfsum"><thead><tr>'+
+    '<th class="cfsum-x-h"></th><th>วันที่</th><th>เลขที่ใบสำคัญ</th><th>ที่มา / คำอธิบาย</th>'+
+    '<th class="ra">ยอดที่จำแนก (เงินสด)</th><th>💵 ธนาคาร/เงินสด</th><th class="ra">สะสม</th><th>Remark</th></tr></thead><tbody>';
+  for(var k=0;k<list.length;k++){ var x=list[k]; run+=x.amt; tot+=x.amt; var rk=code+'|'+x.v; var rmk=_cfdRmkGet(rk);
+    h+='<tr class="cfsum-row" data-vch="'+_fsWpEsc(x.v)+'" data-code="'+_fsWpEsc(code)+'">'+
+      '<td class="cfsum-x"><span class="cfsum-caret">▸</span></td>'+
+      '<td class="cfsum-dt">'+_fsWpEsc(_fsIssDate(x.date))+'</td>'+
+      '<td class="cfsum-code">'+_fsWpEsc(x.v)+'</td>'+
+      '<td class="cfsum-tr">'+_fsWpEsc(x.trace||'')+'</td>'+
+      '<td class="ra amt'+(x.amt<0?' neg':'')+'">'+_fsIssN(x.amt)+'</td>'+
+      '<td class="cfsum-bk">'+_fsWpEsc(_cfdGroupBankStr2(x.bank))+'</td>'+
+      '<td class="ra cfsum-run">'+_fsIssN(run)+'</td>'+
+      '<td class="cfsum-rk"><input class="cfsum-rmk" type="text" data-rk="'+_fsWpEsc(rk)+'" value="'+_fsWpEsc(rmk)+'" placeholder="เพิ่มหมายเหตุ…"></td></tr>'+
+      '<tr class="cfsum-det" hidden><td colspan="8"></td></tr>';
   }
-  h+='<div class="glrow glcl"><span class="glleg-ac">รวมยอดที่จำแนกเข้าบัญชี '+_fsWpEsc(code)+' ('+keys.length+' ใบ)</span><span class="gl-dr"></span><span class="gl-cr"></span><span class="gl-bal">'+_fsIssN(tot)+'</span></div>';
-  h+='</div>'; return h;
+  h+='<tr class="cfsum-tot"><td></td><td></td><td></td><td class="cfsum-tr">รวมบัญชี '+_fsWpEsc(code)+' ('+list.length+' ใบ)</td>'+
+    '<td class="ra amt'+(tot<0?' neg':'')+'">'+_fsIssN(tot)+'</td><td>= ยอดในช่อง Grouping</td><td></td><td></td></tr>';
+  h+='</tbody></table></div>'; return h;
 }
 function _fsCfdCodeGLHTML_accrual(code){
   if(!(typeof GLROWS!=='undefined'&&GLROWS&&GLROWS.length)) return '<div class="fsiss-glempty">— ยังไม่ได้โหลด GL (เปิดแท็บ Database เพื่อโหลด General Ledger) —</div>';
@@ -21417,6 +21447,33 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    ".cc-sub{display:block;font-size:10px;font-weight:500;color:#5a7a72;margin-top:1px;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
    ".cc-amt{font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:#3730A3;flex:none}",
    ".cc-ex{color:#4F46E5;font-size:10px;flex:none;width:12px;text-align:center}",
+   /* v10.110: per-voucher summary table (date · voucher · source · classified cash · bank · running · Remark) */
+   ".cfsum-wrap{margin:2px 3px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #e2ece7;border-radius:10px;background:#fff}",
+   ".cfsum{width:100%;border-collapse:collapse;font-size:11.5px;min-width:660px}",
+   ".cfsum thead th{position:sticky;top:0;background:#EAF4F0;color:#0A463E;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.03em;padding:7px 8px;text-align:left;border-bottom:1.5px solid #cfe6db;white-space:nowrap;z-index:1}",
+   ".cfsum th.ra{text-align:right}",
+   ".cfsum td{padding:5px 8px;border-bottom:1px solid #eef4f1;vertical-align:middle;color:#1E2A24}",
+   ".cfsum td.ra{text-align:right;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',ui-monospace,monospace;white-space:nowrap}",
+   ".cfsum td.amt{font-weight:800;color:#0A463E;background:#FBF7E6}",
+   ".cfsum td.amt.neg{color:#C0392B}",
+   ".cfsum td.cfsum-run{color:#6B4A00}",
+   ".cfsum td.cfsum-code{font-family:'IBM Plex Mono',monospace;font-weight:700;color:#0A6B54;white-space:nowrap}",
+   ".cfsum td.cfsum-dt{white-space:nowrap;color:#4A5563}",
+   ".cfsum td.cfsum-tr{color:#5A5040;min-width:150px}",
+   ".cfsum td.cfsum-bk{color:#0A6B54;font-size:10.5px;white-space:nowrap;font-variant-numeric:tabular-nums}",
+   ".cfsum-row{cursor:pointer}",
+   ".cfsum-row:hover>td{background:#F2FAF7}",
+   ".cfsum-row.open>td{background:#E7F3EE}",
+   ".cfsum td.cfsum-x{width:18px;text-align:center;color:#0E5C52}",
+   ".cfsum-caret{display:inline-block;transition:transform .12s}",
+   ".cfsum-row.open .cfsum-caret{transform:rotate(90deg)}",
+   ".cfsum td.cfsum-rk{min-width:130px}",
+   ".cfsum-rmk{width:100%;box-sizing:border-box;border:1px solid #dbe5e0;border-radius:7px;padding:3px 7px;font-family:'Inter',sans-serif;font-size:11px;background:#fff;color:#19222E}",
+   ".cfsum-rmk:focus{outline:none;border-color:#0E5C52;box-shadow:0 0 0 2px rgba(14,92,82,.18)}",
+   ".cfsum-tot td{background:linear-gradient(180deg,#12665B,#0A463E);color:#fff;font-weight:800;border-top:2px solid #4FD6C0;border-bottom:0}",
+   ".cfsum-tot td.amt{background:#0A463E;color:#fff}",
+   ".cfsum-det>td{padding:0 8px 10px;background:#F6FAF8}",
+   ".cfsum .glwrap-in{margin-top:4px}",
    /* v10.104: CF-direct grouping — ยอดรวมตัวใหญ่ · แถบสัดส่วน · คู่บัญชีเงินสด/ธนาคาร · แถวรวม */
    ".cfg-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin:2px 4px 8px;padding:11px 14px;border-radius:12px;background:linear-gradient(135deg,#EAF6F0,#D9F0E6);border:1px solid #cfe6db}",
    ".cfg-hero-l{font-size:11.5px;font-weight:800;color:#0A463E;letter-spacing:.01em}",
