@@ -20678,14 +20678,17 @@ var _CFD_XLS_BTN='<button class="fsiss-xls" type="button" title="ส่งออ
 /* v10.91: lock the dock as a stable half-page pane — pinned under the sticky command bar,
    full remaining height, tracking scroll/resize so it never floats away from the statement. */
 function _fsIssPanelPos(panel){ panel=panel||document.getElementById('fsIssPanel'); if(!panel)return;
-  /* v10.108: lock the drill panel to the viewport centre. Horizontal centring lives in CSS
-     (left:50% + translateX(-50%)); here we only set a vertical position + height that stays
-     put under page scroll, wide horizontally-scrolling tables and browser zoom (Ctrl +/-). */
-  var vh=window.innerHeight||800;
-  var h=Math.min(Math.max(320,vh-72),860);
-  var top=Math.max(12,Math.round((vh-h)/2));
-  panel.style.left=''; panel.style.right=''; panel.style.bottom='';
-  panel.style.top=top+'px'; panel.style.height=h+'px'; panel.style.maxHeight='';
+  /* v10.109: right-half dock. Horizontal size/position is pure CSS (right:10px; width:calc(50vw-20px))
+     and the statement is padded 50vw, so the two halves always tile flush at any browser zoom.
+     Here we only pin the vertical extent — under the sticky command bar down to the viewport bottom. */
+  var fb=document.getElementById('fsBody')||document.getElementById('fsWrap');
+  var top=12;
+  try{ if(fb){ var r=fb.getBoundingClientRect(); top=Math.max(12,Math.round(r.top)); } }catch(e){}
+  try{ var cmd=document.querySelector('#page-fs .fscmd'); if(cmd){ var cr=cmd.getBoundingClientRect(); if(cr.height)top=Math.max(top,Math.round(cr.bottom)+8); } }catch(e){}
+  top=Math.min(top,Math.max(12,window.innerHeight-180));
+  panel.style.left=''; panel.style.right=''; panel.style.bottom=''; panel.style.transform='';
+  panel.style.top=top+'px';
+  panel.style.height=Math.max(180,(window.innerHeight-top-12))+'px'; panel.style.maxHeight='';
 }
 function _fsIssPanelEnsure(){
   var panel=document.getElementById('fsIssPanel');
@@ -21378,10 +21381,14 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    ".fsiss-t tr.issactive td{color:#1E3A8A!important;font-weight:700}",
    ".fsiss-t tr.issactive td.l{box-shadow:inset 3px 0 0 #2563EB}",
    /* persistent RIGHT half-page dock — statement shifts left so it stays fully visible */
-   /* v10.108: centred floating panel — locked to the viewport centre so table width, page scroll & browser zoom never move it */
-   ".fsiss-panel{position:fixed;left:50%;transform:translateX(-50%);width:min(960px,66vw);min-width:380px;background:#fff;border:1px solid #d3e6df;border-radius:16px;box-shadow:0 28px 74px rgba(8,40,34,.34);z-index:100060;display:flex;flex-direction:column;overflow:hidden;animation:fsissIn .16s ease-out}",
-   "@keyframes fsissIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}",
-   "#fsBody.fsiss-drillopen{transition:none}",
+   /* v10.109: right-half dock — statement fills the left 50vw, the drill panel the right 50vw.
+      Panel width and the statement's padding both key off 50vw, so the two halves always tile
+      flush (constant 10px gutter) at any browser zoom (Ctrl +/-). */
+   ".fsiss-panel{position:fixed;right:10px;width:calc(50vw - 20px);min-width:340px;background:#fff;border:1px solid #d3e6df;border-radius:16px;box-shadow:0 20px 55px rgba(8,40,34,.26);z-index:100060;display:flex;flex-direction:column;overflow:hidden;animation:fsissIn .16s ease-out}",
+   "@keyframes fsissIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}",
+   "#fsBody.fsiss-drillopen .fsiss,#fsBody.fsiss-drillopen .fsiss-cap{margin-left:0;margin-right:auto}",
+   "#fsBody.fsiss-drillopen .fsiss-hd{text-align:left}",
+   "#fsBody.fsiss-drillopen{padding-right:50vw;transition:padding .16s ease}",
    /* empty / waiting state */
    ".fsiss-wait{padding:40px 24px;text-align:center;color:#57736c}",
    ".fsiss-wait-ic{font-size:38px;line-height:1;margin-bottom:12px;opacity:.9}",
