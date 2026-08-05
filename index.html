@@ -4195,7 +4195,7 @@ body.apjv-resizing,body.apjv-resizing *{cursor:col-resize!important;user-select:
 #page-pdrepjv .apjv-tbl td.cvch{width:96px}
 #page-pdrepjv .apjv-tbl td.camt,#page-pdrepjv .apjv-tbl th.camt{width:120px;min-width:116px}
 #page-pdrepjv .apjv-tbl td.cidx,#page-pdrepjv .apjv-tbl th.cidx{width:152px;min-width:152px}
-#page-pdrepjv .apjvin{width:100%;box-sizing:border-box;border:1px solid transparent;border-radius:8px;padding:5px 7px;font-family:'Inter',sans-serif;font-size:12px;background:transparent;color:var(--ink,#141C29)}
+#page-pdrepjv .apjvin{width:100%;box-sizing:border-box;border:1px solid transparent;border-radius:8px;padding:5px 7px;font-family:'Inter',sans-serif;font-size:12.5px;line-height:1.35;font-feature-settings:'tnum' 1,'lnum' 1;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background:transparent;color:var(--ink,#141C29)}
 #page-pdrepjv .apjvin::placeholder{color:#BEB8A8}
 #page-pdrepjv .apjvin:hover{background:#FBF8F1}
 #page-pdrepjv .apjvin:focus{outline:none;border-color:#CBB6EE;background:#fff;box-shadow:0 0 0 2px rgba(124,92,214,.14)}
@@ -8090,7 +8090,7 @@ var APJV={}; try{APJV=JSON.parse(localStorage.getItem('gli_apjv')||'{}')||{};}ca
 if(!APJV||typeof APJV!=='object')APJV={};(function(){var _cs=['GLR','GLI','ARG','GLE','GRW','CGL','ECM'];if(Array.isArray(APJV.liab)||Array.isArray(APJV.asset)||Array.isArray(APJV.routine)||Array.isArray(APJV.bank)){if(!APJV.GLR||typeof APJV.GLR!=='object')APJV.GLR={};['liab','asset','routine','bank'].forEach(function(k){if(Array.isArray(APJV[k])){APJV.GLR[k]=(Array.isArray(APJV.GLR[k])?APJV.GLR[k]:[]).concat(APJV[k]);delete APJV[k];}});}for(var _i=0;_i<_cs.length;_i++){var _c=_cs[_i];if(!APJV[_c]||typeof APJV[_c]!=='object')APJV[_c]={};['liab','asset','routine','bank'].forEach(function(k){if(!Array.isArray(APJV[_c][k]))APJV[_c][k]=[];});}})();
 function saveApjv(){try{localStorage.setItem('gli_apjv',JSON.stringify(APJV));}catch(e){} try{if(typeof _tsTouch==='function')_tsTouch('apjv');}catch(e){} try{if(typeof cloudPush==='function')cloudPush();}catch(e){}}
 /* ===== Report AP JV module (pdrepjv) — per-company two-sided ledger: Liability (AP) | Asset ===== */
-var APJV_COS=['GLR','GLI','ARG','GLE','GRW','CGL','ECM'];
+var APJV_COS=['GLR','ARG','GLE','GRW','CGL','ECM'];/* v10.103: ลบ GLI ออกจากรายชื่อบริษัทของ Report AP JV (แท็บ + การส่งออก) */
 var _apjvCo='GLR';try{var _apjvSc=localStorage.getItem('gli_apjv_co');if(_apjvSc&&APJV_COS.indexOf(_apjvSc)>=0)_apjvCo=_apjvSc;}catch(_e){}
 function _apjvCoData(){if(!APJV||typeof APJV!=='object')APJV={};if(!APJV[_apjvCo]||typeof APJV[_apjvCo]!=='object')APJV[_apjvCo]={liab:[],asset:[],routine:[],bank:[]};return APJV[_apjvCo];}
 function _apjvArr(k){var d=_apjvCoData();if(!Array.isArray(d[k]))d[k]=[];return d[k];}
@@ -18267,7 +18267,7 @@ function _fsCfdCleanCSS(){ if(document.getElementById('fsiss-cfd-css'))return;
    ".fsiss-cfd tr.cfinfo td{padding-top:2px}",".fsiss-cfd tr.cfinfo td.l{color:#234}",
    /* v10.100: sign-boxed amounts — positive green, negative red */
    ".fsiss-cfd td.n{padding-top:2px;padding-bottom:2px}",
-   ".fsiss-cfd td.n .cfamt{display:inline-block;padding:1px 8px;border-radius:6px;font-variant-numeric:tabular-nums;min-width:64px;text-align:right}",
+   ".fsiss-cfd td.n .cfamt{display:inline-block;padding:1px 8px;border-radius:6px;font-variant-numeric:tabular-nums;min-width:64px;text-align:right;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13.5px;font-feature-settings:'tnum' 1,'lnum' 1;letter-spacing:.01em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}",
    ".fsiss-cfd td.n .cfamt.pos{background:#e6f6ec;color:#0a7a3f;box-shadow:inset 0 0 0 1px #bce4cb}",
    ".fsiss-cfd td.n .cfamt.neg{background:#fdeceb;color:#c02b22;box-shadow:inset 0 0 0 1px #f2c6c2}",
    ".fsiss-cfd td.n .cfamt.zero{color:#9fb0ab;background:transparent;box-shadow:none;padding-right:8px}",
@@ -19823,7 +19823,7 @@ function _fsWpCSS(){ if(document.getElementById('fswp-css'))return;
   var css=[
   ".fswp-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;background:linear-gradient(180deg,#f3faf7,#eaf4f0);border:1px solid #d3e6df;border-radius:12px;margin-bottom:10px}",
   ".fswp-bt{font-weight:700;color:#0A463E;font-size:15px;display:flex;flex-direction:column;line-height:1.15}",
-  ".fswp-bt small{font-weight:500;color:#5a7a72;font-size:11px}",
+  ".fswp-bt small{display:block;margin-top:3px;font-weight:500;color:#5a7a72;font-size:11px;line-height:1.3}",
   ".fswp-sp{flex:1}",
   ".fswp-btn{border:1px solid #cfe3db;background:#fff;color:#0A463E;border-radius:9px;padding:6px 11px;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px}",
   ".fswp-btn:hover{background:#f0f8f5;border-color:#9ecabd}",
@@ -20247,7 +20247,7 @@ function _fsIssCSS(){ if(document.getElementById('fsiss-css'))return;
    ".fsiss-t thead th .rs{font-weight:400;font-style:italic;color:#7a8f89;font-size:10.5px}",
    ".fsiss-t td{padding:2.5px 10px}",
    ".fsiss-t td.l{text-align:left}",
-   ".fsiss-t td.n{text-align:right;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',ui-monospace,monospace;white-space:nowrap}",
+   ".fsiss-t td.n{text-align:right;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',ui-monospace,monospace;white-space:nowrap;font-size:13.5px;font-feature-settings:'tnum' 1,'lnum' 1;letter-spacing:.01em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}",
    ".fsiss-t td.ind1{padding-left:32px}",".fsiss-t td.ind0{padding-left:16px}",
    ".fsiss-t tr.sec td{font-weight:700;color:#08352e;padding-top:7px;padding-left:0}",
    ".fsiss-t tr.info td.l{font-weight:600;color:#123}",
@@ -20852,6 +20852,9 @@ function _fsCfdCodeGLHTML(code){
    ทันที ไม่ปล่อยให้ผู้ใช้รอ CDN ที่อาจถูกบล็อกจนปุ่มค้าง "กำลังเตรียม Excel…" */
 function _cfdLibRace(ms){
   if(typeof window!=='undefined'&&window.ExcelJS)return Promise.resolve(window.ExcelJS);
+  /* v10.103: ถ้าไม่มีตัวโหลด ExcelJS (loadExcelJS ไม่ถูกนิยามในบางบิลด์) → reject ทันที เพื่อตกไปใช้
+     SheetJS (ฝังในตัว) โดยไม่ throw "loadExcelJS is not defined" และไม่ต้องรอ CDN */
+  if(typeof loadExcelJS!=='function')return Promise.reject(new Error('no-exceljs-loader'));
   return new Promise(function(res,rej){
     var settled=false;
     setTimeout(function(){ if(!settled){ settled=true; rej(new Error('excel-timeout')); } },ms||2500);
