@@ -18408,9 +18408,9 @@ function _fsRenderCFD(){
     _cg+='<tr class="cfdcash-tot"><td></td><td>รวม '+R.cashAccts.length+' บัญชี</td><td class="fsm">'+money(R.beginCash)+'</td>'+amtCur(R.move)+'<td class="fsm">'+money(R.endCash)+'</td></tr></tbody></table></div>';
     var _extras='<details class="cfd-extras"><summary>▸ รายละเอียดเพิ่มเติม · กระแสเงินสดรายโครงการ · กลุ่มบัญชีเงินสด</summary>'+_cfdProjSummaryHtml()+_cg+'</details>';
     return '<div class="fsstmtwrap fscfd-wrap">'+
-      '<div class="fswp-bar"><span class="fswp-bt">📘 WP FS · GLI '+((typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):'')+'<small>งบกระแสเงินสด · วิธีทางตรง · คำนวณสดจาก GL (voucher-by-voucher)</small></span><span class="fswp-sp"></span>'+
+      '<div class="fswp-bar"><span class="fswp-bt">📘 WP FS · GLI '+((typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):'')+'<small>งบกระแสเงินสด · วิธีทางตรง · คำนวณสดจาก GL (voucher-by-voucher)</small></span>'+
         '<button type="button" id="cfdExportAll" class="fswp-btn cfdxall" title="ส่งออก Excel รวมทุกบรรทัดในงบกระแสเงินสด — แต่ละบรรทัดมี Grouping (บัญชี · คู่บัญชีเงินสด/ธนาคาร · %) + GL กระทบยอด (RE/PV บวกแล้วตรงยอด)">⤓ Excel · ทุกบรรทัด</button>'+
-        '<button type="button" id="cfdLnEditToggle" class="fswp-btn" title="แก้ไข/เพิ่มบรรทัดงบกระแสเงินสด — คลิกที่ชื่อบรรทัดเพื่อพิมพ์แก้ · ➕ เพิ่มบรรทัดใหม่ในแต่ละกิจกรรม">✏️ แก้ไข / เพิ่มบรรทัด</button></div>'+
+        '<button type="button" id="cfdLnEditToggle" class="fswp-btn" title="แก้ไข/เพิ่มบรรทัดงบกระแสเงินสด — คลิกที่ชื่อบรรทัดเพื่อพิมพ์แก้ · ➕ เพิ่มบรรทัดใหม่ในแต่ละกิจกรรม">✏️ แก้ไข / เพิ่มบรรทัด</button><span class="fswp-sp"></span></div>'+
       _cln+_tieC+_extras+'</div>';
   }
   var body='';
@@ -21377,11 +21377,11 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    ".fsiss-t tr.issactive td{color:#1E3A8A!important;font-weight:700}",
    ".fsiss-t tr.issactive td.l{box-shadow:inset 3px 0 0 #2563EB}",
    /* persistent RIGHT half-page dock — statement shifts left so it stays fully visible */
-   ".fsiss-panel{position:fixed;width:min(760px,50vw);min-width:360px;background:#fff;border:1px solid #d3e6df;border-radius:16px;box-shadow:0 20px 55px rgba(8,40,34,.24);z-index:100060;display:flex;flex-direction:column;overflow:hidden;animation:fsissIn .16s ease-out}",
+   ".fsiss-panel{position:fixed;width:min(940px,60vw);min-width:380px;background:#fff;border:1px solid #d3e6df;border-radius:16px;box-shadow:0 20px 55px rgba(8,40,34,.24);z-index:100060;display:flex;flex-direction:column;overflow:hidden;animation:fsissIn .16s ease-out}",
    "@keyframes fsissIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}",
    "#fsBody.fsiss-drillopen .fsiss,#fsBody.fsiss-drillopen .fsiss-cap{margin-left:0;margin-right:auto}",
    "#fsBody.fsiss-drillopen .fsiss-hd{text-align:left}",
-   "#fsBody.fsiss-drillopen{padding-right:min(788px,52vw);transition:padding .16s ease}",
+   "#fsBody.fsiss-drillopen{padding-right:min(968px,62vw);transition:padding .16s ease}",
    /* empty / waiting state */
    ".fsiss-wait{padding:40px 24px;text-align:center;color:#57736c}",
    ".fsiss-wait-ic{font-size:38px;line-height:1;margin-bottom:12px;opacity:.9}",
