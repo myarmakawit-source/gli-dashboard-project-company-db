@@ -20748,18 +20748,39 @@ function _fsCfdRenderCodes(key,label){ var p=_fsIssPanelEnsure(); p.classList.ad
     arr.sort(function(a,b){ return Math.abs(b.end)-Math.abs(a.end); });
     note=(pledgedOnly?'เงินฝากธนาคารที่มีภาระค้ำประกัน (แยกจากเงินสดในงบแสดงฐานะการเงิน) · ':'เงินสดและรายการเทียบเท่าเงินสด · ')+arr.length+' บัญชี · อ้างอิงบรรทัดในงบแสดงฐานะการเงิน · คลิกรหัสเพื่อดู GL';
   } else {
-    var LL=(typeof _CFD!=='undefined'&&_CFD&&_CFD.lines&&_CFD.lines[key])||{codes:{}};
+    var LL=(typeof _CFD!=='undefined'&&_CFD&&_CFD.lines&&_CFD.lines[key])||{cur:0,codes:{}};
     var codes=LL.codes||{};
-    arr=Object.keys(codes).map(function(c){ var o=codes[c]||{}; return {c:c,name:o.name||'',a:(+o.cur||0)}; });
+    arr=Object.keys(codes).map(function(c){ var o=codes[c]||{};
+      var bank=[]; if(o.cash){ for(var bk in o.cash){ var b=o.cash[bk]; if(b&&Math.abs(b.amt||0)>=0.005)bank.push({code:bk,name:b.name||'',amt:(+b.amt||0)}); } }
+      bank.sort(function(x,y){ return Math.abs(y.amt)-Math.abs(x.amt); });
+      return {c:c,name:o.name||'',a:(+o.cur||0),bank:bank,nvch:(o.vch?Object.keys(o.vch).length:0)}; });
     arr.sort(function(a,b){ return Math.abs(b.a)-Math.abs(a.a); });
     note='บรรทัดกระแสเงินสด · '+arr.length+' บัญชี · คลิกรหัสเพื่อดู GL + คู่บัญชี (เดบิต/เครดิต)';
   }
+  /* v10.104: การแสดงผลแบบเห็นตัวเลขชัด — ยอดรวมบรรทัดตัวใหญ่ + แถบสัดส่วน% + คู่บัญชีเงินสด/ธนาคาร 💵 + แถวรวม */
+  var isLine=!ck;
+  var heroTot=arr.reduce(function(s,o){ return s+o.a; },0);
+  if(isLine){ try{ var _ll=(_CFD&&_CFD.lines&&_CFD.lines[key]); if(_ll&&isFinite(+_ll.cur))heroTot=+_ll.cur; }catch(_e){} }
   var body=arr.map(function(o){
-    var sub=ck?('<span class="cc-sub">ต้นงวด '+_fsIssN(o.begin)+' · เคลื่อนไหว '+_fsIssN(o.move)+' · ปลายงวด '+_fsIssN(o.end)+'</span>'):'';
-    return '<div class="fsiss-crow"'+(ck?' data-cash="1"':'')+' data-isscode="'+_fsWpEsc(o.c)+'"><div class="cc-h"><span class="cc-code">'+_fsWpEsc(o.c)+'</span>'+
+    if(isLine){
+      var share=(Math.abs(heroTot)>0.005)?(o.a/heroTot):0, shPct=Math.max(0,Math.min(100,Math.abs(share)*100));
+      var bankHtml=(o.bank&&o.bank.length)?('<span class="cc-bank">💵 '+_fsWpEsc(o.bank[0].code+' '+(o.bank[0].name||''))+(o.bank.length>1?(' <b>+'+(o.bank.length-1)+'</b>'):'')+'</span>'):'<span class="cc-bank cc-bank-x">— ไม่มีเงินสดเคลื่อนไหว</span>';
+      return '<div class="fsiss-crow cfg" data-isscode="'+_fsWpEsc(o.c)+'"><div class="cc-h">'+
+        '<span class="cc-code">'+_fsWpEsc(o.c)+'</span>'+
+        '<span class="cc-name"><b class="cc-nm-t">'+_fsWpEsc(o.name)+'</b>'+bankHtml+'<span class="cc-bar"><i style="width:'+shPct.toFixed(1)+'%"></i></span></span>'+
+        '<span class="cc-amtw"><span class="cc-amt">'+_fsIssN(o.a)+'</span><span class="cc-share">'+(Math.abs(share)*100).toFixed(1)+'% · '+o.nvch+' ใบ</span></span>'+
+        '<span class="cc-ex">▸</span></div><div class="cc-det" hidden></div></div>';
+    }
+    var sub='<span class="cc-sub">ต้นงวด '+_fsIssN(o.begin)+' · เคลื่อนไหว '+_fsIssN(o.move)+' · ปลายงวด '+_fsIssN(o.end)+'</span>';
+    return '<div class="fsiss-crow" data-cash="1" data-isscode="'+_fsWpEsc(o.c)+'"><div class="cc-h"><span class="cc-code">'+_fsWpEsc(o.c)+'</span>'+
       '<span class="cc-name">'+_fsWpEsc(o.name)+sub+'</span><span class="cc-amt">'+_fsIssN(o.a)+'</span><span class="cc-ex">▸</span></div><div class="cc-det" hidden></div></div>'; }).join('');
   if(!arr.length)body='<div class="fsiss-empty">— ไม่มีรหัสบัญชีในบรรทัดนี้ —</div>';
-  p.innerHTML=_fsIssHeadHTML(label||'',note,_CFD_XLS_BTN)+'<div class="fsiss-pb">'+body+'</div>'; }
+  var hero='', totrow='';
+  if(isLine && arr.length){
+    hero='<div class="cfg-hero"><span class="cfg-hero-l">ยอดรวมบรรทัด · เงินสดสุทธิ</span><span class="cfg-hero-v'+(heroTot<0?' neg':'')+'">'+_fsIssN(heroTot)+'</span></div>';
+    totrow='<div class="cfg-tot"><span class="cfg-tot-l">รวม '+arr.length+' บัญชี</span><span class="cfg-tot-v'+(heroTot<0?' neg':'')+'">'+_fsIssN(heroTot)+'</span></div>';
+  }
+  p.innerHTML=_fsIssHeadHTML(label||'',note,_CFD_XLS_BTN)+'<div class="fsiss-pb">'+hero+body+totrow+'</div>'; }
 /* v10.96: cash/bank account GL with AP/AR look-through — for every cash payment (PV) / receipt (RE)
    whose counterpart is a trade payable/receivable, also show the ตั้งหนี้ (source invoice) it settles:
    PV → _AP_PVMAP → AP standing voucher · RE → _cfdArMap → AR standing voucher, then its GL legs. */
@@ -21165,6 +21186,26 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    ".cc-sub{display:block;font-size:10px;font-weight:500;color:#5a7a72;margin-top:1px;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
    ".cc-amt{font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:#3730A3;flex:none}",
    ".cc-ex{color:#4F46E5;font-size:10px;flex:none;width:12px;text-align:center}",
+   /* v10.104: CF-direct grouping — ยอดรวมตัวใหญ่ · แถบสัดส่วน · คู่บัญชีเงินสด/ธนาคาร · แถวรวม */
+   ".cfg-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin:2px 4px 8px;padding:11px 14px;border-radius:12px;background:linear-gradient(135deg,#EAF6F0,#D9F0E6);border:1px solid #cfe6db}",
+   ".cfg-hero-l{font-size:11.5px;font-weight:800;color:#0A463E;letter-spacing:.01em}",
+   ".cfg-hero-v{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;font-size:25px;font-weight:800;color:#116A3E;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}",
+   ".cfg-hero-v.neg{color:#B42318}",
+   ".fsiss-crow.cfg .cc-h{align-items:center}",
+   ".fsiss-crow.cfg .cc-name{display:flex;flex-direction:column;gap:2px;min-width:0}",
+   ".cc-nm-t{font-size:13px;font-weight:700;color:#1E2340;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+   ".cc-bank{font-size:10.5px;color:#0E8A6E;font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+   ".cc-bank b{color:#0A463E;font-weight:800}",
+   ".cc-bank-x{color:#a9b8b2;font-family:inherit}",
+   ".cc-bar{height:5px;border-radius:3px;background:#e6efeb;overflow:hidden;margin-top:2px;width:100%;max-width:230px}",
+   ".cc-bar>i{display:block;height:100%;background:linear-gradient(90deg,#0E7A5F,#16A085);border-radius:3px}",
+   ".fsiss-crow.cfg .cc-amtw{display:flex;flex-direction:column;align-items:flex-end;flex:none;gap:1px}",
+   ".fsiss-crow.cfg .cc-amt{font-size:17px;font-weight:800;color:#0A463E}",
+   ".cc-share{font-size:10px;color:#5a7a72;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',ui-monospace,monospace}",
+   ".cfg-tot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:7px 4px 4px;padding:12px 14px;border-radius:12px;background:linear-gradient(135deg,#0E5C52,#0A463E);color:#fff;box-shadow:0 4px 14px -6px rgba(10,70,62,.5)}",
+   ".cfg-tot-l{font-size:12.5px;font-weight:800}",
+   ".cfg-tot-v{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;font-size:19px;font-weight:800;-webkit-font-smoothing:antialiased}",
+   ".cfg-tot-v.neg{color:#FFD0CB}",
    /* GL detail = TEAL layer */
    ".cc-det{border-top:1px solid #dbe8e3;border-left:3px solid #9ecabd;padding:8px;background:#f3faf6;max-height:46vh;overflow:auto}",
    ".cc-det::-webkit-scrollbar{width:8px}.cc-det::-webkit-scrollbar-thumb{background:#c3ddd3;border-radius:6px}",
