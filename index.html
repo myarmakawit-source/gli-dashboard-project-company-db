@@ -15825,7 +15825,7 @@ var _fsEndM=12;
 /* v9.36: สถานะการกระทบยอด TB กับไฟล์รายละเอียดประกอบงบ (reconciliation) — ทำงานเฉพาะเซสชัน + จำ mapping ลง localStorage */
 var _fsRecon=null, _fsReconWB=null;
 var _FS_TABS=[['tb','Trial Balance','🧾'],['bs','Balance Sheet','⚖️'],['pl','Income Statement','📈'],
-              ['sce','Changes in Equity','🔄'],['cf','Cash Flow · Indirect','💵'],['cfd','Cash Flow · Direct','💧'],['ratio','Ratio %','📊'],['wk','Working Papers','🗂️'],['an','Anomalies','⚠️']];
+              ['sce','Changes in Equity','🔄'],['notes','หมายเหตุประกอบงบ','📝'],['cf','Cash Flow · Indirect','💵'],['cfd','Cash Flow · Direct','💧'],['ratio','Ratio %','📊'],['wk','Working Papers','🗂️'],['an','Anomalies','⚠️']];
 var _FS_WK=[['A','Assets'],['L','Liabilities'],['E','Equity'],['R','Revenue'],['X','Expenses']];
 var _FS_BS_ASSET=['Cash on hand','Cash & deposits in transit','Cash at banks',
   'Trade receivables','Less: Allowance for ECL (receivables)',
@@ -16918,7 +16918,7 @@ function _fsShell(){
         '<span class="fscmd-chips" id="fsChips">'+chipsInner+'</span>'+
         '<span class="fscmd-exp">'+expBtns+'</span>'+
       '</div>'))+
-    '<div class="fscmd-tabs">'+_fsTabG(['tb','bs','pl','sce','cf','cfd'])+'<span class="fscmd-div"></span>'+_fsTabG(['ratio','wk','an'])+'</div>'+
+    '<div class="fscmd-tabs">'+_fsTabG(['tb','bs','pl','sce','notes','cf','cfd'])+'<span class="fscmd-div"></span>'+_fsTabG(['ratio','wk','an'])+'</div>'+
   '</div>'+
   '<div id="fsBody"></div>';
 }
@@ -19699,6 +19699,46 @@ function _fsRenderRatio(){
     '<div class="rt-body">'+verdictBanner+heroes+'<div class="rt-groups">'+gL+gS+gP+gE+'</div>'+analysis+'</div></div>'+note;
 }
 
+/* v10.112: หมายเหตุประกอบงบการเงิน — มุมมองบนหน้าจอ (ใช้ข้อมูลชุดเดียวกับที่ส่งออก Excel/PDF จาก _fsTplNotes) */
+function _fsNotesCSS(){ if(document.getElementById('fsnotes-css'))return; var s=document.createElement('style'); s.id='fsnotes-css'; s.textContent=[
+  '.fsnote-wrap{max-height:calc(100vh - 150px);overflow:auto;padding:0}',
+  '.fsnote-doc{max-width:none;width:100%;margin:0;box-sizing:border-box;background:#fff;border:1px solid var(--line,#E6E0D4);border-radius:12px;padding:24px 30px 28px;box-shadow:0 1px 4px rgba(15,40,35,.06);font-size:14px;line-height:1.6;color:#1b2430}',
+  '.fsnote-co{text-align:center;font-weight:800;font-size:17.5px;color:#0A463E}',
+  '.fsnote-ti{text-align:center;font-weight:700;font-size:15px;margin-top:2px;color:#123}',
+  '.fsnote-dt{text-align:center;color:#6b7280;font-size:12.5px;margin:2px 0 18px;padding-bottom:12px;border-bottom:1px solid #eee}',
+  '.fsnote{margin:0 0 14px}',
+  '.fsnote-h{font-weight:800;font-size:15px;color:#0A463E;margin:14px 0 5px;display:flex;gap:9px;align-items:baseline}',
+  '.fsnote-no{min-width:22px;color:#116A3E;font-variant-numeric:tabular-nums}',
+  '.fsnote p{margin:3px 0}',
+  '.fsnote p.pin{margin-left:18px;color:#333}',
+  '.fsnote-subh{font-weight:700;font-size:13.5px;margin:9px 0 3px;color:#123}',
+  '.fsnote-note{font-style:italic;color:#666;font-size:12px;margin:2px 0 6px}',
+  '.fsnote-tw{overflow-x:auto;margin:6px 0 10px;border:1px solid #e6efeb;border-radius:9px}',
+  '.fsnote-tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:520px}',
+  '.fsnote-tbl th{background:#EAF4F0;color:#0A463E;font-weight:700;padding:6px 10px;text-align:left;border-bottom:1.5px solid #cfe6db;white-space:nowrap;vertical-align:bottom}',
+  '.fsnote-tbl td{padding:5px 10px;border-bottom:1px solid #eef4f1;vertical-align:top}',
+  ".fsnote-tbl th.r,.fsnote-tbl td.r{text-align:right;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',ui-monospace,monospace;white-space:nowrap}",
+  '.fsnote-tbl tbody tr:nth-child(even) td{background:#fafcfb}',
+  '.fsnote-hint{max-width:none;margin:0 0 8px;font-size:12px;color:#5a7a72;background:#F1FAF8;border:1px solid #cfe6db;border-radius:9px;padding:7px 12px}'
+].join(''); document.head.appendChild(s); }
+function _fsRenderNotes(){
+  _fsNotesCSS();
+  var notes=(typeof _fsTplNotes==='function')?_fsTplNotes():[];
+  var co=(typeof _fsTplCo==='function')?_fsTplCo():'', be=(typeof _fsTplCurBE==='function')?_fsTplCurBE():'';
+  var E=_fsE, M=function(v){ return (typeof _fsTplM==='function')?_fsTplM(v,true):(''+v); };
+  function tbl(t){ var x=t.title?('<div class="fsnote-subh">'+E(t.title)+'</div>'):'';
+    x+='<div class="fsnote-tw"><table class="fsnote-tbl"><thead><tr>'+(t.head||[]).map(function(hh,i){return '<th class="'+(i?'r':'l')+'">'+E(hh)+'</th>';}).join('')+'</tr></thead><tbody>'
+      +(t.rows||[]).map(function(rr){return '<tr>'+rr.map(function(c,i){return '<td class="'+(i?'r':'l')+'">'+E(c)+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table></div>';
+    if(t.note)x+='<div class="fsnote-note">'+E(t.note)+'</div>'; return x; }
+  var body=notes.map(function(n){ var h='<div class="fsnote"><div class="fsnote-h"><span class="fsnote-no">'+E(n.no)+'.</span><span>'+E(n.title)+'</span></div>';
+    (n.body||[]).forEach(function(p){ h+='<p>'+E(p)+'</p>'; });
+    (n.tables||[]).forEach(function(t){ h+=tbl(t); });
+    (n.subs||[]).forEach(function(sb){ h+='<div class="fsnote-subh">'+E(sb.title)+'</div>'; (sb.body||[]).forEach(function(p){ h+='<p class="pin">'+E(p)+'</p>'; }); (sb.tables||[]).forEach(function(t){ h+=tbl(t); }); });
+    if(n.table){ h+='<div class="fsnote-tw"><table class="fsnote-tbl"><thead><tr>'+n.table.head.map(function(hh,i){return '<th class="'+(i?'r':'l')+'">'+E(hh)+'</th>';}).join('')+'</tr></thead><tbody>'+n.table.rows.map(function(rr){return '<tr><td class="l">'+E(rr[0])+'</td><td class="r">'+(typeof rr[1]==='number'?M(rr[1]):E(rr[1]))+'</td></tr>';}).join('')+'</tbody></table></div>'; }
+    return h+'</div>'; }).join('');
+  return '<div class="fsnote-hint">📝 หมายเหตุประกอบงบการเงิน (NPAEs) — เนื้อหาชุดเดียวกับที่ส่งออกใน Excel/PDF · แก้ไขข้อความได้ในโค้ด _fsTplNotes()</div>'+
+    '<div class="fsnote-wrap"><div class="fsnote-doc"><div class="fsnote-co">'+E(co)+'</div><div class="fsnote-ti">หมายเหตุประกอบงบการเงิน</div><div class="fsnote-dt">สำหรับปีสิ้นสุดวันที่ 31 ธันวาคม '+E(be)+'</div>'+body+'</div></div>';
+}
 function _fsRenderBody(){
   var b=document.getElementById('fsBody'); if(!b)return; var h='';
   /* v9.138: กันสกอร์ "เด้งขึ้น" เมื่อ re-render (เช่น sync สดพื้นหลัง/ไฟล์แนบ) — จำตำแหน่งเลื่อนไว้แล้วคืนค่า */
@@ -19711,6 +19751,9 @@ function _fsRenderBody(){
       try{ if(typeof _fsIssDrillDock==='function')_fsIssDrillDock(); }catch(_e3){}   /* v10.90: keep the account drill-down docked half-page on the right */
       return; }catch(_wpe){ if(window.console&&console.error)console.error('[WP FS]',_wpe); }
   }
+  /* v10.112: หมายเหตุประกอบงบการเงิน — แท็บบนหน้าจอ (หลัง Changes in Equity) · แสดงได้แม้ยังไม่โหลด GL (เนื้อหาส่วนใหญ่คงที่) */
+  if(_fsTab==='notes'){ try{ b.innerHTML=_fsRenderNotes(); }catch(_ne){ b.innerHTML='<div class="fsnote-wrap"><div class="fsnote-doc">แสดงหมายเหตุไม่สำเร็จ: '+_fsE((_ne&&_ne.message)||_ne)+'</div></div>'; }
+    try{ if(typeof _fsIssDockRemove==='function')_fsIssDockRemove(); }catch(_e5){} return; }
   if(!_fsT){ h=_fsEmpty(); }
   else if(_fsTab==='tb')h=_fsRenderTB(); else if(_fsTab==='bs')h=_fsRenderBS();
   else if(_fsTab==='pl')h=_fsRenderPL(); else if(_fsTab==='sce')h=_fsRenderSCE();
