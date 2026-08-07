@@ -63,8 +63,8 @@ h1{font-size:26px;font-weight:800;letter-spacing:.025em;line-height:1.5;text-tra
 .glmissf{font-size:12.5px;color:#7C2D12;line-height:1.7}
 .glreimp{display:inline-flex;align-items:center;gap:5px;background:#0E5C52;color:#fff;border-radius:8px;padding:5px 12px;font-weight:700;cursor:pointer;font-size:12.5px;margin:0 3px;box-shadow:0 2px 6px rgba(109,40,217,.3)}
 .glreimp:hover{background:#0A463E}
-.modhero{margin:8px 0 6px;border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:13px;color:#fff;background:linear-gradient(108deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,0) 40%,rgba(0,0,0,.13) 100%),var(--mh,#0E5C52);box-shadow:0 6px 18px -7px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.16)}
-.modhero .mh-ic{min-width:30px;height:30px;padding:0 8px;border-radius:8px;background:rgba(255,255,255,.20);border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.20);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;font-family:'IBM Plex Mono',monospace;letter-spacing:.06em;flex:none}
+.modhero{margin:8px 0 6px;border-radius:20px;padding:11px 18px;display:flex;align-items:center;gap:13px;color:#fff;background:linear-gradient(108deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,0) 40%,rgba(0,0,0,.13) 100%),var(--mh,#0E5C52);box-shadow:0 6px 18px -7px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.16)}
+.modhero .mh-ic{min-width:30px;height:30px;padding:0 8px;border-radius:11px;background:rgba(255,255,255,.20);border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.20);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;font-family:'IBM Plex Mono',monospace;letter-spacing:.06em;flex:none}
 .modhero .mh-t{font-size:16.5px;font-weight:800;letter-spacing:.02em;line-height:1.2;text-transform:uppercase}
 .modhero .mh-s{font-size:11px;opacity:.92;font-weight:600;margin-top:2px;letter-spacing:.01em}
 #page-bp .titleblock,#page-ov .titleblock{display:none}
@@ -21492,10 +21492,10 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    ".cc-ex{color:#4F46E5;font-size:10px;flex:none;width:12px;text-align:center}",
    /* v10.110: per-voucher summary table (date · voucher · source · classified cash · bank · running · Remark) */
    ".cfsum-wrap{margin:2px 3px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #e2ece7;border-radius:10px;background:#fff}",
-   ".cfsum{width:max-content;min-width:100%;border-collapse:collapse;font-size:12px}",
-   ".cfsum thead th{position:sticky;top:0;background:#EAF4F0;color:#0A463E;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.03em;padding:7px 8px;text-align:left;border-bottom:1.5px solid #cfe6db;white-space:nowrap;z-index:1}",
+   ".cfsum{width:max-content;min-width:100%;border-collapse:collapse;font-size:13.5px}",
+   ".cfsum thead th{position:sticky;top:0;background:#EAF4F0;color:#0A463E;font-weight:800;font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;padding:8px 11px;text-align:left;border-bottom:1.5px solid #cfe6db;white-space:nowrap;z-index:1}",
    ".cfsum th.ra{text-align:right}",
-   ".cfsum td{padding:5px 8px;border-bottom:1px solid #eef4f1;vertical-align:middle;color:#1E2A24}",
+   ".cfsum td{padding:7px 11px;border-bottom:1px solid #eef4f1;vertical-align:middle;color:#1E2A24}",
    ".cfsum td.ra{text-align:right;font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',ui-monospace,monospace;white-space:nowrap}",
    ".cfsum td.amt{font-weight:800;color:#0A463E;background:#FBF7E6}",
    ".cfsum td.amt.neg{color:#C0392B}",
@@ -21503,7 +21503,7 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    ".cfsum td.cfsum-code{font-family:'IBM Plex Mono',monospace;font-weight:700;color:#0A6B54;white-space:nowrap}",
    ".cfsum td.cfsum-dt{white-space:nowrap;color:#4A5563}",
    ".cfsum td.cfsum-tr{color:#5A5040;white-space:nowrap}",
-   ".cfsum td.cfsum-bk{color:#0A6B54;font-size:10.5px;white-space:nowrap;font-variant-numeric:tabular-nums}",
+   ".cfsum td.cfsum-bk{color:#0A6B54;font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}",
    ".cfsum-row{cursor:pointer}",
    ".cfsum-row:hover>td{background:#F2FAF7}",
    ".cfsum-row.open>td{background:#E7F3EE}",
@@ -21511,7 +21511,8 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    ".cfsum-caret{display:inline-block;transition:transform .12s}",
    ".cfsum-row.open .cfsum-caret{transform:rotate(90deg)}",
    ".cfsum td.cfsum-rk{min-width:130px}",
-   ".cfsum-rmk{width:100%;box-sizing:border-box;border:1px solid #dbe5e0;border-radius:7px;padding:3px 7px;font-family:'Inter',sans-serif;font-size:11px;background:#fff;color:#19222E}",
+   ".cfsum td.cfsum-rk{min-width:140px}",
+   ".cfsum-rmk{width:100%;box-sizing:border-box;border:1px solid #dbe5e0;border-radius:7px;padding:4px 8px;font-family:'Inter',sans-serif;font-size:12.5px;background:#fff;color:#19222E}",
    ".cfsum-rmk:focus{outline:none;border-color:#0E5C52;box-shadow:0 0 0 2px rgba(14,92,82,.18)}",
    ".cfsum-tot td{background:linear-gradient(180deg,#12665B,#0A463E);color:#fff;font-weight:800;border-top:2px solid #4FD6C0;border-bottom:0}",
    ".cfsum-tot td.amt{background:#0A463E;color:#fff}",
@@ -24911,10 +24912,10 @@ try{ if(localStorage.getItem('gli_module')==='cb'&&typeof renderCb==='function')
 body{ text-rendering:optimizeLegibility; font-feature-settings:"kern" 1,"liga" 1; -moz-osx-font-smoothing:grayscale; }
 .val,.bpn,.hubkpi .val,.hkv,.kpiv,td.num,.glnum{ font-variant-numeric:tabular-nums lining-nums; letter-spacing:-.012em; }
 /* — module hero: flatter, crisper, roomier (top banner of every module) — */
-.modhero{ border-radius:18px; padding:14px 20px; gap:14px;
+.modhero{ border-radius:26px; padding:15px 22px; gap:14px;
   background:linear-gradient(115deg,rgba(255,255,255,.13) 0%,rgba(255,255,255,0) 45%,rgba(0,0,0,.10) 100%),var(--mh,#0E5C52);
   box-shadow:0 14px 36px -18px rgba(10,70,62,.55),inset 0 1px 0 rgba(255,255,255,.16); }
-.modhero .mh-ic{ border-radius:11px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.26);
+.modhero .mh-ic{ border-radius:13px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.26);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 3px 8px -3px rgba(0,0,0,.28); }
 .modhero .mh-t{ letter-spacing:.006em; }
 .modhero .mh-s{ opacity:.9; }
