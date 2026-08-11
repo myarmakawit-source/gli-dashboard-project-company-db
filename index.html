@@ -10856,6 +10856,7 @@ function _fitWideTables(){ try{
       if(!found)continue;
       try{ tbl.style.zoom=''; }catch(_z){}
       if(tbl.classList&&tbl.classList.contains('fstb'))continue;/* V10.37: Trial Balance scrolls like GL — no auto-zoom-to-fit */
+      if(tbl.classList&&tbl.classList.contains('cfsum'))continue;/* v10.113: account drill-down summary scrolls horizontally on its own — keep normal size, no auto-zoom */
       var natural=tbl.scrollWidth||0, avail=found.clientWidth||0;
       if(natural>2&&avail>2&&natural>avail+1){ var z=avail/natural; if(z<0.5)z=0.5; tbl.style.zoom=(Math.floor(z*1000)/1000); }
     }
@@ -21492,7 +21493,7 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    ".cc-ex{color:#4F46E5;font-size:10px;flex:none;width:12px;text-align:center}",
    /* v10.110: per-voucher summary table (date · voucher · source · classified cash · bank · running · Remark) */
    ".cfsum-wrap{margin:2px 3px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #e2ece7;border-radius:10px;background:#fff}",
-   ".cfsum{width:max-content;min-width:100%;border-collapse:collapse;font-size:13.5px}",
+   ".cfsum{width:100%;min-width:max-content;border-collapse:collapse;font-size:13.5px}",
    ".cfsum thead th{position:sticky;top:0;background:#EAF4F0;color:#0A463E;font-weight:800;font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;padding:8px 11px;text-align:left;border-bottom:1.5px solid #cfe6db;white-space:nowrap;z-index:1}",
    ".cfsum th.ra{text-align:right}",
    ".cfsum td{padding:7px 11px;border-bottom:1px solid #eef4f1;vertical-align:middle;color:#1E2A24}",
