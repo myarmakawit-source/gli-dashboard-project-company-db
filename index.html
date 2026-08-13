@@ -23244,6 +23244,10 @@ function injectStyle(){
   '#page-wpb table.wpb-t td.mut{color:var(--muted)}',
   '#page-wpb .wpb-onesided{background:rgba(180,83,9,.06)}',
   '#page-wpb .wpb-pill{display:inline-block;font-size:9.5px;font-weight:800;color:var(--gold-d);background:var(--gold-t);border:1px solid #ECD9AE;border-radius:6px;padding:1px 6px;margin-left:7px;vertical-align:middle}',
+  '#page-wpb .wpb-pstat{display:inline-block;font-size:9.5px;font-weight:800;border-radius:6px;padding:1px 7px;margin-left:8px;vertical-align:middle;white-space:nowrap}',
+  '#page-wpb .wpb-pstat.on{color:#15803D;background:#DCFCE7;border:1px solid #A7E3BE}',
+  '#page-wpb .wpb-pstat.off{color:#64748B;background:#EEF2F7;border:1px solid #D4DCE6}',
+  '#page-wpb .wpb-pstat.nd{color:#A16207;background:#FEF6E0;border:1px solid #EAD9A8}',
   /* Detail Final — account-nature conclusion */
   '#page-wpb .wpb-final{background:linear-gradient(120deg,var(--gold-t),#fff 82%);border:1px solid #ECD9AE;border-left:4px solid var(--gold);border-radius:12px;padding:13px 16px;margin-bottom:13px;font-size:12.5px;line-height:1.65;color:var(--ink)}',
   '#page-wpb .wpb-final-h{font-size:13.5px;font-weight:800;color:var(--gold-d);margin-bottom:6px}',
@@ -23607,6 +23611,12 @@ function _wpbDetailFinal(A){
    amount and report the link + matching signals.                                */
 function _wpbVType(v){var m=String(v||'').match(/^[A-Za-z]+/);return m?m[0].toUpperCase():'';}
 /* v9.44: drill-down — list the vouchers that make up one smart-balance group (คลิกชื่อคู่ค้า/กลุ่ม) */
+/* v10.115: bring the project status from Business Performance (ACTIVEOV) into WP-Balance
+   true=Active · false=Inactive · else=No data PM (same rule as _bpStat) */
+function _wpbProjStat(code){ var v; try{ v=(typeof ACTIVEOV!=='undefined'&&ACTIVEOV&&Object.prototype.hasOwnProperty.call(ACTIVEOV,code))?ACTIVEOV[code]:undefined; }catch(e){ v=undefined; }
+  if(v===true)return '<span class="wpb-pstat on" title="สถานะโครงการจาก Business Performance">☑ Active</span>';
+  if(v===false)return '<span class="wpb-pstat off" title="สถานะโครงการจาก Business Performance">☐ Inactive</span>';
+  return '<span class="wpb-pstat nd" title="ยังไม่มีสถานะโครงการใน Business Performance (No data PM)">⚠ No data</span>'; }
 function _wpbSbVouchers(g,cutoff,gi,dim){
   var items=(g.items||[]).slice().sort(function(a,b){return a.date-b.date;});
   var rows='';
@@ -23760,7 +23770,7 @@ function renderSmart(A){
     var shown=S.groups.slice(0,24);
     _WPBSB={groups:shown,allGroups:S.groups,cutoff:A.cutoff,dim:lbl,acct:A.acct};/* v9.44: drill-down + Excel · v9.45: allGroups for export-all */
     shown.forEach(function(g,gi){var one=pillOn&&g.matched<0.005&&g.age>180&&Math.abs(g.net)>0.005;
-      h+='<tr class="wpb-sbrow'+(one?' wpb-onesided':'')+'" data-sbg="'+gi+'" title="คลิกเพื่อดูใบสำคัญ (Voucher) ที่ประกอบเป็นยอดนี้"><td><span class="wpb-sbcaret">▸</span>'+esc(String(g.label).slice(0,62))+(one?'<span class="wpb-pill">ค้างฝั่งเดียว</span>':'')+'</td><td class="r side">'+fmt(g.dr)+'</td><td class="r side">'+fmt(g.cr)+'</td><td class="r mut">'+fmt(g.matched)+'</td><td class="r '+(g.net<0?'neg':'pos')+'">'+fmt(g.net)+'</td><td class="r mut">'+g.n+'</td><td class="r mut">'+(g.age>0?g.age:0)+'</td></tr>';
+      h+='<tr class="wpb-sbrow'+(one?' wpb-onesided':'')+'" data-sbg="'+gi+'" title="คลิกเพื่อดูใบสำคัญ (Voucher) ที่ประกอบเป็นยอดนี้"><td><span class="wpb-sbcaret">▸</span>'+esc(String(g.label).slice(0,62))+(group==='ref'?_wpbProjStat(String(g.label).trim()):'')+(one?'<span class="wpb-pill">ค้างฝั่งเดียว</span>':'')+'</td><td class="r side">'+fmt(g.dr)+'</td><td class="r side">'+fmt(g.cr)+'</td><td class="r mut">'+fmt(g.matched)+'</td><td class="r '+(g.net<0?'neg':'pos')+'">'+fmt(g.net)+'</td><td class="r mut">'+g.n+'</td><td class="r mut">'+(g.age>0?g.age:0)+'</td></tr>';
       h+='<tr class="wpb-sbdet" data-sbg="'+gi+'" hidden><td colspan="7"></td></tr>';});
     if(S.groups.length>24)h+='<tr><td colspan="7" class="mut">… และอีก '+(S.groups.length-24)+' กลุ่ม (กรองให้แคบลงเพื่อดูครบ)</td></tr>';
     var tdr=S.groups.reduce(function(s,g){return s+g.dr;},0),tcr=S.groups.reduce(function(s,g){return s+g.cr;},0);
