@@ -10861,6 +10861,7 @@ function _fitWideTables(){ try{
       try{ tbl.style.zoom=''; }catch(_z){}
       if(tbl.classList&&tbl.classList.contains('fstb'))continue;/* V10.37: Trial Balance scrolls like GL — no auto-zoom-to-fit */
       if(tbl.classList&&tbl.classList.contains('cfsum'))continue;/* v10.113: account drill-down summary scrolls horizontally on its own — keep normal size, no auto-zoom */
+      if(tbl.classList&&tbl.classList.contains('wht-mx'))continue;/* v10.52: WHT monthly completeness matrix scrolls horizontally (sticky payee column) — no auto-zoom */
       var natural=tbl.scrollWidth||0, avail=found.clientWidth||0;
       if(natural>2&&avail>2&&natural>avail+1){ var z=avail/natural; if(z<0.5)z=0.5; tbl.style.zoom=(Math.floor(z*1000)/1000); }
     }
@@ -23283,7 +23284,45 @@ function injectStyle(){
   '#page-wpb .wpb-sec[class*="wsc-"] .wpb-sh{background:linear-gradient(90deg,var(--sec-t),transparent 74%);border-bottom-color:color-mix(in srgb,var(--sec) 22%,var(--line2))}',
   '#page-wpb .wpb-sec[class*="wsc-"] .wpb-sh h3{color:var(--sec)}',
   '#page-wpb .wpb-sec[class*="wsc-"] .wpb-sh h3::before{background:var(--sec)}',
-  '#page-wpb .wpb-sec[class*="wsc-"]{border-top:3px solid var(--sec)}'
+  '#page-wpb .wpb-sec[class*="wsc-"]{border-top:3px solid var(--sec)}',
+  /* v10.52: WHT monthly completeness matrix */
+  '#page-wpb .wpb-wht .wht-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin-top:4px}',
+  '#page-wpb table.wht-mx{font-size:11.5px;border-collapse:collapse;min-width:max-content;background:#fff;margin:0}',
+  '#page-wpb table.wht-mx th,#page-wpb table.wht-mx td{border:1px solid var(--line2);padding:5px 8px;white-space:nowrap}',
+  '#page-wpb table.wht-mx thead th{background:var(--sec-t);font-weight:800;color:var(--sec);text-align:right}',
+  '#page-wpb table.wht-mx th.wht-py-h{text-align:left;position:sticky;left:0;z-index:3;background:var(--sec-t)}',
+  '#page-wpb table.wht-mx td.wht-py-c{text-align:left;position:sticky;left:0;background:#fff;z-index:1}',
+  '#page-wpb table.wht-mx td.r,#page-wpb table.wht-mx th.r{text-align:right;font-variant-numeric:tabular-nums}',
+  '#page-wpb .wht-py{font-weight:700;color:var(--ink)}',
+  '#page-wpb .wht-nat{display:block;font-size:10px;color:var(--muted);margin-top:1px}',
+  '#page-wpb table.wht-mx td.whtc-miss{background:#FDE8E4;color:#B42318;font-weight:800}',
+  '#page-wpb table.wht-mx td.whtc-under{background:#FEF3D6;color:#A8741A;font-weight:800}',
+  '#page-wpb table.wht-mx td.whtc-ok{color:var(--ink)}',
+  '#page-wpb table.wht-mx td.whtc-gapsoft{background:#FBFBEA;color:#9A9A6A}',
+  '#page-wpb table.wht-mx td.whtc-pre{background:repeating-linear-gradient(45deg,#fafafa,#fafafa 4px,#f1f1f1 4px,#f1f1f1 8px)}',
+  '#page-wpb table.wht-mx td.whtc-post{color:#C7CDD3}',
+  '#page-wpb table.wht-mx tr.wht-i3 td.wht-py-c{box-shadow:inset 3px 0 0 #DC2626}',
+  '#page-wpb table.wht-mx tr.wht-i2 td.wht-py-c{box-shadow:inset 3px 0 0 #EA9A19}',
+  '#page-wpb table.wht-mx tr.wht-i1 td.wht-py-c{box-shadow:inset 3px 0 0 #D9C400}',
+  '#page-wpb table.wht-mx tbody tr:hover td{background:var(--brand-t)}',
+  '#page-wpb table.wht-mx tbody tr:hover td.wht-py-c{background:var(--brand-t)}',
+  '#page-wpb table.wht-mx tfoot td{background:linear-gradient(90deg,var(--sec-t),#fff);font-weight:700;color:var(--ink)}',
+  '#page-wpb table.wht-mx tfoot td.wht-py-c{background:var(--sec-t)}',
+  '#page-wpb .wht-bdg{display:inline-block;font-size:9px;font-weight:800;border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:middle}',
+  '#page-wpb .wht-bdg.b3{color:#B42318;background:#FDE8E4}',
+  '#page-wpb .wht-bdg.b2{color:#A8741A;background:#FEF3D6}',
+  '#page-wpb .wht-bdg.b1{color:#8A7A00;background:#FBFBD0}',
+  '#page-wpb .wht-bdg.b0{color:#15803D;background:#DCFCE7}',
+  '#page-wpb .wht-bdg.bm{color:#64748B;background:#EEF2F7}',
+  '#page-wpb .wht-find{background:#fff;border:1px solid #F4C9C0;border-left:4px solid var(--neg);border-radius:12px;padding:12px 15px;margin:10px 0}',
+  '#page-wpb .wht-find-h{font-size:13px;font-weight:800;color:var(--neg);margin-bottom:7px}',
+  '#page-wpb .wht-find-l{margin:0;padding:0 0 0 2px;list-style:none;font-size:12px;line-height:1.8;color:var(--ink)}',
+  '#page-wpb .wht-find-l li{padding:4px 0;border-bottom:1px dashed var(--line2)}',
+  '#page-wpb .wht-find-l li:last-child{border-bottom:none}',
+  '#page-wpb .wht-find-l b{color:var(--brand-d)}',
+  '#page-wpb .wht-mx-lg{font-size:11px;color:var(--muted);margin:10px 0 2px;display:flex;gap:16px;flex-wrap:wrap}',
+  '#page-wpb .wht-mx-lg span{display:inline-flex;align-items:center;gap:5px}',
+  '#page-wpb .wht-mx-lg i{width:14px;height:14px;border-radius:3px;display:inline-block;border:1px solid rgba(0,0,0,.06)}'
   ].join('\n');
   document.head.appendChild(s);
 }
@@ -23402,6 +23441,8 @@ function render(A){
   if(!A.tieOk){
     h+='<div class="wpb-sec"><div class="wpb-bd"><span class="wpb-badge no">⚠ Check</span> <span style="font-size:12.5px;color:var(--ink2)">The balance rebuilt from entries ('+fmt(A.closing)+') differs from the GL Balance column ('+fmt(A.glBal)+') = <b>'+fmt(A.closing-A.glBal)+'</b> — the brought-forward (BF) chain may carry retroactive adjustments; the open items below reference the rebuilt balance</span></div></div>';
   }
+  // v10.52: WHT completeness (ภ.ง.ด.3/53) — per-payee monthly under/missing analysis (no-op for other accounts)
+  h+=_wpbWhtCompleteness(A);
   // smart balance analysis (two-sided · nature · contra)
   h+=renderSmart(A);
   // open items
@@ -23455,6 +23496,7 @@ function render(A){
   R.innerHTML=h;
   var ab2=document.getElementById('wpbExport');if(ab2)ab2.addEventListener('click',function(){exportExcel(CURRENT,ab2);});
   var abo=document.getElementById('wpbXlOpen');if(abo)abo.addEventListener('click',function(){wpbExportOpenXlsx(abo);});
+  var awht=document.getElementById('wpbWhtXl');if(awht)awht.addEventListener('click',function(){_wpbWhtExport(awht);});
   var sbSeg=document.getElementById('wpbSbSeg');
   if(sbSeg)sbSeg.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){SBGROUP=b.getAttribute('data-g');if(CURRENT)render(CURRENT);});});
   var sbXlAll=document.getElementById('wpbSbXlAll');
@@ -23743,6 +23785,232 @@ function _wpbJVSection(A){
   return '<div style="margin-top:16px"><div class="wpb-tl" style="margin-bottom:8px">🔗 ที่มาของรายการ JV · Voucher lineage ('+linked.length+' รายการ)</div>'+
     '<table class="wpb-t"><thead><tr><th>JV</th><th>วันที่ JV</th><th class="r">ยอด</th><th>← ที่มา (ก่อนหน้า)</th><th>วันที่ที่มา</th><th>ห่างกัน</th><th>สัญญาณจับคู่</th></tr></thead><tbody>'+rows+'</tbody></table>'+
     '<div class="wpb-note">ระบบค้นหารายการ<b>ก่อนหน้า</b> (ที่ไม่ใช่ JV เช่น APO/APS/PV) ที่มี<b>ยอดเดียวกัน</b>กับ JV แต่ละใบ เพื่อสืบว่า JV นั้นมีที่มาจากเอกสารใด (เช่น ตั้งหนี้ด้วย APO ก่อน แล้วจึงปรับ/จัดประเภทด้วย JV)</div>'+foot+'</div>';
+}
+/* ===== v10.52: WHT completeness analysis (ภ.ง.ด.3 / ภ.ง.ด.53) =====
+   วิเคราะห์ความครบถ้วนของการหัก ณ ที่จ่าย "รายเดือน" จาก GL ของบัญชีภาษีหัก ณ ที่จ่ายค้างจ่าย
+   (2154003 = ภ.ง.ด.3 บุคคลธรรมดา · 2154004 = ภ.ง.ด.53 นิติบุคคล) — เรียนรู้จำนวนรายการปกติ
+   ต่อเดือนของแต่ละ "ผู้รับเงิน × ลักษณะเงินได้" แล้วชี้เดือนที่ "ยื่นขาด" (น้อยกว่าปกติ) และ
+   "ไม่ได้ยื่น/หายไป" (ขาดรายการกลางคัน หรือหยุดหักทั้งที่เคยหักสม่ำเสมอ).
+   ฝั่งเครดิต = การหัก (withholding) · ฝั่งเดบิต = การนำส่ง (remittance).                */
+var _WPBWHT=null;
+var _WHT_MM=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+function _whtMi(d){return d.getFullYear()*12+d.getMonth();}
+function _whtMLabel(mi){var y=Math.floor(mi/12),mo=((mi%12)+12)%12;return _WHT_MM[mo]+' '+(('0'+((y+543)%100)).slice(-2));}
+function _whtMFull(mi){var y=Math.floor(mi/12),mo=((mi%12)+12)%12;return _WHT_MM[mo]+' '+(y+543);}
+function _wpbWhtKind(A){
+  var c=String((A&&A.acct&&A.acct.code)||'').trim(),nm=String((A&&A.acct&&A.acct.name)||'');
+  if(c==='2154003')return {t:'3',label:'ภ.ง.ด.3 · หัก ณ ที่จ่าย บุคคลธรรมดา'};
+  if(c==='2154004')return {t:'53',label:'ภ.ง.ด.53 · หัก ณ ที่จ่าย นิติบุคคล'};
+  if(/ภ\.?\s*ง\.?\s*ด\.?\s*3(?!\d)|ภงด\.?\s*3(?!\d)/.test(nm))return {t:'3',label:'ภ.ง.ด.3 · หัก ณ ที่จ่าย'};
+  if(/ภ\.?\s*ง\.?\s*ด\.?\s*53|ภงด\.?\s*53/.test(nm))return {t:'53',label:'ภ.ง.ด.53 · หัก ณ ที่จ่าย'};
+  return null;
+}
+function _wpbWhtNature(remark){
+  var s=String(remark||'');
+  if((/เช่า/.test(s)&&!/เช่าซื้อ/.test(s))||/\brent\b/i.test(s))return 'ค่าเช่า';
+  if(/ขนส่ง|freight|transport/i.test(s))return 'ค่าขนส่ง';
+  if(/นายหน้า|คอมมิช|commission/i.test(s))return 'ค่านายหน้า/คอมมิชชั่น';
+  if(/โฆษณา|advertis/i.test(s))return 'ค่าโฆษณา';
+  if(/ดอกเบี้ย|interest/i.test(s))return 'ดอกเบี้ย';
+  if(/ปันผล|dividend/i.test(s))return 'เงินปันผล';
+  if(/ค่าสิทธิ|ลิขสิทธิ์|royalty/i.test(s))return 'ค่าสิทธิ';
+  if(/วิชาชีพ|ที่ปรึกษา|สอบบัญชี|ตรวจสอบบัญชี|กฎหมาย|ทนาย|ออกแบบ|consult|audit|legal|professional/i.test(s))return 'ค่าวิชาชีพ/ที่ปรึกษา';
+  if(/รับเหมา|จ้างเหมา|ก่อสร้าง|จ้างทำของ|ทำของ|construction|subcontract/i.test(s))return 'ค่าจ้างทำของ/รับเหมา';
+  if(/บริการ|ค่าจ้าง|ค่าแรง|service/i.test(s))return 'ค่าบริการ';
+  if(/ค่าธรรมเนียม|\bfee\b/i.test(s))return 'ค่าธรรมเนียม';
+  return 'อื่นๆ';
+}
+function _whtTypical(counts){
+  var freq={},best=0,bestF=0,k;
+  for(var i=0;i<counts.length;i++){var c=counts[i];freq[c]=(freq[c]||0)+1;}
+  for(k in freq){var cc=+k,f=freq[k];if(f>bestF||(f===bestF&&cc>best)){bestF=f;best=cc;}}
+  return best||1;
+}
+function _wpbWhtBuild(A){
+  var K=_wpbWhtKind(A); if(!K)return null;
+  var real=(A&&A.real)||[];
+  var credits=[],debByMi={},minMi=Infinity,dataMax=-Infinity,i,t,m;
+  for(i=0;i<real.length;i++){t=real[i]; if(!t.date)continue; m=_whtMi(t.date);
+    if((t.credit||0)>0.005){credits.push(t); if(m<minMi)minMi=m; if(m>dataMax)dataMax=m;}
+    if((t.debit||0)>0.005){debByMi[m]=(debByMi[m]||0)+(t.debit||0);}
+  }
+  if(!credits.length)return {K:K,empty:true};
+  var cutMi=(A.cutoff)?_whtMi(A.cutoff):dataMax;
+  var maxMi=Math.max(dataMax,cutMi);
+  var WINDOW=24;
+  var startMi=(maxMi-minMi+1>WINDOW)?(maxMi-WINDOW+1):minMi;
+  var omitted=Math.max(0,startMi-minMi);
+  var months=[];for(m=startMi;m<=maxMi;m++)months.push(m);
+  var streams={},order=[],payeeSet={},mSumN={},mSumAmt={};
+  credits.forEach(function(t){var mm=_whtMi(t.date); if(mm<startMi||mm>maxMi)return;
+    var payee=String(t.vendor||'').trim()||'(ไม่ระบุผู้รับเงิน)';
+    var nat=_wpbWhtNature(t.remark);
+    payeeSet[payee]=1; mSumN[mm]=(mSumN[mm]||0)+1; mSumAmt[mm]=(mSumAmt[mm]||0)+(t.credit||0);
+    var key=payee+''+nat;
+    var s=streams[key]; if(!s){s=streams[key]={payee:payee,nature:nat,by:{},n:0,amt:0,fm:Infinity,lm:-Infinity};order.push(key);}
+    var cell=s.by[mm]; if(!cell){cell=s.by[mm]={n:0,amt:0};}
+    cell.n++;cell.amt+=(t.credit||0);s.n++;s.amt+=(t.credit||0);
+    if(mm<s.fm)s.fm=mm; if(mm>s.lm)s.lm=mm;
+  });
+  var rows=[];
+  order.forEach(function(key){var s=streams[key];
+    var activeCounts=[],activeMonths=0,mm;
+    for(mm=s.fm;mm<=s.lm;mm++){var c=s.by[mm];if(c&&c.n>0){activeCounts.push(c.n);activeMonths++;}}
+    var life=s.lm-s.fm+1;
+    var T=_whtTypical(activeCounts);
+    var density=life>0?activeMonths/life:0;
+    var regular=(activeMonths>=3&&density>=0.6);
+    var cells=[],gaps=[],unders=[],trailing=0,internalGaps=0;
+    months.forEach(function(mm){
+      var c=s.by[mm],n=c?c.n:0,amt=c?c.amt:0,st;
+      if(mm<s.fm){st='pre';}
+      else if(mm>s.lm){ st=(regular?'miss':'post'); if(regular)trailing++; }
+      else { if(n===0){st=regular?'miss':'gapsoft'; if(regular){internalGaps++;gaps.push(mm);} }
+             else if(n<T){st='under'; unders.push({mi:mm,n:n,T:T}); }
+             else st='ok'; }
+      cells.push({mi:mm,n:n,amt:amt,st:st});
+    });
+    var trailingFrom=(regular&&s.lm<maxMi)?(s.lm+1):null;
+    var issue=0;
+    if(trailingFrom!=null)issue=3;
+    else if(internalGaps>0)issue=2;
+    else if(unders.length>0)issue=1;
+    if(!regular&&issue<1)issue=-1;
+    rows.push({s:s,T:T,regular:regular,activeMonths:activeMonths,life:life,cells:cells,gaps:gaps,unders:unders,trailing:trailing,trailingFrom:trailingFrom,internalGaps:internalGaps,issue:issue});
+  });
+  rows.sort(function(a,b){ if(b.issue!==a.issue)return b.issue-a.issue; return b.s.amt-a.s.amt; });
+  return {K:K,acct:A.acct,cutoff:A.cutoff,startMi:startMi,maxMi:maxMi,months:months,rows:rows,order:order,
+    payees:Object.keys(payeeSet).length,mSumN:mSumN,mSumAmt:mSumAmt,debByMi:debByMi,omitted:omitted};
+}
+function _wpbWhtCompleteness(A){
+  var D=_wpbWhtBuild(A); if(!D)return '';
+  var head='<div class="wpb-sec wsc-teal wpb-wht"><div class="wpb-sh"><h3>🔎 วิเคราะห์ความครบถ้วนการหัก ณ ที่จ่ายรายเดือน · '+esc(D.K.label)+'</h3>'
+    +(D.empty?'':'<button class="wpb-xl" id="wpbWhtXl" style="margin-left:auto;padding:7px 14px;font-size:12px">⬇ Excel</button>')
+    +'<span class="sub" style="margin-left:12px">'+esc(A.acct.code)+' · ตรวจจับ "ยื่นขาด / ไม่ได้ยื่น" จากรูปแบบรายการรายเดือนใน GL</span></div><div class="wpb-bd">';
+  if(D.empty){ return head+'<div class="wpb-empty">ไม่พบรายการหัก ณ ที่จ่าย (ฝั่งเครดิต) ในบัญชีนี้ — ยังวิเคราะห์ความครบถ้วนไม่ได้</div></div></div>'; }
+  var rows=D.rows,months=D.months,nMonths=months.length;
+  var nStopped=0,nGap=0,nUnder=0,nRegular=0;
+  rows.forEach(function(r){if(r.issue===3)nStopped++;else if(r.issue===2)nGap++;else if(r.issue===1)nUnder++; if(r.regular)nRegular++;});
+  var h=head;
+  h+='<div class="wpb-final" style="background:linear-gradient(120deg,var(--brand-t),#fff 82%);border-color:#BFE0D6;border-left-color:var(--brand)">';
+  h+='<div class="wpb-final-h" style="color:var(--brand-d)">📌 วิธีวิเคราะห์ — เทียบจำนวนรายการหัก ณ ที่จ่ายของ<b>ผู้รับเงินแต่ละราย (แยกตามลักษณะเงินได้)</b> ในแต่ละเดือน กับ<b>ค่าปกติ</b>ของผู้รับเงินรายนั้นเอง</div>';
+  h+='<div class="wpb-final-b">ช่วงที่วิเคราะห์: <b>'+_whtMFull(D.startMi)+' – '+_whtMFull(D.maxMi)+'</b> ('+nMonths+' เดือน)'+(D.omitted>0?(' · ตัดเดือนที่เก่ากว่านั้นออก '+D.omitted+' เดือน'):'')+' · ผู้รับเงิน '+D.payees+' ราย · สายรายการ '+D.order.length+' สาย (เป็นรายการประจำ '+nRegular+' สาย)</div>';
+  h+='</div>';
+  h+='<div class="wpb-flags" style="margin:10px 0">'
+    +'<span class="wpb-flag '+(nStopped?'bad':'ok')+'">🔴 หยุดหัก/หายไป '+nStopped+' สาย</span>'
+    +'<span class="wpb-flag '+(nGap?'warn':'ok')+'">🟠 ขาดรายการบางเดือน '+nGap+' สาย</span>'
+    +'<span class="wpb-flag '+(nUnder?'warn':'ok')+'">🟡 ยื่นขาด (น้อยกว่าปกติ) '+nUnder+' สาย</span>'
+    +'</div>';
+  // findings
+  var findings=[];
+  rows.forEach(function(r){ if(r.issue<1)return; var s=r.s;
+    var head2='<b>'+esc(s.payee)+'</b> · '+esc(s.nature);
+    var parts=[];
+    if(r.trailingFrom!=null)parts.push('เคยหักสม่ำเสมอ ~'+r.T+' รายการ/เดือน แต่<b>ไม่มีรายการตั้งแต่ '+_whtMFull(r.trailingFrom)+'</b> (ขาด '+r.trailing+' เดือนล่าสุด · หักครั้งสุดท้าย '+_whtMFull(s.lm)+')');
+    if(r.gaps.length)parts.push('เดือนที่<b>ไม่มีรายการ</b> ทั้งที่เดือนอื่นมี: '+r.gaps.map(_whtMFull).join(', ')+' (ปกติ ~'+r.T+' รายการ/เดือน)');
+    if(r.unders.length)parts.push('เดือนที่<b>ยื่นขาด</b> (ปกติ ~'+r.T+'): '+r.unders.map(function(u){return _whtMFull(u.mi)+' มี '+u.n+' (ขาด '+(u.T-u.n)+')';}).join(', '));
+    var icon=r.issue===3?'🔴':(r.issue===2?'🟠':'🟡');
+    findings.push('<li>'+icon+' '+head2+' — '+parts.join(' · ')+'</li>');
+  });
+  if(findings.length){ h+='<div class="wht-find"><div class="wht-find-h">⚠ ข้อสังเกต — รายการที่ควรตรวจสอบการหัก/การยื่น ('+findings.length+' สาย)</div><ul class="wht-find-l">'+findings.slice(0,30).join('')+'</ul>'+(findings.length>30?('<div class="wpb-note">… และอีก '+(findings.length-30)+' สาย (ดูตารางด้านล่าง หรือกด ⬇ Excel)</div>'):'')+'</div>'; }
+  else { h+='<div class="wpb-final-ok" style="margin:8px 0">✓ ไม่พบความผิดปกติเชิงรูปแบบ — ผู้รับเงินที่เป็นรายการประจำมีการหัก ณ ที่จ่ายครบถ้วนสม่ำเสมอทุกเดือน</div>'; }
+  // legend
+  h+='<div class="wht-mx-lg"><span><i style="background:#FDE8E4"></i> ไม่มีรายการ/หายไป (ควรตรวจ)</span><span><i style="background:#FEF3D6"></i> ยื่นขาด (น้อยกว่าปกติ)</span><span><i style="background:#fff;border:1px solid #ccc"></i> ปกติ</span><span><i style="background:repeating-linear-gradient(45deg,#fafafa,#fafafa 3px,#f0f0f0 3px,#f0f0f0 6px)"></i> ยังไม่เริ่มหัก</span></div>';
+  // matrix
+  var CAP=60,shown=rows.slice(0,CAP);
+  var mh='<div class="wht-scroll"><table class="wpb-t wht-mx"><thead><tr><th class="wht-py-h">ผู้รับเงิน · ลักษณะเงินได้</th><th class="r">ปกติ/ด.</th>';
+  months.forEach(function(mi){mh+='<th class="r">'+_whtMLabel(mi)+'</th>';});
+  mh+='<th class="r">รวมราย</th><th class="r">รวมภาษี (฿)</th></tr></thead><tbody>';
+  shown.forEach(function(r){var s=r.s;
+    var bdg=r.issue===3?'<span class="wht-bdg b3">หยุด/หายไป</span>':(r.issue===2?'<span class="wht-bdg b2">ขาดบางเดือน</span>':(r.issue===1?'<span class="wht-bdg b1">ยื่นขาด</span>':(r.regular?'<span class="wht-bdg b0">ปกติ</span>':'<span class="wht-bdg bm">ไม่ประจำ</span>')));
+    var rcls=r.issue===3?' class="wht-i3"':(r.issue===2?' class="wht-i2"':(r.issue===1?' class="wht-i1"':''));
+    mh+='<tr'+rcls+'><td class="wht-py-c"><span class="wht-py">'+esc(String(s.payee).slice(0,46))+'</span><span class="wht-nat">'+esc(s.nature)+bdg+'</span></td>';
+    mh+='<td class="r">'+(r.regular?r.T:'—')+'</td>';
+    r.cells.forEach(function(c){var txt=(c.st==='pre')?'':(c.st==='post'?'·':(''+c.n));
+      var ti=_whtMFull(c.mi)+' · '+(c.n>0?(c.n+' รายการ · '+fmt(c.amt)+' บาท'):'ไม่มีรายการ');
+      mh+='<td class="r whtc whtc-'+c.st+'" title="'+ti+'">'+txt+'</td>';});
+    mh+='<td class="r"><b>'+s.n+'</b></td><td class="r">'+fmt(s.amt)+'</td></tr>';
+  });
+  if(rows.length>CAP)mh+='<tr><td class="mut" colspan="'+(months.length+4)+'">… และอีก '+(rows.length-CAP)+' สาย (กด ⬇ Excel เพื่อดูครบ)</td></tr>';
+  // monthly totals
+  var totN=0,totA=0,totRem=0;
+  mh+='</tbody><tfoot>';
+  mh+='<tr><td class="wht-py-c">รวมหัก ณ ที่จ่าย (จำนวนรายการ)</td><td class="r"></td>';
+  months.forEach(function(mi){var v=D.mSumN[mi]||0;totN+=v;mh+='<td class="r">'+(v||'')+'</td>';});
+  mh+='<td class="r"><b>'+totN+'</b></td><td class="r"></td></tr>';
+  mh+='<tr><td class="wht-py-c">รวมภาษีที่หัก (฿)</td><td class="r"></td>';
+  months.forEach(function(mi){var v=D.mSumAmt[mi]||0;totA+=v;mh+='<td class="r">'+(v>0.005?fmt(v):'')+'</td>';});
+  mh+='<td class="r"></td><td class="r"><b>'+fmt(totA)+'</b></td></tr>';
+  mh+='<tr><td class="wht-py-c">นำส่งกรมสรรพากร · เดบิต (฿)</td><td class="r"></td>';
+  months.forEach(function(mi){var v=D.debByMi[mi]||0;totRem+=v;mh+='<td class="r">'+(v>0.005?fmt(v):'')+'</td>';});
+  mh+='<td class="r"></td><td class="r"><b>'+fmt(totRem)+'</b></td></tr>';
+  mh+='</tfoot></table></div>';
+  h+=mh;
+  h+='<div class="wpb-note"><b>อ่านตารางอย่างไร:</b> แต่ละแถวคือ "ผู้รับเงิน × ลักษณะเงินได้" (เช่น ค่าเช่าของนาย A) · คอลัมน์คือเดือน · ตัวเลขในช่องคือ<b>จำนวนรายการ</b>ที่หักในเดือนนั้น (วางเมาส์เพื่อดูยอดภาษี) · ช่อง<b>สีแดง</b> = เดือนที่ควรมีแต่ไม่มีรายการ (หายไป/หยุดหัก) · ช่อง<b>สีเหลือง</b> = มีน้อยกว่าปกติ (ยื่นขาด) · คอลัมน์ "ปกติ/ด." = จำนวนรายการที่พบบ่อยที่สุดต่อเดือนของผู้รับเงินรายนั้น · ระบบดูเฉพาะ<b>รายการประจำ</b> (มีอย่างน้อย 3 เดือน และสม่ำเสมอ ≥60%) จึงจะเตือน เพื่อลดสัญญาณหลอกจากรายการครั้งเดียว · แถวล่างสรุปยอดหักและยอดนำส่งรวมของทั้งบัญชีในแต่ละเดือน — ช่องว่างท้ายๆ อาจหมายถึง "ยังไม่ได้ยื่น" หรือ "ยังไม่ได้บันทึกบัญชี"</div>';
+  h+='</div></div>';
+  _WPBWHT=D;
+  return h;
+}
+function _wpbWhtExport(btn){
+  var D=_WPBWHT; if(!D||D.empty){alert('ยังไม่มีข้อมูลให้ส่งออก');return;}
+  if(typeof XLSX==='undefined'){alert('The Excel library is still loading — รอสักครู่แล้วลองใหม่');return;}
+  var old=btn?btn.textContent:'';if(btn){btn.disabled=true;btn.textContent='กำลังสร้าง…';}
+  try{
+    var months=D.months,NF='#,##0.00';
+    var mlabels=months.map(function(mi){return _whtMFull(mi);});
+    // Sheet 1: counts
+    var s1=[];
+    s1.push(['Working Paper · Balance — ความครบถ้วนการหัก ณ ที่จ่ายรายเดือน ('+D.K.label+')']);
+    s1.push(['บัญชี',D.acct.code+' '+D.acct.name]);
+    s1.push(['ช่วงที่วิเคราะห์',_whtMFull(D.startMi)+' – '+_whtMFull(D.maxMi),'','ณ วันที่',D.cutoff?dmy(D.cutoff):'']);
+    s1.push([]);
+    var h1=s1.length;
+    s1.push(['ผู้รับเงิน','ลักษณะเงินได้','ปกติ/เดือน','สถานะ'].concat(mlabels).concat(['รวมรายการ','รวมภาษี']));
+    D.rows.forEach(function(r){var s=r.s;
+      var stt=r.issue===3?'หยุด/หายไป':(r.issue===2?'ขาดบางเดือน':(r.issue===1?'ยื่นขาด':(r.regular?'ปกติ':'ไม่ประจำ')));
+      var row=[s.payee,s.nature,(r.regular?r.T:''),stt];
+      r.cells.forEach(function(c){row.push(c.st==='pre'?'':c.n);});
+      row.push(s.n);row.push(s.amt);s1.push(row);});
+    var tN=months.map(function(mi){return D.mSumN[mi]||0;});
+    s1.push(['รวมหัก (จำนวนรายการ)','','',''].concat(tN).concat([tN.reduce(function(a,b){return a+b;},0),'']));
+    var ws1=XLSX.utils.aoa_to_sheet(s1);
+    ws1['!cols']=[{wch:30},{wch:20},{wch:9},{wch:12}].concat(months.map(function(){return {wch:8};})).concat([{wch:11},{wch:15}]);
+    // Sheet 2: amounts
+    var s2=[['ผู้รับเงิน','ลักษณะเงินได้','สถานะ'].concat(mlabels).concat(['รวมภาษี'])];
+    D.rows.forEach(function(r){var s=r.s;var stt=r.issue===3?'หยุด/หายไป':(r.issue===2?'ขาดบางเดือน':(r.issue===1?'ยื่นขาด':(r.regular?'ปกติ':'ไม่ประจำ')));
+      var row=[s.payee,s.nature,stt];
+      r.cells.forEach(function(c){row.push(c.amt>0.005?c.amt:'');});
+      row.push(s.amt);s2.push(row);});
+    var tA=months.map(function(mi){return D.mSumAmt[mi]||0;});
+    var tR=months.map(function(mi){return D.debByMi[mi]||0;});
+    s2.push(['รวมภาษีที่หัก (เครดิต)','',''].concat(tA).concat([tA.reduce(function(a,b){return a+b;},0)]));
+    s2.push(['นำส่งกรมสรรพากร (เดบิต)','',''].concat(tR).concat([tR.reduce(function(a,b){return a+b;},0)]));
+    var ws2=XLSX.utils.aoa_to_sheet(s2);
+    ws2['!cols']=[{wch:30},{wch:20},{wch:12}].concat(months.map(function(){return {wch:13};})).concat([{wch:15}]);
+    // Sheet 3: findings
+    var s3=[['#','ระดับ','ผู้รับเงิน','ลักษณะเงินได้','ปกติ/เดือน','รายละเอียดข้อสังเกต']];
+    var fi=0;
+    D.rows.forEach(function(r){ if(r.issue<1)return; var s=r.s;fi++;
+      var lvl=r.issue===3?'หยุด/หายไป':(r.issue===2?'ขาดบางเดือน':'ยื่นขาด');
+      var parts=[];
+      if(r.trailingFrom!=null)parts.push('ไม่มีรายการตั้งแต่ '+_whtMFull(r.trailingFrom)+' (ขาด '+r.trailing+' เดือน · ครั้งสุดท้าย '+_whtMFull(s.lm)+')');
+      if(r.gaps.length)parts.push('ไม่มีรายการเดือน: '+r.gaps.map(_whtMFull).join(', '));
+      if(r.unders.length)parts.push('ยื่นขาด: '+r.unders.map(function(u){return _whtMFull(u.mi)+' มี '+u.n+' (ขาด '+(u.T-u.n)+')';}).join(', '));
+      s3.push([fi,lvl,s.payee,s.nature,r.T,parts.join(' · ')]);});
+    if(fi===0)s3.push(['','','','','','ไม่พบความผิดปกติเชิงรูปแบบ']);
+    var ws3=XLSX.utils.aoa_to_sheet(s3);
+    ws3['!cols']=[{wch:5},{wch:14},{wch:30},{wch:20},{wch:9},{wch:80}];
+    // number formats
+    function fmtCols(ws,cols,r0){var rng=XLSX.utils.decode_range(ws['!ref']);for(var R=r0;R<=rng.e.r;R++){cols.forEach(function(C){var cell=ws[XLSX.utils.encode_cell({r:R,c:C})];if(cell&&typeof cell.v==='number'){cell.t='n';cell.z=NF;}});}}
+    var amtCols2=[]; for(var c2=3;c2<3+months.length+1;c2++)amtCols2.push(c2); fmtCols(ws2,amtCols2,1);
+    fmtCols(ws1,[4+months.length+1],h1);/* "รวมภาษี" column on the counts sheet */
+    var wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws1,'จำนวนรายการรายเดือน');
+    XLSX.utils.book_append_sheet(wb,ws2,'ยอดภาษีรายเดือน');
+    XLSX.utils.book_append_sheet(wb,ws3,'ข้อสังเกต');
+    XLSX.writeFile(wb,'WP_WHT_'+D.K.t+'_'+(D.acct.code||'')+'.xlsx');
+  }catch(e){alert('สร้าง Excel ไม่สำเร็จ: '+((e&&e.message)||e));}
+  if(btn){btn.disabled=false;btn.textContent=old;}
 }
 function renderSmart(A){
   if(A.acct.cls!=='cumulative')return '';
