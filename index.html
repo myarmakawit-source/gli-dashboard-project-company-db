@@ -10283,7 +10283,7 @@ function _pgHtml(){
   statLeg+='</div>';
   return '<div class="pgpage">'+
     chips+kpis+statLeg+
-    '<div class="pgtools"><input type="text" class="pgq" placeholder="🔍 ค้นหาโปรเจค — รหัส / ชื่อ / ผู้ว่าจ้าง / ยอด (ทุกฟิลด์)" value="'+esc(_pgQ||'')+'" spellcheck="false" autocomplete="off"><span class="pgcount">'+nAll+' projects'+(_pgAnyFilter()?(' / '+nTot):'')+'</span>'+(_pgAnyFilter()?'<button type="button" class="pgclrf" title="Clear all filters">✕ Clear filters</button>':'')+'<button type="button" class="pgactual-btn'+(manTot?'':' on')+'" title="Compute the real Progress % from GL — clears ALL manual / pasted %">🧮 Actual %</button><button type="button" class="pgpaste-btn'+(manTot?' on':'')+'" title="Paste a template of manual Progress % — Project No. + %">📋 Paste %'+(manTot?(' · '+manTot):'')+'</button><button type="button" class="pgexport-btn" title="Export the current table (with the active filters) to Excel .xlsx">⬇ Excel</button><button type="button" class="pgpdf-btn" title="พิมพ์ / บันทึกตาราง Progress % (ตามตัวกรองปัจจุบัน) เป็น PDF สวยงาม">🖨 PDF</button><span class="pghint">↕ Sort by header · ▾ Excel-style filter</span></div>'+
+    '<div class="pgtools"><input type="text" class="pgq" placeholder="🔍 ค้นหาโปรเจค — รหัส / ชื่อ / ผู้ว่าจ้าง / ยอด (ทุกฟิลด์)" value="'+esc(_pgQ||'')+'" spellcheck="false" autocomplete="off"><span class="pgcount">'+nAll+' projects'+(_pgAnyFilter()?(' / '+nTot):'')+'</span>'+(_pgAnyFilter()?'<button type="button" class="pgclrf" title="Clear all filters">✕ Clear filters</button>':'')+'<button type="button" class="pgactual-btn'+(manTot?'':' on')+'" title="Compute the real Progress % from GL — clears ALL manual / pasted %">🧮 Actual %</button><button type="button" class="pgpaste-btn'+(manTot?' on':'')+'" title="Paste a template of manual Progress % — Project No. + %">📋 Paste %'+(manTot?(' · '+manTot):'')+'</button><button type="button" class="pgexport-btn" title="Export the current table (with the active filters) to Excel .xlsx">⬇ Excel</button><button type="button" class="pgpdf-btn" title="พิมพ์ / บันทึกตาราง Progress % (ตามตัวกรองปัจจุบัน) เป็น PDF สวยงาม">🖨 PDF</button><button type="button" class="pgrecon-btn" title="กระทบยอด GL ↔ Progress % — อธิบายว่ายอดต่างจาก GL จริงตรงไหน">🧮 กระทบยอด GL</button><span class="pghint">↕ Sort by header · ▾ Excel-style filter</span></div>'+
     '<div class="pgtblwrap"><table class="pgtbl">'+head+'<tbody>'+body+'</tbody>'+foot+'</table></div>'+
     '<p class="pgnote"><b>Progress %</b> compares actual <b>Cost (GL)</b> against the <b>Contract Expense</b> (budget) — under 80% = in progress · 80–100% = near budget · over 100% = <b class="pgred">over budget</b>. <b>Earned Revenue (POC)</b> = Progress % × Contract Revenue (percentage-of-completion). Projects without a contract-expense budget are not measured. Figures follow the selected database year in Business Performance.</p>'+
     '</div>';
@@ -10298,6 +10298,7 @@ function _pgBind(w){ if(_pgBound)return; _pgBound=true;
     var pst=t.closest?t.closest('.pgpaste-btn'):null; if(pst){ _pgPasteOpen(); return; }   /* v9.138: paste manual % template */
     var xpt=t.closest?t.closest('.pgexport-btn'):null; if(xpt){ _pgExportXlsx(); return; }   /* v9.155: export table to Excel */
     var ppdf=t.closest?t.closest('.pgpdf-btn'):null; if(ppdf){ _pgPrintPdf(); return; }   /* v9.181: print / save as PDF */
+    var prcn=t.closest?t.closest('.pgrecon-btn'):null; if(prcn){ _pgReconOpen(); return; }   /* v10.54: GL ↔ Progress% reconciliation */
     var act=t.closest?t.closest('.pgactual-btn'):null; if(act){ var _mc=0,_lk=0; try{ for(var _mk in _pgManPct){ if(Object.prototype.hasOwnProperty.call(_pgManPct,_mk)){ if(_pgLock&&_pgLock[_mk])_lk++; else _mc++; } } }catch(e){} if(!_mc){ renderProgress(); return; } if(confirm('Switch to Actual % — compute every Progress % from GL and clear '+_mc+' manual / pasted %'+(_lk?(' ('+_lk+' locked project(s) kept)'):'')+'? (Saved databases are kept.)')){ _pgClearMan(); renderProgress(); } return; }   /* v9.139/144: actual % — clear all manual overrides except locked */
     var fbt=t.closest?t.closest('.pgfbtn'):null; if(fbt){ if(e&&e.stopPropagation)e.stopPropagation(); _pgOpenFilter(fbt.getAttribute('data-fcol'),fbt); return; }   /* v9.135: Excel-style column filter */
     var sh=t.closest?t.closest('.pgsort'):null; if(sh){ var k=sh.getAttribute('data-sk'); if(_pgSort.k===k)_pgSort.dir=-_pgSort.dir; else _pgSort={k:k,dir:((k==='code'||k==='status')?1:-1)}; renderProgress(); return; } });
@@ -10453,6 +10454,97 @@ function _pgDrillScan(code,key){ var def=_PG_DRILL[key]; if(!def)return null;
   return {def:def,list:list,sum:Math.round(sum*100)/100,tDr:Math.round(tDr*100)/100,tCr:Math.round(tCr*100)/100,noGL:false}; }
 function _pgDrillClose(){ var m=document.getElementById('pgDrillModal'); if(m&&m.parentNode)m.parentNode.removeChild(m); document.removeEventListener('keydown',_pgDrillEsc); }
 function _pgDrillEsc(e){ if(e&&e.key==='Escape')_pgDrillClose(); }
+/* ===================== v10.54: GL ↔ Progress% RECONCILIATION — explain why the Progress% totals (a frozen Business-Performance snapshot: glEff=r.gl_total / expEff=r.expense) differ from the LIVE general ledger, and pinpoint exactly where ===================== */
+function _pgReconcile(){
+  var rows=(typeof DATA!=='undefined'&&DATA&&DATA.rows)?DATA.rows:[];
+  var GL=(typeof GLROWS!=='undefined'&&GLROWS)?GLROWS:null;
+  var master={},frozenRev={},frozenCost={},i,k;
+  for(i=0;i<rows.length;i++){ var r=rows[i]; if(!r||r.code==null)continue; var c=(''+r.code).trim(); if(!c)continue; master[c]=r;
+    var gv=(typeof glEff==='function')?glEff(r):null, ev=(typeof expEff==='function')?expEff(r):null;
+    frozenRev[c]=(gv==null?0:(+gv||0)); frozenCost[c]=(ev==null?0:(+ev||0)); }
+  var liveRev={},liveCost={},blankRev=0,blankCost=0,hasGL=!!(GL&&GL.length);
+  if(hasGL){ for(var g=0;g<GL.length;g++){ var rr=GL[g]; if(!rr)continue;
+    var code=(''+(rr[0]||'')).trim(); if(!code)continue; var cls=code.charAt(0); if(cls!=='4'&&cls!=='5')continue;
+    var p=(''+(rr[13]||'')).trim().replace(/#.*$/,''); var dr=+rr[16]||0, cr=+rr[17]||0;
+    if(cls==='4'){ var v=cr-dr; if(!p)blankRev+=v; else liveRev[p]=(liveRev[p]||0)+v; }
+    else { var v2=dr-cr; if(!p)blankCost+=v2; else liveCost[p]=(liveCost[p]||0)+v2; } } }
+  function build(frozen,live,blank){
+    var codes={},kk; for(kk in frozen)codes[kk]=1; for(kk in live)codes[kk]=1;
+    var items=[],frozenTot=0,liveTot=blank,mismatch=0,unreg=0,bponly=0;
+    for(kk in codes){ var f=Math.round((frozen[kk]||0)*100)/100, l=Math.round((live[kk]||0)*100)/100, d=Math.round((l-f)*100)/100;
+      frozenTot+=f; liveTot+=l;
+      var inM=Object.prototype.hasOwnProperty.call(master,kk);
+      var cat=!inM?'unreg':((Math.abs(l)<0.005&&Math.abs(f)>0.005)?'bponly':'mismatch');
+      if(Math.abs(d)>=0.005){ items.push({code:kk,frozen:f,live:l,diff:d,cat:cat,name:(inM&&typeof dispName==='function')?dispName(master[kk]):''});
+        if(cat==='unreg')unreg+=l; else if(cat==='bponly')bponly+=(-f); else mismatch+=d; } }
+    items.sort(function(a,b){return Math.abs(b.diff)-Math.abs(a.diff);});
+    return {frozenTot:Math.round(frozenTot*100)/100, liveTot:Math.round(liveTot*100)/100, diff:Math.round((liveTot-frozenTot)*100)/100,
+      blank:Math.round(blank*100)/100, unreg:Math.round(unreg*100)/100, bponly:Math.round(bponly*100)/100, mismatch:Math.round(mismatch*100)/100, items:items}; }
+  return {hasGL:hasGL, rev:build(frozenRev,liveRev,blankRev), cost:build(frozenCost,liveCost,blankCost)};
+}
+function _pgReconCss(){ if(document.getElementById('pgrc-style'))return; var s=document.createElement('style'); s.id='pgrc-style'; s.textContent=[
+ '.pgrc-ov{position:fixed;inset:0;background:rgba(10,20,35,.55);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:24px 14px;overflow:auto}',
+ '.pgrc-card{background:#fff;max-width:960px;width:100%;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden;font-family:inherit}',
+ '.pgrc-hd{display:flex;align-items:flex-start;gap:12px;background:linear-gradient(120deg,#0B2545,#134074);color:#fff;padding:15px 20px}',
+ '.pgrc-hd .t{font-size:16px;font-weight:800}','.pgrc-hd .sub{font-size:11.5px;color:#CFE0F0;margin-top:2px;max-width:660px;line-height:1.5}','.pgrc-hd .sp{margin-left:auto;display:flex;gap:8px}',
+ '.pgrc-btn{border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer}',
+ '.pgrc-bd{padding:16px 20px;max-height:78vh;overflow:auto}',
+ '.pgrc-sec{margin-bottom:16px}','.pgrc-st{font-size:14px;font-weight:800;color:#0B2545;margin-bottom:7px;border-left:4px solid #134074;padding-left:9px}',
+ '.pgrc-kb{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:9px}',
+ '.pgrc-k{border:1px solid #DCE3EC;border-radius:10px;padding:9px 12px;background:#F5F8FB}','.pgrc-k span{display:block;font-size:10px;color:#6B7A8D;font-weight:600}','.pgrc-k b{font-size:15.5px;color:#0B2545;font-variant-numeric:tabular-nums}',
+ '.pgrc-k.diff{background:#FBF1DD;border-color:#EAD9AE}','.pgrc-k .neg{color:#C0392B}','.pgrc-k .pos{color:#127A4E}',
+ '.pgrc-t,.pgrc-t2{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}',
+ '.pgrc-t th,.pgrc-t td,.pgrc-t2 th,.pgrc-t2 td{border-bottom:1px solid #EDF1F6;padding:5px 9px;text-align:right;font-variant-numeric:tabular-nums}',
+ '.pgrc-t th.l,.pgrc-t td.l,.pgrc-t2 th.l,.pgrc-t2 td.l{text-align:left}',
+ '.pgrc-t thead th,.pgrc-t2 thead th{background:#EEF3FA;color:#134074;font-weight:700}',
+ '.pgrc-t tfoot td{background:#0B2545;color:#fff;font-weight:800}',
+ '.pgrc-t .neg,.pgrc-t2 .neg{color:#C0392B;font-weight:600}','.pgrc-t .pos,.pgrc-t2 .pos{color:#127A4E;font-weight:600}',
+ '.pgrc-h{font-size:10px;color:#6B7A8D;font-weight:400;margin-top:1px}',
+ '.pgrc-top{font-size:11.5px;font-weight:800;color:#134074;margin:9px 0 2px}',
+ '.pgrc-nm{color:#6B7A8D;font-weight:400;font-size:11px}','.pgrc-more{font-size:10.5px;color:#6B7A8D;margin-top:4px}',
+ '.pgrc-tag{font-size:9px;font-weight:800;border-radius:5px;padding:1px 6px;margin-left:5px;white-space:nowrap}',
+ '.pgrc-tag.unreg{background:#FBE9E7;color:#C0392B}','.pgrc-tag.bponly{background:#EEF2F7;color:#64748B}','.pgrc-tag.mismatch{background:#FBF1DD;color:#B7791F}',
+ '.pgrc-note{font-size:11px;color:#243B53;line-height:1.6;background:#F5F8FB;border:1px solid #DCE3EC;border-radius:10px;padding:11px 14px;margin-top:6px}',
+ '.pgrc-warn{font-size:13px;color:#B7791F;background:#FBF1DD;border:1px solid #EAD9AE;border-radius:10px;padding:14px}'
+].join(''); document.head.appendChild(s); }
+function _pgReconClose(){ var m=document.getElementById('pgReconModal'); if(m&&m.parentNode)m.parentNode.removeChild(m); document.removeEventListener('keydown',_pgReconEsc); }
+function _pgReconEsc(e){ if(e&&e.key==='Escape')_pgReconClose(); }
+function _pgReconSect(title,ic,d){
+  function catRow(no,lab,val,hint){ if(Math.abs(val)<0.005)return ''; return '<tr><td class="l"><b>'+no+'</b> '+lab+'<div class="pgrc-h">'+hint+'</div></td><td class="'+(val<0?'neg':'pos')+'">'+fmt(val)+'</td></tr>'; }
+  var catLab={unreg:'ไม่อยู่ในทะเบียน',bponly:'ไม่มีใน GL',mismatch:'BP≠GL'};
+  var top=d.items.slice(0,12).map(function(it){ return '<tr><td class="l"><b>'+esc(it.code)+'</b>'+(it.name?(' <span class="pgrc-nm">'+esc(String(it.name).slice(0,26))+'</span>'):'')+' <span class="pgrc-tag '+it.cat+'">'+catLab[it.cat]+'</span></td><td>'+fmt(it.frozen)+'</td><td>'+fmt(it.live)+'</td><td class="'+(it.diff<0?'neg':'pos')+'">'+fmt(it.diff)+'</td></tr>'; }).join('');
+  return '<div class="pgrc-sec"><div class="pgrc-st">'+ic+' '+title+'</div>'+
+    '<div class="pgrc-kb"><div class="pgrc-k"><span>Progress % (ภาพนิ่ง BP)</span><b>'+fmt(d.frozenTot)+'</b></div>'+
+    '<div class="pgrc-k"><span>GL จริง (live ledger)</span><b>'+fmt(d.liveTot)+'</b></div>'+
+    '<div class="pgrc-k diff"><span>ผลต่าง (GL − Progress%)</span><b class="'+(d.diff<0?'neg':'pos')+'">'+fmt(d.diff)+'</b></div></div>'+
+    '<table class="pgrc-t"><thead><tr><th class="l">องค์ประกอบของผลต่าง</th><th>จำนวนเงิน</th></tr></thead><tbody>'+
+      catRow('①','GL ที่ไม่ระบุรหัสโครงการ',d.blank,'รายการ GL ที่ไม่ได้ผูกกับโครงการใด (ช่อง Ref.Code / รหัสโครงการ ว่าง)')+
+      catRow('②','โครงการที่ไม่อยู่ในทะเบียน PM',d.unreg,'มีใน GL แต่ยังไม่ได้ลงทะเบียนใน Project Master')+
+      catRow('③','ยอด BP ไม่ตรงกับ GL ปัจจุบัน',d.mismatch,'ข้อมูล BP ถูก “แช่แข็ง” ไว้ — GL ถูกแก้/เพิ่มหลังสร้างฐาน BP')+
+      catRow('④','มีใน BP แต่ไม่พบใน GL',d.bponly,'ยอดที่ค้างในฐาน BP แต่ไม่มีรายการใน GL ปัจจุบัน')+
+    '</tbody><tfoot><tr><td class="l">รวมผลต่างทั้งหมด</td><td>'+fmt(d.diff)+'</td></tr></tfoot></table>'+
+    (top?('<div class="pgrc-top">โครงการที่ต่างมากที่สุด</div><table class="pgrc-t2"><thead><tr><th class="l">โครงการ</th><th>BP (ภาพนิ่ง)</th><th>GL จริง</th><th>ต่าง</th></tr></thead><tbody>'+top+'</tbody></table>'+(d.items.length>12?('<div class="pgrc-more">… และอีก '+(d.items.length-12)+' โครงการ — กด ⬇ Excel เพื่อดูครบ</div>'):'')):'<div class="pgrc-more">✓ ไม่พบผลต่างรายโครงการ</div>')+
+    '</div>';
+}
+function _pgReconOpen(){ _pgReconClose(); _pgReconCss();
+  if(typeof GLROWS==='undefined'||!GLROWS||!GLROWS.length){ try{if(typeof _pgEnsureGL==='function')_pgEnsureGL();}catch(e){} }
+  var R=_pgReconcile();
+  var body=R.hasGL?(_pgReconSect('รายได้ · Revenue (บัญชีหมวด 4)','💵',R.rev)+_pgReconSect('ต้นทุน · Cost (บัญชีหมวด 5)','🧱',R.cost))
+    :'<div class="pgrc-warn">⚠ ยังไม่ได้โหลด GL — กรุณาเปิดโมดูล “Database (คลังข้อมูล)” ให้ GL โหลดเสร็จก่อน แล้วเปิดหน้านี้ใหม่</div>';
+  var ov=document.createElement('div'); ov.id='pgReconModal'; ov.className='pgrc-ov';
+  ov.innerHTML='<div class="pgrc-card"><div class="pgrc-hd"><div><div class="t">🧮 กระทบยอด GL ↔ Progress %</div><div class="sub">คอลัมน์ GL/Cost ในตาราง Progress % ดึงจาก “ภาพนิ่ง” ของฐานข้อมูล Business Performance (ต่อโครงการ) — ตารางนี้อธิบายว่าต่างจาก GL จริงตรงไหน (ใช้ทุกโครงการ ไม่สนตัวกรอง)</div></div><div class="sp">'+(R.hasGL?'<button type="button" class="pgrc-btn pgrc-xl">⬇ Excel</button>':'')+'<button type="button" class="pgrc-btn pgrc-x">✕ ปิด</button></div></div><div class="pgrc-bd">'+body+
+    '<div class="pgrc-note"><b>วิธีแก้ให้ตรงกัน:</b> (๑) <b>สร้าง/รีเฟรชฐานข้อมูล Business Performance ใหม่จาก GL ปัจจุบัน</b> เพื่อล้างค่าที่แช่แข็งไว้ (แก้ข้อ ③) · (๒) <b>ผูกรหัสโครงการ (Ref.Code) ให้ครบทุกรายการใน GL</b> (แก้ข้อ ①) · (๓) <b>ลงทะเบียนโครงการที่ขาดใน Project Master</b> (แก้ข้อ ②) · ตรวจรายโครงการแบบเจาะลึกได้จากปุ่ม 🔎 บนแต่ละยอดในตาราง Progress %</div></div></div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click',function(e){ var t=e.target; if(t===ov||(t.closest&&t.closest('.pgrc-x'))){ _pgReconClose(); return; } if(t.closest&&t.closest('.pgrc-xl')){ _pgReconXlsx(R); } });
+  document.addEventListener('keydown',_pgReconEsc);
+}
+function _pgReconXlsx(R){ if(typeof XLSX==='undefined'){alert('กำลังโหลดไลบรารี Excel — รอสักครู่แล้วลองใหม่');return;} R=R||_pgReconcile();
+  function sh(d,label){ var a=[['GLI — กระทบยอด GL ↔ Progress % · '+label],[],['สรุป',''],['Progress % (ภาพนิ่ง BP)',d.frozenTot],['GL จริง (live)',d.liveTot],['ผลต่าง (GL − Progress%)',d.diff],[],['องค์ประกอบของผลต่าง',''],['① GL ไม่ระบุรหัสโครงการ',d.blank],['② โครงการไม่อยู่ในทะเบียน PM',d.unreg],['③ BP ไม่ตรงกับ GL ปัจจุบัน',d.mismatch],['④ มีใน BP แต่ไม่พบใน GL',d.bponly],[],['รายโครงการที่ต่าง'],['รหัส','ชื่อโครงการ','ประเภท','BP (ภาพนิ่ง)','GL จริง','ต่าง']];
+    var cat={unreg:'ไม่อยู่ในทะเบียน',bponly:'ไม่มีใน GL',mismatch:'BP≠GL'};
+    d.items.forEach(function(it){ a.push([it.code,it.name||'',cat[it.cat],it.frozen,it.live,it.diff]); });
+    var ws=XLSX.utils.aoa_to_sheet(a); ws['!cols']=[{wch:16},{wch:34},{wch:16},{wch:18},{wch:18},{wch:16}]; return ws; }
+  var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,sh(R.rev,'รายได้'),'Revenue'); XLSX.utils.book_append_sheet(wb,sh(R.cost,'ต้นทุน'),'Cost');
+  XLSX.writeFile(wb,'GLI_Progress_GL_Reconcile.xlsx'); }
 function _pgGLDrill(code,key){ _pgDrillClose(); var def=_PG_DRILL[key]; if(!def||!code)return;
   if(typeof GLROWS==='undefined'||!GLROWS||!GLROWS.length){ try{if(typeof _pgEnsureGL==='function')_pgEnsureGL();}catch(e){} }
   var res=_pgDrillScan(code,key); if(!res)return;
