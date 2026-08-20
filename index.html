@@ -10120,6 +10120,38 @@ var _pgLock={}; try{ var _plk0=localStorage.getItem('gli_pglock'); if(_plk0){ va
 function _pgLockSave(){ try{localStorage.setItem('gli_pglock',JSON.stringify(_pgLock));}catch(e){} try{if(typeof _tsTouch==='function')_tsTouch('pglk');}catch(e){} try{if(typeof cloudPush==='function')cloudPush();}catch(e){} }
 /* v9.144: clear all manual % EXCEPT locked projects (used by Actual% + the paste modal's Clear-all) */
 function _pgClearMan(){ var keep={}; try{ for(var c in _pgManPct){ if(Object.prototype.hasOwnProperty.call(_pgManPct,c)&&_pgLock&&_pgLock[c])keep[c]=_pgManPct[c]; } }catch(e){} _pgManPct=keep; _pgManSave(); }
+/* v9.184: Progress % — GL cost หมวด selector (5/6/7, multi) drives %Progress; and per-project GL reduction (pasted รหัส + จำนวนที่ลด) */
+var _pgCat={'5':true,'6':true,'7':true}; try{ var _pc0=localStorage.getItem('gli_pgcat'); if(_pc0){ var _pco0=JSON.parse(_pc0); if(_pco0&&typeof _pco0==='object')_pgCat={'5':_pco0['5']!==false,'6':_pco0['6']!==false,'7':_pco0['7']!==false}; } }catch(_pce0){}
+function _pgCatSave(){ try{localStorage.setItem('gli_pgcat',JSON.stringify(_pgCat));}catch(e){} try{if(typeof _tsTouch==='function')_tsTouch('pgcat');}catch(e){} try{if(typeof cloudPush==='function')cloudPush();}catch(e){} }
+function _pgCatLabel(){ if(_pgCat['5']&&_pgCat['6']&&_pgCat['7'])return 'รวม 5+6+7'; var a=[]; if(_pgCat['5'])a.push('5'); if(_pgCat['6'])a.push('6'); if(_pgCat['7'])a.push('7'); return a.length?('หมวด '+a.join('+')):'รวม 5+6+7'; }
+function _pgCostSel(r){ var comb=expEff(r); var all=(!_pgCat['5']&&!_pgCat['6']&&!_pgCat['7'])||(_pgCat['5']&&_pgCat['6']&&_pgCat['7']); if(all)return comb; var ec=(typeof _expCatCum==='function')?_expCatCum(r.code):[0,0,0]; var s=(_pgCat['5']?(+ec[0]||0):0)+(_pgCat['6']?(+ec[1]||0):0)+(_pgCat['7']?(+ec[2]||0):0); if(comb==null&&s===0)return null; return Math.round(s*100)/100; }
+var _pgGlReduce={}; try{ var _pgr0=localStorage.getItem('gli_pgglred'); if(_pgr0){ var _pgo0=JSON.parse(_pgr0); if(_pgo0&&typeof _pgo0==='object')_pgGlReduce=_pgo0; } }catch(_pgre0){ _pgGlReduce={}; }
+function _pgGlReduceSave(){ try{localStorage.setItem('gli_pgglred',JSON.stringify(_pgGlReduce));}catch(e){} try{if(typeof _tsTouch==='function')_tsTouch('pgglred');}catch(e){} try{if(typeof cloudPush==='function')cloudPush();}catch(e){} }
+function _pgRedN(){ var n=0; try{ for(var k in _pgGlReduce){ if(Object.prototype.hasOwnProperty.call(_pgGlReduce,k)&&_pgGlReduce[k])n++; } }catch(e){} return n; }
+function _pgReduceClose(){ var m=document.getElementById('pgReduceModal'); if(m&&m.parentNode)m.parentNode.removeChild(m); }
+function _pgReduceApply(text){ var lines=(''+(text||'')).split(/\r?\n/); var applied=0,cleared=0,codes={};
+  for(var i=0;i<lines.length;i++){ var ln=lines[i]; if(!ln||!ln.trim())continue;
+    var parts=ln.split(/\t|;|,|\s{2,}/); if(parts.length<2)parts=ln.trim().split(/\s+/); if(parts.length<2)continue;
+    var code=(parts[0]||'').trim(), pv=(parts[parts.length-1]||'').trim(); if(!code)continue;
+    var num=parseFloat(pv.replace(/[,\s฿]/g,'')); if(isNaN(num))continue;
+    if(num===0){ if(_pgGlReduce[code]!=null){delete _pgGlReduce[code];cleared++;} continue; }
+    _pgGlReduce[code]=Math.round(num*100)/100; applied++; codes[code]=1; }
+  _pgGlReduceSave();
+  var matched=0,unknown=0; try{ var have={}; ((typeof DATA!=='undefined'&&DATA&&DATA.rows)||[]).forEach(function(r){have[r.code]=1;}); for(var c in codes){ if(have[c])matched++; else unknown++; } }catch(e){}
+  return {applied:applied,cleared:cleared,matched:matched,unknown:unknown}; }
+function _pgReduceOpen(){ _pgReduceClose(); var cnt=0,sum=0; try{ for(var k in _pgGlReduce){ if(_pgGlReduce[k]){cnt++;sum+=+_pgGlReduce[k]||0;} } }catch(e){}
+  var ov=document.createElement('div'); ov.id='pgReduceModal'; ov.className='pgpaste-ov';
+  ov.innerHTML='<div class="pgpaste-card"><div class="pgpaste-hd">➖ ลดมูลค่า GL สำหรับคิด %Progress</div>'+
+    '<div class="pgpaste-sub">วางสองคอลัมน์จาก Excel — <b>รหัสโปรเจค</b> และ <b>จำนวนเงินที่จะลด</b> (บาท) — บรรทัดละ 1 โปรเจค (คั่นด้วย Tab / เว้นวรรค). ระบบจะใช้ <b>GL Cost − จำนวนที่ลด</b> ไปคิด %Progress และ Earned Revenue. ใส่ <code>0</code> เพื่อยกเลิกส่วนลดของโปรเจคนั้น.</div>'+
+    '<textarea id="pgReduceTA" class="pgpaste-ta" spellcheck="false" placeholder="GLI23005&#9;50000000&#10;GLI21004&#9;12000000"></textarea>'+
+    '<div class="pgpaste-ft"><span class="pgpaste-cnt">'+(cnt?('ปัจจุบันลด '+cnt+' โปรเจค · รวม ฿'+fmt(Math.round(sum*100)/100)):'ยังไม่มีส่วนลด')+'</span>'+
+    '<div class="pgpaste-btns">'+(cnt?'<button type="button" class="pgpaste-clr" id="pgReduceClr">ล้างส่วนลดทั้งหมด</button>':'')+'<button type="button" class="pgpaste-cancel" id="pgReduceCancel">ยกเลิก</button><button type="button" class="pri pgpaste-apply" id="pgReduceApplyBtn">ใช้งาน</button></div></div></div>';
+  document.body.appendChild(ov); var ta=ov.querySelector('#pgReduceTA'); if(ta){try{ta.focus();}catch(e){}}
+  ov.querySelector('#pgReduceApplyBtn').addEventListener('click',function(){ var res=_pgReduceApply(ta?ta.value:''); _pgReduceClose(); renderProgress(); try{alert('ตั้งส่วนลด GL '+res.applied+' โปรเจค'+(res.cleared?(' · ยกเลิก '+res.cleared):'')+' · พบในปีนี้ '+res.matched+(res.unknown?(' · ไม่พบรหัส '+res.unknown+' (เก็บไว้ อาจตรงปีอื่น)'):''));}catch(e){} });
+  ov.querySelector('#pgReduceCancel').addEventListener('click',_pgReduceClose);
+  var clrb=ov.querySelector('#pgReduceClr'); if(clrb)clrb.addEventListener('click',function(){ if(confirm('ล้างส่วนลด GL ทั้งหมด?')){ _pgGlReduce={}; _pgGlReduceSave(); _pgReduceClose(); renderProgress(); } });
+  ov.addEventListener('mousedown',function(e){ if(e.target===ov)_pgReduceClose(); });
+  ov.addEventListener('keydown',function(e){ if(e.key==='Escape')_pgReduceClose(); }); }
 function _pgNum(v){ return (v==null)?null:(+v||0); }
 function _pgTile(v){ if(v==null)return '—'; var a=Math.abs(v); if(a>=1e6)return (v/1e6).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' M'; return fmt(v); }
 function _pgProg(cost,conExp){ return (conExp!=null&&conExp!==0)?((cost||0)/conExp*100):null; }
@@ -10177,7 +10209,10 @@ function _pgEnsureGL(){ try{
 }catch(e){ _pgGLBooting=false; } }
 function _pgRowsAll(){ var out=[]; var rows=(typeof DATA!=='undefined'&&DATA&&DATA.rows)?DATA.rows:[]; var LM=_pgLedgerMaps();
   for(var i=0;i<rows.length;i++){ var r=rows[i]; if(!r)continue;
-    var conRev=_pgNum(conEff(r)), glRev=_pgNum(glEff(r)), conExp=_pgNum(conExpEff(r)), cost=_pgNum(expEff(r));
+    var conRev=_pgNum(conEff(r)), glRev=_pgNum(glEff(r)), conExp=_pgNum(conExpEff(r));
+    var costRaw=_pgNum(_pgCostSel(r));   /* v9.184: GL cost of the selected หมวด (all/รวม = combined expEff) */
+    var glRed=(_pgGlReduce&&_pgGlReduce[r.code]!=null&&isFinite(+_pgGlReduce[r.code]))?(+_pgGlReduce[r.code]):0;   /* v9.184: per-project GL reduction */
+    var cost=(costRaw==null)?null:_pgNum(costRaw-glRed);
     var hasAny=(conRev&&conRev!==0)||(glRev&&glRev!==0)||(conExp&&conExp!==0)||(cost&&cost!==0);
     var prog=_pgProg(cost,conExp);
     var manPct=(_pgManPct&&_pgManPct[r.code]!=null&&isFinite(+_pgManPct[r.code]))?(+_pgManPct[r.code]):null;   /* v9.138: manual % override (pasted template) */
@@ -10188,7 +10223,7 @@ function _pgRowsAll(){ var out=[]; var rows=(typeof DATA!=='undefined'&&DATA&&DA
     var advance=(LM.adv&&LM.adv[r.code]!=null)?LM.adv[r.code]:null;      /* v9.153: เงินรับล่วงหน้าตามสัญญา (2152002) */
     var accrExp=(LM.aexp&&LM.aexp[r.code]!=null)?LM.aexp[r.code]:null;   /* v9.153: ค่าใช้จ่ายค้างจ่าย-งานโครงการ (2151113) */
     var diff=(earned!=null)?((glRev||0)-earned):null;   /* v9.150: Diff = GL (actual revenue) − Earned (POC) */
-    out.push({code:r.code, name:dispName(r), cust:(typeof custOf==='function'?(custOf(r)||''):''), conRev:conRev, glRev:glRev, conExp:conExp, cost:cost, prog:effProg, progCalc:prog, manPct:manPct, earned:earned, diff:diff, accrued:accrued, advance:advance, accrExp:accrExp, st:st, empty:!hasAny}); }   /* v9.133/138/148/150/153 */
+    out.push({code:r.code, name:dispName(r), cust:(typeof custOf==='function'?(custOf(r)||''):''), conRev:conRev, glRev:glRev, conExp:conExp, cost:cost, costRaw:costRaw, glRed:glRed, prog:effProg, progCalc:prog, manPct:manPct, earned:earned, diff:diff, accrued:accrued, advance:advance, accrExp:accrExp, st:st, empty:!hasAny}); }   /* v9.133/138/148/150/153 */
   return out; }
 /* v9.144: display string for a column — used BOTH by the checklist-filter dropdown and its row matching, so they always agree */
 function _pgColDisp(x,col){ if(col==='code')return (''+x.code); if(col==='status')return (_PG_ST[x.st]?_PG_ST[x.st][0]:x.st); if(col==='prog')return (x.prog==null?'—':x.prog.toFixed(2)+'%'); return fmt(x[col]); }
@@ -10232,7 +10267,7 @@ function _pgRowTr(r,seq){ var pc=_pgProgCls(r.prog); var man=(r.manPct!=null); v
     '<td class="pgproj l"><div class="pgprojhd">'+star+'<span class="pgcode">'+esc(r.code)+'</span></div>'+(r.name?('<div class="pgnamefull">'+esc(r.name)+'</div>'):'')+(r.cust?('<div class="pgcust"><span class="pgcustlab">ผู้ว่าจ้าง</span>'+esc(r.cust)+'</div>'):'')+'</td>'+
     '<td class="pgstatc l">'+_pgStatusBadge(r.st)+'</td>'+
     '<td class="r pgrev">'+fmt(r.conRev)+'</td>'+_pgDcell('pgrev','glRev',r.code,r.glRev)+'<td class="r pgearn">'+fmt(r.earned)+'</td><td class="r pgdiff'+(r.diff!=null?(r.diff<-0.005?' neg':(r.diff>0.005?' pos':'')):'')+'">'+fmt(r.diff)+'</td>'+_pgDcell('pgaccr','accrued',r.code,r.accrued)+_pgDcell('pgadv','advance',r.code,r.advance)+
-    '<td class="r pgcost pgbud">'+fmt(r.conExp)+'</td><td class="r pgcost">'+fmt(r.cost)+'</td>'+_pgDcell('paccrx','accrExp',r.code,r.accrExp)+
+    '<td class="r pgcost pgbud">'+fmt(r.conExp)+'</td><td class="r pgcost'+(r.glRed?' pgcost-red':'')+'"'+(r.glRed?(' title="ลด GL ฿'+fmt(r.glRed)+' · เดิม ฿'+fmt(r.costRaw)+'"'):'')+'>'+fmt(r.cost)+(r.glRed?' <span class="pgredflag">▼</span>':'')+'</td>'+_pgDcell('paccrx','accrExp',r.code,r.accrExp)+
     '<td class="pgprogc'+(man?' pgprogc-man':'')+'">'+lockBtn+(man?('<span class="pgmanflag" title="Manual '+r.manPct.toFixed(2)+'% · computed '+(r.progCalc!=null?r.progCalc.toFixed(2)+'%':'—')+'">✎</span>'):'')+_pgBar(r.prog)+'</td></tr>'; }
 /* v9.144: group header + per-group subtotal row (⭐ Pasted vs Computed) */
 function _pgGroupHd(icon,txt,n,cls){ return '<tr class="pggrouphd '+cls+'"><td colspan="13">'+icon+' '+txt+' <span class="pggrpn">'+n+' project'+(n===1?'':'s')+'</span></td></tr>'; }
@@ -10271,7 +10306,7 @@ function _pgHtml(){
     '<th rowspan="2" class="pgsort pgstath l'+(_pgSort.k==='status'?' on':'')+'" data-sk="status">Status <i class="pgarr">'+_ar('status')+'</i><button type="button" class="pgfbtn'+((_pgStFilter&&_pgStFilter.length)?' on':'')+'" data-fcol="status" title="Filter (Excel-style)">▾</button></th>'+
     '<th colspan="6" class="pggh gh-rev">Revenue</th>'+
     '<th colspan="3" class="pggh gh-cost">Cost / Expense</th>'+
-    '<th rowspan="2" class="pgsort pgprogh'+(_pgSort.k==='prog'?' on':'')+'" data-sk="prog">Progress %<span class="pgprogh-s">Cost GL ÷ Contract Expense</span> <i class="pgarr">'+_ar('prog')+'</i>'+_pgFb('prog')+'</th></tr>'+
+    '<th rowspan="2" class="pgsort pgprogh'+(_pgSort.k==='prog'?' on':'')+'" data-sk="prog">Progress %<span class="pgprogh-s">Cost GL ('+_pgCatLabel()+') ÷ Contract Expense</span> <i class="pgarr">'+_ar('prog')+'</i>'+_pgFb('prog')+'</th></tr>'+
     '<tr class="pgcols">'+_pgSh('conRev','Contract','Value','rev')+_pgSh('glRev','GL','Actual','rev')+_pgSh('earned','Earned','POC · %×Contract','rev')+_pgSh('diff','Diff','GL − Earned','rev')+_pgSh('accrued','Accrued Rev. <span class="pghdstar">★</span>','รายได้ค้างรับ · <span class="pghdac">มาจาก a/c 1170401</span>','rev')+_pgSh('advance','Advance Rev. <span class="pghdstar">★</span>','เงินรับล่วงหน้า · <span class="pghdac">มาจาก a/c 2152002</span>','rev')+_pgSh('conExp','Contract Exp.','Budget','cost')+_pgSh('cost','GL','Cost','cost')+_pgSh('accrExp','Accrued Exp. <span class="pghdstar">★</span>','ค่าใช้จ่ายค้างจ่าย · <span class="pghdac">มาจาก a/c 2151113</span>','cost')+'</tr></thead>';
   var body=''; if(!rows.length){ body='<tr><td colspan="13" class="pgnone">— No project data (add/import data in the Business Performance module first) —</td></tr>'; }
   else if(manTot>0){   /* v9.144: split into ⭐ Pasted group (top, with subtotal) + Computed group (below) */
@@ -10293,7 +10328,7 @@ function _pgHtml(){
   statLeg+='</div>';
   return '<div class="pgpage">'+
     chips+kpis+statLeg+
-    '<div class="pgtools"><input type="text" class="pgq" placeholder="🔍 ค้นหาโปรเจค — รหัส / ชื่อ / ผู้ว่าจ้าง / ยอด (ทุกฟิลด์)" value="'+esc(_pgQ||'')+'" spellcheck="false" autocomplete="off"><span class="pgcount">'+nAll+' projects'+(_pgAnyFilter()?(' / '+nTot):'')+'</span>'+(_pgAnyFilter()?'<button type="button" class="pgclrf" title="Clear all filters">✕ Clear filters</button>':'')+'<button type="button" class="pgactual-btn'+(manTot?'':' on')+'" title="Compute the real Progress % from GL — clears ALL manual / pasted %">🧮 Actual %</button><button type="button" class="pgpaste-btn'+(manTot?' on':'')+'" title="Paste a template of manual Progress % — Project No. + %">📋 Paste %'+(manTot?(' · '+manTot):'')+'</button><button type="button" class="pgexport-btn" title="Export the current table (with the active filters) to Excel .xlsx">⬇ Excel</button><button type="button" class="pgpdf-btn" title="พิมพ์ / บันทึกตาราง Progress % (ตามตัวกรองปัจจุบัน) เป็น PDF สวยงาม">🖨 PDF</button><button type="button" class="pgrecon-btn" title="กระทบยอด GL ↔ Progress % — อธิบายว่ายอดต่างจาก GL จริงตรงไหน">🧮 กระทบยอด GL</button><span class="pghint">↕ Sort by header · ▾ Excel-style filter</span></div>'+
+    '<div class="pgtools"><input type="text" class="pgq" placeholder="🔍 ค้นหาโปรเจค — รหัส / ชื่อ / ผู้ว่าจ้าง / ยอด (ทุกฟิลด์)" value="'+esc(_pgQ||'')+'" spellcheck="false" autocomplete="off"><span class="pgcount">'+nAll+' projects'+(_pgAnyFilter()?(' / '+nTot):'')+'</span>'+(_pgAnyFilter()?'<button type="button" class="pgclrf" title="Clear all filters">✕ Clear filters</button>':'')+'<span class="pgcatsel" title="เลือกหมวดต้นทุน GL ที่ใช้คิด %Progress (ติ๊กได้หลายหมวด · ครบ 3 = รวม 5+6+7)">หมวด GL:<button type="button" class="pgcatchip'+(_pgCat['5']?' on':'')+'" data-cat="5">5</button><button type="button" class="pgcatchip'+(_pgCat['6']?' on':'')+'" data-cat="6">6</button><button type="button" class="pgcatchip'+(_pgCat['7']?' on':'')+'" data-cat="7">7</button></span><button type="button" class="pgactual-btn'+(manTot?'':' on')+'" title="Compute the real Progress % from GL — clears ALL manual / pasted %">🧮 Actual %</button><button type="button" class="pgpaste-btn'+(manTot?' on':'')+'" title="Paste a template of manual Progress % — Project No. + %">📋 Paste %'+(manTot?(' · '+manTot):'')+'</button><button type="button" class="pgglred-btn'+(_pgRedN()?' on':'')+'" title="ลดมูลค่า GL ที่ใช้คิด %Progress สำหรับหลายโปรเจค (วางรหัส + จำนวนที่ลด)">➖ ลด GL'+(_pgRedN()?(' · '+_pgRedN()):'')+'</button><button type="button" class="pgexport-btn" title="Export the current table (with the active filters) to Excel .xlsx">⬇ Excel</button><button type="button" class="pgpdf-btn" title="พิมพ์ / บันทึกตาราง Progress % (ตามตัวกรองปัจจุบัน) เป็น PDF สวยงาม">🖨 PDF</button><button type="button" class="pgrecon-btn" title="กระทบยอด GL ↔ Progress % — อธิบายว่ายอดต่างจาก GL จริงตรงไหน">🧮 กระทบยอด GL</button><span class="pghint">↕ Sort by header · ▾ Excel-style filter</span></div>'+
     '<div class="pgtblwrap"><table class="pgtbl">'+head+'<tbody>'+body+'</tbody>'+foot+'</table></div>'+
     '<p class="pgnote"><b>Progress %</b> compares actual <b>Cost (GL)</b> against the <b>Contract Expense</b> (budget) — under 80% = in progress · 80–100% = near budget · over 100% = <b class="pgred">over budget</b>. <b>Earned Revenue (POC)</b> = Progress % × Contract Revenue (percentage-of-completion). Projects without a contract-expense budget are not measured. Figures follow the selected database year in Business Performance.</p>'+
     '</div>';
@@ -10306,6 +10341,8 @@ function _pgBind(w){ if(_pgBound)return; _pgBound=true;
     var lk=t.closest?t.closest('.pglk'):null; if(lk){ if(e&&e.stopPropagation)e.stopPropagation(); var _lc=lk.getAttribute('data-lock'); if(_pgLock[_lc])delete _pgLock[_lc]; else _pgLock[_lc]=1; _pgLockSave(); renderProgress(); return; }   /* v9.144: toggle per-project Lock (shields from Paste %) */
     var clr=t.closest?t.closest('.pgclrf'):null; if(clr){ _pgColFilt={}; _pgQ=''; _pgStFilter=[]; renderProgress(); return; }   /* v9.135/144: clear all filters */
     var pst=t.closest?t.closest('.pgpaste-btn'):null; if(pst){ _pgPasteOpen(); return; }   /* v9.138: paste manual % template */
+    var pcat=t.closest?t.closest('.pgcatchip'):null; if(pcat){ var _cc=pcat.getAttribute('data-cat'); if(_pgCat[_cc]){ var _oth=['5','6','7'].filter(function(c){return c!==_cc&&_pgCat[c];}); if(_oth.length)_pgCat[_cc]=false; else _pgCat={'5':true,'6':true,'7':true}; } else { _pgCat[_cc]=true; } _pgCatSave(); renderProgress(); return; }   /* v9.184: หมวดต้นทุน GL selector */
+    var pglr=t.closest?t.closest('.pgglred-btn'):null; if(pglr){ _pgReduceOpen(); return; }   /* v9.184: reduce GL for multiple projects */
     var xpt=t.closest?t.closest('.pgexport-btn'):null; if(xpt){ _pgExportXlsx(); return; }   /* v9.155: export table to Excel */
     var ppdf=t.closest?t.closest('.pgpdf-btn'):null; if(ppdf){ _pgPrintPdf(); return; }   /* v9.181: print / save as PDF */
     var prcn=t.closest?t.closest('.pgrecon-btn'):null; if(prcn){ _pgReconOpen(); return; }   /* v10.54: GL ↔ Progress% reconciliation */
@@ -10419,23 +10456,24 @@ function _pgExportXlsx(){ if(typeof XLSX==='undefined'){ alert('The Excel librar
   aoa.push([]);
   aoa.push(['#','Project Code','Project Name','ผู้ว่าจ้าง / Client','Status','Type',
     'Contract Revenue','Revenue (GL)','Earned Revenue (POC)','Diff (GL − Earned)','Accrued Rev. (รายได้ค้างรับ)','Advance Rev. (เงินรับล่วงหน้า)',
-    'Contract Exp. (Budget)','Cost (GL)','Accrued Exp. (ค่าใช้จ่ายค้างจ่าย)','Progress %']);
-  var t={conRev:0,glRev:0,earned:0,diff:0,nDiff:0,accrued:0,nAcc:0,advance:0,nAdv:0,conExp:0,cost:0,accrExp:0,nAExp:0};
+    'Contract Exp. (Budget)','Cost (GL)','GL ที่ลด (Reduction)','Accrued Exp. (ค่าใช้จ่ายค้างจ่าย)','Progress %']);
+  var t={conRev:0,glRev:0,earned:0,diff:0,nDiff:0,accrued:0,nAcc:0,advance:0,nAdv:0,conExp:0,cost:0,glRed:0,accrExp:0,nAExp:0};
   for(var i=0;i<rows.length;i++){ var x=rows[i];
     if(x.conRev)t.conRev+=x.conRev; if(x.glRev)t.glRev+=x.glRev; if(x.earned)t.earned+=x.earned;
     if(x.diff!=null){t.diff+=x.diff;t.nDiff++;} if(x.accrued!=null){t.accrued+=x.accrued;t.nAcc++;}
     if(x.advance!=null){t.advance+=x.advance;t.nAdv++;} if(x.conExp)t.conExp+=x.conExp; if(x.cost)t.cost+=x.cost;
+    if(x.glRed)t.glRed+=x.glRed;
     if(x.accrExp!=null){t.accrExp+=x.accrExp;t.nAExp++;}
     aoa.push([ i+1, x.code, x.name||'', x.cust||'', (_PG_ST[x.st]?_PG_ST[x.st][0]:x.st), (x.manPct!=null?'⭐ Pasted':'Computed'),
       _pgXn(x.conRev), _pgXn(x.glRev), _pgXn(x.earned), _pgXn(x.diff), _pgXn(x.accrued), _pgXn(x.advance),
-      _pgXn(x.conExp), _pgXn(x.cost), _pgXn(x.accrExp), (x.prog!=null&&isFinite(x.prog)?+(x.prog.toFixed(2)):'') ]); }
+      _pgXn(x.conExp), _pgXn(x.cost), (x.glRed?_pgXn(x.glRed):''), _pgXn(x.accrExp), (x.prog!=null&&isFinite(x.prog)?+(x.prog.toFixed(2)):'') ]); }
   var overall=(t.conExp!==0)?+((t.cost/t.conExp*100).toFixed(2)):'';
   aoa.push([]);
   aoa.push(['','TOTAL — '+rows.length+' projects'+(_pgAnyFilter()?' (filtered)':''),'','','','',
     _pgXn(t.conRev), _pgXn(t.glRev), _pgXn(t.earned), (t.nDiff?_pgXn(t.diff):''), (t.nAcc?_pgXn(t.accrued):''), (t.nAdv?_pgXn(t.advance):''),
-    _pgXn(t.conExp), _pgXn(t.cost), (t.nAExp?_pgXn(t.accrExp):''), overall]);
+    _pgXn(t.conExp), _pgXn(t.cost), (t.glRed?_pgXn(t.glRed):''), (t.nAExp?_pgXn(t.accrExp):''), overall]);
   var ws=XLSX.utils.aoa_to_sheet(aoa);
-  ws['!cols']=[{wch:5},{wch:16},{wch:34},{wch:26},{wch:15},{wch:12},{wch:16},{wch:16},{wch:16},{wch:15},{wch:20},{wch:20},{wch:16},{wch:16},{wch:20},{wch:11}];
+  ws['!cols']=[{wch:5},{wch:16},{wch:34},{wch:26},{wch:15},{wch:12},{wch:16},{wch:16},{wch:16},{wch:15},{wch:20},{wch:20},{wch:16},{wch:16},{wch:18},{wch:20},{wch:11}];
   var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Progress %');
   XLSX.writeFile(wb,'GLI_Progress_'+(yr||'data')+'.xlsx'); }
 /* ===================== v9.174: GL drill-down for GL-sourced columns (Revenue / Accrued Rev / Advance Rev / Accrued Exp) ===================== */
@@ -10666,6 +10704,8 @@ function _pgEnsureCss(){ if(document.getElementById('pgCss'))return; var s=docum
   '.pgclrf{border:1px solid var(--neg,#B42318);background:#FBEAE6;color:var(--neg,#B42318);border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:5px 11px;cursor:pointer;transition:background .12s,color .12s}.pgclrf:hover{background:var(--neg,#B42318);color:#fff}'+
   '.pgpaste-btn{border:1px solid var(--brand,#0E5C52);background:#fff;color:var(--brand-d,#0A463E);border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:5px 11px;cursor:pointer;transition:background .12s,color .12s}.pgpaste-btn:hover{background:var(--brand-t,#E6F0EC)}.pgpaste-btn.on{background:linear-gradient(180deg,#14776A,#0A463E);color:#fff;border-color:transparent}'+
   '.pgactual-btn{border:1px solid var(--brand,#0E5C52);background:#fff;color:var(--brand-d,#0A463E);border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:5px 11px;cursor:pointer;transition:background .12s,color .12s}.pgactual-btn:hover{background:var(--brand-t,#E6F0EC)}.pgactual-btn.on{background:linear-gradient(180deg,#14776A,#0A463E);color:#fff;border-color:transparent}'+
+  '.pgcatsel{display:inline-flex;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--brand-d,#0A463E);margin:0 2px}.pgcatchip{border:1px solid var(--brand,#0E5C52);background:#fff;color:var(--brand-d,#0A463E);border-radius:6px;font:inherit;font-size:11px;font-weight:700;min-width:22px;padding:4px 7px;cursor:pointer;margin-left:3px;transition:background .12s,opacity .12s}.pgcatchip.on{background:linear-gradient(180deg,#14776A,#0A463E);color:#fff;border-color:transparent}.pgcatchip:not(.on){opacity:.5}'+
+  '.pgglred-btn{border:1px solid #B25A2A;background:#fff;color:#8A3E17;border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:5px 11px;cursor:pointer;transition:background .12s,color .12s}.pgglred-btn:hover{background:#FBEDE4}.pgglred-btn.on{background:linear-gradient(180deg,#C56A2E,#8A3E17);color:#fff;border-color:transparent}.pgcost-red{color:#8A3E17}.pgredflag{color:#C56A2E;font-size:9px;font-weight:700}'+
   '.pgexport-btn{border:1px solid #1B7A43;background:linear-gradient(180deg,#22A85A,#178A46);color:#fff;border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:5px 12px;cursor:pointer;transition:filter .12s;box-shadow:0 1px 2px rgba(16,90,50,.25)}.pgexport-btn:hover{filter:brightness(1.06)}.pgexport-btn:active{filter:brightness(.96)}'+   /* v9.155: Excel export button */
   '.pgpdf-btn{border:1px solid #B12E1A;background:linear-gradient(180deg,#EF6A4E,#CE3A24);color:#fff;border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:5px 12px;cursor:pointer;transition:filter .12s;box-shadow:0 1px 2px rgba(206,58,36,.28)}.pgpdf-btn:hover{filter:brightness(1.05)}.pgpdf-btn:active{filter:brightness(.96)}'+   /* v9.181: PDF print button */
   '.pgmanflag{display:inline-block;color:#7A5A12;background:#F5E29A;border-radius:5px;font-size:9px;font-weight:800;padding:1px 4px;margin-right:5px;vertical-align:middle}.pgprogc-man .pgbar-v{color:#7A5A12}'+
