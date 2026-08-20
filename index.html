@@ -10132,25 +10132,49 @@ var _pgCat={'5':true,'6':true,'7':true}; try{ var _pc0=localStorage.getItem('gli
 function _pgCatSave(){ try{localStorage.setItem('gli_pgcat',JSON.stringify(_pgCat));}catch(e){} try{if(typeof _tsTouch==='function')_tsTouch('pgcat');}catch(e){} try{if(typeof cloudPush==='function')cloudPush();}catch(e){} }
 function _pgCatLabel(){ if(_pgCat['5']&&_pgCat['6']&&_pgCat['7'])return 'รวม 5+6+7'; var a=[]; if(_pgCat['5'])a.push('5'); if(_pgCat['6'])a.push('6'); if(_pgCat['7'])a.push('7'); return a.length?('หมวด '+a.join('+')):'รวม 5+6+7'; }
 function _pgCostSel(r){ var comb=expEff(r); var all=(!_pgCat['5']&&!_pgCat['6']&&!_pgCat['7'])||(_pgCat['5']&&_pgCat['6']&&_pgCat['7']); if(all)return comb; var ec=(typeof _expCatCum==='function')?_expCatCum(r.code):[0,0,0]; var s=(_pgCat['5']?(+ec[0]||0):0)+(_pgCat['6']?(+ec[1]||0):0)+(_pgCat['7']?(+ec[2]||0):0); if(comb==null&&s===0)return null; return Math.round(s*100)/100; }
+/* v9.185: per-project GL reduction — now PER-หมวด: _pgGlReduce[code] = {5:amt,6:amt,7:amt,all:amt}.
+   A reduction is subtracted from a หมวด's GL cost ONLY when that หมวด is selected in the %POC calc;
+   'all' = category-agnostic (legacy). Legacy flat numbers are migrated to {all:number}. */
 var _pgGlReduce={}; try{ var _pgr0=localStorage.getItem('gli_pgglred'); if(_pgr0){ var _pgo0=JSON.parse(_pgr0); if(_pgo0&&typeof _pgo0==='object')_pgGlReduce=_pgo0; } }catch(_pgre0){ _pgGlReduce={}; }
+try{ for(var _mk in _pgGlReduce){ if(typeof _pgGlReduce[_mk]==='number')_pgGlReduce[_mk]={all:_pgGlReduce[_mk]}; } }catch(_pgm0){}   /* migrate legacy flat → {all} */
 function _pgGlReduceSave(){ try{localStorage.setItem('gli_pgglred',JSON.stringify(_pgGlReduce));}catch(e){} try{if(typeof _tsTouch==='function')_tsTouch('pgglred');}catch(e){} try{if(typeof cloudPush==='function')cloudPush();}catch(e){} }
-function _pgRedN(){ var n=0; try{ for(var k in _pgGlReduce){ if(Object.prototype.hasOwnProperty.call(_pgGlReduce,k)&&_pgGlReduce[k])n++; } }catch(e){} return n; }
+function _pgRedHas(o){ if(!o)return false; if(typeof o==='number')return !!o; for(var k in o){ if(+o[k])return true; } return false; }
+function _pgRedN(){ var n=0; try{ for(var k in _pgGlReduce){ if(_pgRedHas(_pgGlReduce[k]))n++; } }catch(e){} return n; }
+/* effective reduction for the CURRENTLY-selected หมวด (this is what actually cuts the %POC cost) */
+function _pgGlRedEff(code){ var o=_pgGlReduce[code]; if(!o)return 0; if(typeof o==='number')return +o||0;
+  var allSel=(!_pgCat['5']&&!_pgCat['6']&&!_pgCat['7'])||(_pgCat['5']&&_pgCat['6']&&_pgCat['7']);
+  var s=(+o['all']||0);
+  if(allSel){ s+=(+o['5']||0)+(+o['6']||0)+(+o['7']||0); }
+  else { if(_pgCat['5'])s+=(+o['5']||0); if(_pgCat['6'])s+=(+o['6']||0); if(_pgCat['7'])s+=(+o['7']||0); }
+  return Math.round(s*100)/100; }
+function _pgGlRedTot(code){ var o=_pgGlReduce[code]; if(!o)return 0; if(typeof o==='number')return +o||0; var s=0; for(var k in o)s+=(+o[k]||0); return Math.round(s*100)/100; }
+function _pgGlRedBreak(code){ var o=_pgGlReduce[code]; if(!o||typeof o==='number')return (o?('รวม ฿'+fmt(+o)):''); var a=[]; ['5','6','7'].forEach(function(c){ if(+o[c])a.push('หมวด '+c+' ฿'+fmt(+o[c])); }); if(+o['all'])a.push('ทุกหมวด ฿'+fmt(+o['all'])); return a.join(' · '); }
 function _pgReduceClose(){ var m=document.getElementById('pgReduceModal'); if(m&&m.parentNode)m.parentNode.removeChild(m); }
+/* normalise a หมวด token → '5' | '6' | '7' | 'all' | null(unknown) */
+function _pgCatNorm(s){ s=(''+(s||'')).trim().toLowerCase().replace(/^หมวด\s*/,'').replace(/[\s.]/g,'');
+  if(s==='5'||s==='6'||s==='7')return s;
+  if(s==='all'||s==='รวม'||s==='ทุกหมวด'||s==='ทั้งหมด'||s==='total'||s==='รวมทุกหมวด'||s==='567'||s==='5+6+7'||s==='')return 'all';
+  return null; }
+/* v9.211: per-หมวด GL reduction — paste "รหัส [หมวด] จำนวน". 3 cols = code/หมวด/amount; 2 cols = code/amount (หมวด='all'). */
 function _pgReduceApply(text){ var lines=(''+(text||'')).split(/\r?\n/); var applied=0,cleared=0,codes={};
   for(var i=0;i<lines.length;i++){ var ln=lines[i]; if(!ln||!ln.trim())continue;
-    var parts=ln.split(/\t|;|,|\s{2,}/); if(parts.length<2)parts=ln.trim().split(/\s+/); if(parts.length<2)continue;
-    var code=(parts[0]||'').trim(), pv=(parts[parts.length-1]||'').trim(); if(!code)continue;
-    var num=parseFloat(pv.replace(/[,\s฿]/g,'')); if(isNaN(num))continue;
-    if(num===0){ if(_pgGlReduce[code]!=null){delete _pgGlReduce[code];cleared++;} continue; }
-    _pgGlReduce[code]=Math.round(num*100)/100; applied++; codes[code]=1; }
+    var parts=ln.split(/\t|;|,|\s{2,}/); var clean=[]; for(var pj=0;pj<parts.length;pj++){ var pp=(parts[pj]||'').trim(); if(pp!=='')clean.push(pp); }
+    if(clean.length<2){ var sp=ln.trim().split(/\s+/); clean=[]; for(var sj=0;sj<sp.length;sj++){ if(sp[sj])clean.push(sp[sj]); } }
+    if(clean.length<2)continue;
+    var code=clean[0]; if(!code)continue;
+    var pv=clean[clean.length-1]; var num=parseFloat((''+pv).replace(/[,\s฿]/g,'')); if(isNaN(num))continue;
+    var cat='all'; if(clean.length>=3){ var cn=_pgCatNorm(clean[1]); if(cn)cat=cn; }
+    var cur=_pgGlReduce[code]; if(cur==null||typeof cur==='number'){ _pgGlReduce[code]=(typeof cur==='number'&&cur)?{all:cur}:{}; }
+    if(num===0){ if(_pgGlReduce[code][cat]!=null){delete _pgGlReduce[code][cat];cleared++;} if(!_pgRedHas(_pgGlReduce[code]))delete _pgGlReduce[code]; continue; }
+    _pgGlReduce[code][cat]=Math.round(num*100)/100; applied++; codes[code]=1; }
   _pgGlReduceSave();
   var matched=0,unknown=0; try{ var have={}; ((typeof DATA!=='undefined'&&DATA&&DATA.rows)||[]).forEach(function(r){have[r.code]=1;}); for(var c in codes){ if(have[c])matched++; else unknown++; } }catch(e){}
   return {applied:applied,cleared:cleared,matched:matched,unknown:unknown}; }
-function _pgReduceOpen(){ _pgReduceClose(); var cnt=0,sum=0; try{ for(var k in _pgGlReduce){ if(_pgGlReduce[k]){cnt++;sum+=+_pgGlReduce[k]||0;} } }catch(e){}
+function _pgReduceOpen(){ _pgReduceClose(); var cnt=_pgRedN(),sum=0; try{ for(var k in _pgGlReduce){ sum+=_pgGlRedTot(k); } }catch(e){}
   var ov=document.createElement('div'); ov.id='pgReduceModal'; ov.className='pgpaste-ov';
   ov.innerHTML='<div class="pgpaste-card"><div class="pgpaste-hd">➖ ลดมูลค่า GL สำหรับคิด %Progress</div>'+
-    '<div class="pgpaste-sub">วางสองคอลัมน์จาก Excel — <b>รหัสโปรเจค</b> และ <b>จำนวนเงินที่จะลด</b> (บาท) — บรรทัดละ 1 โปรเจค (คั่นด้วย Tab / เว้นวรรค). ระบบจะใช้ <b>GL Cost − จำนวนที่ลด</b> ไปคิด %Progress และ Earned Revenue. ใส่ <code>0</code> เพื่อยกเลิกส่วนลดของโปรเจคนั้น.</div>'+
-    '<textarea id="pgReduceTA" class="pgpaste-ta" spellcheck="false" placeholder="GLI23005&#9;50000000&#10;GLI21004&#9;12000000"></textarea>'+
+    '<div class="pgpaste-sub">วางจาก Excel: <b>รหัสโปรเจค</b> · <b>หมวด</b> (<code>5</code>/<code>6</code>/<code>7</code> หรือ <code>รวม</code>) · <b>จำนวนเงินที่จะลด</b> (บาท) — บรรทัดละ 1 รายการ (คั่นด้วย Tab / เว้นวรรค). ส่วนลดจะตัด GL <b>เฉพาะหมวดนั้น</b> และมีผลเมื่อหมวดนั้นถูกเลือกในการคิด %Progress เท่านั้น. ไม่ระบุหมวด = <b>รวมทุกหมวด</b>. ใส่ <code>0</code> ที่ช่องจำนวนเพื่อยกเลิกส่วนลดของหมวดนั้น.</div>'+
+    '<textarea id="pgReduceTA" class="pgpaste-ta" spellcheck="false" placeholder="GLI23005&#9;5&#9;50000000&#10;GLI21004&#9;6&#9;12000000&#10;GLI23002&#9;รวม&#9;8000000"></textarea>'+
     '<div class="pgpaste-ft"><span class="pgpaste-cnt">'+(cnt?('ปัจจุบันลด '+cnt+' โปรเจค · รวม ฿'+fmt(Math.round(sum*100)/100)):'ยังไม่มีส่วนลด')+'</span>'+
     '<div class="pgpaste-btns">'+(cnt?'<button type="button" class="pgpaste-clr" id="pgReduceClr">ล้างส่วนลดทั้งหมด</button>':'')+'<button type="button" class="pgpaste-cancel" id="pgReduceCancel">ยกเลิก</button><button type="button" class="pri pgpaste-apply" id="pgReduceApplyBtn">ใช้งาน</button></div></div></div>';
   document.body.appendChild(ov); var ta=ov.querySelector('#pgReduceTA'); if(ta){try{ta.focus();}catch(e){}}
@@ -10247,7 +10271,8 @@ function _pgRowsAll(){ var out=[]; var rows=(typeof DATA!=='undefined'&&DATA&&DA
   for(var i=0;i<rows.length;i++){ var r=rows[i]; if(!r)continue;
     var conRev=_pgNum(conEff(r)), glRev=_pgNum(glEff(r)), conExp=_pgNum(conExpEff(r));
     var costRaw=_pgNum(_pgCostSel(r));   /* v9.184: GL cost of the selected หมวด (all/รวม = combined expEff) */
-    var glRed=(_pgGlReduce&&_pgGlReduce[r.code]!=null&&isFinite(+_pgGlReduce[r.code]))?(+_pgGlReduce[r.code]):0;   /* v9.184: per-project GL reduction */
+    var glRed=(typeof _pgGlRedEff==='function')?_pgNum(_pgGlRedEff(r.code)):0;   /* v9.211: reduction for the CURRENTLY-selected หมวด (only cuts a หมวด's cost when that หมวด is on) */
+    var glRedTot=(typeof _pgGlRedTot==='function')?_pgNum(_pgGlRedTot(r.code)):0; /* total reduction across all หมวด (for tooltip / muted indicator) */
     var cost=(costRaw==null)?null:_pgNum(costRaw-glRed);
     var hasAny=(conRev&&conRev!==0)||(glRev&&glRev!==0)||(conExp&&conExp!==0)||(cost&&cost!==0);
     var prog=_pgProg(cost,conExp);
@@ -10259,7 +10284,7 @@ function _pgRowsAll(){ var out=[]; var rows=(typeof DATA!=='undefined'&&DATA&&DA
     var advance=(LM.adv&&LM.adv[r.code]!=null)?LM.adv[r.code]:null;      /* v9.153: เงินรับล่วงหน้าตามสัญญา (2152002) */
     var accrExp=(LM.aexp&&LM.aexp[r.code]!=null)?LM.aexp[r.code]:null;   /* v9.153: ค่าใช้จ่ายค้างจ่าย-งานโครงการ (2151113) */
     var diff=(earned!=null)?((glRev||0)-earned):null;   /* v9.150: Diff = GL (actual revenue) − Earned (POC) */
-    out.push({code:r.code, name:dispName(r), cust:(typeof custOf==='function'?(custOf(r)||''):''), conRev:conRev, glRev:glRev, conExp:conExp, cost:cost, costRaw:costRaw, glRed:glRed, prog:effProg, progCalc:prog, manPct:manPct, earned:earned, diff:diff, accrued:accrued, advance:advance, accrExp:accrExp, st:st, empty:!hasAny}); }   /* v9.133/138/148/150/153 */
+    out.push({code:r.code, name:dispName(r), cust:(typeof custOf==='function'?(custOf(r)||''):''), conRev:conRev, glRev:glRev, conExp:conExp, cost:cost, costRaw:costRaw, glRed:glRed, glRedTot:glRedTot, prog:effProg, progCalc:prog, manPct:manPct, earned:earned, diff:diff, accrued:accrued, advance:advance, accrExp:accrExp, st:st, empty:!hasAny}); }   /* v9.133/138/148/150/153/211 */
   return out; }
 /* v9.144: display string for a column — used BOTH by the checklist-filter dropdown and its row matching, so they always agree */
 function _pgColDisp(x,col){ if(col==='code')return (''+x.code); if(col==='status')return (_PG_ST[x.st]?_PG_ST[x.st][0]:x.st); if(col==='prog')return (x.prog==null?'—':x.prog.toFixed(2)+'%'); return fmt(x[col]); }
@@ -10296,6 +10321,12 @@ function _pgAnyFilter(){ if((_pgQ||'').trim())return true; if(_pgStFilter&&_pgSt
 /* v9.144: one data row — shows ⭐ for pasted-% projects and a per-project Lock (🔒/🔓) that shields it from Paste % */
 /* v9.174: a GL-sourced amount cell → clickable to drill into the underlying GL entries + Export Excel */
 function _pgDcell(cls,key,code,val){ return '<td class="r '+cls+' pgdrill" data-dc="'+esc(code)+'" data-dk="'+key+'" title="🔎 คลิกเพื่อดูรายการ GL ที่ประกอบเป็นยอดนี้ + Export Excel">'+fmt(val)+'<span class="pgdrico">🔎</span></td>'; }
+/* v9.211: GL-cost cell — shows the per-หมวด reduction. ▼(active) when the reduction hits a selected หมวด and cuts the cost;
+   ▽(muted) when a reduction exists but is on a หมวด not currently selected, so it is NOT deducted from this view. */
+function _pgCostCell(r){ var brk=(typeof _pgGlRedBreak==='function')?_pgGlRedBreak(r.code):'';
+  if(r.glRed){ return '<td class="r pgcost pgcost-red" title="ลด GL (หมวดที่คิด '+esc(_pgCatLabel())+') ฿'+fmt(r.glRed)+' · เดิม ฿'+fmt(r.costRaw)+(brk?(' · ที่ตั้งไว้: '+esc(brk)):'')+'">'+fmt(r.cost)+' <span class="pgredflag">▼</span></td>'; }
+  if(r.glRedTot){ return '<td class="r pgcost pgcost-redoff" title="มีส่วนลด GL ฿'+fmt(r.glRedTot)+' แต่อยู่คนละหมวดกับที่เลือกคิดตอนนี้ ('+esc(_pgCatLabel())+') จึงยังไม่ถูกหัก'+(brk?(' · ที่ตั้งไว้: '+esc(brk)):'')+'">'+fmt(r.cost)+' <span class="pgredflag off">▽</span></td>'; }
+  return '<td class="r pgcost">'+fmt(r.cost)+'</td>'; }
 function _pgRowTr(r,seq){ var pc=_pgProgCls(r.prog); var man=(r.manPct!=null); var locked=!!(_pgLock&&_pgLock[r.code]);
   var star=man?'<span class="pgstar" title="Manual % from Paste">⭐</span>':'';
   var lockBtn='<button type="button" class="pglk'+(locked?' on':'')+'" data-lock="'+esc(r.code)+'" title="'+(locked?'Locked — Paste % / Actual% will not change this project (click to unlock)':'Lock — protect this project from Paste %')+'">'+(locked?'🔒':'🔓')+'</button>';
@@ -10303,7 +10334,7 @@ function _pgRowTr(r,seq){ var pc=_pgProgCls(r.prog); var man=(r.manPct!=null); v
     '<td class="pgproj l"><div class="pgprojhd">'+star+'<span class="pgcode">'+esc(r.code)+'</span></div>'+(r.name?('<div class="pgnamefull">'+esc(r.name)+'</div>'):'')+(r.cust?('<div class="pgcust"><span class="pgcustlab">ผู้ว่าจ้าง</span>'+esc(r.cust)+'</div>'):'')+'</td>'+
     '<td class="pgstatc l">'+_pgStatusBadge(r.st)+'</td>'+
     '<td class="r pgrev">'+fmt(r.conRev)+'</td>'+_pgDcell('pgrev','glRev',r.code,r.glRev)+'<td class="r pgearn">'+fmt(r.earned)+'</td><td class="r pgdiff'+(r.diff!=null?(r.diff<-0.005?' neg':(r.diff>0.005?' pos':'')):'')+'">'+fmt(r.diff)+'</td>'+_pgDcell('pgaccr','accrued',r.code,r.accrued)+_pgDcell('pgadv','advance',r.code,r.advance)+
-    '<td class="r pgcost pgbud">'+fmt(r.conExp)+'</td><td class="r pgcost'+(r.glRed?' pgcost-red':'')+'"'+(r.glRed?(' title="ลด GL ฿'+fmt(r.glRed)+' · เดิม ฿'+fmt(r.costRaw)+'"'):'')+'>'+fmt(r.cost)+(r.glRed?' <span class="pgredflag">▼</span>':'')+'</td>'+_pgDcell('paccrx','accrExp',r.code,r.accrExp)+
+    '<td class="r pgcost pgbud">'+fmt(r.conExp)+'</td>'+_pgCostCell(r)+_pgDcell('paccrx','accrExp',r.code,r.accrExp)+
     '<td class="pgprogc'+(man?' pgprogc-man':'')+'">'+lockBtn+(man?('<span class="pgmanflag" title="Manual '+r.manPct.toFixed(2)+'% · computed '+(r.progCalc!=null?r.progCalc.toFixed(2)+'%':'—')+'">✎</span>'):'')+_pgBar(r.prog)+'</td></tr>'; }
 /* v9.144: group header + per-group subtotal row (⭐ Pasted vs Computed) */
 function _pgGroupHd(icon,txt,n,cls){ return '<tr class="pggrouphd '+cls+'"><td colspan="13">'+icon+' '+txt+' <span class="pggrpn">'+n+' project'+(n===1?'':'s')+'</span></td></tr>'; }
@@ -10742,7 +10773,7 @@ function _pgEnsureCss(){ if(document.getElementById('pgCss'))return; var s=docum
   '.pgpaste-btn{border:1px solid var(--brand,#0E5C52);background:#fff;color:var(--brand-d,#0A463E);border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:5px 11px;cursor:pointer;transition:background .12s,color .12s}.pgpaste-btn:hover{background:var(--brand-t,#E6F0EC)}.pgpaste-btn.on{background:linear-gradient(180deg,#14776A,#0A463E);color:#fff;border-color:transparent}'+
   '.pgactual-btn{border:1px solid var(--brand,#0E5C52);background:#fff;color:var(--brand-d,#0A463E);border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:5px 11px;cursor:pointer;transition:background .12s,color .12s}.pgactual-btn:hover{background:var(--brand-t,#E6F0EC)}.pgactual-btn.on{background:linear-gradient(180deg,#14776A,#0A463E);color:#fff;border-color:transparent}'+
   '.pgcatsel{display:inline-flex;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--brand-d,#0A463E);margin:0 2px}.pgcatchip{border:1px solid var(--brand,#0E5C52);background:#fff;color:var(--brand-d,#0A463E);border-radius:6px;font:inherit;font-size:11px;font-weight:700;min-width:22px;padding:4px 7px;cursor:pointer;margin-left:3px;transition:background .12s,opacity .12s}.pgcatchip.on{background:linear-gradient(180deg,#14776A,#0A463E);color:#fff;border-color:transparent}.pgcatchip:not(.on){opacity:.5}'+
-  '.pgglred-btn{border:1px solid #B25A2A;background:#fff;color:#8A3E17;border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:5px 11px;cursor:pointer;transition:background .12s,color .12s}.pgglred-btn:hover{background:#FBEDE4}.pgglred-btn.on{background:linear-gradient(180deg,#C56A2E,#8A3E17);color:#fff;border-color:transparent}.pgcost-red{color:#8A3E17}.pgredflag{color:#C56A2E;font-size:9px;font-weight:700}'+
+  '.pgglred-btn{border:1px solid #B25A2A;background:#fff;color:#8A3E17;border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:5px 11px;cursor:pointer;transition:background .12s,color .12s}.pgglred-btn:hover{background:#FBEDE4}.pgglred-btn.on{background:linear-gradient(180deg,#C56A2E,#8A3E17);color:#fff;border-color:transparent}.pgcost-red{color:#8A3E17}.pgredflag{color:#C56A2E;font-size:9px;font-weight:700}.pgcost-redoff{color:#9AA0A6}.pgredflag.off{color:#B7BCC2;font-size:9px;font-weight:700}'+
   '.pglockpaste-btn{border:1px solid #C99A06;background:#fff;color:#8A6A00;border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:5px 11px;cursor:pointer;transition:background .12s,color .12s}.pglockpaste-btn:hover{background:#FDF6DD}.pglockpaste-btn.on{background:linear-gradient(180deg,#F0CF63,#C99A06);color:#5A4300;border-color:transparent}'+   /* v9.210: bulk-lock by paste */
   '.pgexport-btn{border:1px solid #1B7A43;background:linear-gradient(180deg,#22A85A,#178A46);color:#fff;border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:5px 12px;cursor:pointer;transition:filter .12s;box-shadow:0 1px 2px rgba(16,90,50,.25)}.pgexport-btn:hover{filter:brightness(1.06)}.pgexport-btn:active{filter:brightness(.96)}'+   /* v9.155: Excel export button */
   '.pgpdf-btn{border:1px solid #B12E1A;background:linear-gradient(180deg,#EF6A4E,#CE3A24);color:#fff;border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:5px 12px;cursor:pointer;transition:filter .12s;box-shadow:0 1px 2px rgba(206,58,36,.28)}.pgpdf-btn:hover{filter:brightness(1.05)}.pgpdf-btn:active{filter:brightness(.96)}'+   /* v9.181: PDF print button */
@@ -17437,29 +17468,29 @@ function _fsRenderTB(){
       '<td class="fsm">'+_fsMoney(x.yd,true)+'</td><td class="fsm">'+_fsMoney(x.yc,true)+'</td>'+
       _endCells(x)+(wpAdjOn?_fsWpTbAdjTd(x):'')+'</tr>';});
   if(!arr.length)rows='<tr class="fstbempty"><td colspan="'+((adjActive?16:13)+(wpAdjOn?3:0))+'">— ไม่มีบัญชีที่ตรงกับตัวกรอง —</td></tr>';
-  var attHead=_fsTbTh('att_ic','📎','Attach','fsatthd-ic')+
-    _fsTbTh('att_amt','Per File','A1 · Sheet FY '+((typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):''),'fsm fsatthd-amt')+
-    _fsTbTh('att_diff','Diff','File − TB','fsm fsatthd-diff');
+  var attHead=_fsTbTh('att_ic','📎','แนบไฟล์','fsatthd-ic')+
+    _fsTbTh('att_amt','ยอดตามไฟล์','A1 · ชีตปี '+((typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):''),'fsm fsatthd-amt')+
+    _fsTbTh('att_diff','ผลต่าง','ไฟล์ − TB','fsm fsatthd-diff');
   var y0BE=(+_fsY0+543), y1BE=(+_fsY1+543), isAll=(_fsYear==='ALL');
-  var openSub=isAll?'Opening · All yrs':('Opening FY '+y0BE);
-  var movSub=isAll?'During · All yrs':(_fsIsInterim()?('Jan–'+_FS_MON_TH[_fsEndM-1]+' '+y1BE):((_fsY0===_fsY1)?('During FY '+y1BE):('FY '+y0BE+'–'+y1BE)));
-  var endSub=isAll?'Ending · All yrs':(_fsIsInterim()?('As of '+_FS_MON_TH[_fsEndM-1]+' '+y1BE):('Ending FY '+y1BE));
+  var openSub=isAll?'ยกมา · ทุกปี':('ต้นปี '+y0BE);
+  var movSub=isAll?'ระหว่าง · ทุกปี':(_fsIsInterim()?('ม.ค.–'+_FS_MON_TH[_fsEndM-1]+' '+y1BE):((_fsY0===_fsY1)?('ระหว่างปี '+y1BE):('ปี '+y0BE+'–'+y1BE)));
+  var endSub=isAll?'คงเหลือ · ทุกปี':(_fsIsInterim()?('ณ '+_FS_MON_TH[_fsEndM-1]+' '+y1BE):('สิ้นปี '+y1BE));
   var endHead = adjActive
-    ? (_fsTbTh('ending','Ending','Unadjusted','fsm')+
-       '<th class="fsm fsadjhd fsadjhd-dr" title="เดบิตจากรายการปรับปรุง">Adj. Dr<span class="fsatthx">Adjustments</span></th>'+
-       '<th class="fsm fsadjhd fsadjhd-cr" title="เครดิตจากรายการปรับปรุง">Adj. Cr<span class="fsatthx">Adjustments</span></th>'+
-       '<th class="fsm fsadjhd fsadjhd-after" title="ยอดหลังปรับปรุง = ไหลเข้างบการเงิน">หลังปรับปรุง<span class="fsatthx">Adjusted TB</span></th>')
-    : _fsTbTh('ending','Ending',endSub,'fsm');
+    ? (_fsTbTh('ending','ยอดคงเหลือ','ก่อนปรับปรุง','fsm')+
+       '<th class="fsm fsadjhd fsadjhd-dr" title="เดบิตจากรายการปรับปรุง">ปรับปรุง Dr<span class="fsatthx">Adjust · เดบิต</span></th>'+
+       '<th class="fsm fsadjhd fsadjhd-cr" title="เครดิตจากรายการปรับปรุง">ปรับปรุง Cr<span class="fsatthx">Adjust · เครดิต</span></th>'+
+       '<th class="fsm fsadjhd fsadjhd-after" title="ยอดหลังปรับปรุง = ไหลเข้างบการเงิน">หลังปรับปรุง<span class="fsatthx">ยอดปรับปรุงแล้ว</span></th>')
+    : _fsTbTh('ending','ยอดคงเหลือ',endSub,'fsm');
   var head='<thead><tr>'+attHead+
     '<th class="fsseqhd" style="width:40px;text-align:center" title="ลำดับ">#</th>'+
-    '<th class="fsidxhd" style="width:94px;text-align:center" title="Index — ใส่ตัวอักษร/สัญลักษณ์เพื่อจับกลุ่มบรรทัดที่เกี่ยวข้องให้มาอยู่ติดกัน · คลิกจุดสีเพื่อเลือกสีไฮไลต์กลุ่ม">Index<span class="fsidxhd-s">Group · Colour</span></th>'+
-    _fsTbTh('code','Code','','')+
-    _fsTbTh('acct','Account · Name','','')+
-    _fsTbTh('group','FS Grouping','Group → FS line','fsgrphd')+
-    _fsTbTh('cfgroup','Cash Flow Grouping','Group → cash-flow line','fsgrphd fscfgrphd')+
-    _fsTbTh('opening','Opening',openSub,'fsm')+
-    _fsTbTh('debit','Debit',movSub,'fsm')+
-    _fsTbTh('credit','Credit',movSub,'fsm')+
+    '<th class="fsidxhd" style="width:94px;text-align:center" title="ดัชนี — ใส่ตัวอักษร/สัญลักษณ์เพื่อจับกลุ่มบรรทัดที่เกี่ยวข้องให้มาอยู่ติดกัน · คลิกจุดสีเพื่อเลือกสีไฮไลต์กลุ่ม">ดัชนี<span class="fsidxhd-s">จัดกลุ่ม · สี</span></th>'+
+    _fsTbTh('code','รหัสบัญชี','Code','')+
+    _fsTbTh('acct','ชื่อบัญชี','Account name','')+
+    _fsTbTh('group','จัดกลุ่มงบการเงิน','กลุ่ม → บรรทัดในงบ','fsgrphd')+
+    _fsTbTh('cfgroup','จัดกลุ่มกระแสเงินสด','กลุ่ม → บรรทัดเงินสด','fsgrphd fscfgrphd')+
+    _fsTbTh('opening','ยอดยกมา',openSub,'fsm')+
+    _fsTbTh('debit','เดบิต',movSub,'fsm')+
+    _fsTbTh('credit','เครดิต',movSub,'fsm')+
     endHead+(wpAdjOn?_fsWpTbAdjTh():'')+'</tr></thead>';
   var fyd=0,fyc=0,sOpen=0,sEnd=0,nAtt=0,attSum=0,nAttMatch=0,nAttMis=0,nAttNo=0,sBefore=0,sAdjDr=0,sAdjCr=0;
   var _grpAttDone={};   /* v9.202/9.204: นับไฟล์แนบต่อกลุ่ม — file=นับรายรหัส · manual=นับครั้งเดียว(เทียบยอดรวม) */
@@ -17483,33 +17514,33 @@ function _fsRenderTB(){
   var _curBEs=_fsCurBE();
   var fdiff=fyd-fyc;
   var filtered=_fsTbHasFil(), nAll=_fsTB.length;
-  var filterBar=filtered?('<div class="fstbfbar">🔎 กำลังกรอง — Showing <b>'+arr.length+'</b> จาก '+nAll+' บัญชี · Debit '+_fsMoney(fyd)+' · Credit '+_fsMoney(fyc)+'<button type="button" id="fsTbClearAll" class="fstbclr">✕ Clear filtersทั้งหมด</button></div>'):'';
+  var filterBar=filtered?('<div class="fstbfbar">🔎 กำลังกรอง — แสดง <b>'+arr.length+'</b> จาก '+nAll+' บัญชี · เดบิต '+_fsMoney(fyd)+' · เครดิต '+_fsMoney(fyc)+'<button type="button" id="fsTbClearAll" class="fstbclr">✕ ล้างตัวกรองทั้งหมด</button></div>'):'';
   /* v9.94: ยอดรวมจำนวนเงินด้านบน (colourful column totals) + เทียบไฟล์แนบต่อบัญชี กับ TB */
   function _fsSc(th,en,val,k){ return '<div class="fstbsum-c s-'+k+'"><div class="fstbsum-cl">'+th+'<span class="fstbsum-cen">'+en+'</span></div><div class="fstbsum-cv">'+val+'</div></div>'; }
   var _balOk=Math.abs(fdiff)<0.5;
   var sumPanel='<div class="fstbsum">'+
-    '<div class="fstbsum-h"><span class="fstbsum-t">Column Totals <span class="fstbsum-en">Trial Balance · '+arr.length+(filtered?(' / '+nAll):'')+' accounts'+(filtered?' (filtered)':'')+'</span></span>'+
+    '<div class="fstbsum-h"><span class="fstbsum-t">ยอดรวมแต่ละคอลัมน์ <span class="fstbsum-en">งบทดลอง · '+arr.length+(filtered?(' / '+nAll):'')+' บัญชี'+(filtered?' (กรองแล้ว)':'')+'</span></span>'+
       '<span class="fstbsum-bal '+(_balOk?'ok':'bad')+'">'+(_balOk?'⚖ เดบิต = เครดิต':'⚖ เดบิต − เครดิต = '+_fsMoney(fdiff))+'</span></div>'+
     '<div class="fstbsum-grid">'+
-      _fsSc('Opening','OPENING',_fsMoney(sOpen),'open')+
-      _fsSc('Debit','DEBIT',_fsMoney(fyd),'deb')+
-      _fsSc('Credit','CREDIT',_fsMoney(fyc),'cred')+
-      _fsSc('Ending','ENDING',_fsMoney(sEnd),'end')+
+      _fsSc('ยอดยกมา','OPENING',_fsMoney(sOpen),'open')+
+      _fsSc('เดบิต','DEBIT',_fsMoney(fyd),'deb')+
+      _fsSc('เครดิต','CREDIT',_fsMoney(fyc),'cred')+
+      _fsSc('ยอดคงเหลือ','ENDING',_fsMoney(sEnd),'end')+
     '</div>';
   if(nAtt){
     var _noWarn=nAttNo?('<span class="fsnosheet-warn">· ⚠ '+nAttNo+' บัญชี No sheet data (ไม่มีชีตปี '+(_curBEs||'?')+')</span>'):'';
-    sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-cmph">📎/✏️ Reconcile vs TB — '+nAtt+' account(s) entered · from Excel (A1, sheet FY '+(_curBEs||'?')+') or type manually'+_noWarn+'</div><div class="fstbsum-grid">'+
-      _fsSc('Per File','FILE · FY '+(_curBEs||''),_fsMoney(attSum),'tb')+
-      _fsSc('Matched','MATCHED',''+nAttMatch,'ok')+
-      _fsSc('Difference','DIFF',''+nAttMis,nAttMis?'bad':'ok')+
-      (nAttNo?_fsSc('No sheet data','no sheet this FY','▲ '+nAttNo,'nosheet')
-             :_fsSc('Status',(nAttMis?'CHECK':'MATCHED'),(nAttMis?('▲ '+nAttMis+' differ'):'✓ all matched'),nAttMis?'bad':'ok'))+
+    sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-cmph">📎/✏️ เทียบยอดกับ TB — กรอกแล้ว '+nAtt+' บัญชี · จาก Excel (A1, ชีตปี '+(_curBEs||'?')+') หรือกรอกเอง'+_noWarn+'</div><div class="fstbsum-grid">'+
+      _fsSc('ยอดตามไฟล์','FILE · FY '+(_curBEs||''),_fsMoney(attSum),'tb')+
+      _fsSc('ตรงกัน','MATCHED',''+nAttMatch,'ok')+
+      _fsSc('ผลต่าง','DIFF',''+nAttMis,nAttMis?'bad':'ok')+
+      (nAttNo?_fsSc('ไม่มีชีตข้อมูล','no sheet this FY','▲ '+nAttNo,'nosheet')
+             :_fsSc('สถานะ',(nAttMis?'CHECK':'MATCHED'),(nAttMis?('▲ '+nAttMis+' ต่าง'):'✓ ตรงทั้งหมด'),nAttMis?'bad':'ok'))+
     '</div></div>';
   } else {
-    sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-wait"><b>Reconcile per-account totals — 2 ways:</b> in the left-most columns of each account · <b>📎 attach an Excel/CSV file</b> (reads the amount from cell A1, top-left) <b>or ✏️ type the amount + source</b> — the system automatically compares each entry against the Ending balance</div></div>';
+    sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-wait"><b>เทียบยอดประกอบต่อบัญชี — เลือกได้ 2 วิธี:</b> ที่คอลัมน์ซ้ายสุดของแต่ละบัญชี · <b>📎 แนบไฟล์ Excel/CSV</b> (อ่านยอดจากเซลล์ A1 มุมซ้ายบน) <b>หรือ ✏️ พิมพ์จำนวนเงิน + ที่มา</b> — ระบบจะเทียบแต่ละรายการกับยอดคงเหลือ (Ending) ให้อัตโนมัติ</div></div>';
   }
   /* v9.96: กระดาษทำการปรับปรุง — สรุป + ปุ่มเปิด */
-  var adjBtn='<button type="button" class="fsadj-openbtn" id="fsAdjOpen">📝 Open adjusting entries</button>';
+  var adjBtn='<button type="button" class="fsadj-openbtn" id="fsAdjOpen">📝 เปิดรายการปรับปรุง</button>';
   if(adjActive){ var abal=adjT.bal&&adjT.bad===0;
     sumPanel+='<div class="fstbsum-cmp fstbsum-adj"><div class="fstbsum-cmph">📝 กระดาษทำการปรับปรุง (Adjusting entries) · ปี '+(_curBEs||'?')+' — ไหลเข้า TB + งบการเงินทุกงบ (งบทดลองหลังปรับปรุง) '+adjBtn+'</div><div class="fstbsum-grid">'+
       _fsSc('รวมปรับปรุง Dr','ADJ DEBIT',_fsMoney(adjT.dr),'deb')+
@@ -17518,14 +17549,14 @@ function _fsRenderTB(){
       _fsSc('สถานะ',(abal?'BALANCED':'CHECK'),(abal?'✓ เดบิต = เครดิต':(adjT.bad?('▲ '+adjT.bad+' รายการไม่ดุล'):('⚠ Dr−Cr '+_fsMoney(adjT.dr-adjT.cr)))),abal?'ok':'bad')+
     '</div></div>';
   } else { var _ab=_fsAdjBook(false); var _other=!!(_ab&&_ab.entries&&_ab.entries.length&&!_fsAdjYearEntries().length);
-    sumPanel+='<div class="fstbsum-cmp fstbsum-adj off"><div class="fstbsum-wait">📝 <b>Adjusting entries:</b> create double-entry adjustments (debit/credit) to correct balances; the system updates <b>the TB and all financial statements</b> automatically (adjusted trial balance)'+(_other?' · <b class="fsnosheet-warn">entries in another FY — switch year to view</b>':'')+' &nbsp;'+adjBtn+'</div></div>';
+    sumPanel+='<div class="fstbsum-cmp fstbsum-adj off"><div class="fstbsum-wait">📝 <b>รายการปรับปรุง (Adjusting entries):</b> สร้างรายการปรับปรุงคู่บัญชี (เดบิต/เครดิต) เพื่อแก้ยอด · ระบบจะอัปเดต <b>งบทดลองและงบการเงินทุกงบ</b> ให้อัตโนมัติ (งบทดลองหลังปรับปรุง)'+(_other?' · <b class="fsnosheet-warn">มีรายการในปีอื่น — สลับปีเพื่อดู</b>':'')+' &nbsp;'+adjBtn+'</div></div>';
   }
   sumPanel+='</div>';
   var attFoot='<td class="fsattc"></td>'+
     '<td class="fsm">'+(nAtt?_fsMoney(attSum):'')+'</td>'+
     '<td class="fsm">'+(nAtt?(nAttNo?('<span class="fsbad">No sheet ×'+nAttNo+'</span>'):(nAttMis?('<span class="fsbad">▲ '+nAttMis+'</span>'):'<span class="fsok">✓</span>')):'')+'</td>';
   /* footer = clean column totals; the Debit=Credit balance check lives in the ⚖ chip above */
-  var totLbl='Total ('+arr.length+(filtered?(' / '+nAll):'')+' accounts)';
+  var totLbl='รวมทั้งหมด ('+arr.length+(filtered?(' / '+nAll):'')+' บัญชี)';
   var endFoot = adjActive
     ? ('<td class="fsm">'+_fsMoney(sBefore)+'</td>'+
        '<td class="fsm fsadj-drc has">'+_fsMoney(sAdjDr,true)+'</td>'+
