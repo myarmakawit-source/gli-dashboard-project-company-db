@@ -789,6 +789,13 @@ td.num.edit{border-bottom:1px dashed #E2DCCF!important}
 .glcls{border:1px solid var(--line);background:#fff;color:var(--ink2);font-family:'Inter',sans-serif;font-size:12px;font-weight:700;padding:5px 11px;border-radius:8px;cursor:pointer}
 .glcls.active{background:#1D5FAE;border-color:#1D5FAE;color:#fff}
 .glclsrow{margin-bottom:6px}
+/* v10.94: Trial Balance — account-class (หมวดบัญชี) filter chips (like GL) */
+.fstbclsrow{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:10px 0 8px;padding:8px 11px;background:#F4FAF8;border:1px solid var(--line2);border-radius:12px}
+.fstbcls-lb{font-size:12px;font-weight:800;color:#0A463E;margin-right:5px;display:flex;flex-direction:column;line-height:1.15}
+.fstbcls-lb span{font-size:8.5px;font-weight:600;color:var(--muted);letter-spacing:.02em;text-transform:uppercase}
+.fstbcls{border:1px solid var(--line);background:#fff;color:var(--ink2);font-family:'Inter',sans-serif;font-size:12px;font-weight:700;padding:5px 12px;border-radius:8px;cursor:pointer;transition:background .12s,color .12s,transform .1s ease,box-shadow .12s ease}
+.fstbcls:hover{background:#EAF3F0;transform:translateY(-1px);box-shadow:0 4px 10px -5px rgba(14,92,82,.35)}
+.fstbcls.active{background:#1D5FAE;border-color:#1D5FAE;color:#fff}
 .glqhint{font-size:10px;color:var(--muted);font-weight:600;margin-left:7px;white-space:nowrap;letter-spacing:.02em}
 .glq{border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-family:'Inter',sans-serif;font-size:12px;min-width:230px}
 .glq:focus{outline:none;border-color:#0E5C52}
@@ -10905,9 +10912,9 @@ function _pgEnsureCss(){ if(document.getElementById('pgCss'))return; var s=docum
   '.pgtbl thead th.pgprogh{border-left-color:rgba(87,201,138,.48);border-right-color:rgba(87,201,138,.48);border-top-color:rgba(87,201,138,.30)}'+
   /* ===== v9.154: remove ALL internal header divider lines → a smooth, seamless dark header (only the colored section underline accents remain) ===== */
   '.pgtbl thead th,.pgtbl .pggh,.pgtbl .pggh.gh-rev,.pgtbl .pggh.gh-cost,.pgtbl thead th.pgsub-rev,.pgtbl thead th.pgsub-cost,.pgtbl thead th.pgprogh,.pgtbl thead th.pgstath,.pgtbl thead th.pgprojh,.pgtbl thead th.pgseq{border-left:0!important;border-right:0!important;border-top:0!important}'+
-  /* ===== v9.209: FULL-ROW highlight — 🔒 Locked = solid yellow · ➖ GL-reduced = solid orange (whole row, wins over zebra/hover/per-cell tints). Reduced (orange) takes precedence when a row is both. ===== */
+  /* ===== v9.209: FULL-ROW highlight — 🔒 Locked = solid yellow · ➖ GL-reduced = solid pink (whole row, wins over zebra/hover/per-cell tints). Reduced (pink) takes precedence when a row is both. (v9.211: reduced colour orange → pink) ===== */
   '.pgtbl tbody tr.pgrow.pgrow-lock td,.pgtbl tbody tr.pgrow.pgrow-lock:hover td{background:#FBE24A !important}'+
-  '.pgtbl tbody tr.pgrow.pgrow-glred td,.pgtbl tbody tr.pgrow.pgrow-glred:hover td{background:#FBA94C !important}'+
+  '.pgtbl tbody tr.pgrow.pgrow-glred td,.pgtbl tbody tr.pgrow.pgrow-glred:hover td{background:#F79FC4 !important}'+
   '.pgnote{font-size:11px;color:var(--muted,#8C8676);line-height:1.6;margin-top:12px}.pgnote .pgred{color:var(--neg,#B42318)}';
   document.head.appendChild(s); }
 /* v9.135: Excel-style per-column filter popup (reuses .gldrop) */
@@ -17172,6 +17179,18 @@ function _fsReconPanel(){
 
 /* ---------- v9.92: Trial Balance — Excel-style per-column filter + sort (in the header) ---------- */
 var _fsTbFil={}, _fsTbSort=null;
+var _fsTbCls='', _fsTbClsAnchor=null;   /* v10.94: account-class filter (first digit of code) — เหมือน Filter หมวดบัญชีใน GL */
+var _FS_TB_CLS=[['1','1','สินทรัพย์ · Assets','สินทรัพย์'],['2','2','หนี้สิน · Liabilities','หนี้สิน'],['3','3','ส่วนของผู้ถือหุ้น · Equity','ทุน'],['4','4','รายได้ · Revenue','รายได้'],['5','5','ต้นทุนขาย/บริการ · Cost','ต้นทุน'],['6','6','ค่าใช้จ่ายในการบริหาร · Admin','ค่าใช้จ่าย'],['7','7','ต้นทุนทางการเงิน · Finance','ดอกเบี้ย'],['8','8','รายการอื่น · Other','อื่นๆ']];
+function _fsTbClsRow(){
+  var TB=(typeof _fsTB!=='undefined'&&_fsTB)?_fsTB:[];
+  var pres={}; for(var i=0;i<TB.length;i++){ var fc=(''+(TB[i].code==null?'':TB[i].code)).charAt(0); if(fc)pres[fc]=1; }
+  var h='<div class="fstbclsrow"><span class="fstbcls-lb">หมวดบัญชี<span>Account class</span></span>'+
+        '<button type="button" class="fstbcls'+(!_fsTbCls?' active':'')+'" data-fscls="">ทั้งหมด</button>';
+  for(var c=0;c<_FS_TB_CLS.length;c++){ var cc=_FS_TB_CLS[c]; if(!pres[cc[0]])continue;
+    h+='<button type="button" class="fstbcls'+((_fsTbCls&&_fsTbCls.indexOf(cc[0])>=0)?' active':'')+'" data-fscls="'+cc[0]+'" title="'+cc[2]+' (Class '+cc[1]+') · คลิกเพื่อกรอง · Shift+คลิก = เลือกช่วง">'+cc[1]+' '+cc[3]+'</button>';
+  }
+  return h+'</div>';
+}
 /* v9.94: per-column widths (drag-to-resize) — persisted in localStorage, keyed by column */
 var _fsTbW={}; try{_fsTbW=JSON.parse(localStorage.getItem('gli_fstbw')||'{}')||{};}catch(_twe){_fsTbW={};}
 function _fsTbWSave(){try{localStorage.setItem('gli_fstbw',JSON.stringify(_fsTbW));}catch(e){}}
@@ -17207,7 +17226,8 @@ var _FS_TB_COLS=[
   {k:'ending',t:'num', get:function(x){return x.nat;}}
 ];
 function _fsTbCol(k){ for(var i=0;i<_FS_TB_COLS.length;i++)if(_FS_TB_COLS[i].k===k)return _FS_TB_COLS[i]; return null; }
-function _fsTbPass(x){ for(var k in _fsTbFil){ var f=_fsTbFil[k], col=_fsTbCol(k); if(!col)continue;
+function _fsTbPass(x){ if(_fsTbCls){ var _fc=(''+(x.code==null?'':x.code)).charAt(0); if(!_fc||_fsTbCls.indexOf(_fc)<0)return false; }
+  for(var k in _fsTbFil){ var f=_fsTbFil[k], col=_fsTbCol(k); if(!col)continue;
     if(f.t==='has'){ var hay=((col.hay?col.hay(x):(''+col.get(x)))+'').toLowerCase(); if(hay.indexOf(f.q)<0)return false; }
     else if(f.t==='set'){ if(!f.v['$'+col.get(x)])return false; }
     else if(f.t==='num'){ var n=+col.get(x)||0; if(f.a!=null&&n<f.a)return false; if(f.b!=null&&n>f.b)return false; } }
@@ -17235,8 +17255,8 @@ function _fsTbRows(){ var arr=[]; for(var i=0;i<_fsTB.length;i++){ if(_fsTbPass(
   /* V10.36: zero-ending accounts (that the user has NOT indexed) pile together at the very bottom */
   arr.sort(function(a,b){var za=((!IDX[a.code])&&Math.abs(+a.nat||0)<0.5)?1:0,zb=((!IDX[b.code])&&Math.abs(+b.nat||0)<0.5)?1:0;return za-zb;});
   return arr; }
-function _fsTbHasFil(){ for(var k in _fsTbFil)return true; return false; }
-function _fsTbClearAll(){ _fsTbFil={}; _fsTbSort=null; _fsRenderBody(); }
+function _fsTbHasFil(){ if(_fsTbCls)return true; for(var k in _fsTbFil)return true; return false; }
+function _fsTbClearAll(){ _fsTbFil={}; _fsTbSort=null; _fsTbCls=''; _fsTbClsAnchor=null; _fsRenderBody(); }
 function _fsTbTh(k,main,sub,cls){ var f=_fsTbFil[k];
   var ar=(_fsTbSort&&_fsTbSort.c===k)?(_fsTbSort.dir>0?' ▲':' ▼'):'';
   return '<th class="'+(cls||'')+(ar?' fsth-sorted':'')+'"'+_fsTbWSty(k)+'><div class="fstbh"><span class="fstbsort" data-tbc="'+k+'" title="คลิกเพื่อเรียงลำดับ (asc/desc/ปิด)">'+main+ar+(sub?('<span class="fsthy">'+sub+'</span>'):'')+'</span>'+
@@ -17512,7 +17532,7 @@ function _fsRenderTB(){
        '<td class="fsm fsadj-drc has">'+_fsMoney(sAdjCr,true)+'</td>'+
        '<td class="fsm fsadj-after on">'+_fsMoney(sEnd)+'</td>')
     : '<td class="fsm">'+_fsMoney(sEnd)+'</td>';
-  return sumPanel+filterBar+'<div class="fstbwrap"><table class="fstable fstb fstb-att'+(adjActive?' fstb-adj':'')+'">'+head+
+  return sumPanel+_fsTbClsRow()+filterBar+'<div class="fstbwrap"><table class="fstable fstb fstb-att'+(adjActive?' fstb-adj':'')+'">'+head+
     '<tbody>'+rows+'</tbody><tfoot><tr class="fstot">'+attFoot+'<td class="fsseq"></td><td colspan="3">'+totLbl+'</td>'+
     '<td class="fsm">'+_fsMoney(sOpen)+'</td>'+
     '<td class="fsm">'+_fsMoney(fyd)+'</td><td class="fsm">'+_fsMoney(fyc)+'</td>'+endFoot+
@@ -19985,6 +20005,11 @@ function _fsBind(w){ if(w._b)return; w._b=1;
     var tbf=t.closest?t.closest('.fstbfun[data-tbc]'):null; if(tbf){_fsTbOpenFilter(tbf.getAttribute('data-tbc'),tbf);return;}
     var tbs=t.closest?t.closest('.fstbsort[data-tbc]'):null; if(tbs){var _tk=tbs.getAttribute('data-tbc'); if(!_fsTbSort||_fsTbSort.c!==_tk)_fsTbSort={c:_tk,dir:1}; else if(_fsTbSort.dir===1)_fsTbSort.dir=-1; else _fsTbSort=null; _fsRenderBody(); return;}
     var tbca=t.closest?t.closest('#fsTbClearAll'):null; if(tbca){_fsTbClearAll();return;}
+    var tbcls=t.closest?t.closest('.fstbcls[data-fscls]'):null; if(tbcls){ var _c=tbcls.getAttribute('data-fscls')||'';   /* v10.94: account-class filter (เหมือน GL) */
+      if(_c===''){ _fsTbCls=''; _fsTbClsAnchor=null; }
+      else if(e.shiftKey&&_fsTbClsAnchor){ var _a=+_fsTbClsAnchor,_b=+_c,_lo=Math.min(_a,_b),_hi=Math.max(_a,_b),_s=''; for(var _d=_lo;_d<=_hi;_d++)_s+=_d; _fsTbCls=_s; }
+      else { _fsTbCls=(_fsTbCls===_c)?'':_c; _fsTbClsAnchor=_c; }   /* คลิกซ้ำ = ปิด (กลับเป็นทั้งหมด) */
+      _fsRenderBody(); return; }
     var adjo=t.closest?t.closest('#fsAdjOpen'):null; if(adjo){_fsAdjOpen();return;}
     var xpop=t.closest?t.closest('[data-fsxpop]'):null; if(xpop){_fsExpModal(xpop.getAttribute('data-fsxpop'));return;}
     var fadd=t.closest?t.closest('[data-fsadd]'):null; if(fadd){_fsManAddRow(fadd.getAttribute('data-fsadd'));return;}
