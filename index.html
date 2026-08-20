@@ -10163,11 +10163,12 @@ function _pgSplitCols(ln){ ln=''+(ln||''); var dl=[/\t/,/;/,/\s{2,}/,/\s+/,/,/];
   for(var d=0;d<dl.length;d++){ var parts=ln.split(dl[d]); var clean=[]; for(var i=0;i<parts.length;i++){ var p=(parts[i]||'').trim(); if(p!=='')clean.push(p); } if(clean.length>=2)return clean; }
   var p0=ln.trim(); return p0?[p0]:[]; }
 /* v9.211: per-หมวด GL reduction — paste "รหัส [หมวด] จำนวน". 3 cols = code/หมวด/amount; 2 cols = code/amount (หมวด='all'). */
-function _pgReduceApply(text){ var lines=(''+(text||'')).split(/\r?\n/); var applied=0,cleared=0,codes={};
+function _pgReduceApply(text){ var lines=(''+(text||'')).split(/\r?\n/); var applied=0,cleared=0,locked=0,codes={};
   for(var i=0;i<lines.length;i++){ var ln=lines[i]; if(!ln||!ln.trim())continue;
     var clean=_pgSplitCols(ln);
     if(clean.length<2)continue;
     var code=clean[0]; if(!code)continue;
+    if(_pgLock&&_pgLock[code]){ locked++; continue; }   /* v9.213: locked projects are NOT changed by ➖ ลด GL (mirror of Paste %) */
     var pv=clean[clean.length-1]; var num=parseFloat((''+pv).replace(/[,\s฿]/g,'')); if(isNaN(num))continue;
     var cat='all'; if(clean.length>=3){ var cn=_pgCatNorm(clean[1]); if(cn)cat=cn; }
     var cur=_pgGlReduce[code]; if(cur==null||typeof cur==='number'){ _pgGlReduce[code]=(typeof cur==='number'&&cur)?{all:cur}:{}; }
@@ -10175,18 +10176,20 @@ function _pgReduceApply(text){ var lines=(''+(text||'')).split(/\r?\n/); var app
     _pgGlReduce[code][cat]=Math.round(num*100)/100; applied++; codes[code]=1; }
   _pgGlReduceSave();
   var matched=0,unknown=0; try{ var have={}; ((typeof DATA!=='undefined'&&DATA&&DATA.rows)||[]).forEach(function(r){have[r.code]=1;}); for(var c in codes){ if(have[c])matched++; else unknown++; } }catch(e){}
-  return {applied:applied,cleared:cleared,matched:matched,unknown:unknown}; }
+  return {applied:applied,cleared:cleared,locked:locked,matched:matched,unknown:unknown}; }
+/* v9.213: clear ALL GL reductions EXCEPT locked projects (mirror of _pgClearMan) */
+function _pgClearRed(){ var keep={}; try{ for(var c in _pgGlReduce){ if(Object.prototype.hasOwnProperty.call(_pgGlReduce,c)&&_pgLock&&_pgLock[c])keep[c]=_pgGlReduce[c]; } }catch(e){} _pgGlReduce=keep; _pgGlReduceSave(); }
 function _pgReduceOpen(){ _pgReduceClose(); var cnt=_pgRedN(),sum=0; try{ for(var k in _pgGlReduce){ sum+=_pgGlRedTot(k); } }catch(e){}
   var ov=document.createElement('div'); ov.id='pgReduceModal'; ov.className='pgpaste-ov';
   ov.innerHTML='<div class="pgpaste-card"><div class="pgpaste-hd">➖ ลดมูลค่า GL สำหรับคิด %Progress</div>'+
-    '<div class="pgpaste-sub">วางจาก Excel: <b>รหัสโปรเจค</b> · <b>หมวด</b> (<code>5</code>/<code>6</code>/<code>7</code> หรือ <code>รวม</code>) · <b>จำนวนเงินที่จะลด</b> (บาท) — บรรทัดละ 1 รายการ (คั่นด้วย Tab / เว้นวรรค). ส่วนลดจะตัด GL <b>เฉพาะหมวดนั้น</b> และมีผลเมื่อหมวดนั้นถูกเลือกในการคิด %Progress เท่านั้น. ไม่ระบุหมวด = <b>รวมทุกหมวด</b>. ใส่ <code>0</code> ที่ช่องจำนวนเพื่อยกเลิกส่วนลดของหมวดนั้น.</div>'+
+    '<div class="pgpaste-sub">วางจาก Excel: <b>รหัสโปรเจค</b> · <b>หมวด</b> (<code>5</code>/<code>6</code>/<code>7</code> หรือ <code>รวม</code>) · <b>จำนวนเงินที่จะลด</b> (บาท) — บรรทัดละ 1 รายการ (คั่นด้วย Tab / เว้นวรรค). ส่วนลดจะตัด GL <b>เฉพาะหมวดนั้น</b> และมีผลเมื่อหมวดนั้นถูกเลือกในการคิด %Progress เท่านั้น. ไม่ระบุหมวด = <b>รวมทุกหมวด</b>. ใส่ <code>0</code> ที่ช่องจำนวนเพื่อยกเลิกส่วนลดของหมวดนั้น. <b>🔒 โปรเจคที่ล็อกจะถูกข้าม</b> (ไม่ถูกเปลี่ยนด้วย ลด GL / Paste % / Actual%).</div>'+
     '<textarea id="pgReduceTA" class="pgpaste-ta" spellcheck="false" placeholder="GLI23005&#9;5&#9;50000000&#10;GLI21004&#9;6&#9;12000000&#10;GLI23002&#9;รวม&#9;8000000"></textarea>'+
     '<div class="pgpaste-ft"><span class="pgpaste-cnt">'+(cnt?('ปัจจุบันลด '+cnt+' โปรเจค · รวม ฿'+fmt(Math.round(sum*100)/100)):'ยังไม่มีส่วนลด')+'</span>'+
     '<div class="pgpaste-btns">'+(cnt?'<button type="button" class="pgpaste-clr" id="pgReduceClr">ล้างส่วนลดทั้งหมด</button>':'')+'<button type="button" class="pgpaste-cancel" id="pgReduceCancel">ยกเลิก</button><button type="button" class="pri pgpaste-apply" id="pgReduceApplyBtn">ใช้งาน</button></div></div></div>';
   document.body.appendChild(ov); var ta=ov.querySelector('#pgReduceTA'); if(ta){try{ta.focus();}catch(e){}}
-  ov.querySelector('#pgReduceApplyBtn').addEventListener('click',function(){ var res=_pgReduceApply(ta?ta.value:''); _pgReduceClose(); renderProgress(); try{alert('ตั้งส่วนลด GL '+res.applied+' โปรเจค'+(res.cleared?(' · ยกเลิก '+res.cleared):'')+' · พบในปีนี้ '+res.matched+(res.unknown?(' · ไม่พบรหัส '+res.unknown+' (เก็บไว้ อาจตรงปีอื่น)'):''));}catch(e){} });
+  ov.querySelector('#pgReduceApplyBtn').addEventListener('click',function(){ var res=_pgReduceApply(ta?ta.value:''); _pgReduceClose(); renderProgress(); try{alert('ตั้งส่วนลด GL '+res.applied+' โปรเจค'+(res.cleared?(' · ยกเลิก '+res.cleared):'')+(res.locked?(' · ข้ามที่ล็อก 🔒 '+res.locked):'')+' · พบในปีนี้ '+res.matched+(res.unknown?(' · ไม่พบรหัส '+res.unknown+' (เก็บไว้ อาจตรงปีอื่น)'):''));}catch(e){} });
   ov.querySelector('#pgReduceCancel').addEventListener('click',_pgReduceClose);
-  var clrb=ov.querySelector('#pgReduceClr'); if(clrb)clrb.addEventListener('click',function(){ if(confirm('ล้างส่วนลด GL ทั้งหมด?')){ _pgGlReduce={}; _pgGlReduceSave(); _pgReduceClose(); renderProgress(); } });
+  var clrb=ov.querySelector('#pgReduceClr'); if(clrb)clrb.addEventListener('click',function(){ var _lk=0; try{ for(var _mk in _pgGlReduce){ if(_pgLock&&_pgLock[_mk])_lk++; } }catch(e){} if(confirm('ล้างส่วนลด GL ทั้งหมด'+(_lk?(' (ยกเว้น '+_lk+' โปรเจคที่ล็อก 🔒 ซึ่งจะเก็บไว้)'):'')+'?')){ _pgClearRed(); _pgReduceClose(); renderProgress(); } });
   ov.addEventListener('mousedown',function(e){ if(e.target===ov)_pgReduceClose(); });
   ov.addEventListener('keydown',function(e){ if(e.key==='Escape')_pgReduceClose(); }); }
 /* v9.210: Lock projects in bulk by pasting codes (mirror of the GL-reduction paste). One code per line; add "0"/"ปลด" after a code to unlock it. */
@@ -10208,7 +10211,7 @@ function _pgLockApply(text){ var lines=(''+(text||'')).split(/\r?\n/); var unloc
 function _pgLockPasteOpen(){ _pgLockClose(); var cnt=_pgLockN();
   var ov=document.createElement('div'); ov.id='pgLockModal'; ov.className='pgpaste-ov';
   ov.innerHTML='<div class="pgpaste-card"><div class="pgpaste-hd">🔒 ล็อกโปรเจค (วางรหัส)</div>'+
-    '<div class="pgpaste-sub">วาง<b>รหัสโปรเจค</b>ที่ต้องการล็อก บรรทัดละ 1 รหัส (คัดลอกจาก Excel ได้). โปรเจคที่ล็อกจะ<b>ไม่ถูกเปลี่ยน</b>โดย Paste % / Actual% และถูกไฮไลท์ทั้งแถวสีเหลือง. เพิ่ม <code>0</code> หรือ <code>ปลด</code> ต่อท้ายรหัสเพื่อ<b>ปลดล็อก</b>โปรเจคนั้น.</div>'+
+    '<div class="pgpaste-sub">วาง<b>รหัสโปรเจค</b>ที่ต้องการล็อก บรรทัดละ 1 รหัส (คัดลอกจาก Excel ได้). โปรเจคที่ล็อกจะ<b>ไม่ถูกเปลี่ยน</b>โดย Paste % / Actual% / ➖ ลด GL และถูกไฮไลท์ทั้งแถวสีเหลือง. เพิ่ม <code>0</code> หรือ <code>ปลด</code> ต่อท้ายรหัสเพื่อ<b>ปลดล็อก</b>โปรเจคนั้น.</div>'+
     '<textarea id="pgLockTA" class="pgpaste-ta" spellcheck="false" placeholder="GLI23005&#10;GLI21004&#10;GLI23002&#9;0"></textarea>'+
     '<div class="pgpaste-ft"><span class="pgpaste-cnt">'+(cnt?('ปัจจุบันล็อก '+cnt+' โปรเจค'):'ยังไม่มีโปรเจคที่ล็อก')+'</span>'+
     '<div class="pgpaste-btns">'+(cnt?'<button type="button" class="pgpaste-clr" id="pgLockClr">ปลดล็อกทั้งหมด</button>':'')+'<button type="button" class="pgpaste-cancel" id="pgLockCancel">ยกเลิก</button><button type="button" class="pri pgpaste-apply" id="pgLockApplyBtn">ใช้งาน</button></div></div></div>';
@@ -10335,7 +10338,7 @@ function _pgCostCell(r){ var brk=(typeof _pgGlRedBreak==='function')?_pgGlRedBre
   return '<td class="r pgcost">'+fmt(r.cost)+'</td>'; }
 function _pgRowTr(r,seq){ var pc=_pgProgCls(r.prog); var man=(r.manPct!=null); var locked=!!(_pgLock&&_pgLock[r.code]);
   var star=man?'<span class="pgstar" title="Manual % from Paste">⭐</span>':'';
-  var lockBtn='<button type="button" class="pglk'+(locked?' on':'')+'" data-lock="'+esc(r.code)+'" title="'+(locked?'Locked — Paste % / Actual% will not change this project (click to unlock)':'Lock — protect this project from Paste %')+'">'+(locked?'🔒':'🔓')+'</button>';
+  var lockBtn='<button type="button" class="pglk'+(locked?' on':'')+'" data-lock="'+esc(r.code)+'" title="'+(locked?'Locked — Paste % / Actual% / ลด GL will not change this project (click to unlock)':'Lock — protect this project from Paste % / Actual% / ลด GL')+'">'+(locked?'🔒':'🔓')+'</button>';
   return '<tr class="pgrow pgrow-'+pc+(seq%2===0?' pgrow-alt':'')+(r.empty?' pgrow-empty':'')+(man?' pgrow-man':'')+(locked?' pgrow-lock':'')+(r.glRed?' pgrow-glred':'')+'"><td class="pgseq">'+(locked?'<span class="pgseqlk" title="Locked — protected from Paste %">🔒</span>':'')+seq+'</td>'+
     '<td class="pgproj l"><div class="pgprojhd">'+star+'<span class="pgcode">'+esc(r.code)+'</span></div>'+(r.name?('<div class="pgnamefull">'+esc(r.name)+'</div>'):'')+(r.cust?('<div class="pgcust"><span class="pgcustlab">ผู้ว่าจ้าง</span>'+esc(r.cust)+'</div>'):'')+'</td>'+
     '<td class="pgstatc l">'+_pgStatusBadge(r.st)+'</td>'+
