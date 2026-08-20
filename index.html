@@ -10155,11 +10155,17 @@ function _pgCatNorm(s){ s=(''+(s||'')).trim().toLowerCase().replace(/^หมว�
   if(s==='5'||s==='6'||s==='7')return s;
   if(s==='all'||s==='รวม'||s==='ทุกหมวด'||s==='ทั้งหมด'||s==='total'||s==='รวมทุกหมวด'||s==='567'||s==='5+6+7'||s==='')return 'all';
   return null; }
+/* v9.212: split a pasted line into columns WITHOUT breaking numbers. Try real column delimiters in order
+   (tab → semicolon → 2+ spaces → single space → comma) and use the FIRST that yields ≥2 columns. This keeps
+   comma thousands-separators (e.g. 48,089,889.45) intact for Excel/tab or space paste, and only treats comma
+   as a delimiter for genuine CSV where nothing else separates the columns. */
+function _pgSplitCols(ln){ ln=''+(ln||''); var dl=[/\t/,/;/,/\s{2,}/,/\s+/,/,/];
+  for(var d=0;d<dl.length;d++){ var parts=ln.split(dl[d]); var clean=[]; for(var i=0;i<parts.length;i++){ var p=(parts[i]||'').trim(); if(p!=='')clean.push(p); } if(clean.length>=2)return clean; }
+  var p0=ln.trim(); return p0?[p0]:[]; }
 /* v9.211: per-หมวด GL reduction — paste "รหัส [หมวด] จำนวน". 3 cols = code/หมวด/amount; 2 cols = code/amount (หมวด='all'). */
 function _pgReduceApply(text){ var lines=(''+(text||'')).split(/\r?\n/); var applied=0,cleared=0,codes={};
   for(var i=0;i<lines.length;i++){ var ln=lines[i]; if(!ln||!ln.trim())continue;
-    var parts=ln.split(/\t|;|,|\s{2,}/); var clean=[]; for(var pj=0;pj<parts.length;pj++){ var pp=(parts[pj]||'').trim(); if(pp!=='')clean.push(pp); }
-    if(clean.length<2){ var sp=ln.trim().split(/\s+/); clean=[]; for(var sj=0;sj<sp.length;sj++){ if(sp[sj])clean.push(sp[sj]); } }
+    var clean=_pgSplitCols(ln);
     if(clean.length<2)continue;
     var code=clean[0]; if(!code)continue;
     var pv=clean[clean.length-1]; var num=parseFloat((''+pv).replace(/[,\s฿]/g,'')); if(isNaN(num))continue;
