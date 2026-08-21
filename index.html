@@ -13287,6 +13287,233 @@ function _pmLKCompute(){ var res=document.getElementById('pmLKRes'),sum=document
 }
 function _pmLKExport(){ if(!_pmLKLast||!_pmLKLast.aoa||_pmLKLast.aoa.length<2){alert('ยังไม่มีข้อมูลให้ Export — วางรหัสโปรเจคและเลือกฟิลด์ก่อน');return;} if(typeof XLSX==='undefined'){alert('The Excel library is still loading');return;}
   try{var ws=XLSX.utils.aoa_to_sheet(_pmLKLast.aoa);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Project Lookup');XLSX.writeFile(wb,'PM_ProjectLookup_'+new Date().toISOString().slice(0,10)+'.xlsx');}catch(e){alert('Export failed: '+((e&&e.message)||e));} }
+
+/* ===================== v10.98: GL Distinct Finder — ใส่ค่า(เช่น รหัสบัญชี) → เลือกว่าอยากรู้อะไร → ดึงรายการไม่ซ้ำ (Supplier/โปรเจค/Voucher …) ===================== */
+var _GLDF_FLD=[
+  {k:'ac',   idx:0, idx2:1, label:'รหัสบัญชี (A/C)',            en:'Account'},
+  {k:'acn',  idx:1,         label:'ชื่อบัญชี',                  en:'A/C Name'},
+  {k:'year', idx:2,         label:'ปี (Year)',                  en:'Year'},
+  {k:'date', idx:3, date:1, label:'วันที่ (Date)',              en:'Date'},
+  {k:'vch',  idx:4,         label:'เลขที่ Voucher',             en:'Voucher No.'},
+  {k:'vend', idx:5,         label:'ผู้ขาย / ลูกค้า (Supplier)', en:'Vendor / Customer'},
+  {k:'taxno',idx:6,         label:'เลขผู้เสียภาษี (Tax No.)',   en:'Tax No.'},
+  {k:'desc', idx:8,         label:'คำอธิบาย (Description)',      en:'Description'},
+  {k:'refno',idx:9,         label:'เลขที่อ้างอิง (Ref. No.)',   en:'Ref. No.'},
+  {k:'mod',  idx:11,        label:'Module',                     en:'Module'},
+  {k:'cost', idx:12,        label:'รหัสต้นทุน (Cost Code)',     en:'Cost Code'},
+  {k:'proj', idx:13,        label:'โปรเจค (Ref.Code Proj./Dpt)',en:'Project / Dept'},
+  {k:'job',  idx:14,        label:'Job',                        en:'Job'},
+  {k:'rem',  idx:15,        label:'หมายเหตุ (Remark)',          en:'Remark'}
+];
+var _glDFState=null,_glDFTimer=null,_glDFLast=null,_GLDF_CAP=800;
+function _glDFFld(k){ for(var i=0;i<_GLDF_FLD.length;i++)if(_GLDF_FLD[i].k===k)return _GLDF_FLD[i]; return _GLDF_FLD[0]; }
+function _glDFModeLabel(m){ return m==='exact'?'ตรงทั้งหมด (exact)':(m==='contains'?'มีคำว่า (contains)':'ขึ้นต้นด้วย (starts with)'); }
+function _glDFLoadState(){ if(_glDFState)return _glDFState;
+  var s=null; try{s=JSON.parse(localStorage.getItem('gli_gldf')||'null');}catch(e){}
+  if(!s||typeof s!=='object'||Array.isArray(s))s={};
+  if(typeof s.q!=='string')s.q='';
+  if(!s.mf||!_glDFFld(s.mf))s.mf='ac';
+  if(s.mode!=='exact'&&s.mode!=='contains'&&s.mode!=='starts')s.mode='starts';
+  if(!s.targets||typeof s.targets!=='object'||Array.isArray(s.targets))s.targets={vend:1,proj:1,vch:1};
+  if(s.sort!=='value'&&s.sort!=='count'&&s.sort!=='net')s.sort='count';
+  _glDFState=s; return s; }
+function _glDFSaveState(){ try{localStorage.setItem('gli_gldf',JSON.stringify(_glDFState));}catch(e){} }
+function _glDFMatch(val,toks,mode){
+  if(!toks.length)return true;
+  var v=(''+(val==null?'':val)).trim().toLowerCase();
+  for(var i=0;i<toks.length;i++){ var t=(''+toks[i]).toLowerCase(); if(!t)continue;
+    if(mode==='exact'){ if(v===t)return true; }
+    else if(mode==='contains'){ if(v.indexOf(t)>=0)return true; }
+    else { if(v.lastIndexOf(t,0)===0)return true; }   /* starts with */
+  }
+  return false;
+}
+function _glDFEnsure(){
+  if(document.getElementById('glDFModal'))return;
+  if(!document.getElementById('glVJCss')){var vs=document.createElement('style');vs.id='glVJCss';vs.textContent=_glVJCSS();document.head.appendChild(vs);}   /* reuse the sibling tool's look */
+  if(!document.getElementById('glDFCss')){var st=document.createElement('style');st.id='glDFCss';st.textContent=_glDFCSS();document.head.appendChild(st);}
+  var s=_glDFLoadState();
+  var mfOpts=''; for(var i=0;i<_GLDF_FLD.length;i++){var f=_GLDF_FLD[i];mfOpts+='<option value="'+f.k+'"'+(f.k===s.mf?' selected':'')+'>'+esc(f.label)+'</option>';}
+  var modes=[['starts','ขึ้นต้นด้วย'],['exact','ตรงทั้งหมด'],['contains','มีคำว่า']];
+  var modeSeg=''; for(var mi=0;mi<modes.length;mi++)modeSeg+='<button class="gldf-seg'+(modes[mi][0]===s.mode?' on':'')+'" type="button" data-dfmode="'+modes[mi][0]+'">'+modes[mi][1]+'</button>';
+  var chips=''; for(var c=0;c<_GLDF_FLD.length;c++){var cf=_GLDF_FLD[c];chips+='<button class="gldf-chip'+(s.targets[cf.k]?' on':'')+'" type="button" data-dftg="'+cf.k+'" title="'+_eatt(cf.en)+'">'+esc(cf.label)+'</button>';}
+  var sorts=[['count','จำนวนแถว (มาก→น้อย)'],['net','ยอดสุทธิ (มาก→น้อย)'],['value','ค่า (ก→ฮ / 0→9)']];
+  var sortOpts=''; for(var so=0;so<sorts.length;so++)sortOpts+='<option value="'+sorts[so][0]+'"'+(sorts[so][0]===s.sort?' selected':'')+'>'+sorts[so][1]+'</option>';
+  var m=document.createElement('div');m.id='glDFModal';m.className='pmodal glvj-modal gldf-modal';m.hidden=true;
+  m.innerHTML=''
+    +'<div class="pmodal-bd"></div>'
+    +'<div class="pmodal-card glvj-card gldf-card">'
+      +'<button class="pmodal-x" type="button" aria-label="Close">×</button>'
+      +'<div class="glvj-hd"><div class="glvj-tt">🔎 ค้นหา / ดึงข้อมูลไม่ซ้ำ · Distinct Finder</div>'
+        +'<div class="glvj-sub">ใส่ค่า (เช่น <b>รหัสบัญชี</b>) แล้วเลือกว่า “อยากรู้อะไร” — ระบบดึง <b>Supplier · โปรเจค · เลข Voucher …</b> ที่เกี่ยวข้อง โดย<b>คัดตัวซ้ำออก</b> พร้อมนับจำนวนแถวและยอดเงิน</div></div>'
+      +'<div class="gldf-controls">'
+        +'<div class="gldf-cell gldf-cell-in"><label class="gldf-lab">ใส่ข้อมูล (ใส่ได้หลายค่า — บรรทัดละค่า หรือคั่นด้วย , )</label>'
+          +'<textarea id="glDFInput" class="glvj-ta gldf-ta" spellcheck="false" placeholder="เช่น&#10;5150019&#10;1150202&#10;(เว้นว่าง = ดูทั้งหมด)">'+esc(s.q||'')+'</textarea></div>'
+        +'<div class="gldf-cell gldf-cell-mf"><label class="gldf-lab">ค้นจากคอลัมน์</label>'
+          +'<select id="glDFMf" class="gldf-select">'+mfOpts+'</select>'
+          +'<label class="gldf-lab" style="margin-top:9px">การจับคู่</label><div class="gldf-segw">'+modeSeg+'</div></div>'
+      +'</div>'
+      +'<div class="gldf-want"><div class="gldf-lab">อยากรู้ (แสดงรายการไม่ซ้ำของ) — เลือกได้หลายอย่าง</div><div class="gldf-chips" id="glDFTargets">'+chips+'</div></div>'
+      +'<div class="gldf-toolbar"><span class="gldf-lab" style="margin:0 2px 0 0">เรียงตาม</span><select id="glDFSort" class="gldf-select gldf-select-sm">'+sortOpts+'</select>'
+        +'<span class="gldf-tbspacer"></span>'
+        +'<button class="glvj-b" id="glDFClear" type="button">✕ ล้างค่า</button>'
+        +'<button class="glvj-b prim" id="glDFXlsx" type="button">⤓ Export Excel</button></div>'
+      +'<div class="glvj-sum gldf-sum" id="glDFSum"></div>'
+      +'<div class="glvj-res gldf-res" id="glDFRes"></div>'
+    +'</div>';
+  document.body.appendChild(m);
+  m.querySelector('.pmodal-bd').addEventListener('click',_glDFClose);
+  m.querySelector('.pmodal-x').addEventListener('click',_glDFClose);
+  var ta=m.querySelector('#glDFInput');
+  ta.addEventListener('input',function(){clearTimeout(_glDFTimer);_glDFTimer=setTimeout(_glDFCompute,150);});
+  m.querySelector('#glDFClear').addEventListener('click',function(){ta.value='';_glDFCompute();ta.focus();});
+  m.querySelector('#glDFMf').addEventListener('change',function(){_glDFLoadState().mf=this.value;_glDFSaveState();_glDFCompute();});
+  m.querySelector('#glDFSort').addEventListener('change',function(){_glDFLoadState().sort=this.value;_glDFSaveState();_glDFCompute();});
+  m.querySelector('#glDFXlsx').addEventListener('click',_glDFExport);
+  m.querySelector('#glDFTargets').addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('[data-dftg]'):null;if(!b)return;var k=b.getAttribute('data-dftg');var st=_glDFLoadState();st.targets[k]=st.targets[k]?0:1;if(!st.targets[k])delete st.targets[k];b.classList.toggle('on',!!st.targets[k]);_glDFSaveState();_glDFCompute();});
+  m.querySelector('.gldf-segw').addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('[data-dfmode]'):null;if(!b)return;var md=b.getAttribute('data-dfmode');_glDFLoadState().mode=md;_glDFSaveState();var segs=this.querySelectorAll('.gldf-seg');for(var i=0;i<segs.length;i++)segs[i].classList.toggle('on',segs[i].getAttribute('data-dfmode')===md);_glDFCompute();});
+  m.querySelector('#glDFRes').addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('[data-dfcopy]'):null;if(!b)return;_glDFCopy(b.getAttribute('data-dfcopy'),b);});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'||e.keyCode===27){var mm=document.getElementById('glDFModal');if(mm&&!mm.hidden)_glDFClose();}});
+}
+function _glDFOpen(){
+  if(!GLROWS||!GLROWS.length){alert('ยังไม่มีข้อมูล GL ในไฟล์นี้ — โปรดเปิด / อัปโหลดไฟล์ GL ก่อน');return;}
+  _glDFEnsure();
+  var m=document.getElementById('glDFModal');if(!m)return;m.hidden=false;
+  _glDFCompute();
+  var ta=document.getElementById('glDFInput');
+  setTimeout(function(){if(ta){ta.focus();var L=ta.value.length;try{ta.setSelectionRange(L,L);}catch(_e){}}},30);
+  try{if(typeof gliLog==='function')gliLog('เปิด Distinct Finder (GL)','');}catch(e){}
+}
+function _glDFClose(){var m=document.getElementById('glDFModal');if(m)m.hidden=true;}
+function _glDFCompute(){
+  var st=_glDFLoadState();
+  var res=document.getElementById('glDFRes'),sum=document.getElementById('glDFSum');if(!res||!sum)return;
+  var el=document.getElementById('glDFInput'); var q=el?el.value:''; st.q=q; _glDFSaveState();
+  var toks=_glVJTokens(q);
+  var mf=_glDFFld(st.mf),mIdx=mf.idx;
+  var rows=(GLROWS&&GLROWS.length)?GLROWS:[];
+  var matched=[],D=0,C=0;
+  for(var i=0;i<rows.length;i++){var r=rows[i];if(!r)continue;
+    if(toks.length&&!_glDFMatch(r[mIdx],toks,st.mode))continue;
+    matched.push(r);D+=(+r[16]||0);C+=(+r[17]||0);}
+  var ordered=[]; for(var f=0;f<_GLDF_FLD.length;f++){if(st.targets[_GLDF_FLD[f].k])ordered.push(_GLDF_FLD[f].k);}
+  _glDFLast={matched:matched,D:D,C:C,mf:mf,toks:toks,mode:st.mode,groups:{}};
+  var net=D-C;
+  sum.innerHTML=(toks.length?'<span class="glvj-pill ok">พบ '+matched.length.toLocaleString()+' แถว · จาก '+toks.length+' ค่า</span>':'<span class="glvj-pill ok">ทั้งหมด '+matched.length.toLocaleString()+' แถว</span>')
+    +'<span class="glvj-pill">ค้นจาก: '+esc(mf.label)+' · '+esc(_glDFModeLabel(st.mode))+'</span>'
+    +'<span class="glvj-pill d">Debit ฿'+fmt(D)+'</span>'
+    +'<span class="glvj-pill c">Credit ฿'+fmt(C)+'</span>'
+    +'<span class="glvj-pill '+(Math.abs(net)<0.005?'bal':'')+'">Net ฿'+fmt(net)+'</span>';
+  if(!ordered.length){res.innerHTML='<div class="glvj-empty">👆 เลือกอย่างน้อย 1 อย่างที่ “อยากรู้” ด้านบน — เช่น <b>ผู้ขาย/ลูกค้า</b> · <b>โปรเจค</b> · <b>เลขที่ Voucher</b></div>';return;}
+  if(!matched.length){res.innerHTML='<div class="glvj-empty">ไม่พบแถวที่ตรงกับค่าที่ค้น — ลองเปลี่ยนค่าที่ใส่ / คอลัมน์ที่ค้น หรือโหมดการจับคู่ (เช่น “มีคำว่า”)</div>';return;}
+  var html='';
+  for(var t=0;t<ordered.length;t++){
+    var fld=_glDFFld(ordered[t]);
+    var map={},order=[];
+    for(var mrow=0;mrow<matched.length;mrow++){var rr=matched[mrow];var raw=rr[fld.idx];
+      var vv=(''+(raw==null?'':raw)).trim();var key=vv===''?' blank':vv.toUpperCase();
+      var g=map[key];if(!g){g=map[key]={val:vv,label2:'',n:0,d:0,c:0};order.push(key);}
+      g.n++;g.d+=(+rr[16]||0);g.c+=(+rr[17]||0);
+      if(fld.idx2!=null&&!g.label2){var l2=(''+(rr[fld.idx2]==null?'':rr[fld.idx2])).trim();if(l2)g.label2=l2;}}
+    var list=order.map(function(k){return map[k];});
+    if(st.sort==='value')list.sort(function(a,b){if(a.val===''&&b.val!=='')return 1;if(b.val===''&&a.val!=='')return -1;return (''+a.val).localeCompare(''+b.val,'th',{numeric:true});});
+    else if(st.sort==='net')list.sort(function(a,b){return (b.d-b.c)-(a.d-a.c);});
+    else list.sort(function(a,b){return b.n-a.n;});
+    _glDFLast.groups[fld.k]=list;
+    html+=_glDFCard(fld,list,matched.length);
+  }
+  res.innerHTML=html;
+}
+function _glDFCard(fld,list,totMatched){
+  var shown=Math.min(list.length,_GLDF_CAP),body='';
+  for(var i=0;i<shown;i++){var g=list[i];var net=g.d-g.c;
+    var val=g.val===''?'<span class="gldf-blank">(ว่าง / ไม่มีค่า)</span>':esc(fld.date?_glDmy(g.val):g.val);
+    var lab2=(g.label2&&g.label2!==g.val)?'<span class="gldf-l2">'+esc(g.label2)+'</span>':'';
+    var pct=totMatched?(Math.round(g.n/totMatched*1000)/10):0;
+    body+='<tr><td class="gldf-i">'+(i+1)+'</td><td class="gldf-v">'+val+lab2+'</td>'
+      +'<td class="n">'+g.n.toLocaleString()+'<span class="gldf-pct">'+pct+'%</span></td>'
+      +'<td class="n d">'+(g.d?fmt(g.d):'')+'</td><td class="n c">'+(g.c?fmt(g.c):'')+'</td>'
+      +'<td class="n net'+(net<-0.005?' neg':'')+'">'+fmt(net)+'</td></tr>';}
+  var more=list.length>shown?('<tr class="gldf-more"><td colspan="6">… และอีก '+(list.length-shown).toLocaleString()+' รายการ — กด ⤓ Export Excel เพื่อดูครบทั้งหมด</td></tr>'):'';
+  return '<div class="glvj-cw gldf-cw">'
+    +'<div class="glvj-cwh"><span class="glvj-no">'+esc(fld.label)+'</span>'
+      +'<span class="glvj-tag">'+list.length.toLocaleString()+' รายการไม่ซ้ำ</span>'
+      +'<span class="glvj-dt">'+esc(fld.en)+'</span>'
+      +'<button class="gldf-copy" type="button" data-dfcopy="'+fld.k+'" title="คัดลอกรายการไม่ซ้ำ (บรรทัดละค่า)">📋 คัดลอก</button>'
+      +'<span class="glvj-ln">'+shown.toLocaleString()+(list.length>shown?(' / '+list.length.toLocaleString()):'')+' distinct</span></div>'
+    +'<table class="glvj-tbl gldf-tbl"><thead><tr><th class="gldf-i">#</th><th>'+esc(fld.label)+'</th><th class="n">จำนวนแถว</th><th class="n">Debit</th><th class="n">Credit</th><th class="n">Net</th></tr></thead>'
+    +'<tbody>'+body+more+'</tbody></table></div>';
+}
+function _glDFCopy(k,btn){
+  if(!_glDFLast||!_glDFLast.groups||!_glDFLast.groups[k])return;
+  var fld=_glDFFld(k),list=_glDFLast.groups[k];
+  var txt=list.map(function(g){return g.val===''?'(blank)':(fld.date?_glDmy(g.val):g.val);}).join('\n');
+  var done=function(){var o=btn?btn.textContent:'';if(btn){btn.textContent='✓ คัดลอกแล้ว';setTimeout(function(){btn.textContent=o;},1400);}};
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,function(){_glDFCopyFallback(txt,done);});}else{_glDFCopyFallback(txt,done);}}catch(e){_glDFCopyFallback(txt,done);}
+}
+function _glDFCopyFallback(txt,done){try{var t=document.createElement('textarea');t.value=txt;t.style.position='fixed';t.style.left='-9999px';document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);if(done)done();}catch(e){}}
+function _glDFSheetName(nm,used){nm=(''+nm).replace(/[:\\\/?*\[\]]/g,' ').trim().slice(0,28)||'Field';var b=nm,n=2;while(used[nm.toLowerCase()]){nm=(b.slice(0,26)+' '+n);n++;}used[nm.toLowerCase()]=1;return nm;}
+function _glDFExport(){
+  if(typeof XLSX==='undefined'){alert('The Excel reader is still loading — please wait and try again');return;}
+  if(!_glDFLast||!_glDFLast.groups||!Object.keys(_glDFLast.groups).length){alert('ยังไม่มีผลลัพธ์ให้ส่งออก — ใส่ค่าและเลือกสิ่งที่อยากรู้ก่อน');return;}
+  try{
+    var wb=XLSX.utils.book_new(),used={};
+    var mf=_glDFLast.mf;
+    var info=[['GL Distinct Finder — ดึงรายการไม่ซ้ำ'],[],
+      ['ค้นจากคอลัมน์',mf.label],
+      ['โหมดจับคู่',_glDFModeLabel(_glDFLast.mode)],
+      ['ค่าที่ค้น',_glDFLast.toks.join(', ')||'(ทั้งหมด)'],
+      ['จำนวนแถวที่ตรง',_glDFLast.matched.length],
+      ['รวม Debit',Math.round(_glDFLast.D*100)/100],
+      ['รวม Credit',Math.round(_glDFLast.C*100)/100],
+      ['รวม Net',Math.round((_glDFLast.D-_glDFLast.C)*100)/100],
+      ['จัดทำ',(new Date()).toLocaleString('th-TH')]];
+    var wsI=XLSX.utils.aoa_to_sheet(info);wsI['!cols']=[{wch:20},{wch:46}];XLSX.utils.book_append_sheet(wb,wsI,'Summary');
+    for(var k in _glDFLast.groups){var fld=_glDFFld(k),list=_glDFLast.groups[k];
+      var head=[fld.label];if(fld.idx2!=null)head.push(fld.en+' (name)');head.push('Rows','Debit','Credit','Net');
+      var aoa=[head],D=0,C=0,N=0;
+      list.forEach(function(g){var row=[g.val===''?'(blank)':(fld.date?_glDmy(g.val):g.val)];if(fld.idx2!=null)row.push(g.label2||'');row.push(g.n,Math.round(g.d*100)/100,Math.round(g.c*100)/100,Math.round((g.d-g.c)*100)/100);aoa.push(row);D+=g.d;C+=g.c;N+=g.n;});
+      var tot=['TOTAL'];if(fld.idx2!=null)tot.push('');tot.push(N,Math.round(D*100)/100,Math.round(C*100)/100,Math.round((D-C)*100)/100);aoa.push(tot);
+      var ws=XLSX.utils.aoa_to_sheet(aoa);var w0=fld.idx2!=null?[{wch:30},{wch:30},{wch:10},{wch:15},{wch:15},{wch:15}]:[{wch:34},{wch:10},{wch:15},{wch:15},{wch:15}];ws['!cols']=w0;
+      XLSX.utils.book_append_sheet(wb,ws,_glDFSheetName(fld.en,used));}
+    XLSX.writeFile(wb,'GL_Distinct_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    try{if(typeof gliLog==='function')gliLog('Export Distinct Finder',Object.keys(_glDFLast.groups).length+' ฟิลด์ · '+_glDFLast.matched.length+' แถว');}catch(e){}
+  }catch(e){alert('Export failed: '+((e&&e.message)||e));}
+}
+function _glDFCSS(){return ''
+  +'.gldf-card{max-width:1060px;}'
+  +'.gldf-controls{display:flex;gap:14px;align-items:stretch;flex-wrap:wrap;margin-bottom:12px;}'
+  +'.gldf-cell{display:flex;flex-direction:column;min-width:0;}'
+  +'.gldf-cell-in{flex:1;min-width:280px;}.gldf-cell-mf{width:280px;}'
+  +'.gldf-lab{font-size:11.5px;font-weight:800;color:var(--brand-d,#0A463E);margin-bottom:5px;letter-spacing:.2px;}'
+  +'.gldf-ta{min-height:92px;}'
+  +'.gldf-select{width:100%;box-sizing:border-box;border:1.5px solid var(--line,#E6E0D4);border-radius:9px;padding:8px 10px;font-family:Inter,sans-serif;font-size:12.5px;font-weight:700;color:var(--ink,#19222E);background:#fff;cursor:pointer;}'
+  +'.gldf-select:focus{outline:none;border-color:var(--brand,#0E5C52);box-shadow:0 0 0 3px rgba(14,92,82,.14);}'
+  +'.gldf-select-sm{width:auto;padding:6px 9px;font-size:12px;}'
+  +'.gldf-segw{display:flex;gap:5px;flex-wrap:wrap;}'
+  +'.gldf-seg{flex:1;min-width:74px;border:1.5px solid var(--line,#E6E0D4);background:#fff;color:var(--ink2,#3E4859);font-family:Inter,sans-serif;font-size:11.5px;font-weight:700;padding:7px 6px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:background .12s ease,border-color .12s ease,color .12s ease;}'
+  +'.gldf-seg:hover{border-color:var(--brand,#0E5C52);background:var(--brand-t,#E6F0EC);}'
+  +'.gldf-seg.on{background:var(--brand,#0E5C52);border-color:var(--brand,#0E5C52);color:#fff;box-shadow:0 3px 9px -4px rgba(14,92,82,.5);}'
+  +'.gldf-want{margin-bottom:13px;}'
+  +'.gldf-chips{display:flex;flex-wrap:wrap;gap:7px;}'
+  +'.gldf-chip{border:1.5px solid var(--line,#E6E0D4);background:#fff;color:var(--ink2,#3E4859);font-family:Inter,sans-serif;font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;transition:background .12s ease,border-color .12s ease,color .12s ease,transform .1s ease;}'
+  +'.gldf-chip:hover{border-color:var(--brand,#0E5C52);background:var(--brand-t,#E6F0EC);transform:translateY(-1px);}'
+  +'.gldf-chip.on{background:linear-gradient(135deg,var(--brand,#0E5C52),var(--brand-d,#0A463E));border-color:var(--brand-d,#0A463E);color:#fff;box-shadow:0 4px 12px -5px rgba(14,92,82,.55);}'
+  +'.gldf-toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:12px;padding-top:11px;border-top:1px dashed var(--line,#E6E0D4);}'
+  +'.gldf-tbspacer{flex:1;}'
+  +'.gldf-sum{margin-bottom:12px;}'
+  +'.gldf-cw{margin-bottom:0;}'
+  +'.gldf-copy{margin-left:auto;border:none;background:rgba(255,255,255,.2);color:#fff;font-family:Inter,sans-serif;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;transition:background .12s ease;}'
+  +'.gldf-copy:hover{background:rgba(255,255,255,.34);}'
+  +'.gldf-cw .glvj-ln{margin-left:10px;}'
+  +'.gldf-tbl td.gldf-i,.gldf-tbl th.gldf-i{width:44px;text-align:center;color:var(--muted,#8C8676);font-variant-numeric:tabular-nums;}'
+  +'.gldf-tbl td.gldf-v{font-weight:700;color:var(--ink,#19222E);}'
+  +'.gldf-l2{display:block;font-size:11px;font-weight:600;color:var(--ink2,#4A5563);margin-top:1px;}'
+  +'.gldf-blank{color:var(--muted,#8C8676);font-style:italic;font-weight:600;}'
+  +'.gldf-pct{display:inline-block;margin-left:7px;font-size:10.5px;font-weight:700;color:var(--muted,#8C8676);}'
+  +'.gldf-more td{padding:8px 12px;text-align:center;color:var(--muted,#8C8676);font-size:12px;font-weight:600;background:var(--paper,#FAF8F3);}'
+  +'@media(max-width:640px){.gldf-cell-mf{width:100%;}}';
+}
 function renderGl(){var w=document.getElementById('glWrap');if(!w)return;
   try{var _intro=document.getElementById('glIntro');if(_intro){if(_intro._glTxt==null)_intro._glTxt=_intro.innerHTML;/* v9.171: show an intro banner on every file (AP/AR/AR Invoice too), each describing its own report */
     var _iv={
@@ -13581,6 +13808,7 @@ function _glBind(){var pg=document.getElementById('page-gl');if(!pg||pg._gb)retu
     if(cl('#glVJBtn')){_glVJOpen();return;}
     if(cl('#glBCBtn')){_glBCOpen();return;}
     if(cl('#glADBtn')){_glADOpen();return;}
+    if(cl('#glDFBtn')){_glDFOpen();return;}
     if(cl('#glCopyV')){_glCopyVOpen();return;}
     if(cl('#glExport')){_glExportExcel();return;}
     var colB=cl('#glCols');if(colB){_glOpenColMenu(colB);return;}
@@ -13703,6 +13931,7 @@ function _glActionPanel(clsb,yrs,mons){
   var _svBC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M7 21h10"/><path d="M5 7h14"/><path d="M5 7l-2 5h4z"/><path d="M19 7l-2 5h4z"/></svg>';
   var _svAD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
   var _svCV='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  var _svDF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg>';
   var groups=[
     {t:'Files',t2:'Manage',ic:'📁',btns:[
       {id:'glAddFile',ic:'＋',l:'Add file',title:'Upload / add another GL file (does not overwrite the current one)'},
@@ -13714,7 +13943,8 @@ function _glActionPanel(clsb,yrs,mons){
       {id:'glVJBtn',ic:_svVJ,l:'Voucher → Journal',title:'Paste one or more Voucher numbers to instantly see the journal entry of every Voucher',cls:'accent'},
       {id:'glBCBtn',ic:_svBC,l:'Balance Check',title:'Scan every Voucher and list the ones where total Debit ≠ total Credit (unbalanced)',cls:'accent2'},
       {id:'glADBtn',ic:_svAD,l:'Auditor Database',title:'Auditor Database — ตรวจสอบข้อมูล GL: เลข Voucher ขาดหาย · รายการซ้ำ · รายการผิดปกติ · Top-N',cls:'accent2'},
-      {id:'glCopyV',ic:_svCV,l:'Copy Voucher',title:'คัดลอกเลข Voucher ของแถวที่กรองอยู่ — เลือกคัดลอกทั้งหมดหรือบางส่วนได้',cls:'accent',off:!_hasRows}
+      {id:'glCopyV',ic:_svCV,l:'Copy Voucher',title:'คัดลอกเลข Voucher ของแถวที่กรองอยู่ — เลือกคัดลอกทั้งหมดหรือบางส่วนได้',cls:'accent',off:!_hasRows},
+      {id:'glDFBtn',ic:_svDF,l:'Distinct Finder',title:'ใส่ค่า (เช่น รหัสบัญชี) แล้วเลือกว่าอยากรู้อะไร — มี Supplier / โปรเจค / เลข Voucher ใดบ้าง (ดึงรายการไม่ซ้ำ พร้อมนับจำนวนและยอดเงิน)',cls:'accent2',off:!_hasRows}
     ]},
     {t:'Export',t2:'View',ic:'⤓',btns:[
       {id:'glExport',ic:'⤓',l:'Export Excel',title:'Export the filtered rows (color / amount / etc.) to Excel'},
