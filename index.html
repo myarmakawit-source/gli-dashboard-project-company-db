@@ -17657,6 +17657,8 @@ function _fsRenderTB(){
 
 /* ===== v10.95: Trial Balance — Export Excel (ExcelJS styled · SheetJS fallback) + PDF (print) ===== */
 function _fsXn(v){ v=+v||0; return Math.round(v*100)/100; }
+/* v10.97: หมวดบัญชี (Index) จากหลักแรกของรหัสบัญชี — หมวด 1 (สินทรัพย์) … หมวด 7 (ค่าใช้จ่ายอื่น/ภาษี) */
+function _fsTbCatLbl(code){ var s=(''+(code==null?'':code)).trim(); var d=s.charAt(0); return /[1-9]/.test(d)?('หมวด '+d):''; }
 function _fsTbExportModel(){
   var arr=(typeof _fsTbRows==='function')?_fsTbRows():[];
   var fsLbl={},cfLbl={};   /* group labels — read the currently-rendered selects, matched by data-code */
@@ -17687,7 +17689,7 @@ function _fsTbExportModel(){
     }
     T.open+=op;T.deb+=dr;T.cred+=cr;T.end+=en;
     if(adjOn){ T.adjDr+=aDr;T.adjCr+=aCr;T.adjAfter+=(aAfter!=null?aAfter:en); }
-    rows.push({seq:k+1, idx:(IDX[x.code]||''), code:x.code, name:x.name||'', fsgrp:(fsLbl[x.code]||''), cfgrp:(cfLbl[x.code]||''), open:op, debit:dr, credit:cr, ending:en, adjDr:aDr, adjCr:aCr, adjAfter:(aAfter!=null?aAfter:en), hasAdj:hasAdj}); }
+    rows.push({seq:k+1, idx:(IDX[x.code]||''), cat:_fsTbCatLbl(x.code), code:x.code, name:x.name||'', fsgrp:(fsLbl[x.code]||''), cfgrp:(cfLbl[x.code]||''), open:op, debit:dr, credit:cr, ending:en, adjDr:aDr, adjCr:aCr, adjAfter:(aAfter!=null?aAfter:en), hasAdj:hasAdj}); }
   var co=(typeof _fsTplCo==='function')?_fsTplCo():'บริษัท';
   var y1BE=((typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):'');
   var per; try{ per=(typeof _fsIsInterim==='function'&&_fsIsInterim())?('ม.ค.–'+_FS_MON_TH[_fsEndM-1]+' '+y1BE):((typeof _fsYear!=='undefined'&&_fsYear==='ALL')?'สะสมทุกปี':('เต็มปี '+y1BE)); }catch(e){ per=('ปี '+y1BE); }
@@ -17702,17 +17704,19 @@ function _fsTbExportModel(){
 }
 function _fsTbExportXlsxPlain(M,fname){ if(typeof XLSX==='undefined')throw new Error('ไม่มีไลบรารี Excel (SheetJS)');
   var adjOn=!!(M.adj&&M.adj.on), endLbl=(M.adj&&M.adj.endLabel)||'ยอดคงเหลือ';
-  var hdr=['#','ดัชนี','รหัสบัญชี','ชื่อบัญชี','จัดกลุ่มงบการเงิน','จัดกลุ่มกระแสเงินสด','ยอดยกมา','เดบิต','เครดิต',endLbl];
+  var hdr=['#','ดัชนี','หมวด','รหัสบัญชี','ชื่อบัญชี','จัดกลุ่มงบการเงิน','จัดกลุ่มกระแสเงินสด','ยอดยกมา','เดบิต','เครดิต',endLbl];
   if(adjOn)hdr=hdr.concat(['ปรับปรุง Dr','ปรับปรุง Cr','หลังปรับปรุง']);
   var aoa=[['งบทดลอง · Trial Balance — '+M.co],['ปีบัญชี '+M.yBE+' · '+M.per+' · '+M.rows.length+' บัญชี'+(M.filtered?' (กรองแล้ว)':'')+' · จัดทำ '+M.dstr],[],hdr];
-  for(var i=0;i<M.rows.length;i++){ var x=M.rows[i]; var r=[x.seq,x.idx,x.code,x.name,x.fsgrp,x.cfgrp,_fsXn(x.open),_fsXn(x.debit),_fsXn(x.credit),_fsXn(x.ending)];
+  for(var i=0;i<M.rows.length;i++){ var x=M.rows[i]; var r=[x.seq,x.idx,x.cat,x.code,x.name,x.fsgrp,x.cfgrp,_fsXn(x.open),_fsXn(x.debit),_fsXn(x.credit),_fsXn(x.ending)];
     if(adjOn)r=r.concat([_fsXn(x.adjDr),_fsXn(x.adjCr),_fsXn(x.adjAfter)]); aoa.push(r); }
   aoa.push([]);
-  var tot=['','','','รวมทั้งหมด · '+M.rows.length+' บัญชี'+(M.filtered?' (กรองแล้ว)':''),'','',_fsXn(M.T.open),_fsXn(M.T.deb),_fsXn(M.T.cred),_fsXn(M.T.end)];
-  if(adjOn)tot=tot.concat([_fsXn(M.T.adjDr),_fsXn(M.T.adjCr),_fsXn(M.T.adjAfter)]); aoa.push(tot);
+  var tot=[]; for(var z=0;z<hdr.length;z++)tot.push('');
+  tot[4]='รวมทั้งหมด · '+M.rows.length+' บัญชี'+(M.filtered?' (กรองแล้ว)':'');
+  tot[7]=_fsXn(M.T.open);tot[8]=_fsXn(M.T.deb);tot[9]=_fsXn(M.T.cred);tot[10]=_fsXn(M.T.end);
+  if(adjOn){tot[11]=_fsXn(M.T.adjDr);tot[12]=_fsXn(M.T.adjCr);tot[13]=_fsXn(M.T.adjAfter);} aoa.push(tot);
   aoa.push([]); aoa.push([M.bal?'⚖ เดบิต = เครดิต (งบทดลองดุล)':'⚖ เดบิต − เครดิต = '+_fsXn(M.T.deb-M.T.cred)+' (ไม่ดุล)']);
   if(adjOn&&M.adj.note){ aoa.push([M.adj.note]); }
-  var ws=XLSX.utils.aoa_to_sheet(aoa); var cols=[{wch:5},{wch:6},{wch:14},{wch:42},{wch:26},{wch:24},{wch:17},{wch:17},{wch:17},{wch:18}];
+  var ws=XLSX.utils.aoa_to_sheet(aoa); var cols=[{wch:5},{wch:6},{wch:8},{wch:14},{wch:42},{wch:26},{wch:24},{wch:17},{wch:17},{wch:17},{wch:18}];
   if(adjOn)cols=cols.concat([{wch:16},{wch:16},{wch:18}]); ws['!cols']=cols;
   var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'งบทดลอง'); XLSX.writeFile(wb,fname); }
 function _fsTbExportXlsx(btn){
@@ -17731,37 +17735,53 @@ function _fsTbExportXlsx(btn){
       if(o.bd)c.border={top:{style:'thin',color:{argb:CLR.line}},left:{style:'thin',color:{argb:CLR.line}},bottom:{style:'thin',color:{argb:CLR.line}},right:{style:'thin',color:{argb:CLR.line}}};}
     var adjOn=!!(M.adj&&M.adj.on), endLbl=(M.adj&&M.adj.endLabel)||'ยอดคงเหลือ';
     var ADJ='FF14776A';   /* header accent for the adjustment block */
+    /* v10.97: descriptor-driven columns — includes หมวด (Index by category 1–7) + adjustment block */
+    var COLS=[
+      {k:'seq',   h:'#',    al:'center', w:5,  t:'seq'},
+      {k:'idx',   h:'ดัชนี', al:'center', w:6,  t:'idx'},
+      {k:'cat',   h:'หมวด',  al:'center', w:8,  t:'cat'},
+      {k:'code',  h:'รหัสบัญชี', al:'center', w:14, t:'code'},
+      {k:'name',  h:'ชื่อบัญชี', al:'left', w:42, t:'name'},
+      {k:'fsgrp', h:'จัดกลุ่มงบการเงิน', al:'left', w:26, t:'grp'},
+      {k:'cfgrp', h:'จัดกลุ่มกระแสเงินสด', al:'left', w:24, t:'grp'},
+      {k:'open',  h:'ยอดยกมา', al:'right', w:17, t:'num'},
+      {k:'debit', h:'เดบิต',  al:'right', w:17, t:'num'},
+      {k:'credit',h:'เครดิต', al:'right', w:17, t:'num'},
+      {k:'ending',h:endLbl,   al:'right', w:18, t:'endnum'}
+    ];
+    if(adjOn)COLS=COLS.concat([
+      {k:'adjDr',   h:'ปรับปรุง Dr', al:'right', w:16, t:'adjnum', hf:ADJ, tint:1},
+      {k:'adjCr',   h:'ปรับปรุง Cr', al:'right', w:16, t:'adjnum', hf:ADJ, tint:1},
+      {k:'adjAfter',h:'หลังปรับปรุง', al:'right', w:18, t:'aftnum', hf:CLR.brand, tint:1}
+    ]);
+    var lastCol=1+COLS.length;                 /* data cols start at B(2) */
+    var firstNum=0; for(var fi=0;fi<COLS.length;fi++){ if(/num$/.test(COLS[fi].t)){firstNum=fi;break;} }
     var S=wb.addWorksheet('งบทดลอง',{views:[{showGridLines:false}]});
-    var colW=[{width:3},{width:5},{width:6},{width:14},{width:42},{width:26},{width:24},{width:17},{width:17},{width:17},{width:18}];
-    if(adjOn)colW=colW.concat([{width:16},{width:16},{width:18}]); S.columns=colW;
-    var COLN=10+(adjOn?3:0), lastCol=1+COLN;   /* data cols start at B(2); last col index */
+    var colW=[{width:3}]; for(var cw=0;cw<COLS.length;cw++)colW.push({width:COLS[cw].w}); S.columns=colW;
     var q=2;
     S.mergeCells(q,2,q,lastCol); st(S.getCell(q,2),{sz:15,b:true,fc:CLR.white,fill:CLR.brand,al:'center'}); S.getCell(q,2).value='งบทดลอง · Trial Balance — '+M.co; S.getRow(q).height=28; q++;
     S.mergeCells(q,2,q,lastCol); st(S.getCell(q,2),{sz:10,fc:CLR.white,fill:CLR.brandD,al:'center'}); S.getCell(q,2).value='ปีบัญชี '+M.yBE+' · '+M.per+' · '+M.rows.length+' บัญชี'+(M.filtered?' (กรองแล้ว)':'')+' · จัดทำ '+M.dstr; S.getRow(q).height=18; q+=2;
-    var hdr=[['#','c'],['ดัชนี','c'],['รหัสบัญชี','c'],['ชื่อบัญชี','l'],['จัดกลุ่มงบการเงิน','l'],['จัดกลุ่มกระแสเงินสด','l'],['ยอดยกมา','r'],['เดบิต','r'],['เครดิต','r'],[endLbl,'r']];
-    if(adjOn)hdr=hdr.concat([['ปรับปรุง Dr','r'],['ปรับปรุง Cr','r'],['หลังปรับปรุง','r']]);
-    for(var c=0;c<hdr.length;c++){ var hc=S.getCell(q,c+2); var hf=(c>=10)?(c===12?CLR.brand:ADJ):CLR.brandD;
-      st(hc,{sz:9.5,b:true,fc:CLR.white,fill:hf,al:(hdr[c][1]==='r'?'right':(hdr[c][1]==='c'?'center':'left')),bd:1,wrap:true}); hc.value=hdr[c][0]; }
+    for(var c=0;c<COLS.length;c++){ var hc=S.getCell(q,c+2);
+      st(hc,{sz:9.5,b:true,fc:CLR.white,fill:(COLS[c].hf||CLR.brandD),al:COLS[c].al,bd:1,wrap:true}); hc.value=COLS[c].h; }
     S.getRow(q).height=22; q++; var firstRow=q;
-    for(var r=0;r<M.rows.length;r++){ var x=M.rows[r]; var zb=(r%2===1)?CLR.zebra:null;
-      st(S.getCell(q,2),{sz:9,al:'center',bd:1,fill:zb,fc:'FF8A97A0'}); S.getCell(q,2).value=x.seq;
-      st(S.getCell(q,3),{sz:9,al:'center',b:true,bd:1,fill:zb,fc:CLR.blue}); S.getCell(q,3).value=x.idx;
-      st(S.getCell(q,4),{sz:9,al:'center',b:true,bd:1,fill:zb,fc:CLR.brandD,font:'Consolas'}); S.getCell(q,4).value=x.code;
-      st(S.getCell(q,5),{sz:9,bd:1,fill:zb}); S.getCell(q,5).value=x.name;
-      st(S.getCell(q,6),{sz:8.5,bd:1,fill:zb,fc:'FF4B5563'}); S.getCell(q,6).value=x.fsgrp;
-      st(S.getCell(q,7),{sz:8.5,bd:1,fill:zb,fc:'FF4B5563'}); S.getCell(q,7).value=x.cfgrp;
-      st(S.getCell(q,8),{sz:9,al:'right',nf:NF,bd:1,fill:zb,fc:x.open<0?'FFB42318':CLR.ink}); S.getCell(q,8).value=x.open;
-      st(S.getCell(q,9),{sz:9,al:'right',nf:NF,bd:1,fill:zb,fc:x.debit<0?'FFB42318':CLR.ink}); S.getCell(q,9).value=x.debit;
-      st(S.getCell(q,10),{sz:9,al:'right',nf:NF,bd:1,fill:zb,fc:x.credit<0?'FFB42318':CLR.ink}); S.getCell(q,10).value=x.credit;
-      st(S.getCell(q,11),{sz:9,b:!adjOn,al:'right',nf:NF,bd:1,fill:zb,fc:x.ending<0?'FFB42318':(adjOn?CLR.ink:CLR.brandD)}); S.getCell(q,11).value=x.ending;
-      if(adjOn){ var za=(r%2===1)?'FFF3F8F6':'FFF9FCFB';   /* faint tint to group the adjustment block */
-        st(S.getCell(q,12),{sz:9,al:'right',nf:NF,bd:1,fill:za,fc:Math.abs(x.adjDr)<0.005?'FFB9C2C0':(x.adjDr<0?'FFB42318':CLR.ink)}); S.getCell(q,12).value=x.adjDr;
-        st(S.getCell(q,13),{sz:9,al:'right',nf:NF,bd:1,fill:za,fc:Math.abs(x.adjCr)<0.005?'FFB9C2C0':(x.adjCr<0?'FFB42318':CLR.ink)}); S.getCell(q,13).value=x.adjCr;
-        st(S.getCell(q,14),{sz:9,b:true,al:'right',nf:NF,bd:1,fill:za,fc:x.adjAfter<0?'FFB42318':CLR.brandD}); S.getCell(q,14).value=x.adjAfter; }
+    for(var r=0;r<M.rows.length;r++){ var x=M.rows[r]; var zb=(r%2===1)?CLR.zebra:null; var za=(r%2===1)?'FFF3F8F6':'FFF9FCFB';
+      for(var ci=0;ci<COLS.length;ci++){ var cd=COLS[ci], cell=S.getCell(q,ci+2), v=x[cd.k], bg=(cd.tint?za:zb);
+        switch(cd.t){
+          case 'seq':    st(cell,{sz:9,al:'center',bd:1,fill:bg,fc:'FF8A97A0'}); cell.value=v; break;
+          case 'idx':    st(cell,{sz:9,al:'center',b:true,bd:1,fill:bg,fc:CLR.blue}); cell.value=v; break;
+          case 'cat':    st(cell,{sz:8.5,al:'center',b:true,bd:1,fill:bg,fc:'FF6B7280'}); cell.value=v; break;
+          case 'code':   st(cell,{sz:9,al:'center',b:true,bd:1,fill:bg,fc:CLR.brandD,font:'Consolas'}); cell.value=v; break;
+          case 'name':   st(cell,{sz:9,bd:1,fill:bg}); cell.value=v; break;
+          case 'grp':    st(cell,{sz:8.5,bd:1,fill:bg,fc:'FF4B5563'}); cell.value=v; break;
+          case 'num':    st(cell,{sz:9,al:'right',nf:NF,bd:1,fill:bg,fc:v<0?'FFB42318':CLR.ink}); cell.value=v; break;
+          case 'endnum': st(cell,{sz:9,b:!adjOn,al:'right',nf:NF,bd:1,fill:bg,fc:v<0?'FFB42318':(adjOn?CLR.ink:CLR.brandD)}); cell.value=v; break;
+          case 'adjnum': st(cell,{sz:9,al:'right',nf:NF,bd:1,fill:bg,fc:Math.abs(v)<0.005?'FFB9C2C0':(v<0?'FFB42318':CLR.ink)}); cell.value=v; break;
+          case 'aftnum': st(cell,{sz:9,b:true,al:'right',nf:NF,bd:1,fill:bg,fc:v<0?'FFB42318':CLR.brandD}); cell.value=v; break;
+        } }
       q++; }
-    S.mergeCells(q,2,q,7); st(S.getCell(q,2),{sz:10,b:true,fc:CLR.white,fill:CLR.brand}); S.getCell(q,2).value='รวมทั้งหมด · '+M.rows.length+' บัญชี'+(M.filtered?' (กรองแล้ว)':'');
-    var tt=[M.T.open,M.T.deb,M.T.cred,M.T.end]; if(adjOn)tt=tt.concat([M.T.adjDr,M.T.adjCr,M.T.adjAfter]);
-    for(var tc=0;tc<tt.length;tc++){ st(S.getCell(q,tc+8),{sz:10,b:true,al:'right',nf:NF,fc:CLR.white,fill:(tc>=4?(tc===6?CLR.brand:ADJ):CLR.brand)}); S.getCell(q,tc+8).value=tt[tc]; }
+    S.mergeCells(q,2,q,firstNum+1); st(S.getCell(q,2),{sz:10,b:true,fc:CLR.white,fill:CLR.brand}); S.getCell(q,2).value='รวมทั้งหมด · '+M.rows.length+' บัญชี'+(M.filtered?' (กรองแล้ว)':'');
+    var TMAP={open:M.T.open,debit:M.T.deb,credit:M.T.cred,ending:M.T.end,adjDr:M.T.adjDr,adjCr:M.T.adjCr,adjAfter:M.T.adjAfter};
+    for(var tc=firstNum;tc<COLS.length;tc++){ var cdt=COLS[tc]; st(S.getCell(q,tc+2),{sz:10,b:true,al:'right',nf:NF,fc:CLR.white,fill:(cdt.t==='adjnum'?ADJ:CLR.brand)}); S.getCell(q,tc+2).value=TMAP[cdt.k]; }
     S.getRow(q).height=20; q+=2;
     S.mergeCells(q,2,q,lastCol); st(S.getCell(q,2),{sz:9,b:true,fc:M.bal?'FF116A3E':'FFB42318'}); S.getCell(q,2).value=(M.bal?'⚖ เดบิต = เครดิต (งบทดลองดุล)':'⚖ เดบิต − เครดิต = '+_fsXn(M.T.deb-M.T.cred)+' (ไม่ดุล)'); q++;
     if(adjOn&&M.adj.note){ S.mergeCells(q,2,q,lastCol); st(S.getCell(q,2),{sz:8.5,fc:'FF6B7A77'}); S.getCell(q,2).value='※ '+M.adj.note; q++; }
@@ -17787,11 +17807,12 @@ function _fsTbPrintPdf(){ try{
     +'</div>';
   var trs=''; for(var j=0;j<M.rows.length;j++){ var x=M.rows[j];
     trs+='<tr><td class="c">'+x.seq+'</td><td class="c idx">'+(x.idx?('<b>'+E(x.idx)+'</b>'):'')+'</td>'
+      +'<td class="c cat">'+E(x.cat)+'</td>'
       +'<td class="c code">'+E(x.code)+'</td><td class="l">'+E(x.name)+'</td>'
       +'<td class="l g">'+E(x.fsgrp)+'</td><td class="l g">'+E(x.cfgrp)+'</td>'
       +'<td class="r">'+fn(x.open)+'</td><td class="r">'+fn(x.debit)+'</td><td class="r">'+fn(x.credit)+'</td><td class="r b">'+fn(x.ending)+'</td>'
       +(adjOn?('<td class="r a">'+fn(x.adjDr)+'</td><td class="r a">'+fn(x.adjCr)+'</td><td class="r a b2">'+fn(x.adjAfter)+'</td>'):'')+'</tr>'; }
-  var foot='<tr class="tot"><td colspan="6" class="l">รวมทั้งหมด '+M.rows.length+' บัญชี'+(M.filtered?' (ตามตัวกรอง)':'')+'</td>'
+  var foot='<tr class="tot"><td colspan="7" class="l">รวมทั้งหมด '+M.rows.length+' บัญชี'+(M.filtered?' (ตามตัวกรอง)':'')+'</td>'
     +'<td class="r">'+fn(M.T.open)+'</td><td class="r">'+fn(M.T.deb)+'</td><td class="r">'+fn(M.T.cred)+'</td><td class="r">'+fn(M.T.end)+'</td>'
     +(adjOn?('<td class="r">'+fn(M.T.adjDr)+'</td><td class="r">'+fn(M.T.adjCr)+'</td><td class="r">'+fn(M.T.adjAfter)+'</td>'):'')+'</tr>';
   var CSS='*{margin:0;padding:0;box-sizing:border-box}html,body{background:#EEF2F1;font-family:"Sarabun","Inter",Tahoma,"Segoe UI",system-ui,sans-serif;color:#1f2937;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
@@ -17810,14 +17831,14 @@ function _fsTbPrintPdf(){ try{
     +'thead th.l{text-align:left}thead th.c{text-align:center}'
     +'tbody td{padding:4.5px 7px;border-bottom:1px solid #EEF2F1;font-size:9.5px;text-align:right;font-variant-numeric:tabular-nums;vertical-align:middle}'
     +'tbody td.l{text-align:left}tbody td.c{text-align:center}tbody tr:nth-child(even) td{background:#FAFBFA}'
-    +'td.code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:700;color:#0A463E}td.idx b{color:#1D5FAE}td.g{font-size:8.5px;color:#5b6b7a;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+    +'td.code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:700;color:#0A463E}td.idx b{color:#1D5FAE}td.cat{color:#6b7280;font-weight:700;font-size:9px;white-space:nowrap}td.g{font-size:8.5px;color:#5b6b7a;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
     +'td.l{max-width:280px}td.b{font-weight:800;color:#0A463E}'
     +'thead th.a{background:linear-gradient(180deg,#17897A,#12776A)}tbody td.a{background:#F3F8F6}tbody tr:nth-child(even) td.a{background:#E9F2EF}td.b2{font-weight:800;color:#0A463E}'
     +'tfoot .tot td{background:#0A463E;color:#fff;font-weight:800;font-size:10.5px;padding:8px 7px;border:none}tfoot .tot td.l{color:#fff;text-align:left}'
     +'.pfoot{margin-top:12px;font-size:9.5px;color:#8a9490;text-align:center;border-top:1px solid #E3E8E6;padding-top:9px;line-height:1.5}'
     +'@page{size:A4 landscape;margin:8mm}tr{break-inside:avoid;page-break-inside:avoid}thead{display:table-header-group}tfoot{display:table-footer-group}'
     +'@media print{html,body{background:#fff}.sheet{max-width:none;padding:0}.toolbar{display:none}.phead{border-radius:0}}';
-  var head='<thead><tr><th class="c">#</th><th class="c">ดัชนี</th><th class="c">รหัสบัญชี</th><th class="l">ชื่อบัญชี</th>'
+  var head='<thead><tr><th class="c">#</th><th class="c">ดัชนี</th><th class="c">หมวด</th><th class="c">รหัสบัญชี</th><th class="l">ชื่อบัญชี</th>'
     +'<th class="l">จัดกลุ่มงบการเงิน</th><th class="l">จัดกลุ่มกระแสเงินสด</th><th>ยอดยกมา</th><th>เดบิต</th><th>เครดิต</th><th>'+E(endLbl)+'</th>'
     +(adjOn?'<th class="a">ปรับปรุง Dr</th><th class="a">ปรับปรุง Cr</th><th class="a">หลังปรับปรุง</th>':'')+'</tr></thead>';
   var html='<!DOCTYPE html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>งบทดลอง — '+E(M.co)+'</title>'
