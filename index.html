@@ -3856,6 +3856,10 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-fs .fstb .fscfgrpcol .cfdmovesel:hover{border-color:#3AA0E6}
 #page-fs .fstb .fscfgrpcol .cfdmovesel.moved{color:#9A5B12;font-weight:700;background:#FFF6EA;border-color:#E7B877}
 #page-fs .fstb thead th.fscfgrphd{white-space:normal;width:188px;min-width:188px}
+/* v10.99.4: บรรทัดตามงบที่ออกจริง (read-only · filterable) */
+#page-fs .fstb .fsfsline{width:200px;white-space:normal;font-size:11.5px;color:#0A5C52;font-weight:600;padding:4px 9px;background:#EFF8F4;border-left:1px solid var(--fx-hair);vertical-align:middle;line-height:1.3}
+#page-fs .fstb .fsfsline-x{color:#B9C2C0;font-weight:500}
+#page-fs .fstb thead th.fsfslinehd{white-space:normal;width:200px;min-width:170px}
 /* v9.201: Index column — จับกลุ่มบรรทัดใน Trial Balance */
 #page-fs .fstb .fsidxhd{border-left:1px solid var(--fx-hair)}
 #page-fs .fstb .fsidxhd-s{display:block;font-size:9px;color:var(--fx-muted);font-weight:600;margin-top:1px;text-transform:none}
@@ -16577,6 +16581,35 @@ var _FS_LINE_EN={
  'Cost of construction':'Cost of sales \u2014 construction','Cost of sales / services':'Cost of sales \u2014 goods/services','Selling expenses':'Selling expenses',
  'Administrative expenses':'Administrative expenses','Finance costs':'Finance costs','Income tax expense':'Tax expense (income)','Other expenses':'Other expenses'};
 function _fsLineEn(line){ try{var o=FSMAP.line&&FSMAP.line[line]; if(o&&o.en!=null&&o.en!=='')return o.en;}catch(e){} try{var c=FSMAP.custom&&FSMAP.custom[line]; if(c&&c.en)return c.en;}catch(e){} return _FS_LINE_EN[line]||line; }
+/* v10.99.2: label ที่ "แสดงจริง" ในช่องเลือกจัดกลุ่มงบการเงิน (คอลัมน์ TB) — ให้ตรงกับ option ที่เลือกใน _fsMapLineOpts เป๊ะ (ใช้ label ของ "กลุ่ม" ไม่ใช่ของบรรทัดย่อย) เพื่อให้ Filter หาเจอ */
+function _fsGrpDispTh(line){
+  try{
+    var selVal=_fsStmtValOf(line), res=null;
+    (_FS_BS_GROUPS||[]).forEach(function(G){ if(res==null&&(G.cat==='A'||G.cat==='L')&&G.members&&G.members[0]===selVal)res=_fsGrpTh(G); });
+    if(res==null&&typeof _FS_EQ!=='undefined'&&_FS_EQ)_FS_EQ.forEach(function(ln){ if(res==null&&ln===selVal)res=_fsLineTh(ln); });
+    if(res==null)(_FS_PL_GROUPS||[]).forEach(function(G){ if(res==null&&(G.sec==='R'||G.sec==='X')&&G.members&&G.members[0]===selVal)res=_fsGrpTh(G); });
+    if(res==null){ var custom=_fsMapCustom(); for(var k in custom){ if(k===selVal){res=_fsLineTh(k);break;} } }
+    if(res!=null&&res!=='')return res;
+  }catch(e){}
+  return _fsLineTh(line);
+}
+/* v10.99.4: บรรทัดตามงบการเงินที่ออกจริง (Separate) — จากไฟล์ WP: code → d-code → บรรทัดในงบ · ใช้โชว์/กรองใน TB ให้ตรงกับงบเป๊ะ */
+var _GLI_WPDMAP=null,_GLI_DLABEL=null;
+function _fsWpFsLine(code){
+  try{
+    if(typeof GLI_FS2025==='undefined'||!GLI_FS2025||!GLI_FS2025.codes)return '';
+    if(!_GLI_WPDMAP){ _GLI_WPDMAP={}; GLI_FS2025.codes.forEach(function(o){ _GLI_WPDMAP[(''+o.c).trim()]=o.d; }); }
+    if(!_GLI_DLABEL){ _GLI_DLABEL={}; if(typeof GLI_ISSUED!=='undefined'&&GLI_ISSUED)['bs','pl'].forEach(function(sk){ (GLI_ISSUED[sk]||[]).forEach(function(row){ if(row&&row.k==='line'&&row.d&&row.t)_GLI_DLABEL[row.d]=(''+row.t).replace(/\s+/g,' ').trim(); }); }); }
+    var d=_GLI_WPDMAP[(''+(code==null?'':code)).trim()]; if(d==null)return '';
+    return _GLI_DLABEL[d]||'';
+  }catch(e){ return ''; }
+}
+/* v10.99.2: label ที่แสดงจริงในช่องจัดกลุ่มกระแสเงินสด — อ่านจาก select ที่ render อยู่ (auto-classify คำนวณตอน build CF) */
+function _fsCfGrpLabel(code){
+  try{ var c=(''+(code==null?'':code)).replace(/["\\\]]/g,''); var s=document.querySelector('table.fstb select.cfdmovesel[data-code="'+c+'"]');
+    if(s){ var o=s.options[s.selectedIndex]; var t=o?(''+o.textContent).replace(/\s+/g,' ').trim():''; if(/อัตโนมัติ/.test(t))return '(อัตโนมัติ)'; return t; } }catch(e){}
+  return '';
+}
 /* v9.46: icon per FS line — ทำหัวข้อกระดาษทำการให้สวย + สื่อความหมาย */
 var _FS_LINE_ICON={
   'Cash on hand':'💵','Cash & deposits in transit':'💸','Cash at banks':'🏦',
@@ -17578,7 +17611,9 @@ var _FS_TB_COLS=[
   {k:'att_diff',t:'text',get:function(x){return _fsAttState(x).diff;}},
   {k:'code', t:'text', get:function(x){return ''+x.code;}},
   {k:'acct', t:'text', get:function(x){return ''+(x.name||'');}},
-  {k:'group',t:'text', get:function(x){return _fsLineTh(x.cls.line);}, hay:function(x){return _fsLineTh(x.cls.line)+' '+_fsLineEn(x.cls.line)+' '+x.cls.line;}},
+  {k:'group',t:'text', get:function(x){return _fsGrpDispTh(x.cls.line);}, hay:function(x){return _fsGrpDispTh(x.cls.line)+' '+_fsLineTh(x.cls.line)+' '+_fsLineEn(x.cls.line)+' '+x.cls.line;}},
+  {k:'fsline',t:'text', get:function(x){return _fsWpFsLine(x.code);}, hay:function(x){return _fsWpFsLine(x.code);}},
+  {k:'cfgroup',t:'text', get:function(x){return _fsCfGrpLabel(x.code);}, hay:function(x){return _fsCfGrpLabel(x.code);}},
   {k:'opening',t:'num', get:function(x){return x.openNat;}},
   {k:'debit', t:'num', get:function(x){return x.yd;}},
   {k:'credit',t:'num', get:function(x){return x.yc;}},
@@ -17626,7 +17661,7 @@ function _fsTbDocClose(e){ var d=document.getElementById('fsTbDrop'); if(!d){doc
   document.removeEventListener('mousedown',_fsTbDocClose); _fsTbCloseDrop(); }
 function _fsTbOpenFilter(k,btn){ _fsTbCloseDrop(); var pg=document.getElementById('page-fs'); if(!pg)return;
   var col=_fsTbCol(k); if(!col)return; var f=_fsTbFil[k]||null;
-  var LBL={att_ic:'แนบไฟล์ · Attachment',att_amt:'ยอดตามไฟล์ · Amount (A1)',att_diff:'ผลต่าง · File − TB',code:'Code · รหัสบัญชี',acct:'Account · ชื่อบัญชี',group:'Group · บรรทัดในงบการเงิน',opening:'Opening · ยอดยกมา',debit:'Debit · เดบิต',credit:'Credit · เครดิต',ending:'Ending · ยอดปลาย'};
+  var LBL={att_ic:'แนบไฟล์ · Attachment',att_amt:'ยอดตามไฟล์ · Amount (A1)',att_diff:'ผลต่าง · File − TB',code:'Code · รหัสบัญชี',acct:'Account · ชื่อบัญชี',group:'จัดกลุ่มงบการเงิน · Financial-statement line',fsline:'บรรทัดตามงบที่ออกจริง · FS line (issued)',cfgroup:'จัดกลุ่มกระแสเงินสด · Cash-flow line',opening:'Opening · ยอดยกมา',debit:'Debit · เดบิต',credit:'Credit · เครดิต',ending:'Ending · ยอดปลาย'};
   var d=document.createElement('div'); d.className='gldrop'; d.id='fsTbDrop';
   var pr=pg.getBoundingClientRect(), br=btn.getBoundingClientRect();
   var left=br.left-pr.left; if(left+310>pg.clientWidth)left=Math.max(6,pg.clientWidth-310);
@@ -17791,11 +17826,12 @@ function _fsRenderTB(){
       '<td class="fsc">'+_fsE(x.code)+'</td>'+
       '<td class="fsacct"><span class="fsnm">'+_fsE(x.name)+badges+'</span></td>'+
       '<td class="fsgrpcol fsgrp-'+c.cat+((FSMAP.code&&FSMAP.code[x.code])?' fsgrp-moved':'')+'"><select class="fstbgrpsel" data-code="'+_fsE(x.code)+'" title="เลือกบรรทัดในงบการเงินที่บัญชีนี้จะวิ่งเข้า (จัดกลุ่ม) — บันทึกอัตโนมัติ">'+_fsMapLineOpts(c.line)+'</select></td>'+
+      '<td class="fsfsline" title="บรรทัดในงบการเงินที่ออกจริง (Separate) — จากไฟล์กระดาษทำการ · กรองคอลัมน์นี้เพื่อให้ตรงกับงบเป๊ะ">'+(_fsWpFsLine(x.code)?_fsE(_fsWpFsLine(x.code)):'<span class="fsfsline-x">–</span>')+'</td>'+   /* v10.99.4: บรรทัดตามงบที่ออกจริง (อ่านอย่างเดียว · กรองได้) */
       '<td class="fscfgrpcol'+(_fsMapCfd()[_fsRcCode(x.code)]?' fscf-moved':'')+'">'+_cfdMoveCtl(x.code)+'</td>'+   /* v10.93: Cash-flow grouping — เลือกบรรทัดงบกระแสเงินสด (auto / override), บันทึกอัตโนมัติ */
       '<td class="fsm'+(wpCarry&&Math.abs(_fsWpAdjNet(x.code))>0.005?' fsadj-after on':'')+'">'+_fsMoney(_fsWpTbOpenVal(x),true)+'</td>'+
       '<td class="fsm">'+_fsMoney(x.yd,true)+'</td><td class="fsm">'+_fsMoney(x.yc,true)+'</td>'+
       _endCells(x)+(wpAdjOn?_fsWpTbAdjTd(x):'')+'</tr>';});
-  if(!arr.length)rows='<tr class="fstbempty"><td colspan="'+((adjActive?16:13)+(wpAdjOn?3:0))+'">— ไม่มีบัญชีที่ตรงกับตัวกรอง —</td></tr>';
+  if(!arr.length)rows='<tr class="fstbempty"><td colspan="'+((adjActive?17:14)+(wpAdjOn?3:0))+'">— ไม่มีบัญชีที่ตรงกับตัวกรอง —</td></tr>';
   var attHead=_fsTbTh('att_ic','📎','แนบไฟล์','fsatthd-ic')+
     _fsTbTh('att_amt','ยอดตามไฟล์','A1 · ชีตปี '+((typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):''),'fsm fsatthd-amt')+
     _fsTbTh('att_diff','ผลต่าง','ไฟล์ − TB','fsm fsatthd-diff');
@@ -17815,6 +17851,7 @@ function _fsRenderTB(){
     _fsTbTh('code','รหัสบัญชี','Code','')+
     _fsTbTh('acct','ชื่อบัญชี','Account name','')+
     _fsTbTh('group','จัดกลุ่มงบการเงิน','กลุ่ม → บรรทัดในงบ','fsgrphd')+
+    _fsTbTh('fsline','บรรทัดตามงบ (FS)','ตามงบที่ออกจริง','fsgrphd fsfslinehd')+
     _fsTbTh('cfgroup','จัดกลุ่มกระแสเงินสด','กลุ่ม → บรรทัดเงินสด','fsgrphd fscfgrphd')+
     _fsTbTh('opening','ยอดยกมา',openSub,'fsm')+
     _fsTbTh('debit','เดบิต',movSub,'fsm')+
@@ -17893,7 +17930,7 @@ function _fsRenderTB(){
     : '<td class="fsm">'+_fsMoney(sEnd)+'</td>';
   var tbExportBar='<div class="fstbexport"><span class="fstbexp-l">ส่งออกงบทดลอง'+(filtered?' (ตามตัวกรอง)':'')+'</span><button type="button" class="fstbxlsb" title="ส่งออกงบทดลองหน้านี้เป็น Excel (.xlsx) — จัดรูปสวยงาม พร้อมสูตร/สี">⬇ Excel</button><button type="button" class="fstbpdfb" title="พิมพ์ / บันทึกงบทดลองหน้านี้เป็น PDF สวยงาม">🖨 PDF</button></div>';
   return sumPanel+_fsTbClsRow()+filterBar+tbExportBar+'<div class="fstbwrap"><table class="fstable fstb fstb-att'+(adjActive?' fstb-adj':'')+'">'+head+
-    '<tbody>'+rows+'</tbody><tfoot><tr class="fstot">'+attFoot+'<td class="fsseq"></td><td colspan="5">'+totLbl+'</td>'+
+    '<tbody>'+rows+'</tbody><tfoot><tr class="fstot">'+attFoot+'<td class="fsseq"></td><td colspan="6">'+totLbl+'</td>'+
     '<td class="fsm">'+_fsMoney(sOpen)+'</td>'+
     '<td class="fsm">'+_fsMoney(fyd)+'</td><td class="fsm">'+_fsMoney(fyc)+'</td>'+endFoot+
     (wpAdjOn?('<td class="fsm fsadj-drc has">'+_fsMoney(sWpDr,true)+'</td><td class="fsm fsadj-drc has">'+_fsMoney(sWpCr,true)+'</td><td class="fsm fsadj-after on">'+_fsMoney(sEnd+sWpNet)+'</td>'):'')+'</tr></tfoot></table></div>'+
@@ -21529,14 +21566,34 @@ function _fsIssRenderEmpty(){ var p=_fsIssPanelEnsure(); p.classList.remove('has
     '<div class="fsiss-pb"><div class="fsiss-wait"><div class="fsiss-wait-ic">👈</div>'+
     '<div class="fsiss-wait-t">ยังไม่เลือกรายการในงบการเงิน</div>'+
     '<div class="fsiss-wait-s">คลิกที่บรรทัดใดก็ได้ในงบ (ฝั่งซ้าย) เพื่อดู<b>รหัสบัญชี</b>ที่ประกอบเป็นยอดนั้น พร้อมรายการ <b>GL</b> และ<b>คู่บัญชี เดบิต/เครดิต</b></div></div></div>'; }
+/* v10.99.3: หายอดตามงบการเงิน (Separate) ของบรรทัด d-code นี้ จาก GLI_ISSUED (bs/pl) เพื่อกระทบยอดในกล่องด้านขวา */
+function _fsIssLineVal(dcode){
+  try{ if(typeof GLI_ISSUED==='undefined'||!GLI_ISSUED)return null; var S=[GLI_ISSUED.bs,GLI_ISSUED.pl];
+    for(var s=0;s<S.length;s++){ var rows=S[s]||[]; for(var i=0;i<rows.length;i++){ var r=rows[i]; if(r&&r.k==='line'&&r.d===dcode&&r.v)return +r.v[0]||0; } } }catch(e){}
+  return null;
+}
 function _fsIssRenderCodes(dcode,label){ var p=_fsIssPanelEnsure(); p.classList.add('has-sel');
-  var codes=_fsIssCodesFor(dcode); var sign=1;
-  try{ var cs=codes.reduce(function(a,c){return a+(+c.pa||0);},0); sign=(cs<0?-1:1); }catch(e){}
+  var codes=_fsIssCodesFor(dcode); var spa=0;
+  try{ spa=codes.reduce(function(a,c){return a+(+c.pa||0);},0); }catch(e){}
+  var sign=(spa<0?-1:1);
   var body=codes.map(function(c){
     return '<div class="fsiss-crow" data-isscode="'+_fsWpEsc(c.c)+'"><div class="cc-h"><span class="cc-code">'+_fsWpEsc(c.c)+'</span>'+
       '<span class="cc-name">'+_fsWpEsc(c.n)+'</span><span class="cc-amt">'+_fsIssN((+c.pa||0)*sign)+'</span><span class="cc-ex">▸</span></div><div class="cc-det" hidden></div></div>'; }).join('');
   if(!codes.length)body='<div class="fsiss-empty">— ไม่มีรหัสบัญชีในบรรทัดนี้ —</div>';
-  p.innerHTML=_fsIssHeadHTML(label||'',(_fsWpEsc?'':'')+'รหัสกลุ่มงบ '+_fsWpEsc(dcode)+' · '+codes.length+' บัญชี · คลิกรหัสเพื่อดู GL + คู่บัญชี (Dr/Cr)')+'<div class="fsiss-pb">'+body+'</div>'; }
+  /* v10.99.3: กระทบยอดให้กล่องด้านขวา "ตรงกับงบการเงิน" — ยอดตามบัญชี (Per Audit) + ส่วนแบ่งงบร่วมค้า/รายการรวมงบ = ยอดตามงบ */
+  var issued=_fsIssLineVal(dcode), subtotal=spa*sign;
+  if(codes.length&&issued!=null){ var resid=issued-subtotal;
+    if(Math.abs(resid)>5){   /* มีส่วนแบ่งงบร่วมค้า/รายการรวมงบจริง → แสดง 3 บรรทัดกระทบยอด */
+      body+='<div class="fsiss-foot">'+
+        '<div class="fsiss-frow"><span class="fl">รวมยอดตามบัญชี (ตรวจสอบแล้ว · Per Audit)</span><span class="fr">'+_fsIssN(subtotal)+'</span></div>'+
+        '<div class="fsiss-frow adj"><span class="fl">＋ ส่วนแบ่งงบร่วมค้า/กิจการร่วมงาน · รายการรวมงบ<small>แสดงในงบ ไม่ได้อยู่ใน GL ของบริษัท</small></span><span class="fr">'+_fsIssN(resid)+'</span></div>'+
+        '<div class="fsiss-frow tot"><span class="fl">＝ ยอดตามงบการเงิน (บรรทัดนี้)</span><span class="fr">'+_fsIssN(issued)+'</span></div>'+
+      '</div>';
+    } else {                 /* ยอดบัญชีตรงกับงบพอดี (ต่างเพียงการปัดเศษ) */
+      body+='<div class="fsiss-foot"><div class="fsiss-frow tot ok"><span class="fl">＝ ยอดตามงบการเงิน (บรรทัดนี้) · ตรงกับยอดบัญชี</span><span class="fr">'+_fsIssN(issued)+'</span></div></div>';
+    }
+  }
+  p.innerHTML=_fsIssHeadHTML(label||'','รหัสกลุ่มงบ '+_fsWpEsc(dcode)+' · '+codes.length+' บัญชี · คลิกรหัสเพื่อดู GL + คู่บัญชี (Dr/Cr)')+'<div class="fsiss-pb">'+body+'</div>'; }
 function _fsIssPanelClick(e){ var t=e.target;
   if(t.closest&&t.closest('.fsiss-px')){ _fsIssDrillClose(); return; }
   if(t.closest&&t.closest('.fsiss-xls')){ var _xb=t.closest('.fsiss-xls'); try{ _cfdGroupExportXlsx(_xb); }catch(err){ if(_xb){_xb.disabled=false;} alert('ส่งออก Excel ไม่สำเร็จ: '+((err&&err.message)||err)); } return; }
@@ -22224,6 +22281,16 @@ function _fsCfdDrill(key,label,el){ if(!(typeof _CFD!=='undefined'&&_CFD))return
 function _fsIssDate(s){ if(!s)return ''; var p=(''+s).split('-'); if(p.length!==3)return s; var mm=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.']; return (+p[2])+' '+mm[+p[1]]+' '+((+p[0])+543-2500); }
 function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
   var css=[
+   /* v10.99.3: reconciling footer in the right dock — ties account list to the FS line */
+   ".fsiss-foot{margin-top:10px;border-top:2px solid #CFE3DC;padding-top:8px;display:flex;flex-direction:column;gap:3px}",
+   ".fsiss-frow{display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding:5px 9px;border-radius:8px;font-size:12.5px}",
+   ".fsiss-frow .fl{color:#374151;font-weight:600}",
+   ".fsiss-frow .fl small{display:block;font-size:10px;color:#8C8676;font-weight:500}",
+   ".fsiss-frow .fr{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:#0A463E}",
+   ".fsiss-frow.adj{background:#FBF3E1}",
+   ".fsiss-frow.adj .fl{color:#8A5E12}.fsiss-frow.adj .fr{color:#8A5E12}",
+   ".fsiss-frow.tot{background:#0E5C52;margin-top:2px}",
+   ".fsiss-frow.tot .fl{color:#fff;font-weight:800}.fsiss-frow.tot .fr{color:#FBBF24}",
    ".fsiss-t tr.issline{cursor:pointer;transition:background .12s}",
    ".fsiss-t tr.issline:hover{background:#eef7f3}",
    ".fsiss-t tr.issline td.l::after{content:' 🔎';font-size:10px;opacity:0;transition:opacity .1s}",
