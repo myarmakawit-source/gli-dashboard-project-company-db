@@ -3682,6 +3682,8 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-fs .fstbpdfb{border-color:#B12E1A;background:linear-gradient(180deg,#EF6A4E,#CE3A24);box-shadow:0 5px 13px -7px rgba(206,58,36,.55)}
 #page-fs .fstbxlsb:hover,#page-fs .fstbpdfb:hover{filter:brightness(1.07);transform:translateY(-1px)}
 #page-fs .fstbxlsb:disabled{opacity:.6;cursor:progress;filter:grayscale(.3)}
+#page-fs .fstbrecb{border:1px solid #8A5E12;background:linear-gradient(180deg,#C68A2E,#A8741A);color:#fff;border-radius:8px;font:inherit;font-size:12px;font-weight:700;padding:6px 14px;cursor:pointer;box-shadow:0 5px 13px -7px rgba(168,116,26,.6);transition:filter .12s,transform .12s}
+#page-fs .fstbrecb:hover{filter:brightness(1.08);transform:translateY(-1px)}
 #page-fs #fsPrint.ghost{background:linear-gradient(180deg,#EF6A4E 0%,#CE3A24 100%);border-color:#B12E1A;color:#fff;box-shadow:0 8px 20px -9px rgba(206,58,36,.6)}
 #page-fs #fsPrint.ghost:hover{background:linear-gradient(180deg,#F0745A 0%,#D53E28 100%);border-color:#B12E1A;filter:brightness(1.03);box-shadow:0 12px 26px -10px rgba(206,58,36,.66);transform:translateY(-1px)}
 #page-fs #fsRatioPdf.pdf{background:linear-gradient(180deg,#5C6BF0 0%,#3542C0 100%);border-color:#2C37A4;color:#fff;box-shadow:0 8px 20px -9px rgba(53,66,192,.6)}
@@ -17932,7 +17934,7 @@ function _fsRenderTB(){
        '<td class="fsm fsadj-drc has">'+_fsMoney(sAdjCr,true)+'</td>'+
        '<td class="fsm fsadj-after on">'+_fsMoney(sEnd)+'</td>')
     : '<td class="fsm">'+_fsMoney(sEnd)+'</td>';
-  var tbExportBar='<div class="fstbexport"><span class="fstbexp-l">ส่งออกงบทดลอง'+(filtered?' (ตามตัวกรอง)':'')+'</span><button type="button" class="fstbxlsb" title="ส่งออกงบทดลองหน้านี้เป็น Excel (.xlsx) — จัดรูปสวยงาม พร้อมสูตร/สี">⬇ Excel</button><button type="button" class="fstbpdfb" title="พิมพ์ / บันทึกงบทดลองหน้านี้เป็น PDF สวยงาม">🖨 PDF</button></div>';
+  var tbExportBar='<div class="fstbexport"><span class="fstbexp-l">ส่งออกงบทดลอง'+(filtered?' (ตามตัวกรอง)':'')+'</span><button type="button" class="fstbxlsb" title="ส่งออกงบทดลองหน้านี้เป็น Excel (.xlsx) — จัดรูปสวยงาม พร้อมสูตร/สี">⬇ Excel</button><button type="button" class="fstbpdfb" title="พิมพ์ / บันทึกงบทดลองหน้านี้เป็น PDF สวยงาม">🖨 PDF</button>'+((typeof _fsReconAvail==='function'&&_fsReconAvail())?'<button type="button" class="fstbrecb" title="ดึงสรุปบัญชีที่งบทดลอง (GL) ไม่ตรงกับงบการเงินที่ออกจริง (Per Audit)">⚖ กระทบยอดกับงบ</button>':'')+'</div>';
   return sumPanel+_fsTbClsRow()+filterBar+tbExportBar+'<div class="fstbwrap"><table class="fstable fstb fstb-att'+(adjActive?' fstb-adj':'')+'">'+head+
     '<tbody>'+rows+'</tbody><tfoot><tr class="fstot">'+attFoot+'<td class="fsseq"></td><td colspan="5">'+totLbl+'</td>'+
     '<td class="fsm">'+_fsMoney(sOpen)+'</td>'+
@@ -18139,6 +18141,107 @@ function _fsTbPrintPdf(){ try{
   w.document.open(); w.document.write(html); w.document.close();
   if(typeof gliLog==='function'){try{gliLog('พิมพ์งบทดลอง (PDF)',M.rows.length+' บัญชี');}catch(e){}}
 }catch(e){ alert('สร้าง PDF ไม่สำเร็จ: '+((e&&e.message)||e)); if(window.console)console.error('fsTbPrintPdf',e); } }
+
+/* ===== v10.101: กระทบยอด งบทดลอง (GL) ↔ งบการเงินที่ออกจริง (Per Audit) — ดึงสรุปบัญชีที่ไม่ตรง ===== */
+function _fsReconAvail(){ try{ return (typeof _fsWpAvail==='function'&&_fsWpAvail())&&(typeof _fsWpIsCur==='function'?_fsWpIsCur():(_fsY1==='2025')); }catch(e){ return false; } }
+function _fsReconRawSign(code,nat){ var d=(''+(code==null?'':code)).trim().charAt(0); return (d==='1'||d==='5'||d==='6'||d==='7')?(+nat||0):-(+nat||0); }
+function _fsReconModel(){
+  var wp={},wpName={},order=[];
+  (GLI_FS2025.codes||[]).forEach(function(c){ var code=(''+c.c).trim(); if(!code)return; wp[code]={pa:+c.pa||0,pb:+c.pb||0,d:c.d}; wpName[code]=c.n||''; order.push(code); });
+  var TB=(typeof _fsTB!=='undefined'&&_fsTB)?_fsTB:[];
+  var rows=[],nMatch=0,net=0,sumTB=0,sumFS=0,tbSeen={},nMiss=0,nExtra=0;
+  TB.forEach(function(x){ var code=(''+x.code).trim(); if(!code)return; tbSeen[code]=1;
+    var raw=_fsReconRawSign(code,x.nat); sumTB+=raw;
+    var w=wp[code];
+    if(!w){ if(Math.abs(raw)>0.5){ rows.push({code:code,name:x.name||'',tb:raw,fs:null,diff:raw,kind:'เกินมาใน TB (ไม่มีในงบ)'}); net+=raw; nExtra++; } return; }
+    sumFS+=w.pa;
+    var diff=raw-w.pa; if(Math.abs(diff)<0.5){ nMatch++; return; }
+    var kind=(Math.abs(raw-w.pb)<0.5)?'ยังไม่ได้ลงรายการปรับปรุงของผู้สอบ':'ต่างจากงบ — ตรวจสอบ';
+    rows.push({code:code,name:wpName[code]||x.name||'',tb:raw,fs:w.pa,pb:w.pb,diff:diff,kind:kind}); net+=diff;
+  });
+  order.forEach(function(code){ if(tbSeen[code])return; var w=wp[code]; if(Math.abs(w.pa)>0.5){ rows.push({code:code,name:wpName[code],tb:0,fs:w.pa,pb:w.pb,diff:-w.pa,kind:'บัญชีที่ขาด (มีในงบ ไม่มีใน TB)'}); net+=-w.pa; nMiss++; } });
+  rows.sort(function(a,b){return Math.abs(b.diff)-Math.abs(a.diff);});
+  var co=(typeof _fsTplCo==='function')?_fsTplCo():'บริษัท'; var yBE=(typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):'';
+  return {rows:rows,nMatch:nMatch,nDiff:rows.length,net:Math.round(net*100)/100,nMiss:nMiss,nExtra:nExtra,nTB:TB.length,nWP:order.length,co:co,yBE:yBE};
+}
+function _fsReconCSS(){ if(document.getElementById('fsrecon-css'))return; var s=document.createElement('style'); s.id='fsrecon-css'; s.textContent=''
+  +'.fsrec-card{background:#fff;border-radius:16px;max-width:1080px;box-shadow:0 24px 60px rgba(0,0,0,.28);padding:20px 22px 22px;font-family:Inter,sans-serif;color:#19222E}'
+  +'.fsrec-tt{font-size:18px;font-weight:800;color:#0A463E}.fsrec-sub{font-size:12.5px;color:#4A5563;margin:3px 0 13px;line-height:1.5}'
+  +'.fsrec-sum{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:13px}'
+  +'.fsrec-pill{font-size:12px;font-weight:700;padding:5px 13px;border-radius:999px;background:#E6F0EC;color:#0A463E;border:1px solid #CFE3DC}'
+  +'.fsrec-pill.ok{background:#E8F3EC;color:#15803D;border-color:transparent}.fsrec-pill.bad{background:#FBEAE6;color:#B42318;border-color:transparent}.fsrec-pill.warn{background:#FEF3C7;color:#92400E;border-color:#FCD9A6}'
+  +'.fsrec-res{max-height:min(60vh,640px);overflow:auto;border:1px solid #E6E0D4;border-radius:12px}'
+  +'.fsrec-tbl{width:100%;border-collapse:collapse;font-size:12.5px}'
+  +'.fsrec-tbl th{position:sticky;top:0;background:#0E5C52;color:#fff;font-weight:700;font-size:11.5px;padding:8px 10px;text-align:right;white-space:nowrap;z-index:1}'
+  +'.fsrec-tbl th.l{text-align:left}.fsrec-tbl td{padding:6px 10px;border-bottom:1px solid #F1ECE2;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}'
+  +'.fsrec-tbl td.l{text-align:left;white-space:normal}.fsrec-tbl tbody tr:nth-child(even) td{background:#FBFAF7}'
+  +'.fsrec-code{font-weight:700;color:#0A463E;font-family:"IBM Plex Mono",monospace}'
+  +'.fsrec-diff{font-weight:800;color:#B42318}.fsrec-kind{font-size:11px;color:#5b6b7a;text-align:left;white-space:normal;max-width:230px}'
+  +'.fsrec-kind.adj{color:#8A5E12}.fsrec-kind.miss{color:#B4356A}.fsrec-kind.extra{color:#1E5FAE}'
+  +'.fsrec-tot td{background:#F3EFE7;font-weight:800;border-top:2px solid #E6E0D4;position:sticky;bottom:0}'
+  +'.fsrec-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}'
+  +'.fsrec-b{border:1px solid #E6E0D4;background:#fff;color:#0A463E;font:inherit;font-size:12.5px;font-weight:700;padding:8px 13px;border-radius:9px;cursor:pointer}'
+  +'.fsrec-b:hover{background:#E6F0EC}.fsrec-b.prim{background:#0E5C52;color:#fff;border-color:#0E5C52}.fsrec-b.prim:hover{background:#0A463E}'
+  +'.fsrec-empty{padding:30px;text-align:center;color:#15803D;font-weight:700;font-size:14px}'
+  +'.fsrec-note{font-size:11.5px;color:#8C8676;margin-top:11px;line-height:1.55}';
+  document.head.appendChild(s); }
+function _fsReconOpen(){
+  if(!_fsReconAvail()){ alert('ยังไม่มีข้อมูลงบการเงินที่ออก (Per Audit) สำหรับปีนี้ — ใช้ได้กับปีบัญชี 2568'); return; }
+  _fsReconCSS();
+  var m=document.getElementById('fsReconModal');
+  if(!m){ m=document.createElement('div'); m.id='fsReconModal'; m.className='pmodal'; m.hidden=true;
+    m.innerHTML='<div class="pmodal-bd"></div><div class="pmodal-card fsrec-card"><button class="pmodal-x" type="button" aria-label="Close">×</button><div id="fsReconBody"></div></div>';
+    document.body.appendChild(m);
+    m.querySelector('.pmodal-bd').addEventListener('click',_fsReconClose);
+    m.querySelector('.pmodal-x').addEventListener('click',_fsReconClose);
+    m.querySelector('#fsReconBody').addEventListener('click',function(e){ var x=e.target.closest?e.target.closest('#fsReconXls'):null; if(x){_fsReconExport(x);} });
+    document.addEventListener('keydown',function(e){ if((e.key==='Escape'||e.keyCode===27)){var mm=document.getElementById('fsReconModal'); if(mm&&!mm.hidden)_fsReconClose();} });
+  }
+  _fsReconRender();
+  m.hidden=false;
+  try{ if(typeof gliLog==='function')gliLog('เปิดกระทบยอด TB ↔ งบ',''); }catch(e){}
+}
+function _fsReconClose(){ var m=document.getElementById('fsReconModal'); if(m)m.hidden=true; }
+function _fsReconRender(){
+  var M=_fsReconModel(); var body=document.getElementById('fsReconBody'); if(!body)return; _fsReconLast=M;
+  var fn=function(v){ return _fsMoney(v,true); };
+  var head='<div class="fsrec-tt">⚖ กระทบยอด งบทดลอง (GL) ↔ งบการเงินที่ออกจริง</div>'+
+    '<div class="fsrec-sub">'+_fsE(M.co)+' · ปีบัญชี '+M.yBE+' · เทียบยอดคงเหลือใน GL กับยอดที่ตรวจสอบแล้ว (Per Audit) รายบัญชี · ค่าตามแบบ <b>เดบิต−เครดิต</b> (+ = เดบิต, − = เครดิต)</div>';
+  var bal=(Math.abs(M.net)<0.5);
+  var sum='<div class="fsrec-sum">'+
+    '<span class="fsrec-pill ok">ตรงกับงบ '+M.nMatch+' บัญชี</span>'+
+    '<span class="fsrec-pill '+(M.nDiff?'bad':'ok')+'">ไม่ตรง '+M.nDiff+' บัญชี</span>'+
+    (M.nMiss?'<span class="fsrec-pill warn">ขาด (มีในงบ ไม่มีใน TB) '+M.nMiss+'</span>':'')+
+    (M.nExtra?'<span class="fsrec-pill warn">เกิน (มีใน TB ไม่มีในงบ) '+M.nExtra+'</span>':'')+
+    '<span class="fsrec-pill '+(bal?'ok':'bad')+'">ผลต่างสุทธิ ฿'+fn(M.net)+'</span></div>';
+  var btns='<div class="fsrec-btns"><button class="fsrec-b prim" id="fsReconXls" type="button">⤓ ส่งออก Excel</button></div>';
+  var tbl;
+  if(!M.rows.length){ tbl='<div class="fsrec-empty">✓ งบทดลองตรงกับงบการเงินทุกบัญชี</div>'; }
+  else{
+    var body2=M.rows.map(function(r,i){ var kc=/ปรับปรุง/.test(r.kind)?'adj':(/ขาด/.test(r.kind)?'miss':(/เกิน/.test(r.kind)?'extra':''));
+      return '<tr><td>'+(i+1)+'</td><td class="l"><span class="fsrec-code">'+_fsE(r.code)+'</span></td><td class="l">'+_fsE(r.name)+'</td>'+
+        '<td>'+fn(r.tb)+'</td><td>'+(r.fs==null?'<span style="color:#B9C2C0">–</span>':fn(r.fs))+'</td><td class="fsrec-diff">'+fn(r.diff)+'</td><td class="fsrec-kind '+kc+'">'+_fsE(r.kind)+'</td></tr>'; }).join('');
+    tbl='<div class="fsrec-res"><table class="fsrec-tbl"><thead><tr><th>#</th><th class="l">รหัส</th><th class="l">ชื่อบัญชี</th><th>TB (GL)</th><th>งบ (Per Audit)</th><th>ผลต่าง</th><th class="l">สาเหตุ</th></tr></thead>'+
+      '<tbody>'+body2+'</tbody><tfoot><tr class="fsrec-tot"><td colspan="5" class="l">ผลต่างสุทธิ (TB − งบ) · '+M.nDiff+' บัญชี</td><td class="fsrec-diff">'+fn(M.net)+'</td><td></td></tr></tfoot></table></div>';
+  }
+  var note='<div class="fsrec-note">※ "ยังไม่ได้ลงรายการปรับปรุงของผู้สอบ" = ยอดใน GL ตรงกับ Per Book แต่ยังไม่ได้ลงรายการปรับปรุงของผู้สอบบัญชี · ผลต่างรวมของแต่ละบรรทัดในงบอาจมี "ส่วนแบ่งงบร่วมค้า/กิจการร่วมงาน" เพิ่มอีก (ดูได้ที่กล่องด้านขวาเมื่อคลิกบรรทัดในงบแสดงฐานะการเงิน)</div>';
+  body.innerHTML=head+sum+btns+tbl+note;
+}
+function _fsReconExport(btn){
+  var M=_fsReconLast||_fsReconModel(); if(typeof XLSX==='undefined'){ alert('ตัวอ่าน Excel กำลังโหลด — ลองใหม่อีกครั้ง'); return; }
+  try{
+    var xn=function(v){ v=+v||0; return Math.round(v*100)/100; };
+    var aoa=[['กระทบยอด งบทดลอง (GL) ↔ งบการเงินที่ออกจริง (Per Audit)'],[M.co+' · ปีบัญชี '+M.yBE],
+      ['ตรงกับงบ',M.nMatch,'ไม่ตรง',M.nDiff,'ขาด',M.nMiss,'เกิน',M.nExtra,'ผลต่างสุทธิ',xn(M.net)],[],
+      ['#','รหัสบัญชี','ชื่อบัญชี','TB (GL) Dr−Cr','งบ (Per Audit)','ผลต่าง','สาเหตุ']];
+    M.rows.forEach(function(r,i){ aoa.push([i+1,r.code,r.name,xn(r.tb),(r.fs==null?'':xn(r.fs)),xn(r.diff),r.kind]); });
+    aoa.push([]); aoa.push(['','','','','','ผลต่างสุทธิ',xn(M.net)]);
+    var ws=XLSX.utils.aoa_to_sheet(aoa); ws['!cols']=[{wch:5},{wch:13},{wch:40},{wch:18},{wch:18},{wch:16},{wch:34}];
+    var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'TB vs FS'); XLSX.writeFile(wb,'Recon_TB_vs_FS_'+(M.yBE||'')+'.xlsx');
+    try{ if(typeof gliLog==='function')gliLog('ส่งออกกระทบยอด TB↔งบ',M.nDiff+' บัญชี'); }catch(e){}
+  }catch(e){ alert('ส่งออกไม่สำเร็จ: '+((e&&e.message)||e)); }
+}
+var _fsReconLast=null;
 
 /* ===== v9.96: ADJUSTING-ENTRIES WORKING PAPER (modal) — สร้าง/แก้รายการปรับปรุงคู่บัญชี ===== */
 var _fsAdjEsc=null,_fsAdjDownBg=false,_fsAdjSaveT=null,_fsAdjTbT=null;
@@ -20627,6 +20730,7 @@ function _fsBind(w){ if(w._b)return; w._b=1;
     var clet=t.closest?t.closest('#cfdLnEditToggle'):null; if(clet){var _ok=_cfdOpenLineKeys();_cfdLnEdit=!_cfdLnEdit;if(typeof _cfdLnAddClose==='function')_cfdLnAddClose();_fsRenderBody();if(!_cfdLnEdit){try{_cfdReopenLines(_ok);}catch(_re){}}return;}   /* v9.126: สลับโหมดแก้ไข/เพิ่มบรรทัดงบกระแสเงินสด (ปุ่มอยู่ในตัวงบ → re-render เฉพาะ body) */
     if(_fsManEdit&&t.closest&&t.closest('[data-fsmanamt],[data-fsmanlbl]'))return; /* v9.98: คลิกในเซลล์แก้งบเอง — ไม่ต้อง drill */
     var ex=t.closest?t.closest('#fsExport'):null; if(ex){_fsExport();return;}
+    var tbrec=t.closest?t.closest('.fstbrecb'):null; if(tbrec){_fsReconOpen();return;}   /* v10.101: กระทบยอด TB ↔ งบ */
     var tbx=t.closest?t.closest('.fstbxlsb'):null; if(tbx){_fsTbExportXlsx(tbx);return;}   /* v10.95: TB → Excel */
     var tbp=t.closest?t.closest('.fstbpdfb'):null; if(tbp){_fsTbPrintPdf();return;}          /* v10.95: TB → PDF */
     var rpx=t.closest?t.closest('#fsRatioPdf'):null; if(rpx){_fsRatioPdf();return;}
