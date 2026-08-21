@@ -3663,6 +3663,12 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-fs .fsbar-actions .fsexp{font-size:13px;font-weight:800;padding:10px 18px;border-radius:12px;gap:8px;letter-spacing:.01em;line-height:1.15}
 #page-fs #fsExport{background:linear-gradient(180deg,#28A85B 0%,#157F3C 100%);border-color:#0F6E32;color:#fff;box-shadow:0 8px 20px -9px rgba(21,127,60,.65)}
 #page-fs #fsExport:hover{filter:brightness(1.06);box-shadow:0 12px 26px -10px rgba(21,127,60,.7);transform:translateY(-1px)}
+#page-fs .fstbexport{display:flex;align-items:center;gap:9px;margin:10px 0 6px;flex-wrap:wrap}
+#page-fs .fstbexport .fstbexp-l{font-size:12px;font-weight:700;color:#5b6b7a;margin-right:2px}
+#page-fs .fstbxlsb,#page-fs .fstbpdfb{border:1px solid #0F6E32;background:linear-gradient(180deg,#28A85B,#157F3C);color:#fff;border-radius:8px;font:inherit;font-size:12px;font-weight:700;padding:6px 14px;cursor:pointer;box-shadow:0 5px 13px -7px rgba(21,127,60,.6);transition:filter .12s,transform .12s}
+#page-fs .fstbpdfb{border-color:#B12E1A;background:linear-gradient(180deg,#EF6A4E,#CE3A24);box-shadow:0 5px 13px -7px rgba(206,58,36,.55)}
+#page-fs .fstbxlsb:hover,#page-fs .fstbpdfb:hover{filter:brightness(1.07);transform:translateY(-1px)}
+#page-fs .fstbxlsb:disabled{opacity:.6;cursor:progress;filter:grayscale(.3)}
 #page-fs #fsPrint.ghost{background:linear-gradient(180deg,#EF6A4E 0%,#CE3A24 100%);border-color:#B12E1A;color:#fff;box-shadow:0 8px 20px -9px rgba(206,58,36,.6)}
 #page-fs #fsPrint.ghost:hover{background:linear-gradient(180deg,#F0745A 0%,#D53E28 100%);border-color:#B12E1A;filter:brightness(1.03);box-shadow:0 12px 26px -10px rgba(206,58,36,.66);transform:translateY(-1px)}
 #page-fs #fsRatioPdf.pdf{background:linear-gradient(180deg,#5C6BF0 0%,#3542C0 100%);border-color:#2C37A4;color:#fff;box-shadow:0 8px 20px -9px rgba(53,66,192,.6)}
@@ -17640,13 +17646,144 @@ function _fsRenderTB(){
        '<td class="fsm fsadj-drc has">'+_fsMoney(sAdjCr,true)+'</td>'+
        '<td class="fsm fsadj-after on">'+_fsMoney(sEnd)+'</td>')
     : '<td class="fsm">'+_fsMoney(sEnd)+'</td>';
-  return sumPanel+_fsTbClsRow()+filterBar+'<div class="fstbwrap"><table class="fstable fstb fstb-att'+(adjActive?' fstb-adj':'')+'">'+head+
-    '<tbody>'+rows+'</tbody><tfoot><tr class="fstot">'+attFoot+'<td class="fsseq"></td><td colspan="3">'+totLbl+'</td>'+
+  var tbExportBar='<div class="fstbexport"><span class="fstbexp-l">ส่งออกงบทดลอง'+(filtered?' (ตามตัวกรอง)':'')+'</span><button type="button" class="fstbxlsb" title="ส่งออกงบทดลองหน้านี้เป็น Excel (.xlsx) — จัดรูปสวยงาม พร้อมสูตร/สี">⬇ Excel</button><button type="button" class="fstbpdfb" title="พิมพ์ / บันทึกงบทดลองหน้านี้เป็น PDF สวยงาม">🖨 PDF</button></div>';
+  return sumPanel+_fsTbClsRow()+filterBar+tbExportBar+'<div class="fstbwrap"><table class="fstable fstb fstb-att'+(adjActive?' fstb-adj':'')+'">'+head+
+    '<tbody>'+rows+'</tbody><tfoot><tr class="fstot">'+attFoot+'<td class="fsseq"></td><td colspan="5">'+totLbl+'</td>'+
     '<td class="fsm">'+_fsMoney(sOpen)+'</td>'+
     '<td class="fsm">'+_fsMoney(fyd)+'</td><td class="fsm">'+_fsMoney(fyc)+'</td>'+endFoot+
     (wpAdjOn?('<td class="fsm fsadj-drc has">'+_fsMoney(sWpDr,true)+'</td><td class="fsm fsadj-drc has">'+_fsMoney(sWpCr,true)+'</td><td class="fsm fsadj-after on">'+_fsMoney(sEnd+sWpNet)+'</td>'):'')+'</tr></tfoot></table></div>'+
     '<p class="fsnote"><b>📎/✏️ เทียบยอดประกอบต่อบัญชี (เลือกได้ 2 วิธี):</b> คอลัมน์ซ้ายสุดของแต่ละบัญชี — <b>📎 ชนไฟล์ Excel/CSV</b> หรือ <b>✏️ กรอกจำนวนเงินเอง + ระบุที่มา</b> (เก็บยอดแยกต่อปี พ.ศ. · สลับปีแล้วกรอกของปีนั้นได้) · <b>ยอดตามไฟล์ = เซลล์ A1 ของชีตที่ชื่อตรงกับ “ปีที่เลือก” (พ.ศ.)</b> — เลือกปี '+(+_fsY1+543)+' ระบบจะอ่าน A1 ของชีตชื่อ “'+(+_fsY1+543)+'” · เปลี่ยนปีแล้วยอดจะสลับตามชีตของปีนั้นให้อัตโนมัติ · <b class="fsnosheet-warn">ยังไม่มีชีตของปีที่เลือก → Showing “No sheet data !” (เตือนสีแดง)</b> · ตรงกับ Ending Showing <span class="fsrctick">✓</span> · ต่างแสดงจำนวนผลต่าง (ไฟล์ − TB). · Ending shown in <b>natural sign</b>. · <b>กรอง/เรียงแบบ Excel:</b> กดปุ่ม ▼ ที่หัวคอลัมน์. · <b>☁ สำรองอัตโนมัติ:</b> ไฟล์แนบทุกบัญชีถูกสำรองขึ้นคลาวด์ (แยกจากข้อมูลหลัก · ประหยัดโควตา · เปิด/กู้คืนข้ามเครื่องได้).'+(_fsIsInterim()?' <b>งบเดือน:</b> ยอดคำนวณถึงสิ้นเดือน '+_FS_MON_TH[_fsEndM-1]+' '+(+_fsY1+543)+'.':'')+'</p>';
 }
+
+/* ===== v10.95: Trial Balance — Export Excel (ExcelJS styled · SheetJS fallback) + PDF (print) ===== */
+function _fsXn(v){ v=+v||0; return Math.round(v*100)/100; }
+function _fsTbExportModel(){
+  var arr=(typeof _fsTbRows==='function')?_fsTbRows():[];
+  var fsLbl={},cfLbl={};   /* group labels — read the currently-rendered selects, matched by data-code */
+  try{ var ss=document.querySelectorAll('table.fstb select.fstbgrpsel'); for(var i=0;i<ss.length;i++){ var s=ss[i],c=s.getAttribute('data-code'); if(c){ var o=s.options[s.selectedIndex]; fsLbl[c]=o?(''+o.textContent).replace(/\s+/g,' ').trim():''; } } }catch(e){}
+  try{ var cs=document.querySelectorAll('table.fstb select.cfdmovesel'); for(var j=0;j<cs.length;j++){ var s2=cs[j],c2=s2.getAttribute('data-code'); if(c2){ var o2=s2.options[s2.selectedIndex]; var t2=o2?(''+o2.textContent).replace(/\s+/g,' ').trim():''; if(/อัตโนมัติ/.test(t2))t2='(อัตโนมัติ)'; cfLbl[c2]=t2; } } }catch(e){}
+  var IDX=(typeof _fsMapIdx==='function')?_fsMapIdx():{};
+  var rows=[],T={open:0,deb:0,cred:0,end:0};
+  for(var k=0;k<arr.length;k++){ var x=arr[k];
+    var op=(typeof _fsWpTbOpenVal==='function')?_fsWpTbOpenVal(x):(+x.openNat||0);
+    var en=(typeof _fsWpTbEndVal==='function')?_fsWpTbEndVal(x):(+x.nat||0);
+    var dr=+x.yd||0, cr=+x.yc||0;
+    T.open+=op;T.deb+=dr;T.cred+=cr;T.end+=en;
+    rows.push({seq:k+1, idx:(IDX[x.code]||''), code:x.code, name:x.name||'', fsgrp:(fsLbl[x.code]||''), cfgrp:(cfLbl[x.code]||''), open:op, debit:dr, credit:cr, ending:en}); }
+  var co=(typeof _fsTplCo==='function')?_fsTplCo():'บริษัท';
+  var y1BE=((typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):'');
+  var per; try{ per=(typeof _fsIsInterim==='function'&&_fsIsInterim())?('ม.ค.–'+_FS_MON_TH[_fsEndM-1]+' '+y1BE):((typeof _fsYear!=='undefined'&&_fsYear==='ALL')?'สะสมทุกปี':('เต็มปี '+y1BE)); }catch(e){ per=('ปี '+y1BE); }
+  var filtered=(typeof _fsTbHasFil==='function')&&_fsTbHasFil();
+  var dstr=''; try{dstr=new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});}catch(e){}
+  return {rows:rows, T:T, co:co, yBE:y1BE, per:per, filtered:filtered, nAll:((typeof _fsTB!=='undefined'&&_fsTB)?_fsTB.length:rows.length), dstr:dstr, bal:Math.abs(T.deb-T.cred)<0.5};
+}
+function _fsTbExportXlsxPlain(M,fname){ if(typeof XLSX==='undefined')throw new Error('ไม่มีไลบรารี Excel (SheetJS)');
+  var aoa=[['งบทดลอง · Trial Balance — '+M.co],['ปีบัญชี '+M.yBE+' · '+M.per+' · '+M.rows.length+' บัญชี'+(M.filtered?' (กรองแล้ว)':'')+' · จัดทำ '+M.dstr],[],
+    ['#','ดัชนี','รหัสบัญชี','ชื่อบัญชี','จัดกลุ่มงบการเงิน','จัดกลุ่มกระแสเงินสด','ยอดยกมา','เดบิต','เครดิต','ยอดคงเหลือ']];
+  for(var i=0;i<M.rows.length;i++){ var x=M.rows[i]; aoa.push([x.seq,x.idx,x.code,x.name,x.fsgrp,x.cfgrp,_fsXn(x.open),_fsXn(x.debit),_fsXn(x.credit),_fsXn(x.ending)]); }
+  aoa.push([]); aoa.push(['','','','รวมทั้งหมด · '+M.rows.length+' บัญชี'+(M.filtered?' (กรองแล้ว)':''),'','',_fsXn(M.T.open),_fsXn(M.T.deb),_fsXn(M.T.cred),_fsXn(M.T.end)]);
+  aoa.push([]); aoa.push([M.bal?'⚖ เดบิต = เครดิต (งบทดลองดุล)':'⚖ เดบิต − เครดิต = '+_fsXn(M.T.deb-M.T.cred)+' (ไม่ดุล)']);
+  var ws=XLSX.utils.aoa_to_sheet(aoa); ws['!cols']=[{wch:5},{wch:6},{wch:14},{wch:42},{wch:26},{wch:24},{wch:17},{wch:17},{wch:17},{wch:18}];
+  var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'งบทดลอง'); XLSX.writeFile(wb,fname); }
+function _fsTbExportXlsx(btn){
+  var M=_fsTbExportModel(); if(!M.rows.length){ alert('ไม่มีบัญชีสำหรับส่งออก'); return; }
+  var fname='TrialBalance_'+(M.yBE||'')+(M.filtered?'_filtered':'')+'.xlsx';
+  var old=btn?btn.textContent:''; if(btn){btn.disabled=true;btn.textContent='กำลังเตรียม Excel…';}
+  var doPlain=function(){ try{ _fsTbExportXlsxPlain(M,fname); }catch(e){ alert('ส่งออก Excel ไม่สำเร็จ: '+((e&&e.message)||e)); } if(btn){btn.disabled=false;btn.textContent=old;} };
+  if(typeof loadExcelJS!=='function'){ doPlain(); return; }
+  loadExcelJS().then(function(ExcelJS){
+    var NF='#,##0.00;[Red]-#,##0.00';
+    var wb=new ExcelJS.Workbook(); wb.creator='Grandline · GLI';
+    function st(c,o){o=o||{};c.font={name:o.font||'Tahoma',size:o.sz||10,bold:!!o.b,color:{argb:o.fc||CLR.ink}};
+      if(o.fill)c.fill={type:'pattern',pattern:'solid',fgColor:{argb:o.fill}};
+      c.alignment={vertical:'middle',horizontal:o.al||'left',wrapText:!!o.wrap};
+      if(o.nf)c.numFmt=o.nf;
+      if(o.bd)c.border={top:{style:'thin',color:{argb:CLR.line}},left:{style:'thin',color:{argb:CLR.line}},bottom:{style:'thin',color:{argb:CLR.line}},right:{style:'thin',color:{argb:CLR.line}}};}
+    var S=wb.addWorksheet('งบทดลอง',{views:[{showGridLines:false}]});
+    S.columns=[{width:3},{width:5},{width:6},{width:14},{width:42},{width:26},{width:24},{width:17},{width:17},{width:17},{width:18}];
+    var q=2;
+    S.mergeCells('B'+q+':K'+q); st(S.getCell('B'+q),{sz:15,b:true,fc:CLR.white,fill:CLR.brand,al:'center'}); S.getCell('B'+q).value='งบทดลอง · Trial Balance — '+M.co; S.getRow(q).height=28; q++;
+    S.mergeCells('B'+q+':K'+q); st(S.getCell('B'+q),{sz:10,fc:CLR.white,fill:CLR.brandD,al:'center'}); S.getCell('B'+q).value='ปีบัญชี '+M.yBE+' · '+M.per+' · '+M.rows.length+' บัญชี'+(M.filtered?' (กรองแล้ว)':'')+' · จัดทำ '+M.dstr; S.getRow(q).height=18; q+=2;
+    var hdr=[['#','c'],['ดัชนี','c'],['รหัสบัญชี','c'],['ชื่อบัญชี','l'],['จัดกลุ่มงบการเงิน','l'],['จัดกลุ่มกระแสเงินสด','l'],['ยอดยกมา','r'],['เดบิต','r'],['เครดิต','r'],['ยอดคงเหลือ','r']];
+    for(var c=0;c<hdr.length;c++){ var hc=S.getCell(q,c+2); st(hc,{sz:9.5,b:true,fc:CLR.white,fill:CLR.brandD,al:(hdr[c][1]==='r'?'right':(hdr[c][1]==='c'?'center':'left')),bd:1,wrap:true}); hc.value=hdr[c][0]; }
+    S.getRow(q).height=22; q++; var firstRow=q;
+    for(var r=0;r<M.rows.length;r++){ var x=M.rows[r]; var zb=(r%2===1)?CLR.zebra:null;
+      st(S.getCell(q,2),{sz:9,al:'center',bd:1,fill:zb,fc:'FF8A97A0'}); S.getCell(q,2).value=x.seq;
+      st(S.getCell(q,3),{sz:9,al:'center',b:true,bd:1,fill:zb,fc:CLR.blue}); S.getCell(q,3).value=x.idx;
+      st(S.getCell(q,4),{sz:9,al:'center',b:true,bd:1,fill:zb,fc:CLR.brandD,font:'Consolas'}); S.getCell(q,4).value=x.code;
+      st(S.getCell(q,5),{sz:9,bd:1,fill:zb}); S.getCell(q,5).value=x.name;
+      st(S.getCell(q,6),{sz:8.5,bd:1,fill:zb,fc:'FF4B5563'}); S.getCell(q,6).value=x.fsgrp;
+      st(S.getCell(q,7),{sz:8.5,bd:1,fill:zb,fc:'FF4B5563'}); S.getCell(q,7).value=x.cfgrp;
+      st(S.getCell(q,8),{sz:9,al:'right',nf:NF,bd:1,fill:zb,fc:x.open<0?'FFB42318':CLR.ink}); S.getCell(q,8).value=x.open;
+      st(S.getCell(q,9),{sz:9,al:'right',nf:NF,bd:1,fill:zb,fc:x.debit<0?'FFB42318':CLR.ink}); S.getCell(q,9).value=x.debit;
+      st(S.getCell(q,10),{sz:9,al:'right',nf:NF,bd:1,fill:zb,fc:x.credit<0?'FFB42318':CLR.ink}); S.getCell(q,10).value=x.credit;
+      st(S.getCell(q,11),{sz:9,b:true,al:'right',nf:NF,bd:1,fill:zb,fc:x.ending<0?'FFB42318':CLR.brandD}); S.getCell(q,11).value=x.ending;
+      q++; }
+    S.mergeCells('B'+q+':G'+q); st(S.getCell(q,2),{sz:10,b:true,fc:CLR.white,fill:CLR.brand}); S.getCell(q,2).value='รวมทั้งหมด · '+M.rows.length+' บัญชี'+(M.filtered?' (กรองแล้ว)':'');
+    var tt=[M.T.open,M.T.deb,M.T.cred,M.T.end];
+    for(var tc=0;tc<4;tc++){ st(S.getCell(q,tc+8),{sz:10,b:true,al:'right',nf:NF,fc:CLR.white,fill:CLR.brand}); S.getCell(q,tc+8).value=tt[tc]; }
+    S.getRow(q).height=20; q+=2;
+    S.mergeCells('B'+q+':K'+q); st(S.getCell(q,2),{sz:9,b:true,fc:M.bal?'FF116A3E':'FFB42318'}); S.getCell(q,2).value=(M.bal?'⚖ เดบิต = เครดิต (งบทดลองดุล)':'⚖ เดบิต − เครดิต = '+_fsXn(M.T.deb-M.T.cred)+' (ไม่ดุล)'); q++;
+    try{ S.views=[{showGridLines:false,state:'frozen',ySplit:firstRow-1}]; }catch(e){}
+    wb.xlsx.writeBuffer().then(function(buf){ _cfdDL(buf,fname); if(btn){btn.disabled=false;btn.textContent=old;} if(typeof gliLog==='function'){try{gliLog('ส่งออกงบทดลอง (Excel)',M.rows.length+' บัญชี');}catch(e){}} })
+      .catch(function(){ if(btn){btn.disabled=false;btn.textContent=old;} doPlain(); });
+  }).catch(function(){ doPlain(); });
+}
+function _fsTbPrintPdf(){ try{
+  var M=_fsTbExportModel(); if(!M.rows.length){ alert('ไม่มีบัญชีสำหรับพิมพ์'); return; }
+  var E=function(s){return (''+(s==null?'':s)).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];});};
+  var fn=function(v){ v=+v||0; var s=Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); return v<-0.005?('('+s+')'):(v>0.005?s:'–'); };
+  var kpi=function(lab,en,val,col){ return '<div class="k" style="border-top-color:'+col+'"><div class="kl">'+lab+'<span>'+en+'</span></div><div class="kv" style="color:'+col+'">'+val+'</div></div>'; };
+  var kpis='<div class="ks">'
+    +kpi('ยอดยกมา','OPENING','฿ '+fn(M.T.open),'#0891B2')
+    +kpi('เดบิต','DEBIT','฿ '+fn(M.T.deb),'#15803D')
+    +kpi('เครดิต','CREDIT','฿ '+fn(M.T.cred),'#B45309')
+    +kpi('ยอดคงเหลือ','ENDING','฿ '+fn(M.T.end),'#0A463E')
+    +'<div class="k bal '+(M.bal?'ok':'bad')+'"><div class="kl">การดุล<span>BALANCE</span></div><div class="kv">'+(M.bal?'⚖ ดุล':'⚖ ต่าง '+fn(M.T.deb-M.T.cred))+'</div></div>'
+    +'</div>';
+  var trs=''; for(var j=0;j<M.rows.length;j++){ var x=M.rows[j];
+    trs+='<tr><td class="c">'+x.seq+'</td><td class="c idx">'+(x.idx?('<b>'+E(x.idx)+'</b>'):'')+'</td>'
+      +'<td class="c code">'+E(x.code)+'</td><td class="l">'+E(x.name)+'</td>'
+      +'<td class="l g">'+E(x.fsgrp)+'</td><td class="l g">'+E(x.cfgrp)+'</td>'
+      +'<td class="r">'+fn(x.open)+'</td><td class="r">'+fn(x.debit)+'</td><td class="r">'+fn(x.credit)+'</td><td class="r b">'+fn(x.ending)+'</td></tr>'; }
+  var foot='<tr class="tot"><td colspan="6" class="l">รวมทั้งหมด '+M.rows.length+' บัญชี'+(M.filtered?' (ตามตัวกรอง)':'')+'</td>'
+    +'<td class="r">'+fn(M.T.open)+'</td><td class="r">'+fn(M.T.deb)+'</td><td class="r">'+fn(M.T.cred)+'</td><td class="r">'+fn(M.T.end)+'</td></tr>';
+  var CSS='*{margin:0;padding:0;box-sizing:border-box}html,body{background:#EEF2F1;font-family:"Sarabun","Inter",Tahoma,"Segoe UI",system-ui,sans-serif;color:#1f2937;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+    +'.sheet{max-width:1240px;margin:0 auto;padding:18px}'
+    +'.toolbar{position:fixed;top:10px;right:12px;background:#0E5C52;color:#fff;padding:8px 12px;border-radius:9px;font-size:13px;z-index:9;box-shadow:0 4px 14px rgba(0,0,0,.2)}.toolbar button{font:inherit;border:none;background:#fff;color:#0E5C52;font-weight:800;border-radius:6px;padding:5px 11px;cursor:pointer;margin-left:8px}'
+    +'.phead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;background:linear-gradient(135deg,#0E5C52,#0A463E);color:#fff;padding:18px 24px;border-radius:15px;box-shadow:0 8px 24px -10px rgba(10,70,62,.5)}'
+    +'.ph-title{font-size:23px;font-weight:800}.ph-sub{font-size:10.5px;font-weight:600;letter-spacing:.16em;color:#9FE6D8;margin-top:3px}'
+    +'.ph-r{text-align:right}.ph-co{font-size:15px;font-weight:800;color:#FFE9A8}.ph-yr{font-size:12px;color:#D7EFEA;margin-top:3px}.ph-dt{font-size:11px;color:#A9D6CD;margin-top:2px}'
+    +'.ks{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:13px}'
+    +'.k{background:#fff;border:1px solid #E3E8E6;border-top:4px solid #0E5C52;border-radius:12px;padding:10px 12px;box-shadow:0 2px 8px rgba(17,24,39,.04)}'
+    +'.k.bal.ok{border-top-color:#15803D}.k.bal.bad{border-top-color:#B42318}.k.bal .kv{font-size:14px;color:#15803D}.k.bal.bad .kv{color:#B42318}'
+    +'.kl{font-size:11px;font-weight:700;color:#374151}.kl span{display:block;font-size:8px;color:#94a3b8;letter-spacing:.06em;font-weight:600}'
+    +'.kv{font-size:16px;font-weight:800;margin-top:5px;font-variant-numeric:tabular-nums;white-space:nowrap}'
+    +'table{width:100%;border-collapse:collapse;margin-top:14px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(17,24,39,.05)}'
+    +'thead th{background:linear-gradient(180deg,#14776A,#0E5C52);color:#fff;font-size:9.5px;font-weight:700;padding:8px 7px;text-align:right;white-space:nowrap;line-height:1.2}'
+    +'thead th.l{text-align:left}thead th.c{text-align:center}'
+    +'tbody td{padding:4.5px 7px;border-bottom:1px solid #EEF2F1;font-size:9.5px;text-align:right;font-variant-numeric:tabular-nums;vertical-align:middle}'
+    +'tbody td.l{text-align:left}tbody td.c{text-align:center}tbody tr:nth-child(even) td{background:#FAFBFA}'
+    +'td.code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:700;color:#0A463E}td.idx b{color:#1D5FAE}td.g{font-size:8.5px;color:#5b6b7a;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+    +'td.l{max-width:280px}td.b{font-weight:800;color:#0A463E}'
+    +'tfoot .tot td{background:#0A463E;color:#fff;font-weight:800;font-size:10.5px;padding:8px 7px;border:none}tfoot .tot td.l{color:#fff;text-align:left}'
+    +'.pfoot{margin-top:12px;font-size:9.5px;color:#8a9490;text-align:center;border-top:1px solid #E3E8E6;padding-top:9px;line-height:1.5}'
+    +'@page{size:A4 landscape;margin:8mm}tr{break-inside:avoid;page-break-inside:avoid}thead{display:table-header-group}tfoot{display:table-footer-group}'
+    +'@media print{html,body{background:#fff}.sheet{max-width:none;padding:0}.toolbar{display:none}.phead{border-radius:0}}';
+  var head='<thead><tr><th class="c">#</th><th class="c">ดัชนี</th><th class="c">รหัสบัญชี</th><th class="l">ชื่อบัญชี</th>'
+    +'<th class="l">จัดกลุ่มงบการเงิน</th><th class="l">จัดกลุ่มกระแสเงินสด</th><th>ยอดยกมา</th><th>เดบิต</th><th>เครดิต</th><th>ยอดคงเหลือ</th></tr></thead>';
+  var html='<!DOCTYPE html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>งบทดลอง — '+E(M.co)+'</title>'
+    +'<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet"><style>'+CSS+'</style></head><body>'
+    +'<div class="toolbar noprint">🖨 บันทึกเป็น PDF จากหน้าต่างพิมพ์ <button onclick="window.print()">พิมพ์ / PDF</button></div>'
+    +'<div class="sheet"><header class="phead"><div><div class="ph-title">งบทดลอง · Trial Balance</div><div class="ph-sub">TRIAL BALANCE · ยอดยกมา · เดบิต · เครดิต · ยอดคงเหลือ</div></div>'
+    +'<div class="ph-r"><div class="ph-co">'+E(M.co)+'</div><div class="ph-yr">ปีบัญชี '+E(M.yBE+'')+' · '+E(M.per)+(M.filtered?' · (ตามตัวกรอง)':'')+'</div><div class="ph-dt">จัดทำ '+E(M.dstr)+'</div></div></header>'
+    +kpis+'<table>'+head+'<tbody>'+trs+'</tbody><tfoot>'+foot+'</tfoot></table>'
+    +'<footer class="pfoot">จัดทำโดยระบบ Grandline Accounting Suite · งบทดลอง (Trial Balance)'+(M.filtered?' · ตามตัวกรองที่ใช้อยู่':'')+' · หน่วย: บาท (THB) · ยอดคงเหลือแสดงตามเครื่องหมายธรรมชาติ (natural sign)</footer>'
+    +'</div><scr'+'ipt>window.onload=function(){setTimeout(function(){try{window.focus();window.print();}catch(e){}},500);};</scr'+'ipt></body></html>';
+  var w=window.open('','_blank'); if(!w){ alert('เบราว์เซอร์บล็อกป๊อปอัป (pop-up) — โปรดอนุญาตแล้วลองใหม่'); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+  if(typeof gliLog==='function'){try{gliLog('พิมพ์งบทดลอง (PDF)',M.rows.length+' บัญชี');}catch(e){}}
+}catch(e){ alert('สร้าง PDF ไม่สำเร็จ: '+((e&&e.message)||e)); if(window.console)console.error('fsTbPrintPdf',e); } }
 
 /* ===== v9.96: ADJUSTING-ENTRIES WORKING PAPER (modal) — สร้าง/แก้รายการปรับปรุงคู่บัญชี ===== */
 var _fsAdjEsc=null,_fsAdjDownBg=false,_fsAdjSaveT=null,_fsAdjTbT=null;
@@ -20135,6 +20272,8 @@ function _fsBind(w){ if(w._b)return; w._b=1;
     var clet=t.closest?t.closest('#cfdLnEditToggle'):null; if(clet){var _ok=_cfdOpenLineKeys();_cfdLnEdit=!_cfdLnEdit;if(typeof _cfdLnAddClose==='function')_cfdLnAddClose();_fsRenderBody();if(!_cfdLnEdit){try{_cfdReopenLines(_ok);}catch(_re){}}return;}   /* v9.126: สลับโหมดแก้ไข/เพิ่มบรรทัดงบกระแสเงินสด (ปุ่มอยู่ในตัวงบ → re-render เฉพาะ body) */
     if(_fsManEdit&&t.closest&&t.closest('[data-fsmanamt],[data-fsmanlbl]'))return; /* v9.98: คลิกในเซลล์แก้งบเอง — ไม่ต้อง drill */
     var ex=t.closest?t.closest('#fsExport'):null; if(ex){_fsExport();return;}
+    var tbx=t.closest?t.closest('.fstbxlsb'):null; if(tbx){_fsTbExportXlsx(tbx);return;}   /* v10.95: TB → Excel */
+    var tbp=t.closest?t.closest('.fstbpdfb'):null; if(tbp){_fsTbPrintPdf();return;}          /* v10.95: TB → PDF */
     var rpx=t.closest?t.closest('#fsRatioPdf'):null; if(rpx){_fsRatioPdf();return;}
     var pex=t.closest?t.closest('#fsPrint'):null; if(pex){_fsPrint();return;}
     var rclr=t.closest?t.closest('#fsReconClear'):null; if(rclr){_fsReconClear();_fsRenderBody();return;}
