@@ -21717,7 +21717,7 @@ function _fsIssRenderCodes(dcode,label){ var p=_fsIssPanelEnsure(); p.classList.
     if(Math.abs(resid)>5){   /* มีส่วนแบ่งงบร่วมค้า/รายการรวมงบจริง → แสดง 3 บรรทัดกระทบยอด */
       body+='<div class="fsiss-foot">'+
         '<div class="fsiss-frow"><span class="fl">รวมยอดตามบัญชี (ตรวจสอบแล้ว · Per Audit)</span><span class="fr">'+_fsIssN(subtotal)+'</span></div>'+
-        '<div class="fsiss-frow adj"><span class="fl">＋ ผลต่างการแสดงในงบ · ส่วนแบ่งงบร่วมค้า / จัดประเภทรายการใหม่<small>แสดงในงบ ไม่ได้อยู่ใน GL ของบริษัท (ส่วนแบ่งร่วมค้า · รวมงบ · จัดประเภทใหม่)</small></span><span class="fr">'+_fsIssN(resid)+'</span></div>'+
+        '<div class="fsiss-frow adj fsiss-srcbrk" data-srcbrk="1" role="button" tabindex="0" title="คลิกเพื่อดูรายงานที่มาของผลต่าง — ส่วนแบ่งร่วมค้า · รวมงบ · ตัดรายการ · จัดประเภทใหม่"><span class="fl">＋ ผลต่างการแสดงในงบ · ส่วนแบ่งงบร่วมค้า / จัดประเภทรายการใหม่<small>👉 คลิกดูรายงานที่มา · แสดงในงบ ไม่ได้อยู่ใน GL ของบริษัท</small></span><span class="fr">'+_fsIssN(resid)+' <span class="fsiss-brkcue">▸</span></span></div>'+
         '<div class="fsiss-frow tot"><span class="fl">＝ ยอดตามงบการเงิน (บรรทัดนี้)</span><span class="fr">'+_fsIssN(issued)+'</span></div>'+
       '</div>';
     } else {                 /* ยอดบัญชีตรงกับงบพอดี (ต่างเพียงการปัดเศษ) */
@@ -21725,8 +21725,187 @@ function _fsIssRenderCodes(dcode,label){ var p=_fsIssPanelEnsure(); p.classList.
     }
   }
   p.innerHTML=_fsIssHeadHTML(label||'','รหัสกลุ่มงบ '+_fsWpEsc(dcode)+' · '+codes.length+' บัญชี · คลิกรหัสเพื่อดู GL + คู่บัญชี (Dr/Cr)')+'<div class="fsiss-pb">'+body+'</div>'; }
+
+/* ============================================================================
+   ที่มาของผลต่างการแสดงในงบ (Presentation bridge report)
+   ----------------------------------------------------------------------------
+   The "ผลต่างการแสดงในงบ" line in the account drill (issued FS line − sum of the
+   company's own GL accounts) is not a plug — it is fully explained by the
+   working-paper articulation stored per FS line in GLI_FS2025.bs / .pl:
+       Per Audit (pa) → + ส่วนแบ่งร่วมค้า (jo) → + รวมงบ/ส่วนได้เสีย (ecm)
+       = Combined (comb) → − ตัดรายการระหว่างกัน (eN, +eP)
+       = Separate (sep)  → + จัดประเภทรายการใหม่ (ฉบับปรับปรุง = issued − sep)
+       = ยอดตามงบการเงิน (issued, จาก GLI_ISSUED)
+   This report surfaces that bridge for the clicked line and, below it, a full
+   overview of every FS line carrying such a difference — with Excel export. */
+var _fsSrcBrkSel=null,_fsSrcBrkLabel='';
+/* find the working-paper FS line (with jo/ecm/elim/sep columns) for a d-code */
+function _fsIssWpLine(dcode){
+  try{ if(typeof GLI_FS2025==='undefined'||!GLI_FS2025)return null; var S=[GLI_FS2025.bs,GLI_FS2025.pl];
+    for(var s=0;s<S.length;s++){ var rows=S[s]||[]; for(var i=0;i<rows.length;i++){ var r=rows[i]; if(r&&r.t==='line'&&r.d===dcode)return r; } } }catch(e){}
+  return null;
+}
+/* breakdown model for one FS line — every figure in natural (display) sign */
+function _fsSrcBrkLineModel(dcode,fallbackLabel){
+  var L=_fsIssWpLine(dcode); var issued=_fsIssLineVal(dcode);
+  if(!L){ var iv=(issued==null?0:issued);
+    return {d:dcode,th:fallbackLabel||dcode,en:'',pa:iv,jo:0,ecm:0,comb:iv,eN:0,eP:0,sep:iv,reclass:0,issued:iv,found:false,grp:'bs'}; }
+  var pa=+L.pa||0,jo=+L.jo||0,ecm=+L.ecm||0,comb=+L.comb||0,eN=+L.eN||0,eP=+L.eP||0,sep=+L.sep||0;
+  var iss=(issued==null?sep:issued);
+  /* Use the stored comb & sep as authoritative anchors and derive the net
+     elimination step as (sep − comb). eN/eP are raw elimination amounts whose
+     sign convention flips between assets and liabilities, so decomposing them
+     directly is unreliable — the net (sep − comb) always ties. */
+  return {d:dcode,th:L.th||fallbackLabel||dcode,en:L.en||'',pa:pa,jo:jo,ecm:ecm,comb:comb,eN:eN,eP:eP,elim:(sep-comb),sep:sep,reclass:(iss-sep),issued:iss,found:true};
+}
+/* all FS lines that carry a presentation difference (jo/ecm/elim/reclass ≠ 0) */
+function _fsSrcBrkAllRows(){
+  var out=[]; if(typeof GLI_FS2025==='undefined'||!GLI_FS2025)return out;
+  var S=[['bs',GLI_FS2025.bs],['pl',GLI_FS2025.pl]];
+  for(var s=0;s<S.length;s++){ var rows=S[s][1]||[];
+    for(var i=0;i<rows.length;i++){ var r=rows[i]; if(!r||r.t!=='line'||!r.d)continue;
+      var m=_fsSrcBrkLineModel(r.d,r.th); m.grp=S[s][0];
+      var diff=Math.abs(m.jo)+Math.abs(m.ecm)+Math.abs(m.elim)+Math.abs(m.reclass);
+      if(diff>0.5)out.push(m);
+    } }
+  return out;
+}
+function _fsSrcBrkEnsure(){
+  var m=document.getElementById('fsSrcModal');
+  if(!m){ m=document.createElement('div'); m.id='fsSrcModal'; m.className='pmodal'; m.hidden=true;
+    m.innerHTML='<div class="pmodal-bd"></div><div class="pmodal-card fssrc-card"><button class="pmodal-x" aria-label="Close">×</button><div class="pmodal-body" id="fsSrcBody"></div></div>';
+    document.body.appendChild(m);
+    m.querySelector('.pmodal-bd').addEventListener('click',_fsSrcBrkClose);
+    m.querySelector('.pmodal-x').addEventListener('click',_fsSrcBrkClose);
+    m.addEventListener('click',function(e){ var t=e.target;
+      if(t.closest&&t.closest('.fssrc-xls')){ try{_fsSrcBrkExport();}catch(err){alert('ส่งออก Excel ไม่สำเร็จ: '+((err&&err.message)||err));} return; }
+      var rr=t.closest&&t.closest('.fssrc-orow[data-d]'); if(rr){ _fsSrcBrkSel=rr.getAttribute('data-d'); _fsSrcBrkLabel=''; _fsSrcBrkRender(); return; } });
+  }
+  return m;
+}
+function _fsSrcBrkOpen(dcode,label){ if(typeof GLI_FS2025==='undefined'||!GLI_FS2025){ alert('ยังไม่มีข้อมูลกระดาษทำการ (WP)'); return; }
+  _fsSrcBrkCSS(); var m=_fsSrcBrkEnsure(); _fsSrcBrkSel=dcode||null; _fsSrcBrkLabel=label||''; m.hidden=false;
+  try{document.body.style.overflow='hidden';}catch(e){} _fsSrcBrkRender(); }
+function _fsSrcBrkClose(){ var m=document.getElementById('fsSrcModal'); if(m)m.hidden=true; try{document.body.style.overflow='';}catch(e){} }
+function _fsSrcBrkRender(){
+  var host=document.getElementById('fsSrcBody'); if(!host)return;
+  var rows=_fsSrcBrkAllRows(); var sel=_fsSrcBrkSel;
+  var selM=sel?_fsSrcBrkLineModel(sel,_fsSrcBrkLabel):null;
+  /* -- Section A: the selected line's waterfall -- */
+  var A='';
+  if(selM){
+    var steps=[]; var jj=Math.abs(selM.jo)>0.5,ee=Math.abs(selM.ecm)>0.5,el=Math.abs(selM.elim)>0.5,rc=Math.abs(selM.reclass)>0.5;
+    steps.push({t:'ยอดตามบัญชี · ตรวจสอบแล้ว (Per Audit)',s:'ผลรวมของรหัสบัญชีในบริษัท',v:selM.pa,cls:'base'});
+    if(jj)steps.push({t:'＋ ส่วนแบ่งในกิจการร่วมค้า / งานร่วมกัน (JO)',s:'ส่วนแบ่งตามสัดส่วน นำเข้างบเฉพาะกิจการ',v:selM.jo,cls:'add'});
+    if(ee)steps.push({t:'＋ ปรับปรุงการรวมงบ · วิธีส่วนได้เสีย (ECM)',s:'รายการรวม/ปรับปรุงเงินลงทุนตามวิธีส่วนได้เสีย',v:selM.ecm,cls:'add'});
+    if(jj||ee)steps.push({t:'รวมก่อนตัดรายการ (Combined)',v:selM.comb,cls:'sub'});
+    if(el)steps.push({t:'ตัดรายการระหว่างกัน (Elimination)',s:'ตัดยอดคงค้าง/รายการระหว่างกิจการที่เกี่ยวข้อง (ยอดสุทธิ)',v:selM.elim,cls:'add'});
+    if(el&&rc)steps.push({t:'ยอดตามงบเฉพาะกิจการ (Separate)',v:selM.sep,cls:'sub'});
+    if(rc)steps.push({t:'＋ จัดประเภทรายการใหม่ · ฉบับปรับปรุง',s:'ปรับการแสดง/จัดประเภทในงบฉบับที่ออก (V2)',v:selM.reclass,cls:'add'});
+    steps.push({t:'＝ ยอดตามงบการเงิน (บรรทัดนี้)',v:selM.issued,cls:'tot'});
+    var sr=steps.map(function(st){ return '<div class="fssrc-srow '+(st.cls||'')+'"><span class="fssrc-sl">'+_fsWpEsc(st.t)+(st.s?'<small>'+_fsWpEsc(st.s)+'</small>':'')+'</span><span class="fssrc-sv">'+_fsIssN(st.v)+'</span></div>'; }).join('');
+    A='<div class="fssrc-sec"><div class="fssrc-sec-h"><span class="fssrc-dc">'+_fsWpEsc(selM.d)+'</span> ที่มาของบรรทัด · <b>'+_fsWpEsc(selM.th)+'</b>'+(selM.en?'<span class="fssrc-en">'+_fsWpEsc(selM.en)+'</span>':'')+'</div>'+
+      '<div class="fssrc-steps">'+sr+'</div>'+
+      '<div class="fssrc-note2">ผลต่างจาก “ยอดตามบัญชี” ที่เห็นในกล่องกระทบยอด = <b>'+_fsIssN(selM.issued-selM.pa)+'</b> — ประกอบขึ้นจากรายการด้านบนทั้งหมด</div></div>';
+  } else {
+    A='<div class="fssrc-sec"><div class="fssrc-note2">คลิกบรรทัดในตารางด้านล่างเพื่อดูที่มาแบบละเอียดทีละรายการ</div></div>';
+  }
+  /* -- Section B: overview of all lines with a presentation difference -- */
+  var T={pa:0,jo:0,ecm:0,elim:0,reclass:0,issued:0,diff:0};
+  var trs=rows.map(function(m){ var elim=m.elim;
+    T.pa+=m.pa;T.jo+=m.jo;T.ecm+=m.ecm;T.elim+=elim;T.reclass+=m.reclass;T.issued+=m.issued;T.diff+=(m.issued-m.pa);
+    var on=(sel&&m.d===sel)?' fssrc-on':'';
+    return '<tr class="fssrc-orow'+on+'" data-d="'+_fsWpEsc(m.d)+'"><td class="l">'+_fsWpEsc(m.th)+'<small>'+(m.grp==='pl'?'งบกำไรขาดทุน':'งบแสดงฐานะการเงิน')+'</small></td>'+
+      '<td>'+_fsIssN(m.pa)+'</td><td>'+_fsIssN(m.jo)+'</td><td>'+_fsIssN(m.ecm)+'</td><td>'+_fsIssN(elim)+'</td><td>'+_fsIssN(m.reclass)+'</td><td class="hl">'+_fsIssN(m.issued)+'</td><td class="df">'+_fsIssN(m.issued-m.pa)+'</td></tr>'; }).join('');
+  var totrow='<tr class="fssrc-ttot"><td class="l">รวมทั้งหมด ('+rows.length+' บรรทัด)</td><td>'+_fsIssN(T.pa)+'</td><td>'+_fsIssN(T.jo)+'</td><td>'+_fsIssN(T.ecm)+'</td><td>'+_fsIssN(T.elim)+'</td><td>'+_fsIssN(T.reclass)+'</td><td class="hl">'+_fsIssN(T.issued)+'</td><td class="df">'+_fsIssN(T.diff)+'</td></tr>';
+  var B='<div class="fssrc-sec"><div class="fssrc-sec-h">ภาพรวมทั้งงบ — ทุกบรรทัดที่มี “ผลต่างการแสดงในงบ” <span class="fssrc-hint">(คลิกแถวเพื่อดูที่มา)</span></div>'+
+    '<div class="fssrc-tw"><table class="fssrc-t"><thead><tr><th class="l">บรรทัดในงบ</th><th>ยอดตามบัญชี<small>Per Audit</small></th><th>ส่วนแบ่งร่วมค้า<small>JO</small></th><th>ปรับรวมงบ<small>ECM</small></th><th>ตัดรายการ<small>Elim</small></th><th>จัดประเภทใหม่<small>ฉบับปรับปรุง</small></th><th>ยอดตามงบ<small>ฉบับที่ออก</small></th><th>ผลต่างรวม</th></tr></thead><tbody>'+trs+totrow+'</tbody></table></div></div>';
+  var head='<div class="fssrc-head"><div class="fssrc-ht"><div class="fssrc-h1">รายงานที่มาของผลต่างการแสดงในงบ</div>'+
+    '<div class="fssrc-h2">Presentation bridge — ยอดตามบัญชี (GL) → ยอดตามงบการเงิน · ปี 2568</div></div>'+
+    '<button class="fssrc-xls" type="button">⤓ Excel</button></div>';
+  var foot='<div class="fssrc-legend"><b>คำอธิบาย</b> · <b>JO</b> ส่วนแบ่งในกิจการร่วมค้า/งานร่วมกันตามสัดส่วน · <b>ECM</b> ปรับปรุงการรวมงบ/เงินลงทุนวิธีส่วนได้เสีย · <b>Elim</b> ตัดรายการระหว่างกิจการที่เกี่ยวข้องกัน · <b>จัดประเภทใหม่</b> การจัดประเภท/ปรับการแสดงในงบฉบับที่ออก (V2) — ทั้งหมดนี้แสดงในงบการเงินแต่ไม่ได้อยู่ใน GL ของบริษัทโดยตรง</div>';
+  host.innerHTML=head+A+B+foot;
+}
+function _fsSrcBrkExport(){
+  if(typeof XLSX==='undefined'||!XLSX){ alert('ไม่พบไลบรารีส่งออก Excel'); return; }
+  var rows=_fsSrcBrkAllRows(); var yr='2568'; var aoa=[];
+  aoa.push(['รายงานที่มาของผลต่างการแสดงในงบการเงิน (Presentation bridge) — ปี '+yr]);
+  aoa.push(['บริษัท แกรนด์ไลน์ อินโนเวชั่น จำกัด']); aoa.push([]);
+  if(_fsSrcBrkSel){ var m=_fsSrcBrkLineModel(_fsSrcBrkSel,_fsSrcBrkLabel);
+    aoa.push(['ที่มาของบรรทัด: '+m.th]);
+    aoa.push(['ยอดตามบัญชี (Per Audit)',m.pa]);
+    aoa.push(['+ ส่วนแบ่งในกิจการร่วมค้า (JO)',m.jo]);
+    aoa.push(['+ ปรับปรุงการรวมงบ / ส่วนได้เสีย (ECM)',m.ecm]);
+    aoa.push(['= รวมก่อนตัดรายการ (Combined)',m.comb]);
+    aoa.push(['- ตัดรายการระหว่างกัน (Elimination, สุทธิ)',m.elim]);
+    aoa.push(['= ยอดตามงบเฉพาะกิจการ (Separate)',m.sep]);
+    aoa.push(['+ จัดประเภทรายการใหม่ (ฉบับปรับปรุง)',m.reclass]);
+    aoa.push(['= ยอดตามงบการเงิน',m.issued]); aoa.push([]); }
+  aoa.push(['ภาพรวมทั้งงบ — ทุกบรรทัดที่มีผลต่างการแสดงในงบ']);
+  aoa.push(['บรรทัดในงบ','งบ','ยอดตามบัญชี (Per Audit)','ส่วนแบ่งร่วมค้า (JO)','ปรับรวมงบ (ECM)','ตัดรายการ (Elim)','จัดประเภทใหม่','ยอดตามงบการเงิน','ผลต่างรวม']);
+  var T={pa:0,jo:0,ecm:0,elim:0,reclass:0,issued:0,diff:0};
+  rows.forEach(function(m){ var elim=m.elim; T.pa+=m.pa;T.jo+=m.jo;T.ecm+=m.ecm;T.elim+=elim;T.reclass+=m.reclass;T.issued+=m.issued;T.diff+=(m.issued-m.pa);
+    aoa.push([m.th,(m.grp==='pl'?'PL':'BS'),m.pa,m.jo,m.ecm,elim,m.reclass,m.issued,(m.issued-m.pa)]); });
+  aoa.push(['รวมทั้งหมด','',T.pa,T.jo,T.ecm,T.elim,T.reclass,T.issued,T.diff]);
+  var ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols']=[{wch:46},{wch:6},{wch:20},{wch:17},{wch:16},{wch:14},{wch:14},{wch:18},{wch:14}];
+  var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'ที่มาผลต่างการแสดงในงบ');
+  XLSX.writeFile(wb,'FS_ที่มาผลต่างการแสดงในงบ_'+yr+'.xlsx');
+}
+function _fsSrcBrkCSS(){ if(document.getElementById('fssrc-css'))return;
+  var css=[
+   "#fsSrcModal{z-index:100120}",
+   ".pmodal-card.fssrc-card{background:#fff;border-radius:18px;max-width:1080px;width:100%;box-shadow:0 30px 80px rgba(8,40,34,.34);padding:0;overflow:hidden;font-family:'Sarabun','Inter',sans-serif;color:#132a25}",
+   ".fssrc-card .pmodal-x{top:14px;right:14px;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.5)}",
+   ".fssrc-head{display:flex;align-items:center;gap:12px;padding:18px 22px;background:linear-gradient(135deg,#0E5C52,#0A463E);color:#fff}",
+   ".fssrc-ht{flex:1;min-width:0}",
+   ".fssrc-h1{font-weight:800;font-size:17px;letter-spacing:.2px}",
+   ".fssrc-h2{font-size:11.5px;color:#bfe3d8;margin-top:3px}",
+   ".fssrc-xls{flex:none;border:0;border-radius:10px;background:#FBBF24;color:#3a2a05;font-weight:800;font-size:13px;padding:9px 16px;cursor:pointer;box-shadow:0 3px 10px rgba(251,191,36,.4);margin-right:34px}",
+   ".fssrc-xls:hover{background:#f2b012}",
+   ".fssrc-sec{padding:16px 22px 4px}",
+   ".fssrc-sec-h{font-weight:800;font-size:13.5px;color:#0A463E;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}",
+   ".fssrc-sec-h b{color:#0E5C52}",
+   ".fssrc-dc{background:#0E5C52;color:#fff;font-size:11px;font-weight:800;border-radius:6px;padding:2px 8px}",
+   ".fssrc-en{font-size:11px;color:#7d8a86;font-weight:500}",
+   ".fssrc-hint,.fssrc-h2 .fssrc-hint{font-size:11px;color:#7d8a86;font-weight:500}",
+   ".fssrc-steps{display:flex;flex-direction:column;gap:4px;max-width:640px}",
+   ".fssrc-srow{display:flex;justify-content:space-between;gap:14px;align-items:baseline;padding:7px 12px;border-radius:9px;background:#f4f8f6;font-size:13px}",
+   ".fssrc-srow .fssrc-sl{color:#37493f;font-weight:600}",
+   ".fssrc-srow .fssrc-sl small{display:block;font-size:10.5px;color:#8a938c;font-weight:400;margin-top:1px}",
+   ".fssrc-srow .fssrc-sv{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:#0A463E}",
+   ".fssrc-srow.base{background:#eef4f1}",
+   ".fssrc-srow.add{background:#FBF6E9}.fssrc-srow.add .fssrc-sl{color:#8A5E12}.fssrc-srow.add .fssrc-sv{color:#8A5E12}",
+   ".fssrc-srow.sub{background:#e3efe9;border:1px dashed #a9cdc0}.fssrc-srow.sub .fssrc-sl{color:#0A463E;font-weight:800}",
+   ".fssrc-srow.tot{background:#0E5C52}.fssrc-srow.tot .fssrc-sl{color:#fff;font-weight:800}.fssrc-srow.tot .fssrc-sv{color:#FBBF24;font-size:14.5px}",
+   ".fssrc-note2{margin-top:9px;font-size:12px;color:#5a7a72;background:#f0f6f3;border-left:3px solid #0E5C52;border-radius:0 8px 8px 0;padding:8px 12px}",
+   ".fssrc-note2 b{color:#0A463E;font-variant-numeric:tabular-nums}",
+   ".fssrc-tw{overflow-x:auto;border:1px solid #dbe8e3;border-radius:12px}",
+   ".fssrc-t{width:100%;border-collapse:collapse;font-size:12px;min-width:820px}",
+   ".fssrc-t thead th{background:#0E5C52;color:#fff;font-weight:700;padding:8px 9px;text-align:right;white-space:nowrap;position:sticky;top:0}",
+   ".fssrc-t thead th small{display:block;font-size:9.5px;color:#bfe3d8;font-weight:500}",
+   ".fssrc-t thead th.l{text-align:left}",
+   ".fssrc-t td{padding:7px 9px;text-align:right;border-top:1px solid #eef3f1;font-variant-numeric:tabular-nums;white-space:nowrap;color:#243b34}",
+   ".fssrc-t td.l{text-align:left;font-weight:600;color:#132a25;white-space:normal;min-width:220px}",
+   ".fssrc-t td.l small{display:block;font-size:10px;color:#9aa39d;font-weight:400}",
+   ".fssrc-t td.hl{font-weight:800;color:#0A463E}",
+   ".fssrc-t td.df{font-weight:700;color:#8A5E12;background:#FBF6E9}",
+   ".fssrc-orow{cursor:pointer;transition:background .12s}",
+   ".fssrc-orow:hover{background:#eef7f3}",
+   ".fssrc-orow.fssrc-on{background:#DBEAFE}",
+   ".fssrc-orow.fssrc-on td{color:#1E3A8A}.fssrc-orow.fssrc-on td.l{box-shadow:inset 3px 0 0 #2563EB}",
+   ".fssrc-ttot td{border-top:2px solid #0E5C52;font-weight:800;background:#f4f8f6;color:#0A463E}",
+   ".fssrc-legend{margin:8px 22px 20px;font-size:11px;line-height:1.7;color:#5a7a72;background:#f6faf8;border:1px solid #e3efe9;border-radius:10px;padding:11px 14px}",
+   ".fssrc-legend b{color:#0A463E}",
+   ".fsiss-srcbrk{cursor:pointer;transition:background .12s,box-shadow .12s}",
+   ".fsiss-srcbrk:hover{background:#F6EBCF;box-shadow:inset 0 0 0 1px #E3C878}",
+   ".fsiss-brkcue{color:#8A5E12;font-weight:800}"
+  ].join('\n');
+  var s=document.createElement('style'); s.id='fssrc-css'; s.textContent=css; document.head.appendChild(s);
+}
 function _fsIssPanelClick(e){ var t=e.target;
   if(t.closest&&t.closest('.fsiss-px')){ _fsIssDrillClose(); return; }
+  if(t.closest&&t.closest('[data-srcbrk]')){ try{ _fsSrcBrkOpen(_fsIssSelDcode,_fsIssSelLabel); }catch(err){ alert('เปิดรายงานที่มาไม่สำเร็จ: '+((err&&err.message)||err)); } return; }
   if(t.closest&&t.closest('.fsiss-xls')){ var _xb=t.closest('.fsiss-xls'); try{ _cfdGroupExportXlsx(_xb); }catch(err){ if(_xb){_xb.disabled=false;} alert('ส่งออก Excel ไม่สำเร็จ: '+((err&&err.message)||err)); } return; }
   if(t.closest&&t.closest('.cfsum-rmk')) return; /* editing a Remark — never toggle the row */
   var sr=t.closest&&t.closest('.cfsum-row'); if(sr){ var sdet=sr.nextElementSibling;
