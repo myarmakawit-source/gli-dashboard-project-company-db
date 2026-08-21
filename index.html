@@ -21250,6 +21250,29 @@ function _fsWpTbAdjTd(x){ var a=_fsWpAdjOf(x.code); var z='<span class="fsadj-z"
    and the Excel / PDF export. Data: window.__GLI_FS2025_ISSUED__ (extracted from
    sheets FS_BS · FS_PL · FS Change). */
 var GLI_ISSUED=(typeof window!=='undefined'&&window.__GLI_FS2025_ISSUED__)?window.__GLI_FS2025_ISSUED__:null;
+/* --- Reissued FS (FS_GLI_2025 V2) — balance-sheet reclassification, ปี 2568 ---
+   The financial statements were reissued (V2). On the Separate balance sheet,
+   5,550,552.46 บาท was reclassified from เงินกู้ยืมระยะยาวจากธนาคาร (non-current)
+   into เจ้าหนี้การค้าและเจ้าหนี้หมุนเวียนอื่น (current); a 1-บาท integer-rounding
+   move on หนี้สินหมุนเวียนอื่น lets the current-liabilities subtotal tie to the sum
+   of its rounded lines. This is a presentation regrouping only — audited account
+   balances and รวมหนี้สิน (1,242,239,457) are unchanged, so the statement still
+   balances. Applied here as a surgical, index-independent override of the issued
+   figures (matched by d-code / prior subtotal value) so the on-screen งบการเงิน view
+   and its Excel/PDF export show V2, without touching the articulated WP model
+   (GLI_FS2025), whose pb→pa→…→sep chain must stay internally consistent. */
+(function _fsApplyIssuedV2(){
+  try{
+    if(!(GLI_ISSUED&&GLI_ISSUED.bs))return;
+    var LINE={ CC:259745441, JJ:11080418, KK:196943892 };  /* detail lines, 2568 (v[0]) by d-code */
+    var SUB ={ 1019326686:1024877238, 222912771:217362219 }; /* subtotals, matched by prior value */
+    GLI_ISSUED.bs.forEach(function(x){
+      if(!x||!x.v||x.v[0]==null)return;
+      if(x.k==='line'&&x.d&&LINE.hasOwnProperty(x.d)){ x.v[0]=LINE[x.d]; }
+      else if(x.k==='sub'){ var o=Math.round(x.v[0]); if(SUB.hasOwnProperty(o)) x.v[0]=SUB[o]; }
+    });
+  }catch(_v2e){}
+})();
 function _fsIssAvail(){ return !!(GLI_ISSUED&&GLI_ISSUED.bs&&GLI_ISSUED.bs.length); }
 function _fsIssN(v){ if(v==null)return '-'; v=Math.round(+v||0); if(v===0)return '-'; var neg=v<0,s=Math.abs(v).toLocaleString('en-US'); return neg?('('+s+')'):s; }
 
@@ -21694,7 +21717,7 @@ function _fsIssRenderCodes(dcode,label){ var p=_fsIssPanelEnsure(); p.classList.
     if(Math.abs(resid)>5){   /* มีส่วนแบ่งงบร่วมค้า/รายการรวมงบจริง → แสดง 3 บรรทัดกระทบยอด */
       body+='<div class="fsiss-foot">'+
         '<div class="fsiss-frow"><span class="fl">รวมยอดตามบัญชี (ตรวจสอบแล้ว · Per Audit)</span><span class="fr">'+_fsIssN(subtotal)+'</span></div>'+
-        '<div class="fsiss-frow adj"><span class="fl">＋ ส่วนแบ่งงบร่วมค้า/กิจการร่วมงาน · รายการรวมงบ<small>แสดงในงบ ไม่ได้อยู่ใน GL ของบริษัท</small></span><span class="fr">'+_fsIssN(resid)+'</span></div>'+
+        '<div class="fsiss-frow adj"><span class="fl">＋ ผลต่างการแสดงในงบ · ส่วนแบ่งงบร่วมค้า / จัดประเภทรายการใหม่<small>แสดงในงบ ไม่ได้อยู่ใน GL ของบริษัท (ส่วนแบ่งร่วมค้า · รวมงบ · จัดประเภทใหม่)</small></span><span class="fr">'+_fsIssN(resid)+'</span></div>'+
         '<div class="fsiss-frow tot"><span class="fl">＝ ยอดตามงบการเงิน (บรรทัดนี้)</span><span class="fr">'+_fsIssN(issued)+'</span></div>'+
       '</div>';
     } else {                 /* ยอดบัญชีตรงกับงบพอดี (ต่างเพียงการปัดเศษ) */
