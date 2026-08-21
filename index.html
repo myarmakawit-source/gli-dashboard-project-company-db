@@ -21340,26 +21340,32 @@ function _fsIssStmtHTML(rows,opts){ _fsIssCSS(); try{_fsIssDrillCSS();}catch(e){
   h+='</tr></thead><tbody>';
   function cells(v){ return (v||[]).map(function(x){return '<td class="n">'+_fsIssN(x)+'</td>';}).join(''); }
   function empt(){ var s=''; for(var i=0;i<ncol;i++)s+='<td class="n"></td>'; return s; }
+  var _hbN=0;   /* count of lines flagged with a presentation difference (issued statement only) */
   rows.forEach(function(r){
     if(['title','subtitle','date','unit','restate','yhdr','blank','sign'].indexOf(r.k)>=0)return;
     if(r.k==='sec'){ h+='<tr class="sec"><td class="l" colspan="'+(ncol+1)+'">'+_fsWpEsc(r.t)+'</td></tr>'; return; }
     if(r.k==='info'){ h+='<tr class="info"><td class="l ind'+(r.i||0)+'">'+_fsWpEsc(r.t)+'</td>'+empt()+'</tr>'; return; }
-    if(r.k==='line'){ var _da=r.d?(' data-issd="'+_fsWpEsc(r.d)+'" data-issl="'+_fsWpEsc(r.t)+'" title="คลิกเพื่อดูรหัสบัญชี + GL + คู่บัญชี (Dr/Cr)"'):''; h+='<tr'+(r.d?' class="issline"':'')+_da+'><td class="l ind'+(r.i||0)+'">'+_fsWpEsc(r.t)+'</td>'+cells(r.v)+'</tr>'; return; }
+    if(r.k==='line'){ var _da=r.d?(' data-issd="'+_fsWpEsc(r.d)+'" data-issl="'+_fsWpEsc(r.t)+'" title="คลิกเพื่อดูรหัสบัญชี + GL + คู่บัญชี (Dr/Cr)"'):'';
+      var _hb=(opts.issued && r.d && typeof _fsSrcBrkHasDiff==='function' && _fsSrcBrkHasDiff(r.d)); if(_hb)_hbN++;
+      var _cl=(r.d?'issline':'')+(_hb?' fsiss-hasbrk':'');
+      var _mk=_hb?'<span class="fsiss-brkmk" title="บรรทัดนี้มีผลต่างการแสดงในงบ (ส่วนแบ่งร่วมค้า · รวมงบ · จัดประเภทใหม่) — คลิกเพื่อดูที่มา">◆</span>':'';
+      h+='<tr'+(_cl?' class="'+_cl+'"':'')+_da+'><td class="l ind'+(r.i||0)+'">'+_fsWpEsc(r.t)+_mk+'</td>'+cells(r.v)+'</tr>'; return; }
     if(r.k==='sub'){ h+='<tr class="sub"><td class="l"></td>'+cells(r.v)+'</tr>'; return; }
     if(r.k==='tot'){ h+='<tr class="tot"><td class="l"></td>'+cells(r.v)+'</tr>'; return; }
   });
   h+='</tbody></table>';
+  if(opts.issued && _hbN>0)h+='<div class="fsiss-brklegend"><span class="fsiss-brkmk">◆</span> <b>'+_hbN+' บรรทัด</b> มีผลต่างการแสดงในงบ (ส่วนแบ่งร่วมค้า · รวมงบ · จัดประเภทรายการใหม่) — คลิกที่บรรทัดแล้วกดแถบผลต่างเพื่อดูรายงานที่มา</div>';
   var sg=_fsIssSigns(rows);
   if(sg.length)h+='<div class="fsiss-sign">'+sg.map(function(s){return '<div>'+_fsWpEsc(s)+'</div>';}).join('')+'</div>';
   h+='</div>';
   return h;
 }
 function _fsIssBSHTML(){ var y=_fsIssSelYr();
-  if(_fsIssIsIssuedYr(y)) return _fsIssStmtHTML(GLI_ISSUED.bs);
+  if(_fsIssIsIssuedYr(y)) return _fsIssStmtHTML(GLI_ISSUED.bs,{issued:true});
   if(!_fsGlLoaded()) return _fsIssComputedNotice(y,'งบแสดงฐานะการเงิน');
   return _fsIssStmtHTML(_fsIssComputeBS(y),{noRestate:true,caption:_fsIssComputedCap(y)}); }
 function _fsIssPLHTML(){ var y=_fsIssSelYr();
-  if(_fsIssIsIssuedYr(y)) return _fsIssStmtHTML(GLI_ISSUED.pl);
+  if(_fsIssIsIssuedYr(y)) return _fsIssStmtHTML(GLI_ISSUED.pl,{issued:true});
   if(!_fsGlLoaded()) return _fsIssComputedNotice(y,'งบกำไรขาดทุน');
   return _fsIssStmtHTML(_fsIssComputePL(y),{noRestate:true,caption:_fsIssComputedCap(y)}); }
 
@@ -21769,6 +21775,16 @@ function _fsSrcBrkAllRows(){
       if(diff>0.5)out.push(m);
     } }
   return out;
+}
+/* does this issued-FS line currently differ from the company's own books?
+   Uses the NET difference (issued − Per Audit) with the SAME >5 threshold as the
+   account-drill bridge, so a line is flagged exactly when the drill shows a
+   "ผลต่างการแสดงในงบ" line. Lines whose JO/ECM/Elimination components fully
+   offset (net ≈ 0) are NOT flagged — their figure already equals the book sum.
+   Returns false automatically once a future TB ties exactly to the งบ. */
+function _fsSrcBrkHasDiff(dcode){
+  try{ var m=_fsSrcBrkLineModel(dcode,''); if(!m||!m.found)return false;
+    return Math.abs(m.issued - m.pa) > 5; }catch(e){ return false; }
 }
 function _fsSrcBrkEnsure(){
   var m=document.getElementById('fsSrcModal');
@@ -22605,8 +22621,16 @@ function _fsIssDrillCSS(){ if(document.getElementById('fsiss-drill-css'))return;
    ".fsiss-t tr.issline:hover{background:#eef7f3}",
    ".fsiss-t tr.issline td.l::after{content:' 🔎';font-size:10px;opacity:0;transition:opacity .1s}",
    ".fsiss-t tr.issline:hover td.l::after{opacity:.5}",
+   /* orange flag: issued-FS line that differs from the company's own books
+      (JO / ECM / elimination / reclassification). Auto-clears when a line ties. */
+   ".fsiss-t tr.fsiss-hasbrk td{background:#FFF7ED}",
+   ".fsiss-t tr.fsiss-hasbrk td.l{box-shadow:inset 3px 0 0 #F97316}",
+   ".fsiss-t tr.fsiss-hasbrk:hover td{background:#FFEDD5}",
+   ".fsiss-brkmk{display:inline-block;margin-left:7px;color:#F97316;font-size:9px;vertical-align:middle;transform:translateY(-1px)}",
+   ".fsiss-brklegend{margin:10px 2px 0;font-size:11.5px;color:#9A5B1A;background:#FFF7ED;border:1px solid #FCD9B0;border-radius:9px;padding:8px 12px;line-height:1.5}",
+   ".fsiss-brklegend b{color:#C2410C}",
    ".fsiss-t tr.issactive{background:#DBEAFE!important}",
-   ".fsiss-t tr.issactive td{color:#1E3A8A!important;font-weight:700}",
+   ".fsiss-t tr.issactive td{background:#DBEAFE!important;color:#1E3A8A!important;font-weight:700}",
    ".fsiss-t tr.issactive td.l{box-shadow:inset 3px 0 0 #2563EB}",
    /* persistent RIGHT half-page dock — statement shifts left so it stays fully visible */
    /* v10.109: right-half dock — statement fills the left 50vw, the drill panel the right 50vw.
