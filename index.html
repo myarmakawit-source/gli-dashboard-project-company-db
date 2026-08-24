@@ -21348,13 +21348,13 @@ function _fsIssStmtHTML(rows,opts){ _fsIssCSS(); try{_fsIssDrillCSS();}catch(e){
     if(r.k==='line'){ var _da=r.d?(' data-issd="'+_fsWpEsc(r.d)+'" data-issl="'+_fsWpEsc(r.t)+'" title="คลิกเพื่อดูรหัสบัญชี + GL + คู่บัญชี (Dr/Cr)"'):'';
       var _hb=(opts.issued && r.d && typeof _fsSrcBrkHasDiff==='function' && _fsSrcBrkHasDiff(r.d)); if(_hb)_hbN++;
       var _cl=(r.d?'issline':'')+(_hb?' fsiss-hasbrk':'');
-      var _mk=_hb?'<span class="fsiss-brkmk" title="บรรทัดนี้มีผลต่างการแสดงในงบ (ส่วนแบ่งร่วมค้า · รวมงบ · จัดประเภทใหม่) — คลิกเพื่อดูที่มา">◆</span>':'';
+      var _mk=_hb?'<span class="fsiss-brkmk" title="บรรทัดนี้ TB/GL ของเรายังไม่ตรงกับงบการเงิน (ปรับปรุงผู้สอบ · ส่วนแบ่งร่วมค้า · รวมงบ · จัดประเภทใหม่) — คลิกเพื่อดูที่มา">◆</span>':'';
       h+='<tr'+(_cl?' class="'+_cl+'"':'')+_da+'><td class="l ind'+(r.i||0)+'">'+_fsWpEsc(r.t)+_mk+'</td>'+cells(r.v)+'</tr>'; return; }
     if(r.k==='sub'){ h+='<tr class="sub"><td class="l"></td>'+cells(r.v)+'</tr>'; return; }
     if(r.k==='tot'){ h+='<tr class="tot"><td class="l"></td>'+cells(r.v)+'</tr>'; return; }
   });
   h+='</tbody></table>';
-  if(opts.issued && _hbN>0)h+='<div class="fsiss-brklegend"><span class="fsiss-brkmk">◆</span> <b>'+_hbN+' บรรทัด</b> มีผลต่างการแสดงในงบ (ส่วนแบ่งร่วมค้า · รวมงบ · จัดประเภทรายการใหม่) — คลิกที่บรรทัดแล้วกดแถบผลต่างเพื่อดูรายงานที่มา</div>';
+  if(opts.issued && _hbN>0)h+='<div class="fsiss-brklegend"><span class="fsiss-brkmk">◆</span> <b>'+_hbN+' บรรทัด</b> TB/GL ของเรายังไม่ตรงกับงบการเงิน (ปรับปรุงผู้สอบ · ส่วนแบ่งร่วมค้า · รวมงบ · จัดประเภทใหม่) — คลิกที่บรรทัดแล้วกดแถบผลต่างเพื่อดูรายงานที่มา</div>';
   var sg=_fsIssSigns(rows);
   if(sg.length)h+='<div class="fsiss-sign">'+sg.map(function(s){return '<div>'+_fsWpEsc(s)+'</div>';}).join('')+'</div>';
   h+='</div>';
@@ -21713,24 +21713,30 @@ function _fsIssRenderCodes(dcode,label){ var p=_fsIssPanelEnsure(); p.classList.
   var codes=_fsIssCodesFor(dcode); var spa=0;
   try{ spa=codes.reduce(function(a,c){return a+(+c.pa||0);},0); }catch(e){}
   var sign=(spa<0?-1:1);
+  var tbOn=_fsTbLoaded();
+  /* v10.11x: แต่ละรหัสแสดง "ยอดตามบัญชี" จาก TB / GL จริง (live) — ไม่ใช่ค่าแช่แข็ง Per Audit
+     จากกระดาษทำการ. ถ้ายังไม่ได้โหลด GL จึง fall back ไปใช้ pa เพื่อให้กล่องยังทำงานได้ */
+  function bookRaw(c){ if(tbOn){ var v=_fsTbRawOf(c.c); return (v==null?0:v); } return (+c.pa||0); }
   var body=codes.map(function(c){
     return '<div class="fsiss-crow" data-isscode="'+_fsWpEsc(c.c)+'"><div class="cc-h"><span class="cc-code">'+_fsWpEsc(c.c)+'</span>'+
-      '<span class="cc-name">'+_fsWpEsc(c.n)+'</span><span class="cc-amt">'+_fsIssN((+c.pa||0)*sign)+'</span><span class="cc-ex">▸</span></div><div class="cc-det" hidden></div></div>'; }).join('');
+      '<span class="cc-name">'+_fsWpEsc(c.n)+'</span><span class="cc-amt">'+_fsIssN(bookRaw(c)*sign)+'</span><span class="cc-ex">▸</span></div><div class="cc-det" hidden></div></div>'; }).join('');
   if(!codes.length)body='<div class="fsiss-empty">— ไม่มีรหัสบัญชีในบรรทัดนี้ —</div>';
-  /* v10.99.3: กระทบยอดให้กล่องด้านขวา "ตรงกับงบการเงิน" — ยอดตามบัญชี (Per Audit) + ส่วนแบ่งงบร่วมค้า/รายการรวมงบ = ยอดตามงบ */
-  var issued=_fsIssLineVal(dcode), subtotal=spa*sign;
+  /* v10.11x: กระทบยอด "TB ของเรา → งบการเงิน" — ยอดตามบัญชี (TB/GL จริง) + ผลต่าง TB↔งบ = ยอดตามงบ */
+  var issued=_fsIssLineVal(dcode);
+  var subtotal=(codes.reduce(function(a,c){return a+bookRaw(c);},0))*sign;
+  var srcLbl=tbOn?'รวมยอดตามบัญชี (TB / GL ของเรา)':'รวมยอดตามบัญชี (ตรวจสอบแล้ว · Per Audit)';
   if(codes.length&&issued!=null){ var resid=issued-subtotal;
-    if(Math.abs(resid)>5){   /* มีส่วนแบ่งงบร่วมค้า/รายการรวมงบจริง → แสดง 3 บรรทัดกระทบยอด */
+    if(Math.abs(resid)>5){   /* TB ยังไม่ตรงกับงบ → แสดง 3 บรรทัดกระทบยอด */
       body+='<div class="fsiss-foot">'+
-        '<div class="fsiss-frow"><span class="fl">รวมยอดตามบัญชี (ตรวจสอบแล้ว · Per Audit)</span><span class="fr">'+_fsIssN(subtotal)+'</span></div>'+
-        '<div class="fsiss-frow adj fsiss-srcbrk" data-srcbrk="1" role="button" tabindex="0" title="คลิกเพื่อดูรายงานที่มาของผลต่าง — ส่วนแบ่งร่วมค้า · รวมงบ · ตัดรายการ · จัดประเภทใหม่"><span class="fl">＋ ผลต่างการแสดงในงบ · ส่วนแบ่งงบร่วมค้า / จัดประเภทรายการใหม่<small>👉 คลิกดูรายงานที่มา · แสดงในงบ ไม่ได้อยู่ใน GL ของบริษัท</small></span><span class="fr">'+_fsIssN(resid)+' <span class="fsiss-brkcue">▸</span></span></div>'+
+        '<div class="fsiss-frow"><span class="fl">'+srcLbl+'</span><span class="fr">'+_fsIssN(subtotal)+'</span></div>'+
+        '<div class="fsiss-frow adj fsiss-srcbrk" data-srcbrk="1" role="button" tabindex="0" title="คลิกเพื่อดูรายงานที่มาของผลต่าง — ปรับปรุงผู้สอบ · ส่วนแบ่งร่วมค้า · รวมงบ · ตัดรายการ · จัดประเภทใหม่"><span class="fl">＋ ผลต่าง TB กับ งบการเงิน<small>👉 คลิกดูรายงานที่มา · บัญชีเรา↔ผู้สอบ · ส่วนแบ่งร่วมค้า · รวมงบ · จัดประเภทใหม่</small></span><span class="fr">'+_fsIssN(resid)+' <span class="fsiss-brkcue">▸</span></span></div>'+
         '<div class="fsiss-frow tot"><span class="fl">＝ ยอดตามงบการเงิน (บรรทัดนี้)</span><span class="fr">'+_fsIssN(issued)+'</span></div>'+
       '</div>';
-    } else {                 /* ยอดบัญชีตรงกับงบพอดี (ต่างเพียงการปัดเศษ) */
-      body+='<div class="fsiss-foot"><div class="fsiss-frow tot ok"><span class="fl">＝ ยอดตามงบการเงิน (บรรทัดนี้) · ตรงกับยอดบัญชี</span><span class="fr">'+_fsIssN(issued)+'</span></div></div>';
+    } else {                 /* TB ตรงกับงบพอดี (ต่างเพียงการปัดเศษ) */
+      body+='<div class="fsiss-foot"><div class="fsiss-frow tot ok"><span class="fl">＝ ยอดตามงบการเงิน (บรรทัดนี้) · ตรงกับ TB ของเรา</span><span class="fr">'+_fsIssN(issued)+'</span></div></div>';
     }
   }
-  p.innerHTML=_fsIssHeadHTML(label||'','รหัสกลุ่มงบ '+_fsWpEsc(dcode)+' · '+codes.length+' บัญชี · คลิกรหัสเพื่อดู GL + คู่บัญชี (Dr/Cr)')+'<div class="fsiss-pb">'+body+'</div>'; }
+  p.innerHTML=_fsIssHeadHTML(label||'','รหัสกลุ่มงบ '+_fsWpEsc(dcode)+' · '+codes.length+' บัญชี · ยอดจาก TB จริง · คลิกรหัสเพื่อดู GL + คู่บัญชี (Dr/Cr)')+'<div class="fsiss-pb">'+body+'</div>'; }
 
 /* ============================================================================
    ที่มาของผลต่างการแสดงในงบ (Presentation bridge report)
@@ -21751,40 +21757,60 @@ function _fsIssWpLine(dcode){
     for(var s=0;s<S.length;s++){ var rows=S[s]||[]; for(var i=0;i<rows.length;i++){ var r=rows[i]; if(r&&r.t==='line'&&r.d===dcode)return r; } } }catch(e){}
   return null;
 }
-/* breakdown model for one FS line — every figure in natural (display) sign */
+/* live raw (dr−cr) ending balance of an account from OUR trial balance (_fsTB),
+   cached per _fsTB instance so per-line/per-code lookups stay cheap. Returns null
+   when the code is absent from the live TB (i.e. no GL balance). */
+var _fsTbEndMap=null,_fsTbEndMapSrc=null;
+function _fsTbEndMapGet(){
+  if(typeof _fsTB==='undefined'||!_fsTB)return null;
+  if(_fsTbEndMapSrc===_fsTB&&_fsTbEndMap)return _fsTbEndMap;
+  var m={}; for(var i=0;i<_fsTB.length;i++){ var rc=_fsRcCode(_fsTB[i].code); if(rc)m[rc]=+_fsTB[i].ending||0; }
+  _fsTbEndMap=m; _fsTbEndMapSrc=_fsTB; return m;
+}
+function _fsTbRawOf(code){ var m=_fsTbEndMapGet(); if(!m)return null; var rc=_fsRcCode(code); return m.hasOwnProperty(rc)?m[rc]:null; }
+function _fsTbLoaded(){ return !!(typeof _fsTB!=='undefined'&&_fsTB&&_fsTB.length>0); }
+/* breakdown model for one FS line — every figure in natural (display) sign.
+   Base is our LIVE TB (sum of member accounts' GL ending balances); the bridge to
+   the issued งบ is: liveTB → +ปรับปรุงผู้สอบที่ยังไม่ลงบัญชี (auditAdj = pa−liveTB)
+   → Per Audit (pa) → +JO → +ECM = Combined → +Elimination = Separate
+   → +จัดประเภทใหม่ = issued. */
 function _fsSrcBrkLineModel(dcode,fallbackLabel){
   var L=_fsIssWpLine(dcode); var issued=_fsIssLineVal(dcode);
-  if(!L){ var iv=(issued==null?0:issued);
-    return {d:dcode,th:fallbackLabel||dcode,en:'',pa:iv,jo:0,ecm:0,comb:iv,eN:0,eP:0,sep:iv,reclass:0,issued:iv,found:false,grp:'bs'}; }
+  var codes=_fsIssCodesFor(dcode);
+  var rawPa=0; for(var i=0;i<codes.length;i++)rawPa+=(+codes[i].pa||0);
+  var sign=(rawPa<0?-1:1);
+  var tbOn=_fsTbLoaded();
+  var rawLive=0; if(tbOn){ for(var j=0;j<codes.length;j++){ var v=_fsTbRawOf(codes[j].c); rawLive+=(v==null?0:v); } }
+  if(!L){ var iv=(issued==null?0:issued); var lt0=(tbOn?rawLive*sign:iv);
+    return {d:dcode,th:fallbackLabel||dcode,en:'',liveTB:lt0,tbOn:tbOn,auditAdj:(iv-lt0),pa:iv,jo:0,ecm:0,comb:iv,eN:0,eP:0,elim:0,sep:iv,reclass:0,issued:iv,found:false,grp:'bs'}; }
   var pa=+L.pa||0,jo=+L.jo||0,ecm=+L.ecm||0,comb=+L.comb||0,eN=+L.eN||0,eP=+L.eP||0,sep=+L.sep||0;
   var iss=(issued==null?sep:issued);
+  var liveTB=(tbOn?rawLive*sign:pa);   /* no GL loaded → assume books = Per Audit */
   /* Use the stored comb & sep as authoritative anchors and derive the net
      elimination step as (sep − comb). eN/eP are raw elimination amounts whose
      sign convention flips between assets and liabilities, so decomposing them
      directly is unreliable — the net (sep − comb) always ties. */
-  return {d:dcode,th:L.th||fallbackLabel||dcode,en:L.en||'',pa:pa,jo:jo,ecm:ecm,comb:comb,eN:eN,eP:eP,elim:(sep-comb),sep:sep,reclass:(iss-sep),issued:iss,found:true};
+  return {d:dcode,th:L.th||fallbackLabel||dcode,en:L.en||'',liveTB:liveTB,tbOn:tbOn,auditAdj:(pa-liveTB),pa:pa,jo:jo,ecm:ecm,comb:comb,eN:eN,eP:eP,elim:(sep-comb),sep:sep,reclass:(iss-sep),issued:iss,found:true};
 }
-/* all FS lines that carry a presentation difference (jo/ecm/elim/reclass ≠ 0) */
+/* all FS lines whose issued งบ figure differs from OUR live TB (issued − liveTB) */
 function _fsSrcBrkAllRows(){
   var out=[]; if(typeof GLI_FS2025==='undefined'||!GLI_FS2025)return out;
   var S=[['bs',GLI_FS2025.bs],['pl',GLI_FS2025.pl]];
   for(var s=0;s<S.length;s++){ var rows=S[s][1]||[];
     for(var i=0;i<rows.length;i++){ var r=rows[i]; if(!r||r.t!=='line'||!r.d)continue;
       var m=_fsSrcBrkLineModel(r.d,r.th); m.grp=S[s][0];
-      var diff=Math.abs(m.jo)+Math.abs(m.ecm)+Math.abs(m.elim)+Math.abs(m.reclass);
-      if(diff>0.5)out.push(m);
+      if(Math.abs(m.issued-m.liveTB)>5)out.push(m);
     } }
   return out;
 }
-/* does this issued-FS line currently differ from the company's own books?
-   Uses the NET difference (issued − Per Audit) with the SAME >5 threshold as the
+/* does this issued-FS line currently differ from OUR live TB/GL?
+   Uses the NET difference (issued − liveTB) with the SAME >5 threshold as the
    account-drill bridge, so a line is flagged exactly when the drill shows a
-   "ผลต่างการแสดงในงบ" line. Lines whose JO/ECM/Elimination components fully
-   offset (net ≈ 0) are NOT flagged — their figure already equals the book sum.
-   Returns false automatically once a future TB ties exactly to the งบ. */
+   "ผลต่าง TB กับ งบการเงิน" line. If a future TB ties a line exactly to the งบ
+   the flag disappears automatically. */
 function _fsSrcBrkHasDiff(dcode){
   try{ var m=_fsSrcBrkLineModel(dcode,''); if(!m||!m.found)return false;
-    return Math.abs(m.issued - m.pa) > 5; }catch(e){ return false; }
+    return Math.abs(m.issued - m.liveTB) > 5; }catch(e){ return false; }
 }
 function _fsSrcBrkEnsure(){
   var m=document.getElementById('fsSrcModal');
@@ -21810,8 +21836,10 @@ function _fsSrcBrkRender(){
   /* -- Section A: the selected line's waterfall -- */
   var A='';
   if(selM){
-    var steps=[]; var jj=Math.abs(selM.jo)>0.5,ee=Math.abs(selM.ecm)>0.5,el=Math.abs(selM.elim)>0.5,rc=Math.abs(selM.reclass)>0.5;
-    steps.push({t:'ยอดตามบัญชี · ตรวจสอบแล้ว (Per Audit)',s:'ผลรวมของรหัสบัญชีในบริษัท',v:selM.pa,cls:'base'});
+    var steps=[]; var aa=Math.abs(selM.auditAdj)>0.5,jj=Math.abs(selM.jo)>0.5,ee=Math.abs(selM.ecm)>0.5,el=Math.abs(selM.elim)>0.5,rc=Math.abs(selM.reclass)>0.5;
+    steps.push({t:'ยอดตามบัญชี · TB / GL ของเรา',s:'ผลรวมยอดคงเหลือจริงของรหัสบัญชีในบริษัท',v:selM.liveTB,cls:'base'});
+    if(aa)steps.push({t:'± ผลต่างบัญชีเรากับยอดผู้สอบ (Per Audit)',s:'ยอดใน GL ของเรายังไม่ตรงกับยอด Per Audit ในกระดาษทำการ (ปรับปรุงยังไม่ลง / จัดประเภทต่างกัน)',v:selM.auditAdj,cls:'add'});
+    if(aa)steps.push({t:'ยอดตามบัญชี · หลังปรับปรุง (Per Audit)',v:selM.pa,cls:'sub'});
     if(jj)steps.push({t:'＋ ส่วนแบ่งในกิจการร่วมค้า / งานร่วมกัน (JO)',s:'ส่วนแบ่งตามสัดส่วน นำเข้างบเฉพาะกิจการ',v:selM.jo,cls:'add'});
     if(ee)steps.push({t:'＋ ปรับปรุงการรวมงบ · วิธีส่วนได้เสีย (ECM)',s:'รายการรวม/ปรับปรุงเงินลงทุนตามวิธีส่วนได้เสีย',v:selM.ecm,cls:'add'});
     if(jj||ee)steps.push({t:'รวมก่อนตัดรายการ (Combined)',v:selM.comb,cls:'sub'});
@@ -21822,34 +21850,36 @@ function _fsSrcBrkRender(){
     var sr=steps.map(function(st){ return '<div class="fssrc-srow '+(st.cls||'')+'"><span class="fssrc-sl">'+_fsWpEsc(st.t)+(st.s?'<small>'+_fsWpEsc(st.s)+'</small>':'')+'</span><span class="fssrc-sv">'+_fsIssN(st.v)+'</span></div>'; }).join('');
     A='<div class="fssrc-sec"><div class="fssrc-sec-h"><span class="fssrc-dc">'+_fsWpEsc(selM.d)+'</span> ที่มาของบรรทัด · <b>'+_fsWpEsc(selM.th)+'</b>'+(selM.en?'<span class="fssrc-en">'+_fsWpEsc(selM.en)+'</span>':'')+'</div>'+
       '<div class="fssrc-steps">'+sr+'</div>'+
-      '<div class="fssrc-note2">ผลต่างจาก “ยอดตามบัญชี” ที่เห็นในกล่องกระทบยอด = <b>'+_fsIssN(selM.issued-selM.pa)+'</b> — ประกอบขึ้นจากรายการด้านบนทั้งหมด</div></div>';
+      '<div class="fssrc-note2">ผลต่าง TB กับ งบการเงิน (ที่เห็นในกล่องกระทบยอด) = <b>'+_fsIssN(selM.issued-selM.liveTB)+'</b> — ประกอบขึ้นจากรายการด้านบนทั้งหมด</div></div>';
   } else {
     A='<div class="fssrc-sec"><div class="fssrc-note2">คลิกบรรทัดในตารางด้านล่างเพื่อดูที่มาแบบละเอียดทีละรายการ</div></div>';
   }
-  /* -- Section B: overview of all lines with a presentation difference -- */
-  var T={pa:0,jo:0,ecm:0,elim:0,reclass:0,issued:0,diff:0};
+  /* -- Section B: overview of all lines where OUR TB differs from the issued งบ -- */
+  var T={tb:0,aa:0,jo:0,ecm:0,elim:0,reclass:0,issued:0,diff:0};
   var trs=rows.map(function(m){ var elim=m.elim;
-    T.pa+=m.pa;T.jo+=m.jo;T.ecm+=m.ecm;T.elim+=elim;T.reclass+=m.reclass;T.issued+=m.issued;T.diff+=(m.issued-m.pa);
+    T.tb+=m.liveTB;T.aa+=m.auditAdj;T.jo+=m.jo;T.ecm+=m.ecm;T.elim+=elim;T.reclass+=m.reclass;T.issued+=m.issued;T.diff+=(m.issued-m.liveTB);
     var on=(sel&&m.d===sel)?' fssrc-on':'';
     return '<tr class="fssrc-orow'+on+'" data-d="'+_fsWpEsc(m.d)+'"><td class="l">'+_fsWpEsc(m.th)+'<small>'+(m.grp==='pl'?'งบกำไรขาดทุน':'งบแสดงฐานะการเงิน')+'</small></td>'+
-      '<td>'+_fsIssN(m.pa)+'</td><td>'+_fsIssN(m.jo)+'</td><td>'+_fsIssN(m.ecm)+'</td><td>'+_fsIssN(elim)+'</td><td>'+_fsIssN(m.reclass)+'</td><td class="hl">'+_fsIssN(m.issued)+'</td><td class="df">'+_fsIssN(m.issued-m.pa)+'</td></tr>'; }).join('');
-  var totrow='<tr class="fssrc-ttot"><td class="l">รวมทั้งหมด ('+rows.length+' บรรทัด)</td><td>'+_fsIssN(T.pa)+'</td><td>'+_fsIssN(T.jo)+'</td><td>'+_fsIssN(T.ecm)+'</td><td>'+_fsIssN(T.elim)+'</td><td>'+_fsIssN(T.reclass)+'</td><td class="hl">'+_fsIssN(T.issued)+'</td><td class="df">'+_fsIssN(T.diff)+'</td></tr>';
-  var B='<div class="fssrc-sec"><div class="fssrc-sec-h">ภาพรวมทั้งงบ — ทุกบรรทัดที่มี “ผลต่างการแสดงในงบ” <span class="fssrc-hint">(คลิกแถวเพื่อดูที่มา)</span></div>'+
-    '<div class="fssrc-tw"><table class="fssrc-t"><thead><tr><th class="l">บรรทัดในงบ</th><th>ยอดตามบัญชี<small>Per Audit</small></th><th>ส่วนแบ่งร่วมค้า<small>JO</small></th><th>ปรับรวมงบ<small>ECM</small></th><th>ตัดรายการ<small>Elim</small></th><th>จัดประเภทใหม่<small>ฉบับปรับปรุง</small></th><th>ยอดตามงบ<small>ฉบับที่ออก</small></th><th>ผลต่างรวม</th></tr></thead><tbody>'+trs+totrow+'</tbody></table></div></div>';
-  var head='<div class="fssrc-head"><div class="fssrc-ht"><div class="fssrc-h1">รายงานที่มาของผลต่างการแสดงในงบ</div>'+
-    '<div class="fssrc-h2">Presentation bridge — ยอดตามบัญชี (GL) → ยอดตามงบการเงิน · ปี 2568</div></div>'+
+      '<td>'+_fsIssN(m.liveTB)+'</td><td>'+_fsIssN(m.auditAdj)+'</td><td>'+_fsIssN(m.jo)+'</td><td>'+_fsIssN(m.ecm)+'</td><td>'+_fsIssN(elim)+'</td><td>'+_fsIssN(m.reclass)+'</td><td class="hl">'+_fsIssN(m.issued)+'</td><td class="df">'+_fsIssN(m.issued-m.liveTB)+'</td></tr>'; }).join('');
+  var totrow='<tr class="fssrc-ttot"><td class="l">รวมทั้งหมด ('+rows.length+' บรรทัด)</td><td>'+_fsIssN(T.tb)+'</td><td>'+_fsIssN(T.aa)+'</td><td>'+_fsIssN(T.jo)+'</td><td>'+_fsIssN(T.ecm)+'</td><td>'+_fsIssN(T.elim)+'</td><td>'+_fsIssN(T.reclass)+'</td><td class="hl">'+_fsIssN(T.issued)+'</td><td class="df">'+_fsIssN(T.diff)+'</td></tr>';
+  var B='<div class="fssrc-sec"><div class="fssrc-sec-h">ภาพรวมทั้งงบ — ทุกบรรทัดที่ TB ของเรายังไม่ตรงกับงบการเงิน <span class="fssrc-hint">(คลิกแถวเพื่อดูที่มา)</span></div>'+
+    '<div class="fssrc-tw"><table class="fssrc-t"><thead><tr><th class="l">บรรทัดในงบ</th><th>ยอดตามบัญชี<small>TB/GL</small></th><th>บัญชีเรา↔ผู้สอบ<small>Per Audit</small></th><th>ส่วนแบ่งร่วมค้า<small>JO</small></th><th>ปรับรวมงบ<small>ECM</small></th><th>ตัดรายการ<small>Elim</small></th><th>จัดประเภทใหม่<small>ฉบับปรับปรุง</small></th><th>ยอดตามงบ<small>ฉบับที่ออก</small></th><th>ผลต่าง TB↔งบ</th></tr></thead><tbody>'+trs+totrow+'</tbody></table></div></div>';
+  var head='<div class="fssrc-head"><div class="fssrc-ht"><div class="fssrc-h1">รายงานที่มาของผลต่าง TB กับ งบการเงิน</div>'+
+    '<div class="fssrc-h2">Bridge — ยอดตามบัญชี TB/GL ของเรา → ยอดตามงบการเงิน · ปี 2568</div></div>'+
     '<button class="fssrc-xls" type="button">⤓ Excel</button></div>';
-  var foot='<div class="fssrc-legend"><b>คำอธิบาย</b> · <b>JO</b> ส่วนแบ่งในกิจการร่วมค้า/งานร่วมกันตามสัดส่วน · <b>ECM</b> ปรับปรุงการรวมงบ/เงินลงทุนวิธีส่วนได้เสีย · <b>Elim</b> ตัดรายการระหว่างกิจการที่เกี่ยวข้องกัน · <b>จัดประเภทใหม่</b> การจัดประเภท/ปรับการแสดงในงบฉบับที่ออก (V2) — ทั้งหมดนี้แสดงในงบการเงินแต่ไม่ได้อยู่ใน GL ของบริษัทโดยตรง</div>';
+  var foot='<div class="fssrc-legend"><b>คำอธิบาย</b> · <b>ยอดตามบัญชี</b> ยอดคงเหลือจริงใน TB/GL ของเรา · <b>บัญชีเรา↔ผู้สอบ</b> ผลต่างระหว่างยอดใน GL ของเรากับยอด Per Audit ในกระดาษทำการผู้สอบ (ปรับปรุงยังไม่ลง / จัดประเภทต่างกัน) · <b>JO</b> ส่วนแบ่งในกิจการร่วมค้า/งานร่วมกันตามสัดส่วน · <b>ECM</b> ปรับปรุงการรวมงบ/เงินลงทุนวิธีส่วนได้เสีย · <b>Elim</b> ตัดรายการระหว่างกิจการที่เกี่ยวข้องกัน · <b>จัดประเภทใหม่</b> การจัดประเภท/ปรับการแสดงในงบฉบับที่ออก (V2) — ทุกส่วนรวมกันคือผลต่างระหว่าง TB ของเรากับงบการเงิน</div>';
   host.innerHTML=head+A+B+foot;
 }
 function _fsSrcBrkExport(){
   if(typeof XLSX==='undefined'||!XLSX){ alert('ไม่พบไลบรารีส่งออก Excel'); return; }
   var rows=_fsSrcBrkAllRows(); var yr='2568'; var aoa=[];
-  aoa.push(['รายงานที่มาของผลต่างการแสดงในงบการเงิน (Presentation bridge) — ปี '+yr]);
+  aoa.push(['รายงานที่มาของผลต่าง TB กับ งบการเงิน (Bridge: TB/GL → งบการเงิน) — ปี '+yr]);
   aoa.push(['บริษัท แกรนด์ไลน์ อินโนเวชั่น จำกัด']); aoa.push([]);
   if(_fsSrcBrkSel){ var m=_fsSrcBrkLineModel(_fsSrcBrkSel,_fsSrcBrkLabel);
     aoa.push(['ที่มาของบรรทัด: '+m.th]);
-    aoa.push(['ยอดตามบัญชี (Per Audit)',m.pa]);
+    aoa.push(['ยอดตามบัญชี (TB / GL ของเรา)',m.liveTB]);
+    aoa.push(['± ผลต่างบัญชีเรากับยอดผู้สอบ (Per Audit)',m.auditAdj]);
+    aoa.push(['= ยอดตามบัญชี หลังปรับปรุง (Per Audit)',m.pa]);
     aoa.push(['+ ส่วนแบ่งในกิจการร่วมค้า (JO)',m.jo]);
     aoa.push(['+ ปรับปรุงการรวมงบ / ส่วนได้เสีย (ECM)',m.ecm]);
     aoa.push(['= รวมก่อนตัดรายการ (Combined)',m.comb]);
@@ -21857,16 +21887,16 @@ function _fsSrcBrkExport(){
     aoa.push(['= ยอดตามงบเฉพาะกิจการ (Separate)',m.sep]);
     aoa.push(['+ จัดประเภทรายการใหม่ (ฉบับปรับปรุง)',m.reclass]);
     aoa.push(['= ยอดตามงบการเงิน',m.issued]); aoa.push([]); }
-  aoa.push(['ภาพรวมทั้งงบ — ทุกบรรทัดที่มีผลต่างการแสดงในงบ']);
-  aoa.push(['บรรทัดในงบ','งบ','ยอดตามบัญชี (Per Audit)','ส่วนแบ่งร่วมค้า (JO)','ปรับรวมงบ (ECM)','ตัดรายการ (Elim)','จัดประเภทใหม่','ยอดตามงบการเงิน','ผลต่างรวม']);
-  var T={pa:0,jo:0,ecm:0,elim:0,reclass:0,issued:0,diff:0};
-  rows.forEach(function(m){ var elim=m.elim; T.pa+=m.pa;T.jo+=m.jo;T.ecm+=m.ecm;T.elim+=elim;T.reclass+=m.reclass;T.issued+=m.issued;T.diff+=(m.issued-m.pa);
-    aoa.push([m.th,(m.grp==='pl'?'PL':'BS'),m.pa,m.jo,m.ecm,elim,m.reclass,m.issued,(m.issued-m.pa)]); });
-  aoa.push(['รวมทั้งหมด','',T.pa,T.jo,T.ecm,T.elim,T.reclass,T.issued,T.diff]);
+  aoa.push(['ภาพรวมทั้งงบ — ทุกบรรทัดที่ TB ยังไม่ตรงกับงบการเงิน']);
+  aoa.push(['บรรทัดในงบ','งบ','ยอดตามบัญชี (TB/GL)','บัญชีเรา↔ผู้สอบ (Per Audit)','ส่วนแบ่งร่วมค้า (JO)','ปรับรวมงบ (ECM)','ตัดรายการ (Elim)','จัดประเภทใหม่','ยอดตามงบการเงิน','ผลต่าง TB↔งบ']);
+  var T={tb:0,aa:0,jo:0,ecm:0,elim:0,reclass:0,issued:0,diff:0};
+  rows.forEach(function(m){ var elim=m.elim; T.tb+=m.liveTB;T.aa+=m.auditAdj;T.jo+=m.jo;T.ecm+=m.ecm;T.elim+=elim;T.reclass+=m.reclass;T.issued+=m.issued;T.diff+=(m.issued-m.liveTB);
+    aoa.push([m.th,(m.grp==='pl'?'PL':'BS'),m.liveTB,m.auditAdj,m.jo,m.ecm,elim,m.reclass,m.issued,(m.issued-m.liveTB)]); });
+  aoa.push(['รวมทั้งหมด','',T.tb,T.aa,T.jo,T.ecm,T.elim,T.reclass,T.issued,T.diff]);
   var ws=XLSX.utils.aoa_to_sheet(aoa);
-  ws['!cols']=[{wch:46},{wch:6},{wch:20},{wch:17},{wch:16},{wch:14},{wch:14},{wch:18},{wch:14}];
-  var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'ที่มาผลต่างการแสดงในงบ');
-  XLSX.writeFile(wb,'FS_ที่มาผลต่างการแสดงในงบ_'+yr+'.xlsx');
+  ws['!cols']=[{wch:46},{wch:6},{wch:20},{wch:20},{wch:17},{wch:16},{wch:14},{wch:14},{wch:18},{wch:14}];
+  var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'ที่มาผลต่าง TB กับงบ');
+  XLSX.writeFile(wb,'FS_ที่มาผลต่าง_TB_กับงบ_'+yr+'.xlsx');
 }
 function _fsSrcBrkCSS(){ if(document.getElementById('fssrc-css'))return;
   var css=[
