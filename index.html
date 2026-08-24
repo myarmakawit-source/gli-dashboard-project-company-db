@@ -16065,7 +16065,7 @@ function _slSetPrompt(){var need=_slLocked();
   else doSet();}
 function _slRemovePrompt(){if(!_slLocked())return;_slAsk({title:'🔓 ปิดล็อกหน้าจอ',msg:'ใส่รหัสปัจจุบันเพื่อปิดล็อก',errText:'รหัสไม่ถูกต้อง',onOk:function(code){if(_slHash(code)===(SECLOCK&&SECLOCK.h)){SECLOCK=null;if(typeof saveSecLock==='function')saveSecLock();_slUnlockedUntil=0;try{renderSec();}catch(e){}try{if(typeof _mnToast==='function')_mnToast('ปิดล็อกแล้ว',3000);}catch(e){}return true;}return false;}});}
 try{window.gliLockNow=function(){try{sessionStorage.removeItem('gli_sec_unlock');}catch(_e){}try{var b=document.querySelector('.modtab[data-mod="sec"]');if(b)b.click();else if(typeof renderSec==='function')renderSec();}catch(_e2){}};}catch(_e){}
-function showMod(mod){/* v9.17: passcode gate before opening Audit Log / Security */var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].hidden=(pages[i].id!=='page-'+mod);}var tabs=document.querySelectorAll('.modtab');for(var j=0;j<tabs.length;j++){var on=tabs[j].getAttribute('data-mod')===mod;tabs[j].classList.toggle('active',on);tabs[j].setAttribute('aria-selected',on?'true':'false');}var dm=document.querySelector('.dmeta');if(dm&&MOD_META[mod]){var m=MOD_META[mod];dm.innerHTML='<div><b>'+m[0]+'</b></div>'+(m[1]?('<div>'+m[1]+'</div>'):'')+(m[2]?('<div>'+m[2]+'</div>'):'');}var _mh=document.getElementById('modHero');if(_mh){var _ht=HEROT[mod];if(_ht){_mh.hidden=false;_mh.style.setProperty('--mh',HEROC[mod]||'#0E5C52');_mh.innerHTML='<span class="mh-logo"><svg viewBox="0 0 64 64"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg></span><span class="mh-ic">'+(HEROIC[mod]||'')+'</span><div><div class="mh-t">'+_ht[0]+'</div>'+(_ht[1]?'<div class="mh-s">'+_ht[1]+'</div>':'')+'</div>';}else{_mh.hidden=true;}}var _md=document.getElementById('modDesc');if(_md){var _dd=(typeof HERODESC!=='undefined'&&HERODESC)?HERODESC[mod]:'';if(_dd){_md.hidden=false;_md.innerHTML=_dd;}else{_md.hidden=true;}}/* v9.151: per-module English description banner */try{localStorage.setItem('gli_module',mod);}catch(e){}window.scrollTo(0,0);if(mod==='ov'&&typeof renderHub==='function')renderHub();if(mod==='tk'&&typeof renderTracking==='function')renderTracking();if(mod==='vat'&&typeof renderVat==='function')renderVat();if(mod==='up'&&typeof renderUp==='function')renderUp();if(mod==='mn'&&typeof renderMn==='function')renderMn();if(mod==='gl'&&typeof renderGl==='function')renderGl();if(mod==='pt'&&typeof renderPt==='function')renderPt();if(mod==='cfb'&&typeof renderDoc==='function')renderDoc();if(mod==='sec'&&typeof renderSec==='function')renderSec();if(mod==='adv'&&typeof renderAdv==='function')renderAdv();if(mod==='pdrepjv'&&typeof renderApjv==='function')renderApjv();if(mod==='bbl'&&typeof renderBbl==='function')renderBbl();if(mod==='fs'&&typeof renderFs==='function')renderFs();if(mod==='pg'&&typeof renderProgress==='function')renderProgress();if(mod==='bp'&&typeof _bpOnShow==='function')_bpOnShow();if(mod==='line'&&typeof renderLine==='function')renderLine();if(mod==='wpb'&&typeof renderWpb==='function')renderWpb();if(mod==='cb'&&typeof renderCb==='function')renderCb();}var _mt=document.querySelectorAll('.modtab');for(var k=0;k<_mt.length;k++){_mt[k].addEventListener('click',function(){showMod(this.getAttribute('data-mod'));});}var saved='ov';try{saved=localStorage.getItem('gli_module')||'ov';}catch(e){}if(!MOD_META[saved])saved='ov';/* v9.17: don't let a locked page block initial load with a passcode modal */showMod(saved);if(typeof _authApply==='function')_authApply();if(typeof _tkUpdNotif==='function')_tkUpdNotif();if(typeof _navWarnUpd==='function')_navWarnUpd();try{document.addEventListener('click',_auditClick,true);}catch(_ae){}})();
+function showMod(mod){/* v9.17: passcode gate before opening Audit Log / Security */var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].hidden=(pages[i].id!=='page-'+mod);}var tabs=document.querySelectorAll('.modtab');for(var j=0;j<tabs.length;j++){var on=tabs[j].getAttribute('data-mod')===mod;tabs[j].classList.toggle('active',on);tabs[j].setAttribute('aria-selected',on?'true':'false');}var dm=document.querySelector('.dmeta');if(dm&&MOD_META[mod]){var m=MOD_META[mod];dm.innerHTML='<div><b>'+m[0]+'</b></div>'+(m[1]?('<div>'+m[1]+'</div>'):'')+(m[2]?('<div>'+m[2]+'</div>'):'');}var _mh=document.getElementById('modHero');if(_mh){var _ht=HEROT[mod];if(_ht){_mh.hidden=false;_mh.style.setProperty('--mh',HEROC[mod]||'#0E5C52');_mh.innerHTML='<span class="mh-logo"><svg viewBox="0 0 64 64"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg></span><div><div class="mh-t">'+_ht[0]+'</div>'+(_ht[1]?'<div class="mh-s">'+_ht[1]+'</div>':'')+'</div>';}else{_mh.hidden=true;}}var _md=document.getElementById('modDesc');if(_md){var _dd=(typeof HERODESC!=='undefined'&&HERODESC)?HERODESC[mod]:'';if(_dd){_md.hidden=false;_md.innerHTML=_dd;}else{_md.hidden=true;}}/* v9.151: per-module English description banner */try{localStorage.setItem('gli_module',mod);}catch(e){}window.scrollTo(0,0);if(mod==='ov'&&typeof renderHub==='function')renderHub();if(mod==='tk'&&typeof renderTracking==='function')renderTracking();if(mod==='vat'&&typeof renderVat==='function')renderVat();if(mod==='up'&&typeof renderUp==='function')renderUp();if(mod==='mn'&&typeof renderMn==='function')renderMn();if(mod==='gl'&&typeof renderGl==='function')renderGl();if(mod==='pt'&&typeof renderPt==='function')renderPt();if(mod==='cfb'&&typeof renderDoc==='function')renderDoc();if(mod==='sec'&&typeof renderSec==='function')renderSec();if(mod==='adv'&&typeof renderAdv==='function')renderAdv();if(mod==='pdrepjv'&&typeof renderApjv==='function')renderApjv();if(mod==='bbl'&&typeof renderBbl==='function')renderBbl();if(mod==='fs'&&typeof renderFs==='function')renderFs();if(mod==='pg'&&typeof renderProgress==='function')renderProgress();if(mod==='bp'&&typeof _bpOnShow==='function')_bpOnShow();if(mod==='line'&&typeof renderLine==='function')renderLine();if(mod==='wpb'&&typeof renderWpb==='function')renderWpb();if(mod==='cb'&&typeof renderCb==='function')renderCb();}var _mt=document.querySelectorAll('.modtab');for(var k=0;k<_mt.length;k++){_mt[k].addEventListener('click',function(){showMod(this.getAttribute('data-mod'));});}var saved='ov';try{saved=localStorage.getItem('gli_module')||'ov';}catch(e){}if(!MOD_META[saved])saved='ov';/* v9.17: don't let a locked page block initial load with a passcode modal */showMod(saved);if(typeof _authApply==='function')_authApply();if(typeof _tkUpdNotif==='function')_tkUpdNotif();if(typeof _navWarnUpd==='function')_navWarnUpd();try{document.addEventListener('click',_auditClick,true);}catch(_ae){}})();
 </script>
 <!-- ===== v7.91: RESTORED MODULES grafted from GLI_Dashboard_v7_76 (FS / LINE / WPB / TFRS) — verified no missing deps, no global-var collisions ===== -->
 <script id="fsScript">
@@ -21300,13 +21300,24 @@ function _fsIssCSS(){ if(document.getElementById('fsiss-css'))return;
    ".fsiss-note{max-width:860px;margin:8px auto 0;font-size:11.5px;color:#8aa;text-align:center}",
    ".fsiss-cap{margin:4px 0 8px;padding:8px 12px;background:linear-gradient(180deg,#fff8ec,#fdf1d8);border:1px solid #f0d9a6;border-left:4px solid #d99a1c;border-radius:8px;font-size:11.5px;line-height:1.5;color:#7a5a12}",
    ".fsiss-cap b{color:#8a4b0a}",
-   /* v10.98: Changes-in-Equity matrix — wide label column (no wrap, scroll horizontally) + drillable cells */
-   ".fsiss-sce{max-width:none;overflow-x:auto}",
-   ".fsiss-scet{min-width:960px}",
-   ".fsiss-scet th.l,.fsiss-scet td.l{min-width:250px;white-space:nowrap;position:sticky;left:0;background:#fff;z-index:1}",
-   ".fsiss-scet thead th.l{color:#0A463E;font-weight:700;border-bottom:1.5px solid #0A463E}",
-   ".fsiss-scet tr.sub td.l{background:#f3f9f6}",
-   ".fsiss-scet thead th{vertical-align:bottom;line-height:1.25}",
+   /* v10.12x: Changes-in-Equity matrix — polished to match BS/PL, wider & drillable */
+   ".fsiss-sce{max-width:none;overflow-x:auto;padding-left:20px;padding-right:20px}",
+   ".fsiss-scet{min-width:1040px;border-collapse:collapse}",
+   ".fsiss-scet thead th{vertical-align:bottom;line-height:1.3;text-align:right;font-weight:700;color:#0A463E;background:#fff;padding:6px 12px;border-bottom:2px solid #0A463E;white-space:normal;min-width:98px}",
+   ".fsiss-scet thead th.u{border-bottom:0;font-weight:400;font-style:italic;color:#7a8f89;font-size:11.5px;padding:0 12px 3px}",
+   ".fsiss-scet thead th.l{text-align:left;min-width:232px;border-bottom:2px solid #0A463E}",
+   ".fsiss-scet thead th:last-child{color:#08352e}",
+   ".fsiss-scet th.l,.fsiss-scet td.l{position:sticky;left:0;background:#fff;z-index:1;min-width:232px;white-space:nowrap}",
+   ".fsiss-scet td{padding:5px 12px}",
+   ".fsiss-scet td.n:last-child{font-weight:700;color:#08352e}",
+   ".fsiss-scet tbody tr:not(.sub) td.l{padding-left:24px;color:#1b2a25;font-weight:400}",
+   /* ยอดคงเหลือ (balance) rows read as subtotals, like BS/PL */
+   ".fsiss-scet tr.sub td{background:#f1f8f4;border-top:1px solid #bcd8cd;border-bottom:1px solid #bcd8cd;font-weight:700}",
+   ".fsiss-scet tr.sub td.l{background:#e7f2ec;color:#08352e;font-weight:800}",
+   ".fsiss-scet tr.sub td.n{color:#0A463E}",
+   /* final closing balance emphasised like a statement total */
+   ".fsiss-scet tbody tr.sub:last-child td{border-bottom:3px double #0A463E;background:#e3f0ea}",
+   ".fsiss-scet tbody tr.sub:last-child td.n{font-weight:800}",
    /* drillable header / cell / row-label affordances */
    ".fsiss-scet th.sce-ch,.fsiss-scet td.sce-cell,.fsiss-scet td.sce-rl{cursor:pointer;transition:background .12s}",
    ".fsiss-scet th.sce-ch:hover{background:#eef7f3;color:#08352e}",
@@ -21314,9 +21325,16 @@ function _fsIssCSS(){ if(document.getElementById('fsiss-css'))return;
    ".fsiss-scet td.sce-rl:hover{background:#e9f4ef;color:#08352e}",
    ".fsiss-scet td.sce-rl::after{content:' 🔎';font-size:10px;opacity:0;transition:opacity .1s}",
    ".fsiss-scet td.sce-rl:hover::after{opacity:.55}",
-   ".fsiss-scet td.sce-cell.issactive,.fsiss-scet td.sce-rl.issactive,.fsiss-scet th.sce-ch.issactive{background:#d8ecff;box-shadow:inset 0 0 0 2px #2f80c2}",
+   ".fsiss-scet td.sce-cell.issactive,.fsiss-scet td.sce-rl.issactive,.fsiss-scet th.sce-ch.issactive{background:#d8ecff!important;box-shadow:inset 0 0 0 2px #2f80c2}",
    ".fsiss-scehint{margin:10px 2px 0;font-size:11.5px;color:#5a7a72;line-height:1.6}",
-   ".fsiss-scehint b{color:#0A463E}"
+   ".fsiss-scehint b{color:#0A463E}",
+   /* v10.12x: widen the statement pane for the wide SCE matrix + narrow the drill dock.
+      The SCE content shrink-wraps (overflow-x scroll container), and padding/margin on
+      #fsBody misbehave in this shell, so size the two direct children (toolbar + matrix
+      card) explicitly to the viewport space left of the 40vw dock — keeps the whole
+      statement visible (never under the dock) and fuller than the old ~50vw pinch. */
+   "#page-fs.pfs-sce #fsBody>*{width:calc(60vw - 250px);max-width:none;margin-left:0;margin-right:auto;box-sizing:border-box}",
+   "#page-fs.pfs-sce #fsIssPanel{width:calc(40vw - 20px);min-width:320px}"
   ].join("");
   var s=document.createElement('style'); s.id='fsiss-css'; s.textContent=css; (document.head||document.body).appendChild(s);
 }
@@ -21972,6 +21990,7 @@ function _fsIssPanelClick(e){ var t=e.target;
 function _fsIssDockRemove(){ var p=document.getElementById('fsIssPanel'); if(p&&p.parentNode)p.parentNode.removeChild(p);
   if(_fsIssActiveRow){ try{_fsIssActiveRow.classList.remove('issactive');}catch(e){} _fsIssActiveRow=null; }
   try{var fb=document.getElementById('fsBody'); if(fb)fb.classList.remove('fsiss-drillopen','fsiss-dock');}catch(e){}
+  try{var _pf=document.getElementById('page-fs'); if(_pf)_pf.classList.remove('pfs-sce');}catch(e){}
   try{if(_fsIssPanelScroll){window.removeEventListener('scroll',_fsIssPanelScroll,true);window.removeEventListener('resize',_fsIssPanelScroll);_fsIssPanelScroll=null;}}catch(e){}
   try{if(_fsIssDrillEsc){document.removeEventListener('keydown',_fsIssDrillEsc);_fsIssDrillEsc=null;}}catch(e){} }
 /* ✕ : clear the current selection back to the waiting state; if already empty, hide the dock */
@@ -21985,6 +22004,7 @@ function _fsIssDrillDock(){ var fb=document.getElementById('fsBody'); if(!fb)ret
   if((!hasIss&&!hasCfd) || _fsIssDockOff){ _fsIssDockRemove(); return; }
   _fsIssCSS(); _fsIssDrillCSS();
   fb.classList.add('fsiss-drillopen'); fb.classList.add('fsiss-dock');
+  try{ var _pf=document.getElementById('page-fs'); if(_pf)_pf.classList.toggle('pfs-sce', !!fb.querySelector('.fsiss-sce')); }catch(_e){}   /* v10.12x: widen statement pane for the wide SCE matrix */
   _fsIssPanelEnsure();
   /* reset a stale selection when the statement kind changed (e.g. BS → Cash Flow) */
   var curKind=hasCfd?'cfd':'iss';
@@ -26916,5 +26936,89 @@ document.addEventListener('click',function(e){
   })(dds[i]);}
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var dds=document.querySelectorAll('details.fscmd-dd[open]');for(var i=0;i<dds.length;i++)dds[i].removeAttribute('open');}});
+</script>
+<script id="sbAcmeSkin">
+/* ===== Sidebar "Acme" template skin — clean line icons · search · soft active pill.
+   Purely additive: restyles the existing .modnav.sidebar and swaps emoji for SVG
+   icons; every .modtab / data-mod / click handler is left untouched. ===== */
+(function(){
+  function run(){
+    var nav=document.querySelector('.modnav.sidebar'); if(!nav||nav.getAttribute('data-skin'))return;
+    nav.setAttribute('data-skin','acme');
+    /* 1) skin CSS (injected last → wins the cascade) */
+    var css=[
+     ".modnav.sidebar{background:linear-gradient(184deg,#0B4A42 0%,#0E5C52 58%,#093f38 100%)!important}",
+     ".modnav.sidebar .sbbrand{padding:17px 16px 13px!important;border-bottom:1px solid rgba(255,255,255,.08)!important}",
+     ".modnav.sidebar .sbbrand .sblogo{width:34px!important;height:34px!important;border-radius:10px!important}",
+     ".modnav.sidebar .sbbrand .sbn1{font-size:16px!important}",
+     /* search */
+     ".modnav.sidebar .sbsearch{position:relative;margin:12px 13px 2px;flex:0 0 auto}",
+     ".modnav.sidebar .sbsearch svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:rgba(255,255,255,.5);pointer-events:none}",
+     ".modnav.sidebar .sbsearch input{width:100%;box-sizing:border-box;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);border-radius:10px;padding:9px 12px 9px 33px;color:#fff;font-size:12.5px;font-family:'Inter',sans-serif;outline:none;transition:background .14s,border-color .14s}",
+     ".modnav.sidebar .sbsearch input::placeholder{color:rgba(255,255,255,.5)}",
+     ".modnav.sidebar .sbsearch input:focus{background:rgba(255,255,255,.13);border-color:rgba(94,234,212,.5)}",
+     /* section labels */
+     ".modnav.sidebar .sbsec{color:rgba(255,255,255,.42)!important;font-size:9.5px!important;font-weight:800!important;letter-spacing:.14em!important;padding:14px 14px 5px!important}",
+     /* items */
+     ".modnav.sidebar .sbmenu{padding:4px 11px 8px!important;gap:1px!important}",
+     ".modnav.sidebar .modtab{gap:11px!important;padding:8px 11px!important;border-radius:9px!important;color:rgba(255,255,255,.74)!important;font-weight:500!important;font-size:13px!important}",
+     ".modnav.sidebar .modtab .sbic{width:22px!important;height:22px!important;background:none!important;border:none!important;box-shadow:none!important;color:currentColor!important;display:flex!important;align-items:center;justify-content:center;transform:none!important;flex:0 0 auto}",
+     ".modnav.sidebar .modtab .sbic svg{width:19px;height:19px;display:block}",
+     ".modnav.sidebar .modtab:hover{background:rgba(255,255,255,.08)!important;color:#fff!important}",
+     ".modnav.sidebar .modtab:hover .sbic{background:none!important;transform:none!important}",
+     ".modnav.sidebar .modtab.active{background:rgba(94,234,212,.15)!important;color:#fff!important;font-weight:700!important;box-shadow:none!important}",
+     ".modnav.sidebar .modtab.active .sbic{color:#5EEAD4!important;background:none!important;box-shadow:none!important;border:none!important}",
+     /* badge (opt-in via .sbbadge) */
+     ".modnav.sidebar .modtab .sbbadge{margin-left:auto;flex:0 0 auto;background:#EF4444;color:#fff;font-size:10px;font-weight:800;line-height:1;min-width:18px;height:18px;padding:0 5px;border-radius:999px;display:flex;align-items:center;justify-content:center}",
+     /* search filter */
+     ".modnav.sidebar .sbhide{display:none!important}",
+     ".modnav.sidebar .sbnores{display:none;color:rgba(255,255,255,.5);font-size:12px;text-align:center;padding:14px 10px}",
+     ".modnav.sidebar.sbnohit .sbnores{display:block}"
+    ].join("\n");
+    var st=document.createElement('style'); st.id='sbAcmeCss'; st.textContent=css; document.body.appendChild(st);
+    /* 2) line icons per module */
+    var IC={
+     ov:'<path d="M3 10.6 12 3l9 7.6"/><path d="M5 9.6V20a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1V9.6"/>',
+     tk:'<path d="M9 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M8.5 11h.01M8.5 15h.01M12 11h4M12 15h4"/>',
+     bp:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+     pg:'<path d="M21.2 15.9A10 10 0 1 1 8 2.8"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>',
+     gl:'<ellipse cx="12" cy="6" rx="9" ry="3"/><path d="M3 6v6c0 1.66 4.03 3 9 3s9-1.34 9-3V6"/><path d="M3 12v6c0 1.66 4.03 3 9 3s9-1.34 9-3v-6"/>',
+     fs:'<path d="M3 3v18h18"/><path d="M8 16V9M13 16V5M18 16v-6"/>',
+     wpb:'<path d="M12 3v18"/><path d="M7 21h10"/><path d="M4 8h16"/><path d="M6.5 8 4 14a2.5 2.5 0 0 0 5 0zM17.5 8 15 14a2.5 2.5 0 0 0 5 0z"/>',
+     cfb:'<path d="M3 8a2 2 0 0 1 2-2h4l2 2.4h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+     bbl:'<path d="M3 21h18"/><path d="M5 21V10M9.5 21V10M14.5 21V10M19 21V10"/><path d="M12 3 21 8H3z"/>',
+     pdrepjv:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h5"/>',
+     wht:'<circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/><path d="M8.3 7.8 20 18M8.3 16.2 20 6M9.2 9.2l5.6 5.6"/>',
+     vat:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/>',
+     mn:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+     cb:'<path d="M12 3l7 2.6v5.2c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V5.6z"/><path d="M9 12l2 2 4-4"/>',
+     up:'<circle cx="7.5" cy="15.5" r="4"/><path d="M10.4 12.6 21 2M16.5 6.5 19 9M13.5 9.5 16 12"/>',
+     pt:'<circle cx="9" cy="8" r="3.3"/><path d="M2.6 20c0-3.4 2.9-5.6 6.4-5.6s6.4 2.2 6.4 5.6"/><path d="M16 5a3.3 3.3 0 0 1 0 6.4M17.6 20c0-2.4-1-4.2-2.6-5.2"/>',
+     sec:'<path d="M12 3l7 2.6v5.2c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V5.6z"/>'
+    };
+    var SW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">';
+    Array.prototype.forEach.call(nav.querySelectorAll('.modtab[data-mod]'),function(b){
+      var m=b.getAttribute('data-mod'), ic=b.querySelector('.sbic'); if(ic&&IC[m])ic.innerHTML=SW+IC[m]+'</svg>';
+    });
+    /* 3) search box + live filter */
+    var menu=nav.querySelector('.sbmenu');
+    if(menu&&!nav.querySelector('.sbsearch')){
+      var sw=document.createElement('div'); sw.className='sbsearch';
+      sw.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg><input type="text" placeholder="ค้นหาเมนู…" aria-label="ค้นหาเมนู">';
+      menu.parentNode.insertBefore(sw,menu);
+      var nores=document.createElement('div'); nores.className='sbnores'; nores.textContent='ไม่พบเมนู'; menu.insertBefore(nores,menu.firstChild);
+      var inp=sw.querySelector('input');
+      function filter(q){ q=(q||'').trim().toLowerCase();
+        var tabs=menu.querySelectorAll('.modtab'), hit=0;
+        Array.prototype.forEach.call(tabs,function(b){ var t=((b.querySelector('.sblbl')||{}).textContent||'').toLowerCase(); var ok=!q||t.indexOf(q)>=0; b.classList.toggle('sbhide',!ok); if(ok)hit++; });
+        Array.prototype.forEach.call(menu.querySelectorAll('.sbsec'),function(s){ var any=false,el=s.nextElementSibling; while(el&&!el.classList.contains('sbsec')){ if(el.classList.contains('modtab')&&!el.classList.contains('sbhide')){any=true;break;} el=el.nextElementSibling; } s.classList.toggle('sbhide',!any); });
+        nav.classList.toggle('sbnohit',q&&hit===0);
+      }
+      inp.addEventListener('input',function(){ filter(this.value); });
+      inp.addEventListener('keydown',function(e){ if(e.key==='Escape'){ this.value=''; filter(''); this.blur(); } });
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run); else run();
+})();
 </script>
 </body></html>
