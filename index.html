@@ -27021,4 +27021,45 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'){var dds=doc
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run); else run();
 })();
 </script>
+<style id="contentRefineCss">
+/* ===== Module content — full "Calm Modern" pass: crisper type, calmer surfaces,
+   softer elevation. Global via shared design tokens + element/shared-shell rules
+   only (no per-module layout is rewritten). Last in the document → wins the
+   cascade. Fully revertible (delete this block). ===== */
+
+/* 1) airy background + crisper text rendering everywhere */
+body{
+  background:
+    radial-gradient(rgba(28,40,62,.020) 1px, transparent 1.5px) 0 0/24px 24px,
+    radial-gradient(880px 560px at 3% -6%, rgba(45,215,196,.045), transparent 60%),
+    linear-gradient(176deg,#F7F9FC 0%,#F4F6FB 60%,#F6F5FB 100%) !important;
+  background-attachment:fixed !important;
+  -webkit-font-smoothing:antialiased !important;
+  -moz-osx-font-smoothing:grayscale !important;
+  text-rendering:optimizeLegibility !important;
+}
+
+/* 2) softer, modern elevation + hairline (cascades to every token-based card) */
+:root{
+  --shadow-card:0 1px 2px rgba(20,28,44,.05),0 7px 18px -10px rgba(20,28,44,.13) !important;
+  --shadow-cardh:0 2px 6px rgba(20,28,44,.07),0 16px 34px -12px rgba(20,28,44,.19) !important;
+  --shadow-soft:0 6px 22px -12px rgba(12,139,125,.16),0 2px 6px -4px rgba(28,37,53,.07) !important;
+  --shadow-lg:0 20px 44px -14px rgba(20,28,44,.16),0 6px 16px -8px rgba(20,28,44,.08) !important;
+  --shadow-md:0 4px 12px -3px rgba(20,28,44,.09),0 2px 6px -3px rgba(20,28,44,.05) !important;
+  --line:#E7EBF3 !important;
+}
+
+/* 3) crisper typography hierarchy (keeps Inter; tightens Latin heads, aligns numbers) */
+h1{ letter-spacing:.02em !important; }
+h2,h3,h4{ letter-spacing:-.006em !important; }
+.mh-t{ font-weight:800 !important; letter-spacing:.15px !important; }
+.num,.mono,.n,.val,td.n,.hubkpiv{ font-variant-numeric:tabular-nums lining-nums; }
+
+/* 4) unify card surfaces + gentle hover lift */
+.card,.railsec{ border-radius:15px !important; border:1px solid var(--line) !important; box-shadow:var(--shadow-card) !important; transition:box-shadow .18s ease,transform .18s ease !important; }
+.card:hover{ box-shadow:var(--shadow-cardh) !important; }
+
+/* 5) module hero — flatter, cleaner (keeps its per-module accent colour) */
+.modhero{ border-radius:16px !important; box-shadow:0 14px 32px -18px rgba(9,50,44,.40),0 2px 6px -3px rgba(0,0,0,.09) !important; }
+</style>
 </body></html>
