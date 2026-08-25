@@ -21333,8 +21333,8 @@ function _fsIssCSS(){ if(document.getElementById('fsiss-css'))return;
       #fsBody misbehave in this shell, so size the two direct children (toolbar + matrix
       card) explicitly to the viewport space left of the 40vw dock — keeps the whole
       statement visible (never under the dock) and fuller than the old ~50vw pinch. */
-   "#page-fs.pfs-sce #fsBody>*{width:calc(60vw - 250px);max-width:none;margin-left:0;margin-right:auto;box-sizing:border-box}",
-   "#page-fs.pfs-sce #fsIssPanel{width:calc(40vw - 20px);min-width:320px}"
+   "#page-fs.pfs-sce #fsBody>*{width:calc(78vw - 236px);max-width:none;margin-left:0;margin-right:auto;box-sizing:border-box}",
+   "#page-fs.pfs-sce #fsIssPanel{width:calc(22vw - 10px);min-width:330px}"
   ].join("");
   var s=document.createElement('style'); s.id='fsiss-css'; s.textContent=css; (document.head||document.body).appendChild(s);
 }
@@ -27059,7 +27059,14 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 .card,.railsec{ border-radius:15px !important; border:1px solid var(--line) !important; box-shadow:var(--shadow-card) !important; transition:box-shadow .18s ease,transform .18s ease !important; }
 .card:hover{ box-shadow:var(--shadow-cardh) !important; }
 
-/* 5) module hero — flatter, cleaner (keeps its per-module accent colour) */
-.modhero{ border-radius:16px !important; box-shadow:0 14px 32px -18px rgba(9,50,44,.40),0 2px 6px -3px rgba(0,0,0,.09) !important; }
+/* 5) module hero — deep-green top banner on every module (matches the pine sidebar) */
+.modhero{ border-radius:16px !important; box-shadow:0 14px 32px -18px rgba(9,50,44,.40),0 2px 6px -3px rgba(0,0,0,.09) !important;
+  background:
+    linear-gradient(108deg,rgba(255,255,255,.10) 0%,rgba(255,255,255,0) 48%,rgba(0,0,0,.20) 100%),
+    linear-gradient(122deg,#0E4438 0%,#0B3329 58%,#0C3B2F 122%) !important; }
+#page-ov .modhero{   /* Overall normally uses the aurora gradient (higher specificity) — force it to the same deep green */
+  background:
+    linear-gradient(108deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,0) 46%,rgba(0,0,0,.16) 100%),
+    linear-gradient(122deg,#0E4438 0%,#0B3329 58%,#0C3B2F 122%) !important; }
 </style>
 </body></html>
