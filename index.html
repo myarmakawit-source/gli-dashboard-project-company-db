@@ -13615,7 +13615,8 @@ function renderGl(){var w=document.getElementById('glWrap');if(!w)return;
   top+='<div class="glwrap2" id="glScroll"><table class="gltbl" style="width:'+totalW+'px">'+_glHead()+'<tbody id="glBody">'+body+'</tbody></table></div>'
     +'<div class="glft"><span class="glmeta">Showing all '+GLVIEW.length.toLocaleString()+' rows (scrollable \u00b7 sorted/filtered) \u00b7 drag a column border to resize \u00b7 use \u25a6 Columns to show/hide</span></div>';
   w.innerHTML=top;_glBind();_glCloseDrop();_glVSSetup();_glEnsureCloud();}
-function _glExportExcel(){
+function _glExportExcel(fmt){
+  fmt=(fmt==='xlsb')?'xlsb':'xlsx';   /* v10.13x: ผู้ใช้เลือกได้ว่าจะดาวน์โหลดเป็น Excel Workbook (.xlsx) หรือ Excel Binary Workbook (.xlsb) */
   if(typeof XLSX==='undefined'){alert('The Excel reader is still loading — please wait and try again');return;}
   _glHlLoad();_glRefresh();
   if(!GLVIEW||!GLVIEW.length){alert('No rows to export for the current filter');return;}
@@ -13638,9 +13639,26 @@ function _glExportExcel(){
     for(var Rr=1;Rr<=rng.e.r;Rr++)numIdx.forEach(function(ci){var cell=ws[XLSX.utils.encode_cell({r:Rr,c:ci})];if(cell&&typeof cell.v==='number'){cell.t='n';cell.z='#,##0.00';}});}catch(e){}
   var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'GL');
   var afn=(_glActiveFile()&&_glActiveFile().name)||'GL';afn=(''+afn).replace(/\.[^.]+$/,'').replace(/[^\w฀-๿]+/g,'_').slice(0,40)||'GL';
-  XLSX.writeFile(wb,'GL_filtered_'+afn+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
-  try{if(typeof gliLog==='function')gliLog('Export GL (filtered)',GLVIEW.length+' rows · '+afn);}catch(e){}
+  try{ XLSX.writeFile(wb,'GL_filtered_'+afn+'_'+new Date().toISOString().slice(0,10)+'.'+fmt,{bookType:fmt}); }
+  catch(e){ alert('Export failed ('+fmt.toUpperCase()+'): '+((e&&e.message)||e)); return; }
+  try{if(typeof gliLog==='function')gliLog('Export GL (filtered · '+fmt.toUpperCase()+')',GLVIEW.length+' rows · '+afn);}catch(e){}
 }
+/* v10.13x: format chooser popup for the GL "Export Excel" button — .xlsx (Workbook) vs .xlsb (Binary Workbook) */
+function _glOpenExportMenu(btn){_glCloseDrop();var pg=document.getElementById('page-gl');if(!pg)return;
+  var d=document.createElement('div');d.className='gldrop';d.id='glDrop';d.style.width='288px';
+  var pr=pg.getBoundingClientRect(),br=btn.getBoundingClientRect();
+  var left=br.left-pr.left;if(left+298>pg.clientWidth)left=Math.max(6,pg.clientWidth-298);
+  d.style.left=left+'px';d.style.top=(br.bottom-pr.top+6)+'px';
+  var bcss='display:block;width:100%;text-align:left;border:1.5px solid var(--line,#E6E0D4);background:#fff;border-radius:11px;padding:10px 13px;margin:0 0 9px;cursor:pointer;font:inherit;font-size:13px;font-weight:800;color:var(--ink,#19222E);line-height:1.3;transition:border-color .12s,background .12s,box-shadow .12s';
+  var scss='display:block;margin-top:3px;font-size:11px;font-weight:600;color:var(--muted,#8C8676);letter-spacing:.01em';
+  d.innerHTML='<div class="ghd">เลือกรูปแบบไฟล์ · Choose format</div>'+
+    '<button type="button" class="glexpfmt" data-fmt="xlsx" style="'+bcss+'">📗 Excel Workbook (.xlsx)<span style="'+scss+'">มาตรฐาน · เปิดได้ทุกเวอร์ชัน/ทุกโปรแกรม</span></button>'+
+    '<button type="button" class="glexpfmt" data-fmt="xlsb" style="'+bcss+'">🗄️ Excel Binary Workbook (.xlsb)<span style="'+scss+'">ไฟล์เล็กกว่า · เปิด/เซฟเร็วกว่าเมื่อข้อมูลใหญ่ (Excel เท่านั้น)</span></button>';
+  pg.appendChild(d);
+  d.addEventListener('mouseover',function(e){var b=e.target.closest('.glexpfmt');if(b){b.style.borderColor='var(--brand,#0E5C52)';b.style.background='var(--brand-t,#E6F0EC)';b.style.boxShadow='0 6px 16px -8px rgba(14,92,82,.5)';}});
+  d.addEventListener('mouseout',function(e){var b=e.target.closest('.glexpfmt');if(b){b.style.borderColor='var(--line,#E6E0D4)';b.style.background='#fff';b.style.boxShadow='none';}});
+  d.addEventListener('click',function(e){var b=e.target.closest('.glexpfmt');if(!b)return;var f=b.getAttribute('data-fmt');_glCloseDrop();_glExportExcel(f);});
+  setTimeout(function(){document.addEventListener('mousedown',_glDocClose);},0);}
 function _glCloseDrop(){var d=document.getElementById('glDrop');if(d&&d.parentNode)d.parentNode.removeChild(d);}
 function _glOpenFun(c,btn){_glCloseDrop();var pg=document.getElementById('page-gl');if(!pg)return;
   var col=GL_COLS[c],f=GLFIL[''+c]||null;
@@ -13836,7 +13854,7 @@ function _glBind(){var pg=document.getElementById('page-gl');if(!pg||pg._gb)retu
     if(cl('#glADBtn')){_glADOpen();return;}
     if(cl('#glDFBtn')){_glDFOpen();return;}
     if(cl('#glCopyV')){_glCopyVOpen();return;}
-    if(cl('#glExport')){_glExportExcel();return;}
+    var xbtn=cl('#glExport');if(xbtn){_glOpenExportMenu(xbtn);return;}
     var colB=cl('#glCols');if(colB){_glOpenColMenu(colB);return;}
     if(cl('#glPurge')){_glPurge();return;}
     if(cl('#glClearAll')){GLFIL={};GLSORT=[];GLSHOW=300;_glClass='';GLMSEL={};renderGl();return;}
@@ -13973,7 +13991,7 @@ function _glActionPanel(clsb,yrs,mons){
       {id:'glDFBtn',ic:_svDF,l:'Distinct Finder',title:'ใส่ค่า (เช่น รหัสบัญชี) แล้วเลือกว่าอยากรู้อะไร — มี Supplier / โปรเจค / เลข Voucher ใดบ้าง (ดึงรายการไม่ซ้ำ พร้อมนับจำนวนและยอดเงิน)',cls:'accent2',off:!_hasRows}
     ]},
     {t:'Export',t2:'View',ic:'⤓',btns:[
-      {id:'glExport',ic:'⤓',l:'Export Excel',title:'Export the filtered rows (color / amount / etc.) to Excel'},
+      {id:'glExport',ic:'⤓',l:'Export Excel ▾',title:'ส่งออกแถวที่กรองอยู่ — เลือกได้ว่าจะเป็น Excel Workbook (.xlsx) หรือ Excel Binary Workbook (.xlsb)'},
       {id:'glCols',ic:'▦',l:'Columns',title:'Show / hide table columns'}
     ]}
   ];
@@ -16208,6 +16226,8 @@ function _fsClassify(code,name){
   else if(cat==='E'){
     if(has('ทุนจดทะเบียน','ทุนเรือนหุ้น','ทุนที่ออก','ทุนชำระ','ทุนที่ชำระ','ทุน-','ทุน -','หุ้นสามัญ','หุ้นบุริมสิทธิ'))
       set('Share capital','ทุนที่ออกและชำระแล้ว','movement','ตามการเพิ่ม/ลดทุน (บอจ.5)');
+    else if(has('ตีราคาสินทรัพย์','ตีราคาทรัพย์สิน','จากการตีราคา','ส่วนเกินทุนจากการตีราคา','ส่วนเกินจากการตีราคา','ส่วนเกินตีราคา'))
+      set('Revaluation surplus','ส่วนเกินจากการตีราคาสินทรัพย์','movement','ตามการตีราคาสินทรัพย์ใหม่');   /* v10.13x: revaluation surplus = บรรทัดส่วนของผู้ถือหุ้นแยกต่างหาก (ก่อน «ส่วนเกินทุน» เพื่อไม่ให้ถูกจับเป็นส่วนเกินมูลค่าหุ้น) */
     else if(has('ส่วนเกินมูลค่าหุ้น','ส่วนเกินทุน','ส่วนล้ำมูลค่าหุ้น','มูลค่าหุ้น'))
       set('Share premium','ส่วนเกินมูลค่าหุ้น','movement','ตามการเปลี่ยนแปลง');
     else if(has('สำรองตามกฎหมาย','ทุนสำรองตามกฎหมาย'))
@@ -16415,7 +16435,7 @@ var _FS_BS_LIAB=['Bank overdrafts & short-term loans','Trade payables','Advances
 var _FS_BS_CUR_L={'Bank overdrafts & short-term loans':1,'Trade payables':1,'Advances received from customers':1,'Retention payable':1,
   'Amounts due to related parties':1,'Output VAT & taxes payable':1,'Income tax payable':1,'Accrued expenses':1,
   'Current portion of long-term loans':1,'Other payables':1,'Other current liabilities':1};
-var _FS_EQ=['Share capital','Share premium','Legal reserve','Retained earnings','Other components of equity','Other equity'];
+var _FS_EQ=['Share capital','Share premium','Revaluation surplus','Legal reserve','Retained earnings','Other components of equity','Other equity'];
 var _FS_REV=['Construction revenue','Service revenue','Sales revenue','Other income'];
 var _FS_EXP=['Cost of construction','Cost of sales / services','Selling expenses','Administrative expenses','Finance costs','Income tax expense','Other expenses'];
 
@@ -16551,7 +16571,7 @@ var _FS_LINE_TH={
  'Other current liabilities':'หนี้สินหมุนเวียนอื่น','Long-term loans & borrowings':'เงินกู้ยืมระยะยาว',
  'Lease liabilities':'หนี้สินตามสัญญาเช่า','Employee benefit obligations':'ประมาณการหนี้สินสำหรับผลประโยชน์พนักงาน',
  'Provisions':'ประมาณการหนี้สิน','Deferred tax liability':'หนี้สินภาษีเงินได้รอการตัดบัญชี','Other non-current liabilities':'หนี้สินไม่หมุนเวียนอื่น',
- 'Share capital':'ทุนที่ออกและชำระแล้ว','Share premium':'ส่วนเกินมูลค่าหุ้น','Legal reserve':'สำรองตามกฎหมาย',
+ 'Share capital':'ทุนที่ออกและชำระแล้ว','Share premium':'ส่วนเกินมูลค่าหุ้น','Revaluation surplus':'ส่วนเกินจากการตีราคาสินทรัพย์','Legal reserve':'สำรองตามกฎหมาย',
  'Retained earnings':'กำไร(ขาดทุน)สะสม','Retained earnings (incl. result for the year)':'กำไร(ขาดทุน)สะสม (รวมผลปีปัจจุบัน)',
  'Other components of equity':'องค์ประกอบอื่นของส่วนของผู้ถือหุ้น','Other equity':'ส่วนของผู้ถือหุ้นอื่น',
  'Construction revenue':'รายได้จากการก่อสร้างตามสัญญา','Service revenue':'รายได้จากการให้บริการและค่าเช่า','Sales revenue':'รายได้จากการขาย','Other income':'รายได้อื่น',
@@ -16581,7 +16601,7 @@ var _FS_LINE_EN={
  'Other current liabilities':'Other current liabilities','Long-term loans & borrowings':'Long-term borrowings',
  'Lease liabilities':'Lease liabilities','Employee benefit obligations':'Provisions for employee benefits',
  'Provisions':'Other provisions','Deferred tax liability':'Deferred tax liabilities','Other non-current liabilities':'Other non-current liabilities',
- 'Share capital':'Issued and paid-up share capital','Share premium':'Share premium','Legal reserve':'Legal reserve',
+ 'Share capital':'Issued and paid-up share capital','Share premium':'Share premium','Revaluation surplus':'Revaluation surplus on assets','Legal reserve':'Legal reserve',
  'Retained earnings':'Retained earnings (deficit)','Retained earnings (incl. result for the year)':'Retained earnings (incl. current year)',
  'Other components of equity':'Other components of equity','Other equity':'Other equity',
  'Construction revenue':'Revenue \u2014 construction','Service revenue':'Revenue \u2014 services','Sales revenue':'Revenue \u2014 sales','Other income':'Other income',
@@ -16631,7 +16651,7 @@ var _FS_LINE_ICON={
   'Amounts due to related parties':'🤝','Output VAT & taxes payable':'🧮','Income tax payable':'🧾','Accrued expenses':'⏱️',
   'Current portion of long-term loans':'🏦','Other payables':'📤','Other current liabilities':'🗃️',
   'Long-term loans & borrowings':'🏦','Lease liabilities':'🏢','Employee benefit obligations':'👥','Provisions':'⚖️','Deferred tax liability':'🧾','Other non-current liabilities':'🗄️',
-  'Share capital':'🏛️','Share premium':'💎','Legal reserve':'⚖️','Retained earnings':'💰','Other components of equity':'🧩','Other equity':'🏛️',
+  'Share capital':'🏛️','Share premium':'💎','Revaluation surplus':'📈','Legal reserve':'⚖️','Retained earnings':'💰','Other components of equity':'🧩','Other equity':'🏛️',
   'Construction revenue':'🏗️','Service revenue':'🛠️','Sales revenue':'🛒','Finance income':'💰','Share of profit of JV':'🤝','Loans receivable':'💸','Other income':'➕',
   'Cost of construction':'🏗️','Cost of sales / services':'📑','Selling expenses':'📢','Administrative expenses':'🗂️','Finance costs':'💳','Income tax expense':'🧾','Other expenses':'➖'
 };
@@ -18739,8 +18759,8 @@ function _fsExpDetailRows(){
 function _fsRenderSCE(){
   var t=_fsT,pt=_fsPrevT;
   var begin=pt?(pt.equity+pt.accProfit):0;
-  var g=_fsAgg(_fsTB); var capNow=0; ['Share capital','Share premium','Legal reserve','Other components of equity','Other equity'].forEach(function(l){if(g.E[l])capNow+=g.E[l].sum;});
-  var capPrev=0; if(_fsPrevTB){var pg=_fsAgg(_fsPrevTB);['Share capital','Share premium','Legal reserve','Other components of equity','Other equity'].forEach(function(l){if(pg.E[l])capPrev+=pg.E[l].sum;});}
+  var g=_fsAgg(_fsTB); var capNow=0; ['Share capital','Share premium','Revaluation surplus','Legal reserve','Other components of equity','Other equity'].forEach(function(l){if(g.E[l])capNow+=g.E[l].sum;});
+  var capPrev=0; if(_fsPrevTB){var pg=_fsAgg(_fsPrevTB);['Share capital','Share premium','Revaluation surplus','Legal reserve','Other components of equity','Other equity'].forEach(function(l){if(pg.E[l])capPrev+=pg.E[l].sum;});}
   var endEq=t.equity+t.accProfit;
   var eqAccts=[]; Object.keys(g.E).forEach(function(l){eqAccts=eqAccts.concat(g.E[l].accts);});
   if(Math.abs(t.accProfit)>0.005)eqAccts=eqAccts.concat([{code:'—',name:'กำไร(ขาดทุน)สำหรับปี (ยังไม่ปิดเข้ากำไรสะสม)',cls:{line:'Retained earnings'},nat:t.accProfit}]);
@@ -18765,7 +18785,7 @@ function _fsRenderSCE(){
 
 /* ---------- RENDER: Cash Flow (indirect, identity-based) ---------- */
 var _FS_CF_INV={'Property, plant & equipment':1,'Intangible assets':1,'Investments':1,'Right-of-use assets':1};
-var _FS_CF_FIN={'Bank overdrafts & short-term loans':1,'Long-term loans & borrowings':1,'Current portion of long-term loans':1,'Lease liabilities':1,'Share capital':1,'Share premium':1,'Legal reserve':1,'Other components of equity':1,'Other equity':1,'Retained earnings':1};
+var _FS_CF_FIN={'Bank overdrafts & short-term loans':1,'Long-term loans & borrowings':1,'Current portion of long-term loans':1,'Lease liabilities':1,'Share capital':1,'Share premium':1,'Revaluation surplus':1,'Legal reserve':1,'Other components of equity':1,'Other equity':1,'Retained earnings':1};
 var _FS_CF_CASH={'Cash on hand':1,'Cash at banks':1,'Cash & deposits in transit':1};
 function _fsCFCompute(tb,t){
   var beginCash=0,deltaCash=0; var opAcc={},invAcc={},finAcc={};
