@@ -19252,10 +19252,10 @@ function _fsCfdCleanCSS(){ if(document.getElementById('fsiss-cfd-css'))return;
    ".fsiss-cfd tr.cfinfo td{padding-top:2px}",".fsiss-cfd tr.cfinfo td.l{color:#234}",
    /* v10.100: sign-boxed amounts — positive green, negative red */
    ".fsiss-cfd td.n{padding-top:2px;padding-bottom:2px}",
-   ".fsiss-cfd td.n .cfamt{display:inline-block;padding:1px 8px;border-radius:6px;font-variant-numeric:tabular-nums;min-width:64px;text-align:right;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13.5px;font-feature-settings:'tnum' 1,'lnum' 1;letter-spacing:.01em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}",
-   ".fsiss-cfd td.n .cfamt.pos{background:#e6f6ec;color:#0a7a3f;box-shadow:inset 0 0 0 1px #bce4cb}",
-   ".fsiss-cfd td.n .cfamt.neg{background:#fdeceb;color:#c02b22;box-shadow:inset 0 0 0 1px #f2c6c2}",
-   ".fsiss-cfd td.n .cfamt.zero{color:#9fb0ab;background:transparent;box-shadow:none;padding-right:8px}",
+   ".fsiss-cfd td.n .cfamt{display:inline-block;padding:0;border-radius:0;background:transparent!important;box-shadow:none!important;font-variant-numeric:tabular-nums;min-width:64px;text-align:right;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13.5px;font-feature-settings:'tnum' 1,'lnum' 1;letter-spacing:.01em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}",
+   ".fsiss-cfd td.n .cfamt.pos{color:#0a7a3f}",
+   ".fsiss-cfd td.n .cfamt.neg{color:#c02b22}",
+   ".fsiss-cfd td.n .cfamt.zero{color:#9fb0ab}",
    /* v10.99: balance-sheet reconciliation bridge */
    ".fsiss-cfd tr.cfrec-h td{padding-top:9px;font-size:11px;font-weight:700;color:#8a5a12;border-top:1px dashed #d9c6a0}",
    ".fsiss-cfd tr.cfrec td.l{padding-left:24px;color:#5a4a22}",
@@ -27094,5 +27094,25 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
   background:
     linear-gradient(108deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,0) 46%,rgba(0,0,0,.16) 100%),
     linear-gradient(122deg,#0E4438 0%,#0B3329 58%,#0C3B2F 122%) !important; }
+</style>
+<style id="vatMinimalUniform">
+/* v10.13x: VAT module — ปรับตัวหนังสือ/ตัวเลข ให้ขนาดเท่ากัน + มินิมอล (ชั้น override สุดท้าย ชนะทุก layer เดิม)
+   ระบบขนาด 4 ระดับ: หัวเลขหลัก 22px · ค่าตัวเลข 16px · ป้ายกำกับ 10.5px · ป้ายย่อย 10px · ตาราง 12.5px */
+/* 1) headline figures — one restrained, uniform size */
+#page-vat .v30hn-v,#page-vat .v30hp-big,#page-vat .vsv{font-size:22px!important;line-height:1.15!important;letter-spacing:-.01em!important;font-weight:800!important}
+#page-vat .v30hp-big small{font-size:12px!important;font-weight:600!important}
+/* 2) secondary value figures (KPI tiles · company header · split values) — one uniform size */
+#page-vat .v30dc-v,#page-vat .vcon{font-size:16px!important;line-height:1.2!important;letter-spacing:-.005em!important;font-weight:800!important}
+#page-vat .v30hn-sp .v{font-size:14px!important;font-weight:700!important}
+/* 3) labels — one uniform size */
+#page-vat .v30dc-k,#page-vat .v30hn-k,#page-vat .v30hp-k,#page-vat .vsh,#page-vat .v30hn-sp .l{font-size:10.5px!important;letter-spacing:.04em!important;font-weight:700!important}
+/* 4) sub-labels / captions — one uniform size */
+#page-vat .v30dc-s,#page-vat .vsb,#page-vat .v30hn-badge,#page-vat .v30hp-s{font-size:10px!important;font-weight:600!important}
+/* 5) tables — consistent, quiet */
+#page-vat .vtbl,#page-vat .vtbl td,#page-vat .vtbl .vmono{font-size:12.5px!important}
+#page-vat .vtbl thead th{font-size:10px!important;letter-spacing:.03em!important}
+/* 6) register section titles + company name in register — align with the scale */
+#page-vat .vregt{font-size:14px!important}
+#page-vat .vregsub,#page-vat .vregic{font-size:11px!important}
 </style>
 </body></html>
