@@ -12971,15 +12971,19 @@ function _apVJEnsure(){
     var add=e.target&&e.target.closest?e.target.closest('#apVJAddTab'):null; if(add){_apVJAddTab();return;}
     var tb=e.target&&e.target.closest?e.target.closest('.apvj-tab[data-tab]'):null; if(tb){_apVJSwitchTab(+tb.getAttribute('data-tab'));return;}
   });
-  /* v10.101: click a voucher code in the statement → toggle its accounting entry (บันทึกบัญชี) under that row */
+  /* v10.102: กดที่แถว/เลข voucher → กางบันทึกบัญชีแบบแบ่งครึ่ง (ซ้าย=ตั้งหนี้ AP · ขวา=จ่ายชำระ PV) · เปิดหลายแถวซ้อนกันได้ */
   m.querySelector('#apVJRes').addEventListener('click',function(e){
-    var vl=e.target&&e.target.closest?e.target.closest('.apvj-vlink[data-vch]'):null; if(!vl)return;
-    var tr=vl.closest?vl.closest('tr'):null; if(!tr)return; var vch=vl.getAttribute('data-vch');
+    var vl=e.target&&e.target.closest?e.target.closest('.apvj-vlink'):null; if(!vl)return;
+    var tr=vl.closest?vl.closest('tr'):null; if(!tr||tr.classList.contains('apvj-jnrow'))return;
     var nx=tr.nextElementSibling;
-    if(nx&&nx.classList.contains('apvj-jnrow')){var same=nx.getAttribute('data-for')===vch;nx.parentNode.removeChild(nx);if(same){vl.classList.remove('open');return;}}
-    var jr=document.createElement('tr');jr.className='apvj-jnrow';jr.setAttribute('data-for',vch);
-    var td=document.createElement('td');td.colSpan=7;td.innerHTML='<div class="apvj-jnbox"><div class="apvj-jnlab">📒 บันทึกบัญชี · '+esc(vch)+'</div>'+_apVJGlMini(vch)+'</div>';
-    jr.appendChild(td);tr.parentNode.insertBefore(jr,tr.nextSibling);vl.classList.add('open');
+    if(nx&&nx.classList.contains('apvj-jnrow')){nx.parentNode.removeChild(nx);tr.classList.remove('apvj-jnopen');return;}   /* toggle off */
+    var ap=tr.getAttribute('data-ap')||'',pv=tr.getAttribute('data-pv')||'';
+    var jr=document.createElement('tr');jr.className='apvj-jnrow';var td=document.createElement('td');td.colSpan=7;
+    td.innerHTML='<div class="apvj-jnsplit">'
+      +'<div class="apvj-jnhalf ap"><div class="apvj-jnlab ap">📒 ตั้งหนี้ · AP '+(ap?esc(ap):'—')+'</div>'+(ap?_apVJGlMini(ap):'<div class="apvj-nojn">— ไม่มีฝั่ง AP —</div>')+'</div>'
+      +'<div class="apvj-jnhalf pv"><div class="apvj-jnlab pv">📒 จ่ายชำระ · PV '+(pv?esc(pv):'—')+'</div>'+(pv?_apVJGlMini(pv):'<div class="apvj-nojn">— ไม่มีฝั่ง PV —</div>')+'</div>'
+      +'</div>';
+    jr.appendChild(td);tr.parentNode.insertBefore(jr,tr.nextSibling);tr.classList.add('apvj-jnopen');
   });
   m.querySelector('#apVJPaste').addEventListener('click',function(){
     try{if(navigator.clipboard&&navigator.clipboard.readText){navigator.clipboard.readText().then(function(t){t=(''+(t||'')).replace(/\s+$/,'');if(!t){ta.focus();return;}ta.value=ta.value.trim()?(ta.value.replace(/\s+$/,'')+'\n'+t):t;_apVJCompute();ta.focus();}).catch(function(){ta.focus();});}else ta.focus();}catch(_e){ta.focus();}
@@ -13041,8 +13045,8 @@ function _apVJApCard(code,rows){
   var pv=rows.slice().sort(function(a,b){var d=_apVJDateKey(a[6])-_apVJDateKey(b[6]);if(d)return d;return (''+(a[1]||''))<(''+(b[1]||''))?-1:1;});
   var totPaid=0,rem=payable,body='';
   for(var j=0;j<pv.length;j++){var r=pv[j];var paid=_apVJNum(r[4]);totPaid+=paid;rem-=paid;var first=(j===0);
-    body+='<tr>'
-      +'<td class="apst-ap">'+(first?'<span class="glvj-ac apvj-vlink" data-vch="'+_eatt(code)+'" title="กดดูบันทึกบัญชี">'+esc(code)+'</span>':'')+'</td>'
+    body+='<tr data-ap="'+_eatt(code)+'" data-pv="'+_eatt(''+(r[1]||''))+'">'
+      +'<td class="apst-ap">'+(first?'<span class="glvj-ac apvj-vlink" data-vch="'+_eatt(code)+'" title="กดดูบันทึกบัญชี 2 ฝั่ง">'+esc(code)+'</span>':'')+'</td>'
       +'<td class="apst-ap">'+(first?esc(apdate):'')+'</td>'
       +'<td class="n apst-ap apst-pay">'+(first?fmt(payable):'')+'</td>'
       +'<td class="apst-sep"><span class="glvj-ac pv apvj-vlink" data-vch="'+_eatt(''+(r[1]||''))+'" title="กดดูบันทึกบัญชี">'+esc(''+(r[1]||''))+'</span></td>'
@@ -13070,8 +13074,8 @@ function _apVJPvCard(code,rows){
     var apRows=_apVJIdxAP[apc.toUpperCase()]||[r];var apPay=0,apTot=0;
     for(var k=0;k<apRows.length;k++){var vv=_apVJNum(apRows[k][3]);if(vv>apPay)apPay=vv;apTot+=_apVJNum(apRows[k][4]);}
     var apRem=apPay-apTot;
-    body+='<tr>'
-      +'<td><span class="glvj-ac apvj-vlink" data-vch="'+_eatt(apc)+'" title="กดดูบันทึกบัญชี">'+esc(apc)+'</span>'+(r[2]?'<div class="apst-vend">'+esc(''+r[2])+'</div>':'')+'</td>'
+    body+='<tr data-ap="'+_eatt(apc)+'" data-pv="'+_eatt(code)+'">'
+      +'<td><span class="glvj-ac apvj-vlink" data-vch="'+_eatt(apc)+'" title="กดดูบันทึกบัญชี 2 ฝั่ง">'+esc(apc)+'</span>'+(r[2]?'<div class="apst-vend">'+esc(''+r[2])+'</div>':'')+'</td>'
       +'<td>'+esc(''+(r[5]||''))+'</td>'
       +'<td class="n apst-pay">'+(apPay?fmt(apPay):'')+'</td>'
       +'<td class="apst-sep"><span class="glvj-ac pv apvj-vlink" data-vch="'+_eatt(code)+'" title="กดดูบันทึกบัญชี">'+esc(code)+'</span></td>'
@@ -13142,9 +13146,14 @@ function _apVJCSS(){return ''
   +'.apvj-vlink{cursor:pointer;border-bottom:1px dashed currentColor;}'
   +'.apvj-vlink:hover{filter:brightness(.85);}'
   +'.apvj-vlink.open{background:#FFF3D6;border-radius:3px;padding:0 2px;}'
-  +'.apvj-jnrow>td{background:#FCFBF7;padding:4px 8px 8px !important;}'
-  +'.apvj-jnbox{border-left:3px solid #E3C97A;padding:2px 0 2px 9px;}'
-  +'.apvj-jnbox .glvj-tbl{margin-top:2px;}';
+  +'.apvj-jnrow>td{background:#FCFBF7;padding:6px 8px 9px !important;}'
+  +'tr.apvj-jnopen>td{box-shadow:inset 0 -2px 0 #E3C97A;}'
+  +'.apvj-jnsplit{display:flex;gap:12px;align-items:flex-start;}'
+  +'.apvj-jnhalf{flex:1 1 0;min-width:0;border-left:3px solid #E3C97A;padding:2px 0 2px 9px;overflow-x:auto;}'
+  +'.apvj-jnhalf.ap{border-left-color:#B45309;} .apvj-jnhalf.pv{border-left-color:#0E5C52;}'
+  +'.apvj-jnhalf .glvj-tbl{margin-top:2px;width:100%;}'
+  +'.apvj-jnlab.ap{color:#8a4b08;} .apvj-jnlab.pv{color:#0a5c52;}'
+  +'@media(max-width:720px){.apvj-jnsplit{flex-direction:column;gap:8px;}}';
 }
 /* ===================== V9.171: Voucher Balance Check (ตรวจ Voucher สมดุล) ===================== */
 var _glBCLast=null;
