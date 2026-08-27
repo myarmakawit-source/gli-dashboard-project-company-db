@@ -27154,8 +27154,8 @@ body{ text-rendering:optimizeLegibility; font-feature-settings:"kern" 1,"liga" 1
 .modnav.sidebar .modtab.active .sbic{color:#053b31;background:linear-gradient(150deg,#6FEAD6,#0E9F6E) !important;border-color:rgba(255,255,255,.5) !important;box-shadow:0 5px 14px -4px rgba(94,234,212,.6),inset 0 1px 1px rgba(255,255,255,.5) !important}
 .modnav.sidebar .sbsec{color:rgba(233,247,243,.5) !important}
 #page-fs .fstb thead th .fstbsort{font-size:12px !important;font-weight:800;letter-spacing:.02em;line-height:1.25}
-#page-fs .fstb th.fsatthd-ic,#page-fs .fstb th.fsatthd-amt,#page-fs .fstb th.fsatthd-diff{font-size:12px !important;background:linear-gradient(180deg,#12665B 0%,#0A463E 100%) !important;color:#fff !important;border-bottom:2px solid #083A33 !important}
-#page-fs .fstb thead th .fsthy,#page-fs .fstb thead th .fsgrphd-en,#page-fs .fstb th .fsatthx{display:block;width:-moz-fit-content;width:fit-content;max-width:100%;box-sizing:border-box;font-size:9px !important;font-weight:700;letter-spacing:.01em;line-height:1.3;margin-top:4px;padding:1.5px 7px;border-radius:7px;opacity:1;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.26);color:#CFE6DE;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+#page-fs .fstb th.fsatthd-ic,#page-fs .fstb th.fsatthd-amt,#page-fs .fstb th.fsatthd-diff{font-size:12px !important;background:#0F3D37 !important;color:#fff !important;border-bottom:2px solid #0B322C !important}
+#page-fs .fstb thead th .fsthy,#page-fs .fstb thead th .fsgrphd-en,#page-fs .fstb th .fsatthx{display:block;width:-moz-fit-content;width:fit-content;max-width:100%;box-sizing:border-box;font-size:9px !important;font-weight:600;letter-spacing:.01em;line-height:1.3;margin-top:3px;padding:0;border-radius:0;opacity:1;background:transparent;border:none;color:rgba(255,255,255,.7);box-shadow:none}
 #page-fs .fstb thead th.fsm .fsthy{margin-left:auto}
 #page-fs .fstb th.fsatthd-amt .fsatthx,#page-fs .fstb th.fsatthd-diff .fsatthx,#page-fs .fstb th.fsatthd-ic .fsatthx{margin-left:auto;margin-right:auto}
 :root{--ink:#141C29 !important;--ink2:#3E4859 !important;--muted:#667085 !important}
@@ -27164,8 +27164,9 @@ body{text-rendering:optimizeLegibility}
 #page-fs .fstbwrap{resize:both !important;overflow:auto !important;min-height:240px;height:560px;max-height:none;min-width:480px;max-width:100%}
 #page-fs .fstb{min-width:1660px;width:100%}
 #page-fs .fstbwrap::-webkit-resizer{background:linear-gradient(135deg,transparent 46%,var(--fx-brand,#0E5C52) 46%,var(--fx-brand,#0E5C52) 60%,transparent 60%,transparent 70%,var(--fx-brand,#0E5C52) 70%,var(--fx-brand,#0E5C52) 84%,transparent 84%)}
-#page-fs .fstb thead th{background:linear-gradient(180deg,#12665B 0%,#0A463E 100%) !important;color:#fff !important;font-family:'Inter',sans-serif !important;border-color:rgba(255,255,255,.14) !important}
-#page-fs .fstb .fstot td{background:linear-gradient(180deg,#12665B 0%,#0A463E 100%) !important;color:#fff !important;font-weight:800 !important;border-top:2.5px solid #4FD6C0 !important;border-bottom:none !important;letter-spacing:.01em}
+/* v10.104: หัวตาราง Trial Balance = สไตล์ Database → GL (พื้นเขียวเข้มทึบ #0F3D37 · ตัวขาว · ไม่พิมพ์ใหญ่) */
+#page-fs .fstb thead th{background:#0F3D37 !important;color:#fff !important;font-family:'Inter',sans-serif !important;border-color:rgba(255,255,255,.12) !important;letter-spacing:0 !important;text-transform:none !important;font-weight:700 !important}
+#page-fs .fstb .fstot td{background:#0F3D37 !important;color:#fff !important;font-weight:800 !important;border-top:2.5px solid #4FD6C0 !important;border-bottom:none !important;letter-spacing:.01em}
 #page-fs .fstb .fstot td .fsm,#page-fs .fstb .fstot td b,#page-fs .fstb .fstot td span,#page-fs .fstb .fstot td i,#page-fs .fstb .fstot td strong{color:#fff !important}
 #page-fs .fstb td.fsatt-amt,#page-fs .fstb td.fsatt-diff{white-space:nowrap;font-variant-numeric:tabular-nums;font-size:10.5px;letter-spacing:-.3px;padding-left:4px;padding-right:5px}
 #page-ov .hubkpi{padding-top:14px}#page-ov .hubkpiic{position:absolute;top:10px;right:12px;font-size:17px;line-height:1;opacity:.55;filter:saturate(1.15)}
@@ -27307,11 +27308,15 @@ body{text-rendering:optimizeLegibility}
 /* ---------- table shell ---------- */
 #page-fs .fstbwrap{border-radius:16px;border-color:var(--tbx-line);box-shadow:var(--tbx-shadow)}
 #page-fs .fstb th,#page-fs .fstb td{padding:8px 13px}
-#page-fs .fstb thead th{padding-top:10px;padding-bottom:10px;font-size:11px;letter-spacing:.035em;
-  border-bottom:2px solid var(--tbx-aqua) !important}
+/* v10.104: หัวตาราง Trial Balance ให้เหมือน Database → GL — พื้นเขียวเข้มทึบ #0F3D37 · ตัวขาว · ปุ่ม ▼ แบบ GL */
+#page-fs .fstb thead th{background:#0F3D37;color:#fff;padding-top:9px;padding-bottom:9px;font-size:11.5px;font-weight:700;
+  letter-spacing:0;text-transform:none;border-right:1px solid rgba(255,255,255,.12);border-bottom:2px solid #0B322C !important}
+#page-fs .fstb thead th.fsm{border-left:1px solid rgba(255,255,255,.14)}
 #page-fs .fstb thead th .fstbsort{line-height:1.3}
-#page-fs .fstb thead th .fstbfun{border-radius:7px;opacity:.72}
-#page-fs .fstb thead th .fstbfun:hover,#page-fs .fstb thead th .fstbfun.on{opacity:1}
+#page-fs .fstb thead th .fsthy,#page-fs .fstb thead th .fsgrphd-en{opacity:.75;text-transform:none;letter-spacing:0;font-weight:600}
+#page-fs .fstb thead th .fstbfun{border:none;background:rgba(255,255,255,.16);color:#fff;border-radius:5px;font-size:10px;line-height:1;padding:4px 5px;opacity:1}
+#page-fs .fstb thead th .fstbfun:hover,#page-fs .fstb thead th .fstbfun.on{background:rgba(255,255,255,.32);color:#fff}
+#page-fs .fstb thead th .fstbrsz:hover,#page-fs .fstb thead th .fstbrsz.drag{background:rgba(242,194,0,.6)}
 
 /* ---------- rows: quiet zebra, clear hover, roomier rhythm ---------- */
 #page-fs .fstb tbody tr{border-top:1px solid var(--tbx-line2)}
