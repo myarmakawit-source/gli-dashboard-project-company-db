@@ -788,6 +788,8 @@ td.num.edit{border-bottom:1px dashed #E2DCCF!important}
 .glyr.active,.glmod.active{background:#0E5C52;border-color:#0E5C52;color:#fff}
 .glcls{border:1px solid var(--line);background:#fff;color:var(--ink2);font-family:'Inter',sans-serif;font-size:12px;font-weight:700;padding:5px 11px;border-radius:8px;cursor:pointer}
 .glcls.active{background:#1D5FAE;border-color:#1D5FAE;color:#fff}
+.glcls-sub{font-size:11.5px;padding:5px 9px;background:#F3F8F5;border-color:#CDE3D8;color:#0A6B4F;border-style:dashed}
+.glcls-sub.active{background:#0A8A5F;border-color:#0A8A5F;color:#fff;border-style:solid}
 .glclsrow{margin-bottom:6px}
 /* v10.94: Trial Balance — account-class (หมวดบัญชี) filter chips (like GL) */
 .fstbclsrow{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:10px 0 8px;padding:8px 11px;background:#F4FAF8;border:1px solid var(--line2);border-radius:12px}
@@ -796,6 +798,15 @@ td.num.edit{border-bottom:1px dashed #E2DCCF!important}
 .fstbcls{border:1px solid var(--line);background:#fff;color:var(--ink2);font-family:'Inter',sans-serif;font-size:12px;font-weight:700;padding:5px 12px;border-radius:8px;cursor:pointer;transition:background .12s,color .12s,transform .1s ease,box-shadow .12s ease}
 .fstbcls:hover{background:#EAF3F0;transform:translateY(-1px);box-shadow:0 4px 10px -5px rgba(14,92,82,.35)}
 .fstbcls.active{background:#1D5FAE;border-color:#1D5FAE;color:#fff}
+.fstbcls-sp{flex:1 1 12px;min-width:8px}
+.fstbcls-adj{background:#F1ECFB;border-color:#D9C9F5;color:#5B3AA6}
+.fstbcls-adj:hover{background:#E7DDF8}
+.fstbcls-adj.on{background:#6D28D9;border-color:#6D28D9;color:#fff}
+.fstbcls-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.4);vertical-align:middle;margin-left:2px}
+.fstbsum-tgl{margin-left:auto;border:1px solid var(--line);background:#fff;color:#0A463E;font-family:'Inter',sans-serif;font-size:11.5px;font-weight:800;padding:3px 11px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.fstbsum-tgl:hover{background:#EAF3F0}
+.fstbsum.collapsed .fstbsum-body{display:none}
+.fstbsum.collapsed{padding-bottom:8px}
 .glqhint{font-size:10px;color:var(--muted);font-weight:600;margin-left:7px;white-space:nowrap;letter-spacing:.02em}
 .glq{border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-family:'Inter',sans-serif;font-size:12px;min-width:230px}
 .glq:focus{outline:none;border-color:#0E5C52}
@@ -11529,8 +11540,24 @@ function _mnDM(d){if(!d)return '';var p=(''+d).split('-');return p.length>=3?((+
 function _mnStatus(t){if(t.payOk)return ['💸 Paid','paid'];if(t.fOk)return ['✅ Filed','filed'];if(t.aOk)return ['🟢 Approved','app'];if(t.rOk)return ['🔵 Reviewed','rev'];if(t.pOk)return ['🟡 Prepared','prep'];return ['⬜ Not started','none'];}
 /* ===================== GL MODULE ===================== */
 var GLROWS=null,GLVIEW=[],GLMETA=null,GLFIL={},GLSORT=[],GLSHOW=300,GLTOT={n:0,d:0,c:0},GLYEARS=[],GLMODS=[],GLMSEL={},_glQT=null;
-var _glClass='';/* v8.50: account-class group filter — first digit of A/C: 1 Asset · 2 Liability · 3 Equity · 4 Revenue · 5 Expense */
+var _glClass=[];/* v9.210: account-class group filter — now an ARRAY of A/C-code PREFIXES (prefix match). Main classes = 1-digit ('1'..'7'); sub-classes split Class 4 (รายได้หลัก 41 / รายได้อื่น 42-43) and Class 6 (ค่าใช้จ่ายขาย 61 / ค่าใช้จ่ายบริหาร 62). */
 var _glYrAnchor=null,_glClsAnchor=null;/* v8.71: anchors for Shift+click range selection on the Year / Account-Class filters */
+/* v9.210: account-class definitions (shared by the button bar + click handler). k=button key/data-cls · pfx=code prefixes it matches · n=badge · s=short label · t=tooltip · main=participates in Shift-range · sub=split sub-class */
+var _GLCLS_DEF=[
+  {k:'1',pfx:['1'],n:'1',s:'Asset',t:'Assets (Class 1)',main:1},
+  {k:'2',pfx:['2'],n:'2',s:'Liability',t:'Liabilities (Class 2)',main:1},
+  {k:'3',pfx:['3'],n:'3',s:'Equity',t:'Equity (Class 3)',main:1},
+  {k:'4',pfx:['4'],n:'4',s:'Revenue',t:'Revenue — ทั้งหมด (Class 4)',main:1},
+  {k:'41',pfx:['41'],n:'4.1',s:'รายได้หลัก',t:'รายได้หลัก / รายได้จากการดำเนินงาน (41xxxxx)',sub:1},
+  {k:'42',pfx:['42','43'],n:'4.2',s:'รายได้อื่น',t:'รายได้อื่น + รายได้ทางการเงิน (42-43xxxxx)',sub:1},
+  {k:'5',pfx:['5'],n:'5',s:'(Cost) Expense',t:'Cost of goods / project cost (Class 5)',main:1},
+  {k:'6',pfx:['6'],n:'6',s:'Expense (all)',t:'ค่าใช้จ่ายดำเนินงาน — ทั้งหมด (Class 6)',main:1},
+  {k:'61',pfx:['61'],n:'6.1',s:'ค่าใช้จ่ายขาย',t:'ค่าใช้จ่ายในการขาย (61xxxxx)',sub:1},
+  {k:'62',pfx:['62'],n:'6.2',s:'ค่าใช้จ่ายบริหาร',t:'ค่าใช้จ่ายในการบริหาร (62xxxxx)',sub:1},
+  {k:'7',pfx:['7'],n:'7',s:'(Finance) Expense',t:'Finance cost (Class 7)',main:1}
+];
+function _glClsDef(k){for(var i=0;i<_GLCLS_DEF.length;i++)if(_GLCLS_DEF[i].k===k)return _GLCLS_DEF[i];return null;}
+function _glClsActive(btn){if(!_glClass||!_glClass.length)return false;var allSingle=_glClass.every(function(p){return p.length===1;});if(btn.main&&allSingle)return _glClass.indexOf(btn.k)>=0;return _glClass.join(',')===btn.pfx.join(',');}
 var GL_COLW_DEFAULT=[110,56,90,120,200,120,90,240,110,90,90,100,150,90,160,112,112,112,120];
 var _glColW=null,_glVS={rowH:29,raf:0};
 var GLCLOUD=null,_glUlBusy=false,_glDlBusy=false;
@@ -11557,7 +11584,7 @@ function _glEmptyCols(){var e=[];for(var c=0;c<GL_COLS.length;c++)e.push(true);i
 function _glKey(id,suf){id=id||GLACTIVE||'_legacy';return (id==='_legacy'?'':(id+':'))+suf;}
 /* ---- file management ---- */
 function _glAddFile(meta){var id=_glNewId();var entry={id:id,name:(meta&&meta.src)||'GL',ts:Date.now(),n:(GLROWS?GLROWS.length:0),na:(meta&&meta.na)||0,cloud:null};GLFILES.push(entry);GLACTIVE=id;/* v10.52: อัป GL ใหม่ต้อง "ไม่" ล้างธง gli_glemb_del อีกต่อไป — ไฟล์ที่ผู้ใช้ลบทิ้งแล้วต้องไม่ถูกโหลดกลับตอน boot ไม่ว่ากรณีใด (เดิม removeItem ทำให้ไฟล์เก่าที่ลบเด้งกลับหลังอัปไฟล์ใหม่) */_glSaveFiles();_glSaveActive();try{if(typeof _fsCarryOnImport==='function')_fsCarryOnImport(id);}catch(_ci){}/* v9.99: อัป GL ใหม่ → ดึงไฟล์แนบ+ทะเบียนบัญชีจากสล็อต carry มาใส่ไฟล์ใหม่ */return entry;}
-function _glSelectFile(id){if(id===GLACTIVE&&GLROWS&&GLROWS.length){return;}GLACTIVE=id;_glSaveActive();GLROWS=null;GLMETA=null;GLFIL={};GLSORT=[];GLSHOW=300;_glClass='';GLHLFILTER=null;GLHLPAINT=-2;_glHlFile=null;renderGl();}
+function _glSelectFile(id){if(id===GLACTIVE&&GLROWS&&GLROWS.length){return;}GLACTIVE=id;_glSaveActive();GLROWS=null;GLMETA=null;GLFIL={};GLSORT=[];GLSHOW=300;_glClass=[];GLHLFILTER=null;GLHLPAINT=-2;_glHlFile=null;renderGl();}
 function _glDeleteFile(id){var f=_glFindFile(id);if(!f)return;
   if(GLFILES.filter(function(x){return x.id!==id;}).length===0){
     /* v9.98: ไฟล์ GL "ตัวสุดท้าย" → ล้างข้อมูลแต่เก็บชิปไว้เป็นช่องว่าง (เหมือน AP/AR) รออัปไฟล์ใหม่ทับ */
@@ -11665,7 +11692,7 @@ function _glHlBar(){var sw='';for(var i=0;i<_GLHLC.length;i++)sw+='<button class
   var cnt=0;for(var k in GLHL)cnt++;
   var hint=(GLHLPAINT!==-2)?'<span class="glhlhint">'+(GLHLPAINT===-1?'Eraser on \u2014 click rows to clear':'Painting \u2014 click rows to apply '+_GLHLC[GLHLPAINT].name)+'</span>':'';
   return '<div class="glhlbar"><span class="glhllab">\U0001F3A8 Highlight</span>'+sw+'<span class="glhlsep"></span><span class="glhllab">Filter by color</span>'+fsw+(cnt?'<span class="glhlcnt">'+cnt+' highlighted</span>':'')+hint+'<span class="glhltot"><span class="glhltt dr">Debit \u0e3f'+fmt(GLTOT.d)+'</span><span class="glhltt cr">Credit \u0e3f'+fmt(GLTOT.c)+'</span><span class="glhltt nt">Net \u0e3f'+fmt(GLTOT.d-GLTOT.c)+'</span><span class="glhltt rw">'+GLTOT.n.toLocaleString()+' rows</span></span></div>';}
-function _glPass(r){if(GLMSEL){var _msH=false,_msK;for(_msK in GLMSEL){_msH=true;break;}if(_msH){var _dv=''+(r[3]||'');if(_dv.length<7||!GLMSEL[_dv.substr(5,2)])return false;}}if(_glClass){var _fc=(''+(r[0]==null?'':r[0])).charAt(0);if(!_fc||_glClass.indexOf(_fc)<0)return false;}if(GLHLFILTER!=null){var _hci=GLHL[_glRowKey(r)];if(GLHLFILTER===-1){if(_hci!=null)return false;}else if(_hci!==GLHLFILTER)return false;}for(var k in GLFIL){var f=GLFIL[k];
+function _glPass(r){if(GLMSEL){var _msH=false,_msK;for(_msK in GLMSEL){_msH=true;break;}if(_msH){var _dv=''+(r[3]||'');if(_dv.length<7||!GLMSEL[_dv.substr(5,2)])return false;}}if(_glClass&&_glClass.length){var _code=(''+(r[0]==null?'':r[0]));var _okc=false;for(var _pci=0;_pci<_glClass.length;_pci++){if(_code.indexOf(_glClass[_pci])===0){_okc=true;break;}}if(!_okc)return false;}if(GLHLFILTER!=null){var _hci=GLHL[_glRowKey(r)];if(GLHLFILTER===-1){if(_hci!=null)return false;}else if(_hci!==GLHLFILTER)return false;}for(var k in GLFIL){var f=GLFIL[k];
     if(k==='_g'){var _hay=r._h;if(_hay==null){_hay=_glRowHay(r);r._h=_hay;}if(_hay.indexOf(f.q)<0)return false;continue;}
     var c=+k,v=_glVal(r,c);
     if(f.t==='set'){if(!f.v['$'+v])return false;}
@@ -12224,7 +12251,7 @@ function _apRender(w){
     return; }
   top+='<div class="glbar"><span class="glmeta">File: <b>'+esc(srcName)+'</b> · '+APROWS.length.toLocaleString()+' rows · '+(isUp?'uploaded manually':'data embedded in file')+' · Accounts-Payable Payment report (A/P Payment) · 1 line per payment · left index: AP Code → PV Code</span><span id="apStatus" style="color:var(--brand-d);font-size:12px;font-weight:700"></span><span style="flex:1"></span>'
     +'</div>'+fileInput;
-  top+=_dbActPanel([{t:'Files',t2:'Manage',ic:'📁',btns:[{id:'apUpload',ic:'⬆',l:'Upload new',title:'Upload a new AP Payment file to replace the current data'},(isUp&&_apHasEmbed())?{id:'apRestore',ic:'↩',l:'Restore original',title:'Restore the data embedded in the file'}:null,{id:'apDelete',ic:'🗑',l:'Delete data',title:'Remove all AP Payment data from this device',cls:'danger'}]},{t:'Export',t2:'View',ic:'⤓',btns:[{id:'apExport',ic:'⤓',l:'Export Excel',title:'Export the filtered rows to Excel'},{id:'apCols',ic:'▦',l:'Columns',title:'Show / hide columns'}]}],[{t:'Year',t2:'Filter',ic:'📅',wcls:'glactg-yr',filCls:'glactfil-yr',html:_apYearBar(true)}]);
+  top+=_dbActPanel([{t:'Files',t2:'Manage',ic:'📁',btns:[{id:'apUpload',ic:'⬆',l:'Upload new',title:'Upload a new AP Payment file to replace the current data'},(isUp&&_apHasEmbed())?{id:'apRestore',ic:'↩',l:'Restore original',title:'Restore the data embedded in the file'}:null,{id:'apDelete',ic:'🗑',l:'Delete data',title:'Remove all AP Payment data from this device',cls:'danger'}]},{t:'Tools',t2:'Match',ic:'🔗',btns:[{id:'apVJBtn',ic:'🔗',l:'AP ↔ PV',title:'วางเลข AP และ/หรือ PV เพื่อดูว่า AP ตัดด้วย PV ใบไหน · PV จ่าย AP ใบไหน พร้อมบันทึกบัญชีจาก GL',cls:'accent'}]},{t:'Export',t2:'View',ic:'⤓',btns:[{id:'apExport',ic:'⤓',l:'Export Excel',title:'Export the filtered rows to Excel'},{id:'apCols',ic:'▦',l:'Columns',title:'Show / hide columns'}]}],[{t:'Year',t2:'Filter',ic:'📅',wcls:'glactg-yr',filCls:'glactfil-yr',html:_apYearBar(true)}]);
   var gq=APFIL._g?APFIL._g.q:'';
   top+='<div class="glquick"><span class="glqlab">Search</span><input class="glq" id="apQ" type="text" placeholder="🔍 Search all fields · AP Code · PV Code · Vendor · Amount …" value="'+_eatt(gq)+'"><button class="glsmall" id="apClearAll" type="button">Clear filters</button></div>';
   top+='<div class="glsum"><span class="glpill">Showing '+APTOT.n.toLocaleString()+' / '+APROWS.length.toLocaleString()+' rows</span><span class="glpill d">Total paid ฿ '+fmt(APTOT.sum)+'</span><span class="glpill n" title="Total payable — first row of each AP only, so no double counting">Total payable ฿ '+fmt(APTOT.sum2)+'</span></div>';
@@ -12887,6 +12914,160 @@ function _glVJCSS(){return ''
   +'.glvj-setdel{border:none;border-left:1px solid var(--line,#E6E0D4);background:#fff;color:var(--muted,#8C8676);cursor:pointer;padding:0 10px;font-size:13px;font-weight:800;}'
   +'.glvj-setdel:hover{background:var(--neg-bg,#FBEAE6);color:var(--neg,#B42318);}'
   +'@media(max-width:640px){.glvj-btns{flex-direction:row;flex-wrap:wrap;min-width:0;}.glvj-b{flex:1;}.glvj-vn{max-width:170px;}}';
+}
+/* ===================== v9.211: AP ↔ PV matching + accounting entries (จับคู่ AP/PV + บันทึกบัญชี) =====================
+   Paste AP codes and/or PV codes → for each, show which PV cleared which AP (and which AP a PV paid) from the AP
+   Payment file, PLUS the accounting entry (journal) of the voucher pulled from the GL. Copy-paste many at once. */
+var _apVJIdxAP=null,_apVJIdxPV=null,_apVJIdxRef=null,_apVJLast=null,_apVJTimer=null;
+function _apVJNum(v){if(v==null||v==='')return 0;var n=parseFloat((''+v).replace(/,/g,''));return isNaN(n)?0:n;}
+function _apVJIndex(){
+  if(_apVJIdxAP&&_apVJIdxRef===APROWS)return;
+  var ap={},pv={};
+  if(APROWS){for(var i=0;i<APROWS.length;i++){var r=APROWS[i];
+    var a=(''+(r[0]==null?'':r[0])).trim().toUpperCase();if(a)(ap[a]||(ap[a]=[])).push(r);
+    var p=(''+(r[1]==null?'':r[1])).trim().toUpperCase();if(p)(pv[p]||(pv[p]=[])).push(r);}}
+  _apVJIdxAP=ap;_apVJIdxPV=pv;_apVJIdxRef=APROWS;
+}
+function _apVJTokens(txt){ if(!txt)return []; var parts=(''+txt).split(/[\s,;|]+/);var out=[],seen={};
+  for(var i=0;i<parts.length;i++){var t=parts[i].trim();if(!t)continue;var k=t.toUpperCase();if(seen[k])continue;seen[k]=1;out.push(t);} return out; }
+function _apVJEnsure(){
+  if(document.getElementById('apVJModal'))return;
+  if(!document.getElementById('glVJCss')){var s0=document.createElement('style');s0.id='glVJCss';s0.textContent=_glVJCSS();document.head.appendChild(s0);}
+  if(!document.getElementById('apVJCss')){var st=document.createElement('style');st.id='apVJCss';st.textContent=_apVJCSS();document.head.appendChild(st);}
+  var m=document.createElement('div');m.id='apVJModal';m.className='pmodal glvj-modal';m.hidden=true;
+  m.innerHTML=''
+    +'<div class="pmodal-bd"></div>'
+    +'<div class="pmodal-card glvj-card">'
+      +'<button class="pmodal-x" type="button" aria-label="Close">×</button>'
+      +'<div class="glvj-hd"><div class="glvj-tt">🔗 AP ↔ PV Matching + บันทึกบัญชี</div>'
+        +'<div class="glvj-sub">วางเลข AP และ/หรือ PV (คั่นด้วยเว้นวรรค บรรทัดใหม่ หรือ ,) — โชว์ทันทีว่า AP ตัดด้วย PV ใบไหน · PV จ่าย AP ใบไหน พร้อมบันทึกบัญชีจาก GL</div></div>'
+      +'<div class="glvj-inrow"><textarea id="apVJInput" class="glvj-ta" spellcheck="false" placeholder="วางเลข AP / PV ที่นี่ เช่น&#10;PV20260100004&#10;APV2025080083&#10;APO2018030001"></textarea>'
+        +'<div class="glvj-btns"><button class="glvj-b" id="apVJPaste" type="button">📋 Paste from clipboard</button>'
+          +'<button class="glvj-b" id="apVJClear" type="button">✕ Clear</button>'
+          +'<button class="glvj-b prim" id="apVJXlsx" type="button">⤓ Export Excel</button></div></div>'
+      +'<div class="glvj-sum" id="apVJSum"></div>'
+      +'<div class="glvj-res" id="apVJRes"></div>'
+    +'</div>';
+  document.body.appendChild(m);
+  m.querySelector('.pmodal-bd').addEventListener('click',_apVJClose);
+  m.querySelector('.pmodal-x').addEventListener('click',_apVJClose);
+  var ta=m.querySelector('#apVJInput');
+  ta.addEventListener('input',function(){clearTimeout(_apVJTimer);_apVJTimer=setTimeout(_apVJCompute,110);});
+  m.querySelector('#apVJClear').addEventListener('click',function(){ta.value='';_apVJCompute();ta.focus();});
+  m.querySelector('#apVJPaste').addEventListener('click',function(){
+    try{if(navigator.clipboard&&navigator.clipboard.readText){navigator.clipboard.readText().then(function(t){t=(''+(t||'')).replace(/\s+$/,'');if(!t){ta.focus();return;}ta.value=ta.value.trim()?(ta.value.replace(/\s+$/,'')+'\n'+t):t;_apVJCompute();ta.focus();}).catch(function(){ta.focus();});}else ta.focus();}catch(_e){ta.focus();}
+  });
+  m.querySelector('#apVJXlsx').addEventListener('click',_apVJExport);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'||e.keyCode===27){var mm=document.getElementById('apVJModal');if(mm&&!mm.hidden)_apVJClose();}});
+}
+function _apVJOpen(){
+  if(!APROWS||!APROWS.length){alert('ยังไม่มีข้อมูล AP Payment ในไฟล์นี้ — โปรดเปิด/อัปโหลดไฟล์ AP Payment ก่อน');return;}
+  _apVJIndex();_apVJEnsure();
+  var m=document.getElementById('apVJModal');if(!m)return;m.hidden=false;
+  _apVJCompute();
+  var ta=document.getElementById('apVJInput');setTimeout(function(){if(ta){ta.focus();ta.select();}},30);
+}
+function _apVJClose(){var m=document.getElementById('apVJModal');if(m)m.hidden=true;}
+function _apVJCompute(){
+  var res=document.getElementById('apVJRes'),sum=document.getElementById('apVJSum');if(!res||!sum)return;
+  var el=document.getElementById('apVJInput');var txt=el?el.value:'';
+  var toks=_apVJTokens(txt);
+  _apVJLast={items:[],reqN:toks.length};
+  if(!toks.length){sum.innerHTML='';res.innerHTML='<div class="glvj-empty">👆 วางเลข AP / PV ด้านบน — การจับคู่และบันทึกบัญชีของแต่ละใบจะขึ้นทันที</div>';return;}
+  _apVJIndex();
+  var html='',apN=0,pvN=0,missN=0,gPaid=0,gRows=0;
+  for(var i=0;i<toks.length;i++){
+    var tk=toks[i],key=tk.toUpperCase();
+    var apRows=_apVJIdxAP[key],pvRows=_apVJIdxPV[key];
+    if(apRows&&apRows.length){apN++;var tp=0;for(var a=0;a<apRows.length;a++)tp+=_apVJNum(apRows[a][4]);gPaid+=tp;gRows+=apRows.length;html+=_apVJApCard(tk,apRows);_apVJLast.items.push({t:'AP',code:tk,rows:apRows});}
+    if(pvRows&&pvRows.length){pvN++;var tp2=0;for(var b=0;b<pvRows.length;b++)tp2+=_apVJNum(pvRows[b][4]);gPaid+=tp2;gRows+=pvRows.length;html+=_apVJPvCard(tk,pvRows);_apVJLast.items.push({t:'PV',code:tk,rows:pvRows});}
+    if(!(apRows&&apRows.length)&&!(pvRows&&pvRows.length)){missN++;html+=_apVJMissing(tk);}
+  }
+  sum.innerHTML='<span class="glvj-pill ok">พบ AP '+apN+' · PV '+pvN+' / '+toks.length+'</span>'
+    +(missN?'<span class="glvj-pill miss">Not found: '+missN+'</span>':'')
+    +'<span class="glvj-pill">'+gRows.toLocaleString()+' matching lines</span>'
+    +'<span class="glvj-pill d">Total paid ฿'+fmt(gPaid)+'</span>'
+    +((typeof GLROWS==='undefined'||!GLROWS||!GLROWS.length)?'<span class="glvj-pill miss">GL ยังไม่โหลด — บันทึกบัญชีจะไม่ขึ้น</span>':'<span class="glvj-pill c">＋ บันทึกบัญชีจาก GL</span>');
+  res.innerHTML=html;
+}
+function _apVJGlMini(vch){
+  if(typeof GLROWS==='undefined'||!GLROWS||!GLROWS.length||typeof _glVJIndex!=='function')return '';
+  var idx=_glVJIndex();var rows=idx[(''+vch).trim().toUpperCase()];
+  if(!rows||!rows.length)return '<div class="apvj-nojn">— ไม่พบบันทึกบัญชีของ '+esc(vch)+' ใน GL —</div>';
+  var d=0,c=0,body='';
+  for(var j=0;j<rows.length;j++){var r=rows[j];var dv=+r[16]||0,cv=+r[17]||0;d+=dv;c+=cv;
+    var de=(''+(r[8]||'')).trim(),rem=(''+(r[15]||'')).trim();var narr=(de&&rem&&de!==rem)?(de+' · '+rem):(de||rem||'');
+    body+='<tr><td class="acc"><span class="glvj-ac">'+esc(''+(r[0]||''))+'</span> '+esc(''+(r[1]||''))+'</td><td class="nar">'+esc(narr)+'</td><td class="n d">'+(dv?fmt(dv):'')+'</td><td class="n c">'+(cv?fmt(cv):'')+'</td></tr>';}
+  var diff=d-c,bal=Math.abs(diff)<0.005;
+  return '<table class="glvj-tbl apvj-jn"><thead><tr><th>Account (A/C)</th><th>Description</th><th class="n">Debit</th><th class="n">Credit</th></tr></thead><tbody>'+body+'</tbody>'
+    +'<tfoot><tr class="tot"><td colspan="2">Total</td><td class="n d">'+fmt(d)+'</td><td class="n c">'+fmt(c)+'</td></tr>'
+    +'<tr class="bal '+(bal?'ok':'bad')+'"><td colspan="4">'+(bal?'✓ Debit = Credit':'⚠ Diff ฿'+fmt(diff))+'</td></tr></tfoot></table>';
+}
+function _apVJApCard(code,rows){
+  var payable=0,vend='',apdate='';
+  for(var i=0;i<rows.length;i++){var v=_apVJNum(rows[i][3]);if(v>payable)payable=v;if(!vend&&rows[i][2])vend=''+rows[i][2];if(!apdate&&rows[i][5])apdate=''+rows[i][5];}
+  var totPaid=0;for(var k=0;k<rows.length;k++)totPaid+=_apVJNum(rows[k][4]);
+  var remain=payable-totPaid;
+  var body='',pvList=[],pvSeen={};
+  for(var j=0;j<rows.length;j++){var r=rows[j];var pv=''+(r[1]||'');
+    body+='<tr><td><span class="glvj-ac">'+esc(pv)+'</span></td><td>'+esc(''+(r[6]||''))+'</td><td class="n d">'+fmt(_apVJNum(r[4]))+'</td><td>'+esc(''+(r[9]||''))+'</td><td>'+esc(''+(r[7]||''))+'</td><td>'+esc(''+(r[10]||''))+'</td></tr>';
+    var pk=pv.toUpperCase();if(pv&&!pvSeen[pk]){pvSeen[pk]=1;pvList.push(pv);}}
+  var jn='<div class="apvj-jnlab">📒 บันทึกบัญชีตั้งหนี้ · AP '+esc(code)+'</div>'+_apVJGlMini(code);
+  for(var p=0;p<pvList.length;p++)jn+='<div class="apvj-jnlab">📒 บันทึกบัญชีจ่ายชำระ · PV '+esc(pvList[p])+'</div>'+_apVJGlMini(pvList[p]);
+  return '<div class="glvj-cw apvj-cw">'
+    +'<div class="glvj-cwh"><span class="apvj-badge ap">AP</span><span class="glvj-no">'+esc(code)+'</span>'
+      +(vend?'<span class="glvj-vn" title="'+_eatt(vend)+'">🏢 '+esc(vend)+'</span>':'')
+      +(apdate?'<span class="glvj-dt">📅 '+esc(apdate)+'</span>':'')
+      +'<span class="glvj-ln">'+rows.length+' payment'+(rows.length>1?'s':'')+'</span></div>'
+    +'<div class="apvj-seclab">💠 ตัดชำระด้วย PV (which PV cleared this AP)</div>'
+    +'<table class="glvj-tbl"><thead><tr><th>PV Code</th><th>Pay Date</th><th class="n">Paid</th><th>Cheque / Transfer</th><th>Type</th><th>Status</th></tr></thead>'
+    +'<tbody>'+body+'</tbody>'
+    +'<tfoot><tr class="tot"><td colspan="2">Payable ฿'+fmt(payable)+'</td><td class="n d">'+fmt(totPaid)+'</td><td colspan="3" class="'+(Math.abs(remain)<0.005?'apvj-clear':'apvj-open')+'">'+(Math.abs(remain)<0.005?'✓ ตัดชำระครบ (cleared)':'คงเหลือ ฿'+fmt(remain))+'</td></tr></tfoot></table>'
+    +'<div class="apvj-jn-wrap">'+jn+'</div></div>';
+}
+function _apVJPvCard(code,rows){
+  var totPaid=0,paydate='',chq='';
+  for(var i=0;i<rows.length;i++){totPaid+=_apVJNum(rows[i][4]);if(!paydate&&rows[i][6])paydate=''+rows[i][6];if(!chq&&rows[i][9])chq=''+rows[i][9];}
+  var body='';
+  for(var j=0;j<rows.length;j++){var r=rows[j];
+    body+='<tr><td><span class="glvj-ac">'+esc(''+(r[0]||''))+'</span></td><td class="nar">'+esc(''+(r[2]||''))+'</td><td class="n">'+(_apVJNum(r[3])?fmt(_apVJNum(r[3])):'')+'</td><td class="n d">'+fmt(_apVJNum(r[4]))+'</td><td>'+esc(''+(r[10]||''))+'</td></tr>';}
+  var jn='<div class="apvj-jnlab">📒 บันทึกบัญชีจ่ายชำระ · PV '+esc(code)+'</div>'+_apVJGlMini(code);
+  return '<div class="glvj-cw apvj-cw">'
+    +'<div class="glvj-cwh"><span class="apvj-badge pv">PV</span><span class="glvj-no">'+esc(code)+'</span>'
+      +(paydate?'<span class="glvj-dt">📅 '+esc(paydate)+'</span>':'')
+      +(chq?'<span class="glvj-vn">🧾 '+esc(chq)+'</span>':'')
+      +'<span class="glvj-ln">'+rows.length+' invoice'+(rows.length>1?'s':'')+'</span></div>'
+    +'<div class="apvj-seclab">💠 จ่ายให้ AP (which AP this PV paid)</div>'
+    +'<table class="glvj-tbl"><thead><tr><th>AP Code</th><th>Vendor</th><th class="n">Payable</th><th class="n">Paid</th><th>Status</th></tr></thead>'
+    +'<tbody>'+body+'</tbody>'
+    +'<tfoot><tr class="tot"><td colspan="3">Total Paid</td><td class="n d">'+fmt(totPaid)+'</td><td></td></tr></tfoot></table>'
+    +'<div class="apvj-jn-wrap">'+jn+'</div></div>';
+}
+function _apVJMissing(code){
+  return '<div class="glvj-cw miss"><div class="glvj-cwh"><span class="glvj-no">'+esc(code)+'</span><span class="glvj-dt warn">⚠ ไม่พบเลขนี้ในไฟล์ AP Payment (ทั้งฝั่ง AP และ PV)</span></div></div>';
+}
+function _apVJExport(){
+  if(typeof XLSX==='undefined'){alert('The Excel reader is still loading — please wait and try again');return;}
+  if(!_apVJLast||!_apVJLast.items.length){alert('No results to export — paste AP / PV codes first');return;}
+  var aoa=[['View','Query Code','AP Code','PV Code','Vendor','Payable','Paid','AP Date','Pay Date','Pay Type','Cheque / Transfer','Status']];
+  _apVJLast.items.forEach(function(it){
+    it.rows.forEach(function(r){aoa.push([it.t,it.code,''+(r[0]||''),''+(r[1]||''),''+(r[2]||''),_apVJNum(r[3]),_apVJNum(r[4]),''+(r[5]||''),''+(r[6]||''),''+(r[7]||''),''+(r[9]||''),''+(r[10]||'')]);});
+    aoa.push([]);
+  });
+  try{var ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=[{wch:6},{wch:16},{wch:16},{wch:16},{wch:26},{wch:14},{wch:14},{wch:12},{wch:12},{wch:9},{wch:14},{wch:13}];
+    var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'AP-PV Matching');XLSX.writeFile(wb,'AP_PV_matching.xlsx');
+  }catch(e){alert('Export failed: '+((e&&e.message)||e));}
+}
+function _apVJCSS(){return ''
+  +'.apvj-badge{display:inline-block;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;margin-right:6px;color:#fff;letter-spacing:.3px;}'
+  +'.apvj-badge.ap{background:#B45309;} .apvj-badge.pv{background:#0E5C52;}'
+  +'.apvj-seclab{font-size:11.5px;font-weight:800;color:var(--brand-d,#0A463E);margin:9px 0 4px;}'
+  +'.apvj-jn-wrap{margin-top:9px;border-top:1px dashed var(--line,#E6E0D4);padding-top:7px;}'
+  +'.apvj-jnlab{font-size:11px;font-weight:700;color:#8a6d00;margin:7px 0 3px;}'
+  +'.apvj-jn{opacity:.98;} .apvj-jn thead th{background:#F6F4EE;color:#5a4a1a;}'
+  +'.apvj-nojn{font-size:11px;color:#a08b5a;font-style:italic;padding:3px 0;}'
+  +'.apvj-clear{color:#0a7a3f;font-weight:800;text-align:right;} .apvj-open{color:#c02b22;font-weight:800;text-align:right;}'
+  +'.apvj-cw .glvj-tbl td.nar{white-space:normal;}';
 }
 /* ===================== V9.171: Voucher Balance Check (ตรวจ Voucher สมดุล) ===================== */
 var _glBCLast=null;
@@ -13590,9 +13771,8 @@ function renderGl(){var w=document.getElementById('glWrap');if(!w)return;
   var yrs='';for(var i=0;i<GLYEARS.length;i++){var y=GLYEARS[i];var on=GLFIL['1']&&GLFIL['1'].t==='set'&&GLFIL['1'].v['$'+y];yrs+='<button class="glyr'+(on?' active':'')+'" data-y="'+y+'" type="button">'+y+'</button>';}var _MONL=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];var mons='';for(var _moi=0;_moi<12;_moi++){var _mok=('0'+(_moi+1)).slice(-2);var _moOn=!!GLMSEL[_mok];mons+='<button class="glmon'+(_moOn?' active':'')+'" data-m="'+_mok+'" type="button" title="'+(_moOn?'คลิกเพื่อเอาออก · Ctrl+คลิกเลือกหลายเดือน':'คลิกเลือกเดือน · Ctrl+คลิกเลือกได้หลายเดือน')+'">'+_MONL[_moi]+'</button>';}
   var mods='';for(var j=0;j<GLMODS.length;j++){var md=GLMODS[j];var on2=GLFIL['10']&&GLFIL['10'].t==='set'&&GLFIL['10'].v['$'+md];mods+='<button class="glmod'+(on2?' active':'')+'" data-m="'+_eatt(md)+'" type="button">'+esc(md)+'</button>';}
   var gq=GLFIL['_g']?GLFIL['_g'].q:'';
-  var _GLCLS=[['1','1','Assets','Asset'],['2','2','Liabilities','Liability'],['3','3','Equity','Equity'],['4','4','Revenue','Revenue'],['5','5','Expenses (Cost)','(Cost) Expense'],['6','6','Expenses (Admin)','(Admin) Expense'],['7','7','Expenses (Finance)','(Finance) Expense']];
-  var clsb='<button class="glcls'+(!_glClass?' active':'')+'" data-cls="" type="button">All</button>';
-  for(var _ci=0;_ci<_GLCLS.length;_ci++){var _cc=_GLCLS[_ci];clsb+='<button class="glcls'+((_glClass&&_glClass.indexOf(_cc[0])>=0)?' active':'')+'" data-cls="'+_cc[0]+'" title="'+_cc[2]+' (Class '+_cc[1]+')" type="button">'+_cc[1]+' '+_cc[3]+'</button>';}
+  var clsb='<button class="glcls'+((!_glClass||!_glClass.length)?' active':'')+'" data-cls="" type="button">All</button>';
+  for(var _ci=0;_ci<_GLCLS_DEF.length;_ci++){var _cc=_GLCLS_DEF[_ci];clsb+='<button class="glcls'+(_cc.sub?' glcls-sub':'')+(_glClsActive(_cc)?' active':'')+'" data-cls="'+_cc.k+'" title="'+_eatt(_cc.t)+'" type="button">'+_cc.n+' '+esc(_cc.s)+'</button>';}
   top+=_glActionPanel(clsb,yrs,mons);
   top+='<div class="glquick">'+(GLMODS.length?'<span class="glqlab">MODULE</span>'+mods:'')
     +'<input class="glq" id="glQ" type="text" placeholder="\ud83d\udd0d Search ALL fields \u00b7 A/C \u00b7 Voucher \u00b7 Vendor \u00b7 Tax/Ref No. \u00b7 Project \u00b7 Job \u00b7 Amount \u00b7 Date \u00b7 Remark" value="'+_eatt(gq)+'">'
@@ -13814,6 +13994,7 @@ function _glBind(){var pg=document.getElementById('page-gl');if(!pg||pg._gb)retu
         if(e.shiftKey&&_apYrAnchor!=null){var _lo=Math.min(_apYrAnchor,_y),_hi=Math.max(_apYrAnchor,_y);for(var _yy=_lo;_yy<=_hi;_yy++){if(APYEARS&&APYEARS.indexOf(_yy)>=0)APYRSEL['$'+_yy]=1;}}
         else{if(APYRSEL['$'+_y])delete APYRSEL['$'+_y];else APYRSEL['$'+_y]=1;_apYrAnchor=_y;}
         APSHOW=400;renderGl();return;}
+      if(cl('#apVJBtn')){_apVJOpen();return;}
       if(cl('#apExport')){_apExport();return;}
       if(cl('#apCols')){_apColMenu(cl('#apCols'));return;}
       if(cl('#apClearAll')){APFIL={};APSORT=[];APYRSEL={};APHLFILTER=null;APSHOW=400;renderGl();return;}
@@ -13857,13 +14038,15 @@ function _glBind(){var pg=document.getElementById('page-gl');if(!pg||pg._gb)retu
     var xbtn=cl('#glExport');if(xbtn){_glOpenExportMenu(xbtn);return;}
     var colB=cl('#glCols');if(colB){_glOpenColMenu(colB);return;}
     if(cl('#glPurge')){_glPurge();return;}
-    if(cl('#glClearAll')){GLFIL={};GLSORT=[];GLSHOW=300;_glClass='';GLMSEL={};renderGl();return;}
+    if(cl('#glClearAll')){GLFIL={};GLSORT=[];GLSHOW=300;_glClass=[];GLMSEL={};renderGl();return;}
     if(cl('#glMore')){GLSHOW+=300;renderGl();return;}
     if(cl('#glAll')){GLSHOW=5000;renderGl();return;}
     var cb=cl('.glcls');if(cb){var _cls=cb.getAttribute('data-cls')||'';
-      if(_cls===''){_glClass='';_glClsAnchor=null;}/* All */
-      else if(e.shiftKey&&_glClsAnchor){var _a=+_glClsAnchor,_c=+_cls,_lo=Math.min(_a,_c),_hi=Math.max(_a,_c),_s='';for(var _d=_lo;_d<=_hi;_d++)_s+=_d;_glClass=_s;}/* Shift+click → select the range of classes */
-      else{_glClass=_cls;_glClsAnchor=_cls;}
+      if(_cls===''){_glClass=[];_glClsAnchor=null;}/* All */
+      else{var _cbtn=_glClsDef(_cls);
+        if(_cbtn&&_cbtn.sub){_glClass=_cbtn.pfx.slice();_glClsAnchor=null;}/* sub-class → exact prefix set (no range) */
+        else if(e.shiftKey&&_glClsAnchor&&/^[0-9]$/.test(_cls)&&/^[0-9]$/.test(_glClsAnchor)){var _a=+_glClsAnchor,_c=+_cls,_lo=Math.min(_a,_c),_hi=Math.max(_a,_c),_s=[];for(var _d=_lo;_d<=_hi;_d++)_s.push(''+_d);_glClass=_s;}/* Shift+click → range of main classes */
+        else{_glClass=[_cls];_glClsAnchor=_cls;}}
       GLSHOW=300;renderGl();return;}
     var yb=cl('.glyr');if(yb){var _y=+yb.getAttribute('data-y');
       if(e.shiftKey&&_glYrAnchor!=null){var _lo2=Math.min(_glYrAnchor,_y),_hi2=Math.max(_glYrAnchor,_y);if(!GLFIL['1']||GLFIL['1'].t!=='set')GLFIL['1']={t:'set',v:{}};for(var _yy=_lo2;_yy<=_hi2;_yy++){if(GLYEARS.indexOf(_yy)>=0)GLFIL['1'].v['$'+_yy]=1;}var _n=0;for(var _k in GLFIL['1'].v)_n++;if(!_n)delete GLFIL['1'];_glYrAnchor=_y;GLSHOW=300;renderGl();}/* Shift+click → select the range of years */
@@ -17608,6 +17791,9 @@ function _fsTbClsRow(){
   for(var c=0;c<_FS_TB_CLS.length;c++){ var cc=_FS_TB_CLS[c]; if(!pres[cc[0]])continue;
     h+='<button type="button" class="fstbcls'+((_fsTbCls&&_fsTbCls.indexOf(cc[0])>=0)?' active':'')+'" data-fscls="'+cc[0]+'" title="'+cc[2]+' (Class '+cc[1]+') · คลิกเพื่อกรอง · Shift+คลิก = เลือกช่วง">'+cc[1]+' '+cc[3]+'</button>';
   }
+  /* v10.98: ปุ่ม «เปิดรายการปรับปรุง» ย้ายมาต่อท้ายแถวหมวดบัญชี (หลัง «7 ดอกเบี้ย») — เข้าถึงได้เสมอแม้ยุบกล่องสรุป */
+  var _adjOn=(typeof _fsAdjActive==='function')&&_fsAdjActive();
+  h+='<span class="fstbcls-sp"></span><button type="button" class="fstbcls fstbcls-adj'+(_adjOn?' on':'')+'" id="fsAdjOpen" title="เปิด / แก้รายการปรับปรุง (Adjusting entries) — ไหลเข้า TB + งบการเงินทุกงบ (งบทดลองหลังปรับปรุง)">📝 เปิดรายการปรับปรุง'+(_adjOn?' <span class="fstbcls-dot"></span>':'')+'</button>';
   return h+'</div>';
 }
 /* v9.94: per-column widths (drag-to-resize) — persisted in localStorage, keyed by column */
@@ -17909,9 +18095,12 @@ function _fsRenderTB(){
   /* v9.94: ยอดรวมจำนวนเงินด้านบน (colourful column totals) + เทียบไฟล์แนบต่อบัญชี กับ TB */
   function _fsSc(th,en,val,k){ return '<div class="fstbsum-c s-'+k+'"><div class="fstbsum-cl">'+th+'<span class="fstbsum-cen">'+en+'</span></div><div class="fstbsum-cv">'+val+'</div></div>'; }
   var _balOk=Math.abs(fdiff)<0.5;
-  var sumPanel='<div class="fstbsum">'+
+  var _sumCol=false; try{_sumCol=localStorage.getItem('gli_fstbsum_col')==='1';}catch(_sce){}
+  var sumPanel='<div class="fstbsum'+(_sumCol?' collapsed':'')+'">'+
     '<div class="fstbsum-h"><span class="fstbsum-t">ยอดรวมแต่ละคอลัมน์ <span class="fstbsum-en">งบทดลอง · '+arr.length+(filtered?(' / '+nAll):'')+' บัญชี'+(filtered?' (กรองแล้ว)':'')+'</span></span>'+
-      '<span class="fstbsum-bal '+(_balOk?'ok':'bad')+'">'+(_balOk?'⚖ เดบิต = เครดิต':'⚖ เดบิต − เครดิต = '+_fsMoney(fdiff))+'</span></div>'+
+      '<span class="fstbsum-bal '+(_balOk?'ok':'bad')+'">'+(_balOk?'⚖ เดบิต = เครดิต':'⚖ เดบิต − เครดิต = '+_fsMoney(fdiff))+'</span>'+
+      '<button type="button" class="fstbsum-tgl" id="fsTbSumTgl" title="ย่อ / ขยายกล่องสรุปยอด — ย่อไว้เพื่อให้ตัวกรองและตารางเด่นขึ้น">'+(_sumCol?'▾ ขยายสรุป':'▴ ย่อสรุป')+'</button></div>'+
+    '<div class="fstbsum-body">'+
     '<div class="fstbsum-grid">'+
       _fsSc('ยอดยกมา','OPENING',_fsMoney(sOpen),'open')+
       _fsSc('เดบิต','DEBIT',_fsMoney(fyd),'deb')+
@@ -17930,8 +18119,8 @@ function _fsRenderTB(){
   } else {
     sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-wait"><b>เทียบยอดประกอบต่อบัญชี — เลือกได้ 2 วิธี:</b> ที่คอลัมน์ซ้ายสุดของแต่ละบัญชี · <b>📎 แนบไฟล์ Excel/CSV</b> (อ่านยอดจากเซลล์ A1 มุมซ้ายบน) <b>หรือ ✏️ พิมพ์จำนวนเงิน + ที่มา</b> — ระบบจะเทียบแต่ละรายการกับยอดคงเหลือ (Ending) ให้อัตโนมัติ</div></div>';
   }
-  /* v9.96: กระดาษทำการปรับปรุง — สรุป + ปุ่มเปิด */
-  var adjBtn='<button type="button" class="fsadj-openbtn" id="fsAdjOpen">📝 เปิดรายการปรับปรุง</button>';
+  /* v10.98: กระดาษทำการปรับปรุง — สรุปยังอยู่ในกล่อง แต่ปุ่มเปิดย้ายไปแถวหมวดบัญชี (หลัง «7 ดอกเบี้ย») แล้ว */
+  var adjBtn='';
   if(adjActive){ var abal=adjT.bal&&adjT.bad===0;
     sumPanel+='<div class="fstbsum-cmp fstbsum-adj"><div class="fstbsum-cmph">📝 กระดาษทำการปรับปรุง (Adjusting entries) · ปี '+(_curBEs||'?')+' — ไหลเข้า TB + งบการเงินทุกงบ (งบทดลองหลังปรับปรุง) '+adjBtn+'</div><div class="fstbsum-grid">'+
       _fsSc('รวมปรับปรุง Dr','ADJ DEBIT',_fsMoney(adjT.dr),'deb')+
@@ -17940,9 +18129,9 @@ function _fsRenderTB(){
       _fsSc('สถานะ',(abal?'BALANCED':'CHECK'),(abal?'✓ เดบิต = เครดิต':(adjT.bad?('▲ '+adjT.bad+' รายการไม่ดุล'):('⚠ Dr−Cr '+_fsMoney(adjT.dr-adjT.cr)))),abal?'ok':'bad')+
     '</div></div>';
   } else { var _ab=_fsAdjBook(false); var _other=!!(_ab&&_ab.entries&&_ab.entries.length&&!_fsAdjYearEntries().length);
-    sumPanel+='<div class="fstbsum-cmp fstbsum-adj off"><div class="fstbsum-wait">📝 <b>รายการปรับปรุง (Adjusting entries):</b> สร้างรายการปรับปรุงคู่บัญชี (เดบิต/เครดิต) เพื่อแก้ยอด · ระบบจะอัปเดต <b>งบทดลองและงบการเงินทุกงบ</b> ให้อัตโนมัติ (งบทดลองหลังปรับปรุง)'+(_other?' · <b class="fsnosheet-warn">มีรายการในปีอื่น — สลับปีเพื่อดู</b>':'')+' &nbsp;'+adjBtn+'</div></div>';
+    sumPanel+='<div class="fstbsum-cmp fstbsum-adj off"><div class="fstbsum-wait">📝 <b>รายการปรับปรุง (Adjusting entries):</b> สร้างรายการปรับปรุงคู่บัญชี (เดบิต/เครดิต) เพื่อแก้ยอด · ระบบจะอัปเดต <b>งบทดลองและงบการเงินทุกงบ</b> ให้อัตโนมัติ (งบทดลองหลังปรับปรุง)'+(_other?' · <b class="fsnosheet-warn">มีรายการในปีอื่น — สลับปีเพื่อดู</b>':'')+' · <b>กดปุ่ม «📝 เปิดรายการปรับปรุง» ท้ายแถวหมวดบัญชีด้านล่าง</b>'+adjBtn+'</div></div>';
   }
-  sumPanel+='</div>';
+  sumPanel+='</div></div>';
   var attFoot='<td class="fsattc"></td>'+
     '<td class="fsm">'+(nAtt?_fsMoney(attSum):'')+'</td>'+
     '<td class="fsm">'+(nAtt?(nAttNo?('<span class="fsbad">No sheet ×'+nAttNo+'</span>'):(nAttMis?('<span class="fsbad">▲ '+nAttMis+'</span>'):'<span class="fsok">✓</span>')):'')+'</td>';
@@ -20734,6 +20923,7 @@ function _fsBind(w){ if(w._b)return; w._b=1;
       else if(e.shiftKey&&_fsTbClsAnchor){ var _a=+_fsTbClsAnchor,_b=+_c,_lo=Math.min(_a,_b),_hi=Math.max(_a,_b),_s=''; for(var _d=_lo;_d<=_hi;_d++)_s+=_d; _fsTbCls=_s; }
       else { _fsTbCls=(_fsTbCls===_c)?'':_c; _fsTbClsAnchor=_c; }   /* คลิกซ้ำ = ปิด (กลับเป็นทั้งหมด) */
       _fsRenderBody(); return; }
+    var sumtg=t.closest?t.closest('#fsTbSumTgl'):null; if(sumtg){ var _sb=document.querySelector('#page-fs .fstbsum'); if(_sb){ var _col=_sb.classList.toggle('collapsed'); try{localStorage.setItem('gli_fstbsum_col',_col?'1':'0');}catch(_e){} sumtg.textContent=_col?'▾ ขยายสรุป':'▴ ย่อสรุป'; } return; }
     var adjo=t.closest?t.closest('#fsAdjOpen'):null; if(adjo){_fsAdjOpen();return;}
     var xpop=t.closest?t.closest('[data-fsxpop]'):null; if(xpop){_fsExpModal(xpop.getAttribute('data-fsxpop'));return;}
     var fadd=t.closest?t.closest('[data-fsadd]'):null; if(fadd){_fsManAddRow(fadd.getAttribute('data-fsadd'));return;}
