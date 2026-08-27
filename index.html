@@ -18143,8 +18143,9 @@ function _fsRenderTB(){
        '<td class="fsm fsadj-drc has">'+_fsMoney(sAdjCr,true)+'</td>'+
        '<td class="fsm fsadj-after on">'+_fsMoney(sEnd)+'</td>')
     : '<td class="fsm">'+_fsMoney(sEnd)+'</td>';
-  var tbExportBar='<div class="fstbexport"><span class="fstbexp-l">ส่งออกงบทดลอง'+(filtered?' (ตามตัวกรอง)':'')+'</span><button type="button" class="fstbxlsb" title="ส่งออกงบทดลองหน้านี้เป็น Excel (.xlsx) — จัดรูปสวยงาม พร้อมสูตร/สี">⬇ Excel</button><button type="button" class="fstbpdfb" title="พิมพ์ / บันทึกงบทดลองหน้านี้เป็น PDF สวยงาม">🖨 PDF</button>'+((typeof _fsReconAvail==='function'&&_fsReconAvail())?'<button type="button" class="fstbrecb" title="ดึงสรุปบัญชีที่งบทดลอง (GL) ไม่ตรงกับงบการเงินที่ออกจริง (Per Audit)">⚖ กระทบยอดกับงบ</button>':'')+'</div>';
-  return sumPanel+_fsTbClsRow()+filterBar+tbExportBar+'<div class="fstbwrap"><table class="fstable fstb fstb-att'+(adjActive?' fstb-adj':'')+'">'+head+
+  /* v10.99: ตามที่ผู้ใช้ขอ — เอากล่องสรุปยอดใหญ่ + ปุ่ม «กระทบยอดกับงบ» ออก แล้วดันตาราง TB ขึ้น (ยอดรวมยังอยู่ที่แถวสรุปท้ายตาราง · สถานะสมดุลอยู่ที่ชิปด้านบน) */
+  var tbExportBar='<div class="fstbexport"><span class="fstbexp-l">ส่งออกงบทดลอง'+(filtered?' (ตามตัวกรอง)':'')+'</span><button type="button" class="fstbxlsb" title="ส่งออกงบทดลองหน้านี้เป็น Excel (.xlsx) — จัดรูปสวยงาม พร้อมสูตร/สี">⬇ Excel</button><button type="button" class="fstbpdfb" title="พิมพ์ / บันทึกงบทดลองหน้านี้เป็น PDF สวยงาม">🖨 PDF</button></div>';
+  return _fsTbClsRow()+filterBar+tbExportBar+'<div class="fstbwrap"><table class="fstable fstb fstb-att'+(adjActive?' fstb-adj':'')+'">'+head+
     '<tbody>'+rows+'</tbody><tfoot><tr class="fstot">'+attFoot+'<td class="fsseq"></td><td colspan="5">'+totLbl+'</td>'+
     '<td class="fsm">'+_fsMoney(sOpen)+'</td>'+
     '<td class="fsm">'+_fsMoney(fyd)+'</td><td class="fsm">'+_fsMoney(fyc)+'</td>'+endFoot+
