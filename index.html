@@ -13981,6 +13981,193 @@ function _glDFCSS(){return ''
   +'.gldf-more td{padding:8px 12px;text-align:center;color:var(--muted,#8C8676);font-size:12px;font-weight:600;background:var(--paper,#FAF8F3);}'
   +'@media(max-width:640px){.gldf-cell-mf{width:100%;}}';
 }
+/* ============ GL Tool: Project × Account summary — วางรหัสโปรเจค (หลายอันได้) + เลือกรหัสบัญชี → ยอดสรุป ============ */
+var _glPXState=null,_glPXTimer=null,_glPXLast=null,_GLPX_CAP=2000;
+function _glPXLoadState(){ if(_glPXState)return _glPXState;
+  var s=null; try{s=JSON.parse(localStorage.getItem('gli_glpx')||'null');}catch(e){}
+  if(!s||typeof s!=='object'||Array.isArray(s))s={};
+  if(typeof s.proj!=='string')s.proj='';
+  if(typeof s.acc!=='string')s.acc='';
+  if(s.pmode!=='exact'&&s.pmode!=='starts'&&s.pmode!=='contains')s.pmode='exact';
+  if(s.amode!=='exact'&&s.amode!=='starts'&&s.amode!=='contains')s.amode='starts';
+  if(s.view!=='matrix'&&s.view!=='byproj'&&s.view!=='byacc')s.view='matrix';
+  _glPXState=s; return s; }
+function _glPXSaveState(){ try{localStorage.setItem('gli_glpx',JSON.stringify(_glPXState));}catch(e){} }
+function _glPXTokens(txt){ if(!txt)return []; var parts=(''+txt).split(/[\n\r,;|]+/),out=[],seen={};
+  for(var i=0;i<parts.length;i++){var t=parts[i].trim();if(!t)continue;var k=t.toUpperCase();if(seen[k])continue;seen[k]=1;out.push(t);} return out; }
+function _glPXMatch(val,toks,mode){ if(!toks.length)return true; var v=(''+(val==null?'':val)).trim().toLowerCase();
+  for(var i=0;i<toks.length;i++){var t=(''+toks[i]).toLowerCase();if(!t)continue;
+    if(mode==='exact'){if(v===t)return true;} else if(mode==='contains'){if(v.indexOf(t)>=0)return true;} else {if(v.lastIndexOf(t,0)===0)return true;} }
+  return false; }
+function _glPXModeLabel(m){ return m==='exact'?'ตรงทั้งหมด':(m==='contains'?'มีคำว่า':'ขึ้นต้นด้วย'); }
+function _glPXOpen(){
+  if(!GLROWS||!GLROWS.length){alert('ยังไม่มีข้อมูล GL ในไฟล์นี้ — โปรดเปิด / อัปโหลดไฟล์ GL ก่อน');return;}
+  _glPXEnsure(); var m=document.getElementById('glPXModal');if(!m)return;m.hidden=false;_glPXCompute();
+  var ta=document.getElementById('glPXProj'); setTimeout(function(){if(ta){ta.focus();var L=ta.value.length;try{ta.setSelectionRange(L,L);}catch(_e){}}},30);
+  try{if(typeof gliLog==='function')gliLog('เปิด Project × Account (GL)','');}catch(e){}
+}
+function _glPXClose(){var m=document.getElementById('glPXModal');if(m)m.hidden=true;}
+function _glPXCompute(){
+  var st=_glPXLoadState();
+  var res=document.getElementById('glPXRes'),sum=document.getElementById('glPXSum');if(!res||!sum)return;
+  var pe=document.getElementById('glPXProj'),ae=document.getElementById('glPXAcc');
+  st.proj=pe?pe.value:''; st.acc=ae?ae.value:''; _glPXSaveState();
+  var ptoks=_glPXTokens(st.proj),atoks=_glPXTokens(st.acc);
+  var rows=(GLROWS&&GLROWS.length)?GLROWS:[];
+  var cells={},cellOrd=[],perP={},pOrd=[],perA={},aOrd=[],D=0,C=0,N=0;
+  for(var i=0;i<rows.length;i++){var r=rows[i];if(!r)continue;
+    if(!_glPXMatch(r[13],ptoks,st.pmode))continue;
+    if(!_glPXMatch(r[0],atoks,st.amode))continue;
+    var pj=(''+(r[13]==null?'':r[13])).trim()||'(ไม่ระบุโปรเจค)';
+    var ac=(''+(r[0]==null?'':r[0])).trim()||'(ไม่มีรหัส)';
+    var anm=(''+(r[1]==null?'':r[1])).trim();
+    var d=(+r[16]||0),c=(+r[17]||0);
+    var ck=pj+''+ac; var g=cells[ck];
+    if(!g){g=cells[ck]={proj:pj,acc:ac,anm:anm,n:0,d:0,c:0};cellOrd.push(ck);}
+    g.n++;g.d+=d;g.c+=c; if(!g.anm&&anm)g.anm=anm;
+    var gp=perP[pj]; if(!gp){gp=perP[pj]={proj:pj,n:0,d:0,c:0,accs:{}};pOrd.push(pj);} gp.n++;gp.d+=d;gp.c+=c;gp.accs[ac]=1;
+    var ga=perA[ac]; if(!ga){ga=perA[ac]={acc:ac,anm:anm,n:0,d:0,c:0,projs:{}};aOrd.push(ac);} ga.n++;ga.d+=d;ga.c+=c;if(!ga.anm&&anm)ga.anm=anm;ga.projs[pj]=1;
+    D+=d;C+=c;N++;
+  }
+  _glPXLast={cells:cells,cellOrd:cellOrd,perP:perP,pOrd:pOrd,perA:perA,aOrd:aOrd,D:D,C:C,N:N,ptoks:ptoks,atoks:atoks,st:{pmode:st.pmode,amode:st.amode,view:st.view}};
+  var net=D-C,nP=pOrd.length,nA=aOrd.length;
+  sum.innerHTML=''
+    +'<span class="glvj-pill ok">พบ '+N.toLocaleString()+' แถว</span>'
+    +'<span class="glvj-pill">โปรเจค '+nP.toLocaleString()+' · บัญชี '+nA.toLocaleString()+'</span>'
+    +'<span class="glvj-pill">โปรเจค: '+(ptoks.length?esc(_glPXModeLabel(st.pmode))+' '+ptoks.length+' ค่า':'ทั้งหมด')+' · บัญชี: '+(atoks.length?esc(_glPXModeLabel(st.amode))+' '+atoks.length+' ค่า':'ทั้งหมด')+'</span>'
+    +'<span class="glvj-pill d">Debit ฿'+fmt(D)+'</span><span class="glvj-pill c">Credit ฿'+fmt(C)+'</span>'
+    +'<span class="glvj-pill '+(Math.abs(net)<0.005?'bal':'')+'">Net ฿'+fmt(net)+'</span>';
+  if(!N){res.innerHTML='<div class="glvj-empty">ไม่พบแถวที่ตรง — วาง<b>รหัสโปรเจค</b> (เช่น GLI23005) และ/หรือ <b>รหัสบัญชี</b> (เช่น 5311001) แล้วลองปรับโหมดการจับคู่ (เช่น “ขึ้นต้นด้วย” สำหรับ 5311 = ทุกบัญชี 5311xxx)</div>';return;}
+  res.innerHTML=_glPXRenderTable();
+}
+function _glPXRenderTable(){
+  var L=_glPXLast;if(!L)return '';var view=L.st.view;
+  function netcls(v){return v<-0.005?' neg':'';}
+  if(view==='byproj'){
+    var list=L.pOrd.map(function(p){return L.perP[p];});
+    list.sort(function(a,b){return (b.d-b.c)-(a.d-a.c);});
+    var body='',shown=Math.min(list.length,_GLPX_CAP);
+    for(var i=0;i<shown;i++){var g=list[i],nn=g.d-g.c,na=0,k;for(k in g.accs)na++;
+      body+='<tr><td class="gldf-i">'+(i+1)+'</td><td class="gldf-v">'+esc(g.proj)+'</td><td class="n">'+na.toLocaleString()+'</td><td class="n">'+g.n.toLocaleString()+'</td><td class="n d">'+(g.d?fmt(g.d):'')+'</td><td class="n c">'+(g.c?fmt(g.c):'')+'</td><td class="n net'+netcls(nn)+'">'+fmt(nn)+'</td></tr>';}
+    return '<table class="glvj-tbl glpx-tbl"><thead><tr><th class="gldf-i">#</th><th>โปรเจค (Ref.Code)</th><th class="n">#บัญชี</th><th class="n">แถว</th><th class="n">Debit</th><th class="n">Credit</th><th class="n">Net</th></tr></thead><tbody>'+body
+      +'<tr class="glpx-gt"><td></td><td>รวมทั้งสิ้น ('+L.pOrd.length+' โปรเจค)</td><td class="n">'+L.aOrd.length.toLocaleString()+'</td><td class="n">'+L.N.toLocaleString()+'</td><td class="n">'+fmt(L.D)+'</td><td class="n">'+fmt(L.C)+'</td><td class="n">'+fmt(L.D-L.C)+'</td></tr></tbody></table>';
+  }
+  if(view==='byacc'){
+    var la=L.aOrd.map(function(a){return L.perA[a];});
+    la.sort(function(a,b){return (b.d-b.c)-(a.d-a.c);});
+    var bd='',sh=Math.min(la.length,_GLPX_CAP);
+    for(var j=0;j<sh;j++){var ga=la[j],nn2=ga.d-ga.c,np=0,kk;for(kk in ga.projs)np++;
+      bd+='<tr><td class="gldf-i">'+(j+1)+'</td><td class="gldf-v">'+esc(ga.acc)+'</td><td class="gldf-nm">'+esc(ga.anm||'')+'</td><td class="n">'+np.toLocaleString()+'</td><td class="n">'+ga.n.toLocaleString()+'</td><td class="n d">'+(ga.d?fmt(ga.d):'')+'</td><td class="n c">'+(ga.c?fmt(ga.c):'')+'</td><td class="n net'+netcls(nn2)+'">'+fmt(nn2)+'</td></tr>';}
+    return '<table class="glvj-tbl glpx-tbl"><thead><tr><th class="gldf-i">#</th><th>รหัสบัญชี</th><th>ชื่อบัญชี</th><th class="n">#โปรเจค</th><th class="n">แถว</th><th class="n">Debit</th><th class="n">Credit</th><th class="n">Net</th></tr></thead><tbody>'+bd
+      +'<tr class="glpx-gt"><td></td><td>รวมทั้งสิ้น ('+L.aOrd.length+' บัญชี)</td><td></td><td class="n">'+L.pOrd.length.toLocaleString()+'</td><td class="n">'+L.N.toLocaleString()+'</td><td class="n">'+fmt(L.D)+'</td><td class="n">'+fmt(L.C)+'</td><td class="n">'+fmt(L.D-L.C)+'</td></tr></tbody></table>';
+  }
+  /* matrix: grouped by project, a row per account, subtotal per project */
+  var html='<table class="glvj-tbl glpx-tbl"><thead><tr><th class="gldf-i">#</th><th>รหัสบัญชี</th><th>ชื่อบัญชี</th><th class="n">แถว</th><th class="n">Debit</th><th class="n">Credit</th><th class="n">Net</th></tr></thead><tbody>';
+  var shownCells=0;
+  for(var p=0;p<L.pOrd.length;p++){var pj=L.pOrd[p];var gp=L.perP[pj];
+    var accsInP=L.cellOrd.filter(function(k){return L.cells[k].proj===pj;}).map(function(k){return L.cells[k];});
+    accsInP.sort(function(a,b){return (b.d-b.c)-(a.d-a.c);});
+    var pn=gp.d-gp.c,naP=0,kx;for(kx in gp.accs)naP++;
+    html+='<tr class="glpx-band"><td colspan="7">โปรเจค <b>'+esc(pj)+'</b> · '+naP+' บัญชี · '+gp.n.toLocaleString()+' แถว · Net ฿'+fmt(pn)+'</td></tr>';
+    for(var a=0;a<accsInP.length;a++){var g=accsInP[a];if(shownCells>=_GLPX_CAP)break;shownCells++;var gn=g.d-g.c;
+      html+='<tr><td class="gldf-i">'+(a+1)+'</td><td class="gldf-v">'+esc(g.acc)+'</td><td class="gldf-nm">'+esc(g.anm||'')+'</td><td class="n">'+g.n.toLocaleString()+'</td><td class="n d">'+(g.d?fmt(g.d):'')+'</td><td class="n c">'+(g.c?fmt(g.c):'')+'</td><td class="n net'+netcls(gn)+'">'+fmt(gn)+'</td></tr>';}
+    html+='<tr class="glpx-sub"><td></td><td colspan="2">รวมโปรเจค '+esc(pj)+'</td><td class="n">'+gp.n.toLocaleString()+'</td><td class="n">'+fmt(gp.d)+'</td><td class="n">'+fmt(gp.c)+'</td><td class="n">'+fmt(pn)+'</td></tr>';
+  }
+  html+='<tr class="glpx-gt"><td></td><td colspan="2">รวมทั้งสิ้น ('+L.pOrd.length+' โปรเจค · '+L.aOrd.length+' บัญชี)</td><td class="n">'+L.N.toLocaleString()+'</td><td class="n">'+fmt(L.D)+'</td><td class="n">'+fmt(L.C)+'</td><td class="n">'+fmt(L.D-L.C)+'</td></tr></tbody></table>';
+  return html;
+}
+function _glPXExport(){
+  if(typeof XLSX==='undefined'){alert('The Excel reader is still loading — please wait and try again');return;}
+  if(!_glPXLast||!_glPXLast.N){alert('ยังไม่มีผลลัพธ์ให้ส่งออก — วางรหัสโปรเจค / รหัสบัญชี ก่อน');return;}
+  try{var L=_glPXLast,R2=function(x){return Math.round(x*100)/100;};
+    var wb=XLSX.utils.book_new();
+    var info=[['GL — สรุปยอดตามโปรเจค × รหัสบัญชี'],[],
+      ['โปรเจคที่ค้น',L.ptoks.join(', ')||'(ทั้งหมด)'],['โหมดจับคู่โปรเจค',_glPXModeLabel(L.st.pmode)],
+      ['รหัสบัญชีที่ค้น',L.atoks.join(', ')||'(ทั้งหมด)'],['โหมดจับคู่บัญชี',_glPXModeLabel(L.st.amode)],
+      ['จำนวนโปรเจค',L.pOrd.length],['จำนวนบัญชี',L.aOrd.length],['จำนวนแถว',L.N],
+      ['รวม Debit',R2(L.D)],['รวม Credit',R2(L.C)],['รวม Net',R2(L.D-L.C)],['จัดทำ',(new Date()).toLocaleString('th-TH')]];
+    var wsI=XLSX.utils.aoa_to_sheet(info);wsI['!cols']=[{wch:22},{wch:52}];XLSX.utils.book_append_sheet(wb,wsI,'Summary');
+    /* Matrix: Project | Account | Name | Rows | Debit | Credit | Net */
+    var aoa=[['โปรเจค','รหัสบัญชี','ชื่อบัญชี','แถว','Debit','Credit','Net']];
+    for(var p=0;p<L.pOrd.length;p++){var pj=L.pOrd[p];var gp=L.perP[pj];
+      var accs=L.cellOrd.filter(function(k){return L.cells[k].proj===pj;}).map(function(k){return L.cells[k];});
+      accs.sort(function(a,b){return (b.d-b.c)-(a.d-a.c);});
+      accs.forEach(function(g){aoa.push([pj,g.acc,g.anm||'',g.n,R2(g.d),R2(g.c),R2(g.d-g.c)]);});
+      aoa.push(['รวม '+pj,'','',gp.n,R2(gp.d),R2(gp.c),R2(gp.d-gp.c)]);}
+    aoa.push(['รวมทั้งสิ้น','','',L.N,R2(L.D),R2(L.C),R2(L.D-L.C)]);
+    var wsM=XLSX.utils.aoa_to_sheet(aoa);wsM['!cols']=[{wch:16},{wch:14},{wch:34},{wch:9},{wch:16},{wch:16},{wch:16}];XLSX.utils.book_append_sheet(wb,wsM,'Project x Account');
+    /* By Project */
+    var ap=[['โปรเจค','#บัญชี','แถว','Debit','Credit','Net']];
+    L.pOrd.map(function(x){return L.perP[x];}).sort(function(a,b){return (b.d-b.c)-(a.d-a.c);}).forEach(function(g){var na=0,k;for(k in g.accs)na++;ap.push([g.proj,na,g.n,R2(g.d),R2(g.c),R2(g.d-g.c)]);});
+    ap.push(['รวมทั้งสิ้น',L.aOrd.length,L.N,R2(L.D),R2(L.C),R2(L.D-L.C)]);
+    var wsP=XLSX.utils.aoa_to_sheet(ap);wsP['!cols']=[{wch:18},{wch:9},{wch:9},{wch:16},{wch:16},{wch:16}];XLSX.utils.book_append_sheet(wb,wsP,'By Project');
+    /* By Account */
+    var aa=[['รหัสบัญชี','ชื่อบัญชี','#โปรเจค','แถว','Debit','Credit','Net']];
+    L.aOrd.map(function(x){return L.perA[x];}).sort(function(a,b){return (b.d-b.c)-(a.d-a.c);}).forEach(function(g){var np=0,k;for(k in g.projs)np++;aa.push([g.acc,g.anm||'',np,g.n,R2(g.d),R2(g.c),R2(g.d-g.c)]);});
+    aa.push(['รวมทั้งสิ้น','',L.pOrd.length,L.N,R2(L.D),R2(L.C),R2(L.D-L.C)]);
+    var wsA=XLSX.utils.aoa_to_sheet(aa);wsA['!cols']=[{wch:14},{wch:34},{wch:9},{wch:9},{wch:16},{wch:16},{wch:16}];XLSX.utils.book_append_sheet(wb,wsA,'By Account');
+    XLSX.writeFile(wb,'GL_Project_x_Account_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    try{if(typeof gliLog==='function')gliLog('Export Project × Account',L.pOrd.length+' โปรเจค · '+L.aOrd.length+' บัญชี · '+L.N+' แถว');}catch(e){}
+  }catch(e){alert('Export failed: '+((e&&e.message)||e));}
+}
+function _glPXCSS(){return ''
+  +'.glpx-card{max-width:1080px;}'
+  +'.glpx-two{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;}'
+  +'.glpx-cell{flex:1;min-width:250px;display:flex;flex-direction:column;}'
+  +'.glpx-modehd{display:flex;align-items:center;gap:8px;margin:6px 0 5px;}'
+  +'.glpx-modehd .gldf-lab{margin:0;}'
+  +'.glpx-tbl td.gldf-nm{font-size:11.5px;color:var(--ink2,#4A5563);font-weight:600;}'
+  +'.glpx-tbl tr.glpx-band td{background:linear-gradient(90deg,var(--brand-t,#E6F0EC),transparent);border-top:1.5px solid var(--brand,#0E5C52);color:var(--brand-d,#0A463E);font-weight:700;font-size:12px;padding:7px 12px;}'
+  +'.glpx-tbl tr.glpx-sub td{background:var(--paper,#FAF8F3);font-weight:700;color:var(--ink,#19222E);border-top:1px dashed var(--line,#E6E0D4);}'
+  +'.glpx-tbl tr.glpx-gt td{background:linear-gradient(135deg,var(--brand,#0E5C52),var(--brand-d,#0A463E));color:#fff;font-weight:800;border-top:2px solid var(--brand-d,#0A463E);}'
+  +'.glpx-tbl tr.glpx-gt td.n{color:#fff;}'
+  +'.glpx-views{display:flex;gap:5px;}'
+  +'@media(max-width:640px){.glpx-cell{min-width:100%;}}';
+}
+function _glPXEnsure(){
+  if(document.getElementById('glPXModal'))return;
+  if(!document.getElementById('glVJCss')){var vs=document.createElement('style');vs.id='glVJCss';vs.textContent=_glVJCSS();document.head.appendChild(vs);}
+  if(!document.getElementById('glDFCss')){var st0=document.createElement('style');st0.id='glDFCss';st0.textContent=_glDFCSS();document.head.appendChild(st0);}
+  if(!document.getElementById('glPXCss')){var st=document.createElement('style');st.id='glPXCss';st.textContent=_glPXCSS();document.head.appendChild(st);}
+  var s=_glPXLoadState();
+  function segset(cur,attr){var ms=[['exact','ตรงทั้งหมด'],['starts','ขึ้นต้นด้วย'],['contains','มีคำว่า']],h='';for(var i=0;i<ms.length;i++)h+='<button class="gldf-seg'+(ms[i][0]===cur?' on':'')+'" type="button" '+attr+'="'+ms[i][0]+'">'+ms[i][1]+'</button>';return h;}
+  var views=[['matrix','โปรเจค × บัญชี'],['byproj','รวมต่อโปรเจค'],['byacc','รวมต่อบัญชี']];
+  var viewSeg='';for(var vi=0;vi<views.length;vi++)viewSeg+='<button class="gldf-seg'+(views[vi][0]===s.view?' on':'')+'" type="button" data-pxview="'+views[vi][0]+'">'+views[vi][1]+'</button>';
+  var m=document.createElement('div');m.id='glPXModal';m.className='pmodal glvj-modal gldf-modal';m.hidden=true;
+  m.innerHTML=''
+    +'<div class="pmodal-bd"></div>'
+    +'<div class="pmodal-card glvj-card gldf-card glpx-card">'
+      +'<button class="pmodal-x" type="button" aria-label="Close">×</button>'
+      +'<div class="glvj-hd"><div class="glvj-tt">📊 สรุปยอดตามโปรเจค × รหัสบัญชี</div>'
+        +'<div class="glvj-sub">วาง <b>รหัสโปรเจค</b> ได้หลายอัน (บรรทัดละอัน หรือคั่นด้วย , ) แล้วเลือก <b>รหัสบัญชี</b> — ระบบรวมยอด <b>Debit / Credit / Net</b> ให้ทันที แยกตามโปรเจคและบัญชี</div></div>'
+      +'<div class="glpx-two">'
+        +'<div class="glpx-cell"><label class="gldf-lab">รหัสโปรเจค (Ref.Code) — วางได้หลายอัน</label>'
+          +'<textarea id="glPXProj" class="glvj-ta gldf-ta" spellcheck="false" placeholder="เช่น&#10;GLI23005&#10;GLI24006&#10;(เว้นว่าง = ทุกโปรเจค)">'+esc(s.proj||'')+'</textarea>'
+          +'<div class="glpx-modehd"><span class="gldf-lab">จับคู่โปรเจค</span><div class="gldf-segw" id="glPXPmode">'+segset(s.pmode,'data-pxpm')+'</div></div></div>'
+        +'<div class="glpx-cell"><label class="gldf-lab">รหัสบัญชี (Code) — วางได้หลายรหัส</label>'
+          +'<textarea id="glPXAcc" class="glvj-ta gldf-ta" spellcheck="false" placeholder="เช่น&#10;5311001&#10;5110001&#10;(เว้นว่าง = ทุกบัญชี · ใช้ “ขึ้นต้นด้วย” 5311 = ทุก 5311xxx)">'+esc(s.acc||'')+'</textarea>'
+          +'<div class="glpx-modehd"><span class="gldf-lab">จับคู่บัญชี</span><div class="gldf-segw" id="glPXAmode">'+segset(s.amode,'data-pxam')+'</div></div></div>'
+      +'</div>'
+      +'<div class="gldf-toolbar"><span class="gldf-lab" style="margin:0 2px 0 0">มุมมอง</span><div class="gldf-segw glpx-views" id="glPXViews">'+viewSeg+'</div>'
+        +'<span class="gldf-tbspacer"></span>'
+        +'<button class="glvj-b" id="glPXClear" type="button">✕ ล้างค่า</button>'
+        +'<button class="glvj-b prim" id="glPXXlsx" type="button">⤓ Export Excel</button></div>'
+      +'<div class="glvj-sum gldf-sum" id="glPXSum"></div>'
+      +'<div class="glvj-res gldf-res" id="glPXRes"></div>'
+    +'</div>';
+  document.body.appendChild(m);
+  m.querySelector('.pmodal-bd').addEventListener('click',_glPXClose);
+  m.querySelector('.pmodal-x').addEventListener('click',_glPXClose);
+  var pe=m.querySelector('#glPXProj'),ae=m.querySelector('#glPXAcc');
+  pe.addEventListener('input',function(){clearTimeout(_glPXTimer);_glPXTimer=setTimeout(_glPXCompute,150);});
+  ae.addEventListener('input',function(){clearTimeout(_glPXTimer);_glPXTimer=setTimeout(_glPXCompute,150);});
+  m.querySelector('#glPXClear').addEventListener('click',function(){pe.value='';ae.value='';_glPXCompute();pe.focus();});
+  m.querySelector('#glPXXlsx').addEventListener('click',_glPXExport);
+  m.querySelector('#glPXPmode').addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('[data-pxpm]'):null;if(!b)return;var md=b.getAttribute('data-pxpm');_glPXLoadState().pmode=md;_glPXSaveState();var sg=this.querySelectorAll('.gldf-seg');for(var i=0;i<sg.length;i++)sg[i].classList.toggle('on',sg[i].getAttribute('data-pxpm')===md);_glPXCompute();});
+  m.querySelector('#glPXAmode').addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('[data-pxam]'):null;if(!b)return;var md=b.getAttribute('data-pxam');_glPXLoadState().amode=md;_glPXSaveState();var sg=this.querySelectorAll('.gldf-seg');for(var i=0;i<sg.length;i++)sg[i].classList.toggle('on',sg[i].getAttribute('data-pxam')===md);_glPXCompute();});
+  m.querySelector('#glPXViews').addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('[data-pxview]'):null;if(!b)return;var vw=b.getAttribute('data-pxview');_glPXLoadState().view=vw;_glPXSaveState();var sg=this.querySelectorAll('.gldf-seg');for(var i=0;i<sg.length;i++)sg[i].classList.toggle('on',sg[i].getAttribute('data-pxview')===vw);var res=document.getElementById('glPXRes');if(res&&_glPXLast&&_glPXLast.N)res.innerHTML=_glPXRenderTable();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'||e.keyCode===27){var mm=document.getElementById('glPXModal');if(mm&&!mm.hidden)_glPXClose();}});
+}
 function renderGl(){var w=document.getElementById('glWrap');if(!w)return;
   try{var _intro=document.getElementById('glIntro');if(_intro){if(_intro._glTxt==null)_intro._glTxt=_intro.innerHTML;/* v9.171: show an intro banner on every file (AP/AR/AR Invoice too), each describing its own report */
     var _iv={
@@ -14357,6 +14544,7 @@ function _glBind(){var pg=document.getElementById('page-gl');if(!pg||pg._gb)retu
     if(cl('#glBCBtn')){_glBCOpen();return;}
     if(cl('#glADBtn')){_glADOpen();return;}
     if(cl('#glDFBtn')){_glDFOpen();return;}
+    if(cl('#glPXBtn')){_glPXOpen();return;}
     if(cl('#glCopyV')){_glCopyVOpen();return;}
     if(cl('#glExportPdf')){_glExportPDF();return;}
     var xbtn=cl('#glExport');if(xbtn){_glOpenExportMenu(xbtn);return;}
@@ -14483,6 +14671,7 @@ function _glActionPanel(clsb,yrs,mons){
   var _svAD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
   var _svCV='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
   var _svDF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg>';
+  var _svPX='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="9" x2="9" y2="21"/></svg>';
   var groups=[
     {t:'Files',t2:'Manage',ic:'📁',btns:[
       {id:'glAddFile',ic:'＋',l:'Add file',title:'Upload / add another GL file (does not overwrite the current one)'},
@@ -14495,7 +14684,8 @@ function _glActionPanel(clsb,yrs,mons){
       {id:'glBCBtn',ic:_svBC,l:'Balance Check',title:'Scan every Voucher and list the ones where total Debit ≠ total Credit (unbalanced)',cls:'accent2'},
       {id:'glADBtn',ic:_svAD,l:'Auditor Database',title:'Auditor Database — ตรวจสอบข้อมูล GL: เลข Voucher ขาดหาย · รายการซ้ำ · รายการผิดปกติ · Top-N',cls:'accent2'},
       {id:'glCopyV',ic:_svCV,l:'Copy Voucher',title:'คัดลอกเลข Voucher ของแถวที่กรองอยู่ — เลือกคัดลอกทั้งหมดหรือบางส่วนได้',cls:'accent',off:!_hasRows},
-      {id:'glDFBtn',ic:_svDF,l:'Distinct Finder',title:'ใส่ค่า (เช่น รหัสบัญชี) แล้วเลือกว่าอยากรู้อะไร — มี Supplier / โปรเจค / เลข Voucher ใดบ้าง (ดึงรายการไม่ซ้ำ พร้อมนับจำนวนและยอดเงิน)',cls:'accent2',off:!_hasRows}
+      {id:'glDFBtn',ic:_svDF,l:'Distinct Finder',title:'ใส่ค่า (เช่น รหัสบัญชี) แล้วเลือกว่าอยากรู้อะไร — มี Supplier / โปรเจค / เลข Voucher ใดบ้าง (ดึงรายการไม่ซ้ำ พร้อมนับจำนวนและยอดเงิน)',cls:'accent2',off:!_hasRows},
+      {id:'glPXBtn',ic:_svPX,l:'โปรเจค × บัญชี',title:'วางรหัสโปรเจค (หลายอันได้) + เลือกรหัสบัญชี แล้วขึ้นยอดสรุป Debit / Credit / Net แยกตามโปรเจคและบัญชี',cls:'accent',off:!_hasRows}
     ]},
     {t:'Export',t2:'View',ic:'⤓',btns:[
       {id:'glExport',ic:'⤓',l:'Export Excel ▾',title:'ส่งออกแถวที่กรองอยู่ — เลือกได้ว่าจะเป็น Excel Workbook (.xlsx) หรือ Excel Binary Workbook (.xlsb)'},
