@@ -12288,7 +12288,12 @@ function _apExport(){ if(typeof XLSX==='undefined'){alert('The Excel library is 
   var head=vis.map(function(c){return AP_COLS[c].l;});if(anyColor)head.push('สี / Colour');
   var aoa=[head];
   for(var i=0;i<APVIEW.length;i++){var r=APVIEW[i];var row=vis.map(function(c){return AP_NUMC[c]?(_apNum(r[c])==null?'':_apNum(r[c])):(r[c]==null?'':r[c]);});if(anyColor){var ci=APHL[_apRowKey(r)];row.push(ci!=null?_GLHLC[ci].name:'');}aoa.push(row);}
-  var ws=XLSX.utils.aoa_to_sheet(aoa);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'AP Payment');XLSX.writeFile(wb,'AP_Payment_filtered.xlsx'); }
+  var ws=XLSX.utils.aoa_to_sheet(aoa);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'AP Payment');
+  XLSX.writeFile(wb,_dbExpName('AP_Payment',APYRSEL)); }
+/* v10.105: ตั้งชื่อไฟล์ Export ตามปีที่กรอง (ใช้ร่วมกับ AP/AR/INV/PM) */
+function _dbExpName(base,yrsel){var yrs=[];for(var y in (yrsel||{})){if(yrsel[y])yrs.push((''+y).replace(/^\$/,''));}yrs.sort();
+  var yt=yrs.length?('_ปี'+(yrs.length<=3?yrs.join('-'):(yrs[0]+'-'+yrs[yrs.length-1]))):'';
+  return (base+yt+'_'+new Date().toISOString().slice(0,10)+'.xlsx').replace(/[\/\\:*?"<>|]+/g,'-'); }
 /* ===== v9.54: AR RECEIPT — a SEPARATE data file in the Database module (own template · like AP Payment) ===== */
 var AR_COLS=[
   {l:'Customer',w:220},
@@ -12491,7 +12496,7 @@ function _arExport(){ if(typeof XLSX==='undefined'){alert('The Excel library is 
   var head=vis.map(function(c){return AR_COLS[c].l;});if(anyColor)head.push('สี / Colour');
   var aoa=[head];
   for(var i=0;i<ARVIEW.length;i++){var r=ARVIEW[i];var row=vis.map(function(c){return AR_NUMC[c]?(_arNum(r[c])==null?'':_arNum(r[c])):(r[c]==null?'':r[c]);});if(anyColor){var ci=ARHL[_arRowKey(r)];row.push(ci!=null?_GLHLC[ci].name:'');}aoa.push(row);}
-  var ws=XLSX.utils.aoa_to_sheet(aoa);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'AR Receipt');XLSX.writeFile(wb,'AR_Receipt_filtered.xlsx'); }
+  var ws=XLSX.utils.aoa_to_sheet(aoa);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'AR Receipt');XLSX.writeFile(wb,_dbExpName('AR_Receipt',ARYRSEL)); }
 /* ===== v9.74: AR INVOICE (ISSUE) — a SEPARATE data file in the Database module (own template · like AP Payment / AR Receipt) =====
    Source: 4.3.1 Detail Issue Invoice AR. Ref. Code + Project Name (+ Contract Amt) are carried DOWN (forward-filled)
    from each project's group header so every Invoice No. row is self-contained (Index on the left). ===== */
@@ -12685,7 +12690,7 @@ function _invExport(){ if(typeof XLSX==='undefined'){alert('The Excel library is
   var head=vis.map(function(c){return INV_COLS[c].l;});if(anyColor)head.push('สี / Colour');
   var aoa=[head];
   for(var i=0;i<INVVIEW.length;i++){var r=INVVIEW[i];var row=vis.map(function(c){return INV_NUMC[c]?(_invNum(r[c])==null?'':_invNum(r[c])):(r[c]==null?'':r[c]);});if(anyColor){var ci=INVHL[_invRowKey(r)];row.push(ci!=null?_GLHLC[ci].name:'');}aoa.push(row);}
-  var ws=XLSX.utils.aoa_to_sheet(aoa);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'AR Invoice');XLSX.writeFile(wb,'AR_Invoice_filtered.xlsx'); }
+  var ws=XLSX.utils.aoa_to_sheet(aoa);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'AR Invoice');XLSX.writeFile(wb,_dbExpName('AR_Invoice',INVYRSEL)); }
 /* ===================== V9.165: Voucher → auto journal (การบันทึกบัญชีตามเลขที่ Voucher) =====================
    Paste one or many Voucher numbers → instantly list the full accounting entry (A/C · Debit · Credit) of every
    Voucher, grouped per Voucher with per-Voucher totals + a Dr=Cr balance check, plus a grand summary + Excel export. */
@@ -14050,6 +14055,34 @@ function renderGl(){var w=document.getElementById('glWrap');if(!w)return;
   top+='<div class="glwrap2" id="glScroll"><table class="gltbl" style="width:'+totalW+'px">'+_glHead()+'<tbody id="glBody">'+body+'</tbody></table></div>'
     +'<div class="glft"><span class="glmeta">Showing all '+GLVIEW.length.toLocaleString()+' rows (scrollable \u00b7 sorted/filtered) \u00b7 drag a column border to resize \u00b7 use \u25a6 Columns to show/hide</span></div>';
   w.innerHTML=top;_glBind();_glCloseDrop();_glVSSetup();_glEnsureCloud();}
+/* v10.105: ตั้งชื่อไฟล์ Export ให้สื่อความชัด — รหัสบัญชี / หมวดหมู่ / ปี / เดือน ตามตัวกรองที่เลือก */
+var _GL_MON_ABBR=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+function _glExportTag(){
+  var p=[];
+  /* หมวดหมู่ (account class) */
+  if(typeof _glClass!=='undefined'&&_glClass&&_glClass.length){
+    var L=_glClass.map(function(x){var d=(typeof _glClsDef==='function')?_glClsDef(x):null;return d?d.s:x;});
+    p.push('หมวด'+_glClass.join('+')+'-'+L.join('_'));
+  }
+  /* รหัสบัญชี (ตัวกรองคอลัมน์ A/C) */
+  var cf=GLFIL['0'];
+  if(cf&&cf.t==='set'){var cs=Object.keys(cf.v).map(function(k){return k.slice(1);}).filter(Boolean).sort();
+    if(cs.length&&cs.length<=5)p.push('บช'+cs.join('-'));else if(cs.length)p.push(cs.length+'บัญชี');}
+  else if(cf&&cf.t==='has'&&cf.q){p.push('บช-'+cf.q);}
+  /* ปี */
+  var yf=GLFIL['1'];
+  if(yf&&yf.t==='set'){var ys=Object.keys(yf.v).map(function(k){return k.slice(1);}).filter(Boolean).sort();
+    if(ys.length)p.push('ปี'+(ys.length<=3?ys.join('-'):(ys[0]+'-'+ys[ys.length-1])));}
+  /* เดือน */
+  var ms=[];for(var k in GLMSEL)if(GLMSEL[k])ms.push(k);ms.sort();
+  if(ms.length)p.push((ms.length<=6?ms.map(function(m){return _GL_MON_ABBR[+m]||m;}).join('-'):(_GL_MON_ABBR[+ms[0]]+'-'+_GL_MON_ABBR[+ms[ms.length-1]])));
+  return p.join('_');
+}
+function _glExportFileName(fmt){
+  var tag=_glExportTag();
+  var fn='GL_'+(tag?tag:'ทั้งหมด')+'_'+new Date().toISOString().slice(0,10)+'.'+fmt;
+  return fn.replace(/[\/\\:*?"<>|]+/g,'-').replace(/_+/g,'_');
+}
 function _glExportExcel(fmt){
   fmt=(fmt==='xlsb')?'xlsb':'xlsx';   /* v10.13x: ผู้ใช้เลือกได้ว่าจะดาวน์โหลดเป็น Excel Workbook (.xlsx) หรือ Excel Binary Workbook (.xlsb) */
   if(typeof XLSX==='undefined'){alert('The Excel reader is still loading — please wait and try again');return;}
@@ -14073,10 +14106,44 @@ function _glExportExcel(fmt){
   try{var rng=XLSX.utils.decode_range(ws['!ref']),numIdx=[];vis.forEach(function(c,i){if(GL_COLS[c].t==='num')numIdx.push(i);});
     for(var Rr=1;Rr<=rng.e.r;Rr++)numIdx.forEach(function(ci){var cell=ws[XLSX.utils.encode_cell({r:Rr,c:ci})];if(cell&&typeof cell.v==='number'){cell.t='n';cell.z='#,##0.00';}});}catch(e){}
   var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'GL');
-  var afn=(_glActiveFile()&&_glActiveFile().name)||'GL';afn=(''+afn).replace(/\.[^.]+$/,'').replace(/[^\w฀-๿]+/g,'_').slice(0,40)||'GL';
-  try{ XLSX.writeFile(wb,'GL_filtered_'+afn+'_'+new Date().toISOString().slice(0,10)+'.'+fmt,{bookType:fmt}); }
+  var fn=_glExportFileName(fmt);
+  try{ XLSX.writeFile(wb,fn,{bookType:fmt}); }
   catch(e){ alert('Export failed ('+fmt.toUpperCase()+'): '+((e&&e.message)||e)); return; }
-  try{if(typeof gliLog==='function')gliLog('Export GL (filtered · '+fmt.toUpperCase()+')',GLVIEW.length+' rows · '+afn);}catch(e){}
+  try{if(typeof gliLog==='function')gliLog('Export GL (filtered · '+fmt.toUpperCase()+')',GLVIEW.length+' rows · '+fn);}catch(e){}
+}
+/* v10.106: Export PDF ของ GL (Database) — พิมพ์แถวที่กรองอยู่เป็น PDF สวยงาม หัวเขียวแบบระบบ + ยอดรวม */
+function _glExportPDF(){
+  _glHlLoad();_glRefresh();
+  if(!GLVIEW||!GLVIEW.length){alert('ไม่มีแถวให้ส่งออกตามตัวกรองปัจจุบัน');return;}
+  if(GLVIEW.length>4000&&!confirm('มี '+GLVIEW.length.toLocaleString()+' แถว — PDF จะใหญ่และช้ามาก\nแนะนำให้กรองก่อน (เลือกหมวด/ปี/เดือน/รหัสบัญชี)\n\nต้องการทำต่อไหม?'))return;
+  var vis=_glVisCols();
+  function money(v){v=+v||0;return v?v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'';}
+  function e2(s){return (''+(s==null?'':s)).replace(/[&<>]/g,function(c){return c==='&'?'&amp;':c==='<'?'&lt;':'&gt;';});}
+  var D=0,C=0,body='';
+  GLVIEW.forEach(function(r){var tds='';
+    vis.forEach(function(c){var num=GL_COLS[c].t==='num';var v=_glVal(r,c);tds+='<td'+(num?' class="n"':'')+'>'+(num?money(v):e2(v))+'</td>';});
+    body+='<tr>'+tds+'</tr>';D+=(+r[16]||0);C+=(+r[17]||0);});
+  var ths='';vis.forEach(function(c){ths+='<th'+(GL_COLS[c].t==='num'?' class="n"':'')+'>'+e2(GL_COLS[c].l)+'</th>';});
+  var tot='';vis.forEach(function(c,i){if(c===15)tot+='<td class="n">'+money(D)+'</td>';else if(c===16)tot+='<td class="n">'+money(C)+'</td>';else if(c===17)tot+='<td class="n">'+money(D-C)+'</td>';else tot+='<td>'+(i===0?'รวม TOTAL':'')+'</td>';});
+  var tag=(typeof _glExportTag==='function')?_glExportTag():'';
+  var title='บัญชีแยกประเภท · General Ledger'+(tag?(' — '+tag):' — ทั้งหมด');
+  var meta='แสดง '+GLVIEW.length.toLocaleString()+' แถว · เดบิต '+money(D)+' · เครดิต '+money(C)+' · สุทธิ (D−C) '+money(D-C)+' · พิมพ์ '+new Date().toLocaleDateString('th-TH');
+  var w=window.open('','_blank');if(!w){alert('เปิดหน้าต่างพิมพ์ไม่ได้ — โปรดอนุญาต pop-up ของหน้านี้');return;}
+  var css='@page{size:A4 landscape;margin:9mm}'
+    +'*{box-sizing:border-box}body{margin:0;padding:14px 16px;font-family:\'Sarabun\',\'Noto Sans Thai\',\'Inter\',sans-serif;color:#19222E;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+    +'.hd .co{font-size:15px;font-weight:800;color:#0A463E}.hd .tt{font-size:12.5px;font-weight:700;margin-top:2px;color:#123}.hd .mt{font-size:10px;color:#556;margin-top:3px}'
+    +'table{border-collapse:collapse;width:100%;font-size:8.7px;margin-top:9px}'
+    +'thead th{background:#0F3D37;color:#fff;font-weight:700;padding:5px 6px;text-align:left;border:1px solid #0B322C;white-space:nowrap}'
+    +'thead th.n{text-align:right}thead{display:table-header-group}'
+    +'tbody td{padding:3px 6px;border:1px solid #E4EAE7;vertical-align:top}'
+    +'td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}'
+    +'tbody tr:nth-child(even){background:#F6FAF9}tr{page-break-inside:avoid}'
+    +'tfoot td{background:#EAF3EF;font-weight:800;padding:5px 6px;border:1px solid #CBE0D8}tfoot td.n{text-align:right}';
+  w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+e2(title)+'</title><style>'+css+'</style></head><body>'
+    +'<div class="hd"><div class="co">บริษัท แกรนด์ไลน์ อินโนเวชั่น จำกัด</div><div class="tt">'+e2(title)+'</div><div class="mt">'+e2(meta)+'</div></div>'
+    +'<table><thead><tr>'+ths+'</tr></thead><tbody>'+body+'</tbody><tfoot><tr>'+tot+'</tr></tfoot></table></body></html>');
+  w.document.close();setTimeout(function(){try{w.focus();w.print();}catch(e){}},450);
+  try{if(typeof gliLog==='function')gliLog('Export GL PDF (filtered)',GLVIEW.length+' rows'+(tag?(' · '+tag):''));}catch(e){}
 }
 /* v10.13x: format chooser popup for the GL "Export Excel" button — .xlsx (Workbook) vs .xlsb (Binary Workbook) */
 function _glOpenExportMenu(btn){_glCloseDrop();var pg=document.getElementById('page-gl');if(!pg)return;
@@ -14291,6 +14358,7 @@ function _glBind(){var pg=document.getElementById('page-gl');if(!pg||pg._gb)retu
     if(cl('#glADBtn')){_glADOpen();return;}
     if(cl('#glDFBtn')){_glDFOpen();return;}
     if(cl('#glCopyV')){_glCopyVOpen();return;}
+    if(cl('#glExportPdf')){_glExportPDF();return;}
     var xbtn=cl('#glExport');if(xbtn){_glOpenExportMenu(xbtn);return;}
     var colB=cl('#glCols');if(colB){_glOpenColMenu(colB);return;}
     if(cl('#glPurge')){_glPurge();return;}
@@ -14431,6 +14499,7 @@ function _glActionPanel(clsb,yrs,mons){
     ]},
     {t:'Export',t2:'View',ic:'⤓',btns:[
       {id:'glExport',ic:'⤓',l:'Export Excel ▾',title:'ส่งออกแถวที่กรองอยู่ — เลือกได้ว่าจะเป็น Excel Workbook (.xlsx) หรือ Excel Binary Workbook (.xlsb)'},
+      {id:'glExportPdf',ic:'🖨',l:'Export PDF',title:'พิมพ์ / บันทึกแถวที่กรองอยู่เป็น PDF สวยงาม (ตามตัวกรอง · หัวเขียวแบบระบบ)'},
       {id:'glCols',ic:'▦',l:'Columns',title:'Show / hide table columns'}
     ]}
   ];
