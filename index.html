@@ -13991,7 +13991,9 @@ function _glPXLoadState(){ if(_glPXState)return _glPXState;
   if(s.pmode!=='exact'&&s.pmode!=='starts'&&s.pmode!=='contains')s.pmode='exact';
   if(s.amode!=='exact'&&s.amode!=='starts'&&s.amode!=='contains')s.amode='starts';
   if(s.view!=='matrix'&&s.view!=='byproj'&&s.view!=='byacc')s.view='matrix';
+  if(!s.years||typeof s.years!=='object'||Array.isArray(s.years))s.years={};
   _glPXState=s; return s; }
+function _glPXYearsSel(st){ var out={},any=false,k; for(k in (st.years||{})){if(st.years[k]){out[k]=1;any=true;}} return any?out:null; }
 function _glPXSaveState(){ try{localStorage.setItem('gli_glpx',JSON.stringify(_glPXState));}catch(e){} }
 function _glPXTokens(txt){ if(!txt)return []; var parts=(''+txt).split(/[\n\r,;|]+/),out=[],seen={};
   for(var i=0;i<parts.length;i++){var t=parts[i].trim();if(!t)continue;var k=t.toUpperCase();if(seen[k])continue;seen[k]=1;out.push(t);} return out; }
@@ -14013,9 +14015,11 @@ function _glPXCompute(){
   var pe=document.getElementById('glPXProj'),ae=document.getElementById('glPXAcc');
   st.proj=pe?pe.value:''; st.acc=ae?ae.value:''; _glPXSaveState();
   var ptoks=_glPXTokens(st.proj),atoks=_glPXTokens(st.acc);
+  var ysel=_glPXYearsSel(st);
   var rows=(GLROWS&&GLROWS.length)?GLROWS:[];
   var cells={},cellOrd=[],perP={},pOrd=[],perA={},aOrd=[],D=0,C=0,N=0;
   for(var i=0;i<rows.length;i++){var r=rows[i];if(!r)continue;
+    if(ysel&&!ysel[''+(+r[2]||0)])continue;
     if(!_glPXMatch(r[13],ptoks,st.pmode))continue;
     if(!_glPXMatch(r[0],atoks,st.amode))continue;
     var pj=(''+(r[13]==null?'':r[13])).trim()||'(ไม่ระบุโปรเจค)';
@@ -14029,11 +14033,13 @@ function _glPXCompute(){
     var ga=perA[ac]; if(!ga){ga=perA[ac]={acc:ac,anm:anm,n:0,d:0,c:0,projs:{}};aOrd.push(ac);} ga.n++;ga.d+=d;ga.c+=c;if(!ga.anm&&anm)ga.anm=anm;ga.projs[pj]=1;
     D+=d;C+=c;N++;
   }
-  _glPXLast={cells:cells,cellOrd:cellOrd,perP:perP,pOrd:pOrd,perA:perA,aOrd:aOrd,D:D,C:C,N:N,ptoks:ptoks,atoks:atoks,st:{pmode:st.pmode,amode:st.amode,view:st.view}};
+  _glPXLast={cells:cells,cellOrd:cellOrd,perP:perP,pOrd:pOrd,perA:perA,aOrd:aOrd,D:D,C:C,N:N,ptoks:ptoks,atoks:atoks,yrTxt:(ysel?Object.keys(ysel).sort().join(', '):'ทุกปี'),st:{pmode:st.pmode,amode:st.amode,view:st.view}};
   var net=D-C,nP=pOrd.length,nA=aOrd.length;
+  var yrTxt=ysel?Object.keys(ysel).sort().join(', '):'ทุกปี';
   sum.innerHTML=''
     +'<span class="glvj-pill ok">พบ '+N.toLocaleString()+' แถว</span>'
     +'<span class="glvj-pill">โปรเจค '+nP.toLocaleString()+' · บัญชี '+nA.toLocaleString()+'</span>'
+    +'<span class="glvj-pill">ปี: '+esc(yrTxt)+'</span>'
     +'<span class="glvj-pill">โปรเจค: '+(ptoks.length?esc(_glPXModeLabel(st.pmode))+' '+ptoks.length+' ค่า':'ทั้งหมด')+' · บัญชี: '+(atoks.length?esc(_glPXModeLabel(st.amode))+' '+atoks.length+' ค่า':'ทั้งหมด')+'</span>'
     +'<span class="glvj-pill d">Debit ฿'+fmt(D)+'</span><span class="glvj-pill c">Credit ฿'+fmt(C)+'</span>'
     +'<span class="glvj-pill '+(Math.abs(net)<0.005?'bal':'')+'">Net ฿'+fmt(net)+'</span>';
@@ -14084,6 +14090,7 @@ function _glPXExport(){
     var info=[['GL — สรุปยอดตามโปรเจค × รหัสบัญชี'],[],
       ['โปรเจคที่ค้น',L.ptoks.join(', ')||'(ทั้งหมด)'],['โหมดจับคู่โปรเจค',_glPXModeLabel(L.st.pmode)],
       ['รหัสบัญชีที่ค้น',L.atoks.join(', ')||'(ทั้งหมด)'],['โหมดจับคู่บัญชี',_glPXModeLabel(L.st.amode)],
+      ['ปี (Year)',L.yrTxt||'ทุกปี'],
       ['จำนวนโปรเจค',L.pOrd.length],['จำนวนบัญชี',L.aOrd.length],['จำนวนแถว',L.N],
       ['รวม Debit',R2(L.D)],['รวม Credit',R2(L.C)],['รวม Net',R2(L.D-L.C)],['จัดทำ',(new Date()).toLocaleString('th-TH')]];
     var wsI=XLSX.utils.aoa_to_sheet(info);wsI['!cols']=[{wch:22},{wch:52}];XLSX.utils.book_append_sheet(wb,wsI,'Summary');
@@ -14122,6 +14129,9 @@ function _glPXCSS(){return ''
   +'.glpx-tbl tr.glpx-gt td{background:linear-gradient(135deg,var(--brand,#0E5C52),var(--brand-d,#0A463E));color:#fff;font-weight:800;border-top:2px solid var(--brand-d,#0A463E);}'
   +'.glpx-tbl tr.glpx-gt td.n{color:#fff;}'
   +'.glpx-views{display:flex;gap:5px;}'
+  +'.glpx-yrs{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:12px;padding-top:11px;border-top:1px dashed var(--line,#E6E0D4);}'
+  +'.glpx-yrs .gldf-chips{gap:6px;}'
+  +'.glpx-yrs .gldf-chip{padding:5px 12px;font-variant-numeric:tabular-nums;}'
   +'@media(max-width:640px){.glpx-cell{min-width:100%;}}';
 }
 function _glPXEnsure(){
@@ -14133,6 +14143,9 @@ function _glPXEnsure(){
   function segset(cur,attr){var ms=[['exact','ตรงทั้งหมด'],['starts','ขึ้นต้นด้วย'],['contains','มีคำว่า']],h='';for(var i=0;i<ms.length;i++)h+='<button class="gldf-seg'+(ms[i][0]===cur?' on':'')+'" type="button" '+attr+'="'+ms[i][0]+'">'+ms[i][1]+'</button>';return h;}
   var views=[['matrix','โปรเจค × บัญชี'],['byproj','รวมต่อโปรเจค'],['byacc','รวมต่อบัญชี']];
   var viewSeg='';for(var vi=0;vi<views.length;vi++)viewSeg+='<button class="gldf-seg'+(views[vi][0]===s.view?' on':'')+'" type="button" data-pxview="'+views[vi][0]+'">'+views[vi][1]+'</button>';
+  var _gy=(typeof GLYEARS!=='undefined'&&GLYEARS)?GLYEARS:[]; var _ysel0=_glPXYearsSel(s);
+  var yearChips='<button class="gldf-chip'+(_ysel0?'':' on')+'" type="button" data-pxyr="__all">ทุกปี</button>';
+  for(var yi=0;yi<_gy.length;yi++){var _yy=_gy[yi];yearChips+='<button class="gldf-chip'+(s.years[_yy]?' on':'')+'" type="button" data-pxyr="'+_yy+'">'+_yy+'</button>';}
   var m=document.createElement('div');m.id='glPXModal';m.className='pmodal glvj-modal gldf-modal';m.hidden=true;
   m.innerHTML=''
     +'<div class="pmodal-bd"></div>'
@@ -14148,6 +14161,7 @@ function _glPXEnsure(){
           +'<textarea id="glPXAcc" class="glvj-ta gldf-ta" spellcheck="false" placeholder="เช่น&#10;5311001&#10;5110001&#10;(เว้นว่าง = ทุกบัญชี · ใช้ “ขึ้นต้นด้วย” 5311 = ทุก 5311xxx)">'+esc(s.acc||'')+'</textarea>'
           +'<div class="glpx-modehd"><span class="gldf-lab">จับคู่บัญชี</span><div class="gldf-segw" id="glPXAmode">'+segset(s.amode,'data-pxam')+'</div></div></div>'
       +'</div>'
+      +'<div class="glpx-yrs"><span class="gldf-lab" style="margin:0 4px 0 0">ปี (Year) — เลือกได้หลายปี</span><div class="gldf-chips" id="glPXYears">'+yearChips+'</div></div>'
       +'<div class="gldf-toolbar"><span class="gldf-lab" style="margin:0 2px 0 0">มุมมอง</span><div class="gldf-segw glpx-views" id="glPXViews">'+viewSeg+'</div>'
         +'<span class="gldf-tbspacer"></span>'
         +'<button class="glvj-b" id="glPXClear" type="button">✕ ล้างค่า</button>'
@@ -14166,6 +14180,11 @@ function _glPXEnsure(){
   m.querySelector('#glPXPmode').addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('[data-pxpm]'):null;if(!b)return;var md=b.getAttribute('data-pxpm');_glPXLoadState().pmode=md;_glPXSaveState();var sg=this.querySelectorAll('.gldf-seg');for(var i=0;i<sg.length;i++)sg[i].classList.toggle('on',sg[i].getAttribute('data-pxpm')===md);_glPXCompute();});
   m.querySelector('#glPXAmode').addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('[data-pxam]'):null;if(!b)return;var md=b.getAttribute('data-pxam');_glPXLoadState().amode=md;_glPXSaveState();var sg=this.querySelectorAll('.gldf-seg');for(var i=0;i<sg.length;i++)sg[i].classList.toggle('on',sg[i].getAttribute('data-pxam')===md);_glPXCompute();});
   m.querySelector('#glPXViews').addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('[data-pxview]'):null;if(!b)return;var vw=b.getAttribute('data-pxview');_glPXLoadState().view=vw;_glPXSaveState();var sg=this.querySelectorAll('.gldf-seg');for(var i=0;i<sg.length;i++)sg[i].classList.toggle('on',sg[i].getAttribute('data-pxview')===vw);var res=document.getElementById('glPXRes');if(res&&_glPXLast&&_glPXLast.N)res.innerHTML=_glPXRenderTable();});
+  m.querySelector('#glPXYears').addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('[data-pxyr]'):null;if(!b)return;var yv=b.getAttribute('data-pxyr');var stt=_glPXLoadState();
+    if(yv==='__all'){stt.years={};}else{if(stt.years[yv])delete stt.years[yv];else stt.years[yv]=1;}_glPXSaveState();
+    var anyY=false,kk;for(kk in stt.years){if(stt.years[kk]){anyY=true;break;}}
+    var chips=this.querySelectorAll('.gldf-chip');for(var i=0;i<chips.length;i++){var cv=chips[i].getAttribute('data-pxyr');chips[i].classList.toggle('on',cv==='__all'?!anyY:!!stt.years[cv]);}
+    _glPXCompute();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'||e.keyCode===27){var mm=document.getElementById('glPXModal');if(mm&&!mm.hidden)_glPXClose();}});
 }
 function renderGl(){var w=document.getElementById('glWrap');if(!w)return;
