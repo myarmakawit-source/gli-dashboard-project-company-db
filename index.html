@@ -14765,7 +14765,9 @@ function _dbActPanel(actionGroups,filterCols){
   var idx=0,h='<div class="glacts">';
   for(var g=0;g<actionGroups.length;g++){var G=actionGroups[g];if(!G)continue;
     h+='<div class="glactg glactg-act"><div class="glacth"><span class="glacthi">'+G.ic+'</span><span class="glacthname">'+esc(G.t)+'</span><span class="glacth2">'+esc(G.t2)+'</span></div>';
-    for(var b=0;b<G.btns.length;b++){var B=G.btns[b];if(!B)continue;idx++;
+    for(var b=0;b<G.btns.length;b++){var B=G.btns[b];if(!B)continue;
+      if(B.cat){ h+='<div class="glactcat'+(B.cc?' cat-'+B.cc:'')+'">'+esc(B.cat)+'</div>'; continue; }
+      idx++;
       h+='<button class="glactb'+(B.cls?' '+B.cls:'')+'" id="'+B.id+'" type="button"'+(B.off?' disabled':'')+' title="'+_eatt(B.title||'')+'">'
         +'<span class="glactn">'+idx+'</span><span class="glacti">'+B.ic+'</span><span class="glactl">'+esc(B.l)+'</span></button>';
     }
@@ -14794,12 +14796,15 @@ function _glActionPanel(clsb,yrs,mons){
       {id:'glDelete',ic:'🗑',l:'Delete data',title:'Clear all data in this GL file (keeps the chip as an empty slot for a new upload · like AP/AR)',cls:'danger'}
     ]},
     {t:'Tools',t2:'Analyse',ic:_svTools,btns:[
+      {cat:'ใบสำคัญ · Voucher',cc:'v'},
       {id:'glVJBtn',ic:_svVJ,l:'Voucher → Journal',title:'Paste one or more Voucher numbers to instantly see the journal entry of every Voucher',cls:'accent'},
+      {id:'glCopyV',ic:_svCV,l:'Copy Voucher',title:'คัดลอกเลข Voucher ของแถวที่กรองอยู่ — เลือกคัดลอกทั้งหมดหรือบางส่วนได้',cls:'accent',off:!_hasRows},
+      {cat:'ตรวจสอบ · Audit',cc:'a'},
       {id:'glBCBtn',ic:_svBC,l:'Balance Check',title:'Scan every Voucher and list the ones where total Debit ≠ total Credit (unbalanced)',cls:'accent2'},
       {id:'glADBtn',ic:_svAD,l:'Auditor Database',title:'Auditor Database — ตรวจสอบข้อมูล GL: เลข Voucher ขาดหาย · รายการซ้ำ · รายการผิดปกติ · Top-N',cls:'accent2'},
-      {id:'glCopyV',ic:_svCV,l:'Copy Voucher',title:'คัดลอกเลข Voucher ของแถวที่กรองอยู่ — เลือกคัดลอกทั้งหมดหรือบางส่วนได้',cls:'accent',off:!_hasRows},
-      {id:'glDFBtn',ic:_svDF,l:'Distinct Finder',title:'ใส่ค่า (เช่น รหัสบัญชี) แล้วเลือกว่าอยากรู้อะไร — มี Supplier / โปรเจค / เลข Voucher ใดบ้าง (ดึงรายการไม่ซ้ำ พร้อมนับจำนวนและยอดเงิน)',cls:'accent2',off:!_hasRows},
-      {id:'glPXBtn',ic:_svPX,l:'โปรเจค × บัญชี',title:'วางรหัสโปรเจค (หลายอันได้) + เลือกรหัสบัญชี แล้วขึ้นยอดสรุป Debit / Credit / Net แยกตามโปรเจคและบัญชี',cls:'accent',off:!_hasRows}
+      {cat:'วิเคราะห์ · Analyse',cc:'q'},
+      {id:'glDFBtn',ic:_svDF,l:'Distinct Finder',title:'ใส่ค่า (เช่น รหัสบัญชี) แล้วเลือกว่าอยากรู้อะไร — มี Supplier / โปรเจค / เลข Voucher ใดบ้าง (ดึงรายการไม่ซ้ำ พร้อมนับจำนวนและยอดเงิน)',cls:'accent3',off:!_hasRows},
+      {id:'glPXBtn',ic:_svPX,l:'โปรเจค × บัญชี',title:'วางรหัสโปรเจค (หลายอันได้) + เลือกรหัสบัญชี แล้วขึ้นยอดสรุป Debit / Credit / Net แยกตามโปรเจคและบัญชี',cls:'accent3',off:!_hasRows}
     ]},
     {t:'Export',t2:'View',ic:'⤓',btns:[
       {id:'glExport',ic:'⤓',l:'Export Excel ▾',title:'ส่งออกแถวที่กรองอยู่ — เลือกได้ว่าจะเป็น Excel Workbook (.xlsx) หรือ Excel Binary Workbook (.xlsb)'},
@@ -14834,6 +14839,13 @@ function _glActCSS(){return ''
   +'.glactb.accent2{background:linear-gradient(135deg,var(--gold,#A8741A),var(--gold-d,#8A5E12));color:#fff;border-color:var(--gold-d,#8A5E12);box-shadow:0 4px 13px -4px rgba(168,116,26,.5);}'
   +'.glactb.accent2:hover{filter:brightness(1.08);box-shadow:0 9px 22px -7px rgba(168,116,26,.55);}'
   +'.glactb.accent2 .glactn{background:rgba(255,255,255,.28);color:#fff;}'
+  +'.glactb.accent3{background:linear-gradient(135deg,#1E5FAE,#154A86);color:#fff;border-color:#154A86;box-shadow:0 4px 13px -4px rgba(30,95,174,.5);}'
+  +'.glactb.accent3:hover{filter:brightness(1.08);box-shadow:0 9px 22px -7px rgba(30,95,174,.55);}'
+  +'.glactb.accent3 .glactn{background:rgba(255,255,255,.28);color:#fff;}'
+  +'.glactcat{font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted,#8C8676);margin:6px 1px 0;padding-left:1px;display:flex;align-items:center;gap:6px;}'
+  +'.glactcat:before{content:"";flex:none;width:8px;height:8px;border-radius:3px;background:currentColor;opacity:.6;}'
+  +'.glactg-act .glactcat:first-child{margin-top:1px;}'
+  +'.glactcat.cat-v{color:#0A5C52;}.glactcat.cat-a{color:#8A5E12;}.glactcat.cat-q{color:#1E5FAE;}'
   +'.glactb.danger{color:#B42318;}'
   +'.glactb.danger:hover{border-color:#B42318;background:var(--neg-bg,#FBEAE6);box-shadow:0 7px 18px -7px rgba(180,35,24,.32);}'
   +'.glactb.danger .glactn{background:var(--neg-bg,#FBEAE6);color:#B42318;}'
@@ -27376,7 +27388,7 @@ function _cbRenderModal(){
   var nm=c.name?esc(c.name):('Company '+c.idx+' — <i>not set</i>');
   var h='<div class="cbmodal-hd"><div class="cbmodal-hdl"><div class="cbmodal-badge">'+(c.idx<10?'0':'')+c.idx+'</div>'
     +'<div class="cbmodal-tt"><div class="cbmodal-nm">'+nm+'</div><div class="cbmodal-meta">'+(c.tax?'Tax ID '+esc(c.tax)+' · ':'')+'ปีฐานข้อมูล <b>'+esc(CBDATA.cur)+'</b> · '+accs.length+' account'+(accs.length===1?'':'s')+'</div></div></div>'
-    +'<div class="cbmodal-hdr"><button class="cbmodal-xls" id="cbExportOne" type="button" title="\u0e14\u0e36\u0e07 Excel \u0e40\u0e09\u0e1e\u0e32\u0e30\u0e1a\u0e23\u0e34\u0e29\u0e31\u0e17\u0e19\u0e35\u0e49">\u2913 Export</button><span class="cbchip bal">฿'+_cbMoney(thb)+'</span></div></div>';
+    +'<div class="cbmodal-hdr"><button class="cbmodal-xls" id="cbExportPdfOne" type="button" title="ดึง PDF สำหรับ Confirm bank — รายงานยืนยันยอดเงินฝากธนาคาร เฉพาะบริษัทนี้">🖨 Export PDF</button><button class="cbmodal-xls" id="cbExportOne" type="button" title="\u0e14\u0e36\u0e07 Excel \u0e40\u0e09\u0e1e\u0e32\u0e30\u0e1a\u0e23\u0e34\u0e29\u0e31\u0e17\u0e19\u0e35\u0e49">\u2913 Export</button><span class="cbchip bal">฿'+_cbMoney(thb)+'</span></div></div>';
   h+='<div class="cbmodal-body">'+_cbBody(id,accs)+'</div>';
   var _mb=host.querySelector('.cbmodal-body');var _mt=_mb?_mb.scrollTop:0;
   host.innerHTML=h;
@@ -27385,6 +27397,7 @@ function _cbRenderModal(){
 function _cbModalClick(e){
   var t=e.target,cl=function(s){return t.closest?t.closest(s):null;};
   var _vt=cl('[data-cbview]'); if(_vt){_cbView=_vt.getAttribute('data-cbview');_cbRenderModal();return;}
+  if(cl('#cbExportPdfOne')){_cbExportPDF(_cbModalCo);return;}
   if(cl('#cbExportOne')){_cbExport(_cbModalCo);return;}
   if(cl('#cbFilClr')){_cbFil={q:'',bank:'',status:'',collat:'',verify:'',acst:''};_cbRenderModal();return;}
   var add=cl('[data-cbadd]');
@@ -27460,6 +27473,67 @@ function _cbExport(coId){
   var tag=coId?((only&&only.name)?safe(only.name):('Company'+(only?only.idx:''))):'AllCompanies';
   try{XLSX.writeFile(wb,'Bank_Database_'+year+'_'+tag+'.xlsx');}catch(e){alert('Export failed: '+((e&&e.message)||e));return;}
   if(typeof gliLog==='function')gliLog('Export Confirm Bank',(coId?('รายบริษัท · '+tag):'ทุกบริษัท')+' · '+n+' บัญชี · ปี '+year);
+}
+/* Export PDF — Confirm Bank: รายงานยืนยันยอดเงินฝากธนาคาร รายบริษัท (จัดกลุ่มตามธนาคาร + ยอดรวม + ช่องลงนาม) */
+function _cbExportPDF(coId){
+  try{if(typeof loadCb==='function')loadCb();}catch(e){}
+  var cos=_cbCos(),year=(typeof CBDATA!=='undefined'&&CBDATA)?CBDATA.cur:'',c=null;
+  for(var i=0;i<cos.length;i++){ if(cos[i].id===coId){c=cos[i];break;} }
+  if(!c){ alert('ไม่พบบริษัทนี้'); return; }
+  var accs=_cbAccs(c.id)||[];
+  if(!accs.length){ alert('บริษัทนี้ยังไม่มีบัญชีธนาคารให้ส่งออก'); return; }
+  function e2(s){return (''+(s==null?'':s)).replace(/[&<>]/g,function(ch){return ch==='&'?'&amp;':ch==='<'?'&lt;':'&gt;';});}
+  function fdate(s){s=(''+(s||'')).trim();var m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!m)return e2(s);var mon=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][(+m[2])-1]||m[2];return m[3]+'-'+mon+'-'+m[1];}
+  /* group by bank, preserving first-seen order */
+  var groups=[],gmap={};
+  accs.forEach(function(x){ var b=(''+(x.bank||'')).trim()||'— ไม่ระบุธนาคาร —'; var gi=gmap[b]; if(gi==null){gi=groups.length;gmap[b]=gi;groups.push({bank:b,items:[]});} groups[gi].items.push(x); });
+  var body='',no=0,grand=0,nClosed=0;
+  groups.forEach(function(g){
+    var sub=0; g.items.forEach(function(x){ if((x.ccy||'THB')==='THB')sub+=_cbNum(x.bal); });
+    body+='<tr class="bk"><td colspan="12">'+e2(g.bank)+' · '+g.items.length+' บัญชี · รวม (THB) ฿'+_cbMoney(sub)+'</td></tr>';
+    g.items.forEach(function(x){ no++; if((x.ccy||'THB')==='THB')grand+=_cbNum(x.bal); var closed=(x.acst||'')==='Closed'; if(closed)nClosed++;
+      body+='<tr'+(closed?' class="cl"':'')+'><td class="n">'+no+'</td>'
+        +'<td>'+e2(x.branch||'')+'</td>'
+        +'<td class="ad">'+e2(x.addr||'')+'</td>'
+        +'<td>'+e2(x.accName||'')+'</td>'
+        +'<td class="mono">'+e2(x.accNo||'')+'</td>'
+        +'<td class="c">'+e2(x.type||'')+'</td>'
+        +'<td class="c">'+((x.collat==='Y')?'✔':(x.collat==='N'?'—':''))+'</td>'
+        +'<td class="c">'+e2(x.acst||'')+'</td>'
+        +'<td class="c">'+e2(x.ccy||'THB')+'</td>'
+        +'<td class="r">'+((x.bal!=null&&x.bal!=='')?_cbMoney(_cbNum(x.bal)):'')+'</td>'
+        +'<td class="c">'+fdate(x.asOf)+'</td>'
+        +'<td class="c">'+e2(_cbStatLabel(x.status))+'</td></tr>';
+    });
+  });
+  var tot='<tr class="gt"><td colspan="9">รวมทั้งสิ้น · '+accs.length+' บัญชี · '+groups.length+' ธนาคาร'+(nClosed?(' · ปิดแล้ว '+nClosed):'')+' (THB)</td><td class="r">฿'+_cbMoney(grand)+'</td><td colspan="2"></td></tr>';
+  var cname=(c.name?e2(c.name):('บริษัทที่ '+c.idx));
+  var title='รายงานยืนยันยอดเงินฝากธนาคาร · Bank Accounts Confirmation Summary';
+  var meta=(c.tax?'เลขประจำตัวผู้เสียภาษี '+e2(c.tax)+' · ':'')+'ปีฐานข้อมูล '+e2(year)+' · '+accs.length+' บัญชี · '+groups.length+' ธนาคาร · พิมพ์ '+new Date().toLocaleString('th-TH');
+  var w=window.open('','_blank'); if(!w){ alert('เปิดหน้าต่างพิมพ์ไม่ได้ — โปรดอนุญาต pop-up ของหน้านี้'); return; }
+  var css='@page{size:A4 landscape;margin:9mm}'
+    +'*{box-sizing:border-box}body{margin:0;padding:14px 16px;font-family:\'Sarabun\',\'Noto Sans Thai\',\'Inter\',sans-serif;color:#19222E;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+    +'.hd .co{font-size:16px;font-weight:800;color:#0A463E}.hd .tt{font-size:12.5px;font-weight:700;margin-top:2px;color:#123}.hd .mt{font-size:10px;color:#556;margin-top:3px}'
+    +'table{border-collapse:collapse;width:100%;font-size:8.6px;margin-top:9px;table-layout:fixed}'
+    +'thead th{background:#0F3D37;color:#fff;font-weight:700;padding:5px 6px;text-align:left;border:1px solid #0B322C;white-space:nowrap}'
+    +'thead th.c{text-align:center}thead th.r{text-align:right}thead{display:table-header-group}'
+    +'tbody td{padding:3px 6px;border:1px solid #E4EAE7;vertical-align:top;word-wrap:break-word;overflow-wrap:break-word}'
+    +'td.n{text-align:center;color:#667}td.c{text-align:center}td.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700}td.mono{font-family:ui-monospace,\'Courier New\',monospace;white-space:nowrap}td.ad{font-size:8px;color:#556}'
+    +'tr{page-break-inside:avoid}'
+    +'tr.bk td{background:#E6F0EC;color:#0A463E;font-weight:800;border-top:1.5px solid #0E5C52}'
+    +'tr.cl td{background:#F7F7F5;color:#8A8A82}'
+    +'tfoot td{background:#0F3D37;color:#fff;font-weight:800;padding:5px 6px;border:1px solid #0B322C}tfoot td.r{text-align:right}'
+    +'.sig{margin-top:26px;display:flex;gap:40px;justify-content:flex-end}.sig .box{text-align:center;font-size:10px;color:#333;min-width:210px}.sig .ln{border-top:1px dotted #333;margin:34px 10px 5px}.sig .cap{color:#556}';
+  var colg='<colgroup>'
+    +'<col style="width:3%"><col style="width:9%"><col style="width:15%"><col style="width:13%"><col style="width:9%"><col style="width:6.5%"><col style="width:4.5%"><col style="width:6.5%"><col style="width:5%"><col style="width:9%"><col style="width:7.5%"><col style="width:7%"></colgroup>';
+  var thead='<thead><tr><th class="c">No.</th><th>สาขา · Branch</th><th>ที่อยู่ธนาคาร · Address</th><th>ชื่อบัญชี · Account name</th><th>เลขที่บัญชี · Account no.</th><th class="c">ประเภท</th><th class="c">ค้ำ</th><th class="c">สถานะบัญชี</th><th class="c">สกุล</th><th class="r">ยอดคงเหลือ · Balance</th><th class="c">ณ วันที่ · As of</th><th class="c">สถานะยืนยัน</th></tr></thead>';
+  var sig='<div class="sig"><div class="box"><div class="ln"></div><div class="cap">ผู้จัดทำ / Prepared by</div></div><div class="box"><div class="ln"></div><div class="cap">ผู้มีอำนาจลงนาม &amp; ประทับตรา / Authorized signature</div></div></div>';
+  w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+e2(title)+' · '+cname+'</title><style>'+css+'</style></head><body>'
+    +'<div class="hd"><div class="co">'+cname+'</div><div class="tt">'+e2(title)+'</div><div class="mt">'+meta+'</div></div>'
+    +'<table>'+colg+thead+'<tbody>'+body+'</tbody><tfoot>'+tot+'</tfoot></table>'+sig
+    +'</body></html>');
+  w.document.close(); setTimeout(function(){try{w.focus();w.print();}catch(e){}},450);
+  try{if(typeof gliLog==='function')gliLog('Export Confirm Bank PDF',(c.name||('Company'+c.idx))+' · '+accs.length+' บัญชี · ปี '+year);}catch(e){}
 }
 function _cbBind(w){ if(w._cb)return; w._cb=1;
   w.addEventListener('click',function(e){var t=e.target,cl=function(s){return t.closest?t.closest(s):null;};
