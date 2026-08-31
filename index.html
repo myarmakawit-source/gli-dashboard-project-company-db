@@ -1754,6 +1754,12 @@ h1{ background:var(--g-aurora) !important;
 .tkmsb.on{border-color:var(--c);color:#fff;background:var(--c)}
 .tkmmeta{font-size:11.5px;color:var(--muted);padding-top:2px}
 .tkmft{display:flex;align-items:center;gap:9px;padding:15px 20px;border-top:1px solid var(--line);background:var(--line2,#F7F9FB)}
+.tkmove{position:absolute;top:8px;right:9px;display:grid;grid-template-columns:auto auto;gap:3px;opacity:.28;transition:.12s}
+.tkmv.up:hover:not(:disabled),.tkmv.down:hover:not(:disabled){background:#0E7C52;color:#fff;border-color:transparent}
+.tksw{width:26px;height:25px;padding:0;font-size:12.5px;line-height:1;display:inline-flex;align-items:center;justify-content:center;border-radius:7px}
+.tksw.on{outline:2.5px solid var(--brand,#1D5FAE);outline-offset:1px}
+.tkswt{background:#fff}
+.tkmsw{gap:5px}
 @media(max-width:640px){.tkhdr{margin-left:0}.tkstat{margin-left:0;width:100%}.tksearch{max-width:none}.tkcol{min-width:228px}}
 </style>
 <style id="vatCss">
@@ -6808,6 +6814,21 @@ function _tkCat(c){for(var i=0;i<TK_CAT.length;i++)if(TK_CAT[i][0]===c)return TK
 function _tkStat(s){for(var i=0;i<TK_STAT.length;i++)if(TK_STAT[i][0]===s)return TK_STAT[i];return TK_STAT[0];}
 function _tkPrio(p){for(var i=0;i<TK_PRIO.length;i++)if(TK_PRIO[i][0]===p)return TK_PRIO[i];return TK_PRIO[1];}
 function _tkStatIdx(s){for(var i=0;i<TK_STAT.length;i++)if(TK_STAT[i][0]===s)return i;return 0;}
+/* v10.52: per-card highlight colour + title text colour */
+var TK_HL=[['','None','#ffffff','#E6E0D4'],['y','เหลือง','#FEF7E0','#EAC94A'],['g','เขียว','#E7F6EC','#7BC79A'],['b','ฟ้า','#E7EFF8','#8FB6E6'],['p','ชมพู','#FCE7EF','#EC9CB8'],['o','ส้ม','#FCEEE0','#EBB681'],['v','ม่วง','#F1E8FB','#BFA0E8'],['r','แดงอ่อน','#FDECEA','#EDA69C']];
+var TK_TC=[['','ปกติ','#19222E'],['r','แดง','#B42318'],['g','เขียว','#15803D'],['b','น้ำเงิน','#1D5FAE'],['o','ส้ม','#B45309'],['v','ม่วง','#7C3AED'],['k','ดำเข้ม','#0B1220']];
+function _tkHL(c){for(var i=0;i<TK_HL.length;i++)if(TK_HL[i][0]===(c||''))return TK_HL[i];return TK_HL[0];}
+function _tkTC(c){for(var i=0;i<TK_TC.length;i++)if(TK_TC[i][0]===(c||''))return TK_TC[i];return TK_TC[0];}
+/* v10.52: column ordering respects a manual "ord" (set by ▲▼); tasks without ord fall back to the priority sort and sit below the manually-ordered ones */
+function _tkColSort(a,b){var ao=(a.ord==null?Infinity:+a.ord),bo=(b.ord==null?Infinity:+b.ord);if(ao!==bo)return ao-bo;return _tkSort(a,b);}
+function _tkReorder(id,dir){var t=_tkFind(id);if(!t)return;var st=t.status||'todo';
+  var col=TRACKDATA.filter(function(x){return (x.status||'todo')===st;}).sort(_tkColSort);
+  for(var i=0;i<col.length;i++)col[i].ord=i;/* normalise to contiguous order as shown */
+  var idx=-1;for(var j=0;j<col.length;j++)if(col[j].id===id){idx=j;break;}
+  var ni=idx+(dir<0?-1:1);if(idx<0||ni<0||ni>=col.length)return;
+  var tmp=col[idx].ord;col[idx].ord=col[ni].ord;col[ni].ord=tmp;
+  if(typeof gliLog==='function')gliLog('Reordered task',(t.title||'')+' '+(dir<0?'↑':'↓'));
+  saveTrack();renderTracking();}
 var _tkView='kanban',_tkQ='',_tkFA='',_tkFP='',_tkFC='',_tkModalId=null,_tkDragId=null,_tkNewStatus='todo',_tkDebT=null;
 function _tkToday(){return new Date().toISOString().slice(0,10);}
 /* v8.23: defeat browser saved-form-history autofill on search boxes. Browsers key autofill on the field's name/id; a per-page-load random name means nothing matches, so stale values (e.g. project codes) stop being suggested as you type. */
@@ -6872,10 +6893,12 @@ function _tkSnapModal(){
   var m=document.getElementById('tkModal');if(!m)return null;
   var v=function(id){var e=document.getElementById(id);return e?e.value:undefined;};
   var sOn=m.querySelector('#tkmStatus .tkmsb.on'),pOn=m.querySelector('#tkmPrio .tkmsb.on');
+  var hOn=m.querySelector('#tkmHL .tkmsb.on'),tOn=m.querySelector('#tkmTC .tkmsb.on');
   var ae=document.activeElement,af=(ae&&ae.id&&m.contains(ae))?ae.id:'',ss=null,se=null;
   try{if(af&&ae&&('selectionStart' in ae)){ss=ae.selectionStart;se=ae.selectionEnd;}}catch(e){}
   return {title:v('tkmTitle'),desc:v('tkmDesc'),assign:v('tkmAssign'),due:v('tkmDue'),cat:v('tkmCat'),proj:v('tkmProj'),
-    st:sOn?sOn.getAttribute('data-st'):null,pr:pOn?pOn.getAttribute('data-pr'):null,af:af,ss:ss,se:se};
+    st:sOn?sOn.getAttribute('data-st'):null,pr:pOn?pOn.getAttribute('data-pr'):null,
+    hl:hOn?hOn.getAttribute('data-hl'):null,tc:tOn?tOn.getAttribute('data-tc'):null,af:af,ss:ss,se:se};
 }
 function _tkRestoreModal(s){
   if(!s)return;var m=document.getElementById('tkModal');if(!m)return;
@@ -6883,32 +6906,41 @@ function _tkRestoreModal(s){
   set('tkmTitle',s.title);set('tkmDesc',s.desc);set('tkmAssign',s.assign);set('tkmDue',s.due);set('tkmCat',s.cat);set('tkmProj',s.proj);
   var seg=function(wrap,attr,val){if(!val)return;var box=document.getElementById(wrap);if(!box)return;var bs=box.querySelectorAll('.tkmsb');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].getAttribute(attr)===val);};
   seg('tkmStatus','data-st',s.st);seg('tkmPrio','data-pr',s.pr);
+  var segAny=function(wrap,attr,val){var box=document.getElementById(wrap);if(!box||val==null)return;var bs=box.querySelectorAll('.tkmsb');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].getAttribute(attr)===val);};
+  segAny('tkmHL','data-hl',s.hl);segAny('tkmTC','data-tc',s.tc);
   if(s.af){var fe=document.getElementById(s.af);if(fe){try{fe.focus();if(s.ss!=null&&('setSelectionRange' in fe))fe.setSelectionRange(s.ss,s.se);}catch(e){}}}
 }
 function _tkKanban(view){
   var h='<div class="tkboard">';
   TK_STAT.forEach(function(st){
-    var col=view.filter(function(t){return (t.status||'todo')===st[0];}).sort(_tkSort);
+    var col=view.filter(function(t){return (t.status||'todo')===st[0];}).sort(_tkColSort);
     h+='<div class="tkcol" data-st="'+st[0]+'" style="--c:'+st[2]+';--cb:'+st[3]+'">';
     h+='<div class="tkcolhd"><span class="tkcoldot"></span>'+st[1]+'<span class="tkcoln">'+col.length+'</span></div>';
     h+='<div class="tkcolbody" data-st="'+st[0]+'">';
-    col.forEach(function(t){h+=_tkCard(t);});
+    col.forEach(function(t,ci){h+=_tkCard(t,{first:ci===0,last:ci===col.length-1});});
     h+='<button class="tkaddcol" data-st="'+st[0]+'" type="button">+ Add Task</button>';
     h+='</div></div>';
   });
   return h+'</div>';
 }
-function _tkCard(t){
+function _tkCard(t,pos){
   var pr=_tkPrio(t.prio||'med'),d=_tkDue(t),si=_tkStatIdx(t.status||'todo');
-  var h='<div class="tkcard" draggable="true" data-id="'+t.id+'" style="--p:'+pr[2]+'">';
+  var hl=_tkHL(t.hl),tc=_tkTC(t.tc);
+  var cstyle='--p:'+pr[2]+';'+(t.hl?('background:'+hl[2]+';border-color:'+hl[3]+';'):'');
+  var h='<div class="tkcard" draggable="true" data-id="'+t.id+'" style="'+cstyle+'">';
   h+='<div class="tkcardtop"><span class="tkprio" style="background:'+pr[3]+';color:'+pr[2]+'">'+pr[1]+'</span>';
   if(t.proj)h+='<span class="tkproj" title="'+_eatt(_tkProjName(t.proj))+'">🔗 '+esc(t.proj)+'</span>';
   if(t.cat){var _tc=_tkCat(t.cat);if(_tc)h+='<span class="tkcat" style="background:'+_tc[3]+';color:'+_tc[2]+'">'+esc(_tc[1])+'</span>';}
   h+='</div>';
-  h+='<div class="tkcardttl" data-edit="'+t.id+'">'+esc(t.title||'(Untitled)')+'</div>';
-  if(t.desc)h+='<div class="tkcarddesc">'+esc((t.desc||'').slice(0,90))+(((t.desc||'').length>90)?'…':'')+'</div>';
+  h+='<div class="tkcardttl" data-edit="'+t.id+'"'+(t.tc?(' style="color:'+tc[2]+'"'):'')+'>'+esc(t.title||'(Untitled)')+'</div>';
+  if(t.desc)h+='<div class="tkcarddesc"'+(t.tc?(' style="color:'+tc[2]+';opacity:.8"'):'')+'>'+esc((t.desc||'').slice(0,90))+(((t.desc||'').length>90)?'…':'')+'</div>';
   var _na=(t.att&&t.att.length)||0;h+='<div class="tkcardbot"><span class="tkassign">'+_tkAvatar(t.assignee)+'</span>'+(d?('<span class="'+d.cls+'">'+d.txt+'</span>'):'')+(_na?('<span class="tkattcount" title="'+_na+' ไฟล์แนบ">📎 '+_na+'</span>'):'')+'</div>';
-  h+='<div class="tkmove"><button class="tkmv" data-mv="'+t.id+'|-1" type="button" title="ย้ายไปคอลัมน์ก่อนหน้า"'+(si<=0?' disabled':'')+'>◀</button><button class="tkmv" data-mv="'+t.id+'|1" type="button" title="ย้ายไปคอลัมน์ถัดไป"'+(si>=TK_STAT.length-1?' disabled':'')+'>▶</button></div>';
+  h+='<div class="tkmove">'
+    +'<button class="tkmv up" data-mvv="'+t.id+'|up" type="button" title="เลื่อนขึ้น (ในคอลัมน์เดียวกัน)"'+((pos&&pos.first)?' disabled':'')+'>▲</button>'
+    +'<button class="tkmv" data-mv="'+t.id+'|-1" type="button" title="ย้ายไปคอลัมน์ก่อนหน้า"'+(si<=0?' disabled':'')+'>◀</button>'
+    +'<button class="tkmv down" data-mvv="'+t.id+'|down" type="button" title="เลื่อนลง (ในคอลัมน์เดียวกัน)"'+((pos&&pos.last)?' disabled':'')+'>▼</button>'
+    +'<button class="tkmv" data-mv="'+t.id+'|1" type="button" title="ย้ายไปคอลัมน์ถัดไป"'+(si>=TK_STAT.length-1?' disabled':'')+'>▶</button>'
+    +'</div>';
   return h+'</div>';
 }
 function _tkList(view){
@@ -6939,6 +6971,10 @@ function _tkModalHTML(){
   h+='<label class="tkml">Description<textarea class="tkmin tkmta" id="tkmDesc" rows="3" placeholder="Task details (optional)">'+esc(t.desc||'')+'</textarea></label>';
   h+='<div class="tkmrow"><div class="tkmf"><div class="tkmlbl">Status</div><div class="tkmseg" id="tkmStatus">'+TK_STAT.map(function(s){return '<button class="tkmsb'+((t.status||'todo')===s[0]?' on':'')+'" data-st="'+s[0]+'" type="button" style="--c:'+s[2]+'">'+s[1]+'</button>';}).join('')+'</div></div>';
   h+='<div class="tkmf"><div class="tkmlbl">Priority</div><div class="tkmseg" id="tkmPrio">'+TK_PRIO.map(function(p){return '<button class="tkmsb'+((t.prio||'med')===p[0]?' on':'')+'" data-pr="'+p[0]+'" type="button" style="--c:'+p[2]+'">'+p[1]+'</button>';}).join('')+'</div></div></div>';
+  h+='<div class="tkmrow">'
+    +'<div class="tkmf"><div class="tkmlbl">ไฮไลท์การ์ด · Highlight</div><div class="tkmseg tkmsw" id="tkmHL">'+TK_HL.map(function(c){return '<button class="tkmsb tksw'+((t.hl||'')===c[0]?' on':'')+'" data-hl="'+c[0]+'" type="button" title="'+esc(c[1])+'" style="background:'+c[2]+';border-color:'+c[3]+'">'+(c[0]===''?'✕':'')+'</button>';}).join('')+'</div></div>'
+    +'<div class="tkmf"><div class="tkmlbl">สีตัวอักษร · Text colour</div><div class="tkmseg tkmsw" id="tkmTC">'+TK_TC.map(function(c){return '<button class="tkmsb tksw tkswt'+((t.tc||'')===c[0]?' on':'')+'" data-tc="'+c[0]+'" type="button" title="'+esc(c[1])+'" style="color:'+c[2]+'">A</button>';}).join('')+'</div></div>'
+    +'</div>';
   h+='<div class="tkmrow"><label class="tkmf"><div class="tkmlbl">Assignee</div><select class="tkmin" id="tkmAssign">'+((typeof _ptUserOptions==='function')?_ptUserOptions(t.assignee):'<option value="">—</option>')+'</select></label>';
   h+='<label class="tkmf"><div class="tkmlbl">Due date</div><input class="tkmin" id="tkmDue" type="date" value="'+_eatt(t.due||'')+'"></label></div>';
   h+='<label class="tkml"><div class="tkmlbl">Category</div><select class="tkmin" id="tkmCat"><option value="">— None —</option>'+TK_CAT.map(function(c){return '<option value="'+c[0]+'"'+((t.cat||'')===c[0]?' selected':'')+'>'+c[1]+'</option>';}).join('')+'</select></label>';
@@ -6958,23 +6994,25 @@ function _tkSaveModal(){
   var sEl=document.querySelector('#tkmStatus .tkmsb.on'),pEl=document.querySelector('#tkmPrio .tkmsb.on');
   var status=sEl?sEl.getAttribute('data-st'):'todo',prio=pEl?pEl.getAttribute('data-pr'):'med';
   var assignee=g('tkmAssign'),due=g('tkmDue'),proj=g('tkmProj'),desc=g('tkmDesc'),cat=g('tkmCat');
+  var hlEl=document.querySelector('#tkmHL .tkmsb.on'),tcEl=document.querySelector('#tkmTC .tkmsb.on');
+  var hl=hlEl?hlEl.getAttribute('data-hl'):'',tc=tcEl?tcEl.getAttribute('data-tc'):'';
   var isNew=(_tkModalId==='__new__');loadTrack();
   if(isNew){
-    var nt={id:(_tkNewId||_uid()),title:title,desc:desc,status:status,prio:prio,assignee:assignee,due:due,proj:proj,cat:cat,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done_dt:(status==='done')?_tkToday():''};
+    var nt={id:(_tkNewId||_uid()),title:title,desc:desc,status:status,prio:prio,assignee:assignee,due:due,proj:proj,cat:cat,hl:hl,tc:tc,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done_dt:(status==='done')?_tkToday():''};
     TRACKDATA.push(nt);
     if(typeof gliLog==='function')gliLog('Added task',title+(assignee&&_ptFind(assignee)?(' · assigned to '+_ptName(_ptFind(assignee))):''));
   }else{
     var t=_tkFind(_tkModalId);if(!t){_tkModalId=null;renderTracking();return;}
     var oldSt=t.status;
-    t.title=title;t.desc=desc;t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.cat=cat;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));
+    t.title=title;t.desc=desc;t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.cat=cat;t.hl=hl;t.tc=tc;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));
     if(status==='done'&&oldSt!=='done')t.done_dt=_tkToday();if(status!=='done')t.done_dt='';
     if(typeof gliLog==='function')gliLog((oldSt!==status)?'Updated status':'Edited task',title+(oldSt!==status?(' → '+_tkStat(status)[1]):''));
   }
   _tkModalId=null;_tkAtt=[];_tkNewId=null;saveTrack();renderTracking();
 }
 function _tkDel(id){var t=_tkFind(id);if(!t)return;if(!confirm('Delete "'+(t.title||'')+'" ?\nThis cannot be undone'))return;loadTrack();_tkAttDelTask(t);TRACKDATA=TRACKDATA.filter(function(x){return x.id!==id;});if(typeof gliLog==='function')gliLog('Deleted task',t.title||'');_tkModalId=null;saveTrack();renderTracking();}
-function _tkMove(id,dir){var t=_tkFind(id);if(!t)return;var i=_tkStatIdx(t.status||'todo')+(+dir);if(i<0||i>=TK_STAT.length)return;t.status=TK_STAT[i][0];if(t.status==='done')t.done_dt=_tkToday();else t.done_dt='';if(typeof gliLog==='function')gliLog('Moved task',(t.title||'')+' → '+TK_STAT[i][1]);saveTrack();renderTracking();}
-function _tkSetStatus(id,st){var t=_tkFind(id);if(!t||(t.status||'todo')===st)return;t.status=st;if(st==='done')t.done_dt=_tkToday();else t.done_dt='';if(typeof gliLog==='function')gliLog('Moved task',(t.title||'')+' → '+_tkStat(st)[1]);saveTrack();renderTracking();}
+function _tkMove(id,dir){var t=_tkFind(id);if(!t)return;var i=_tkStatIdx(t.status||'todo')+(+dir);if(i<0||i>=TK_STAT.length)return;t.status=TK_STAT[i][0];t.ord=null;/* moved to another column → drop manual order so it lands at the bottom, then can be re-ordered */if(t.status==='done')t.done_dt=_tkToday();else t.done_dt='';if(typeof gliLog==='function')gliLog('Moved task',(t.title||'')+' → '+TK_STAT[i][1]);saveTrack();renderTracking();}
+function _tkSetStatus(id,st){var t=_tkFind(id);if(!t||(t.status||'todo')===st)return;t.status=st;t.ord=null;if(st==='done')t.done_dt=_tkToday();else t.done_dt='';if(typeof gliLog==='function')gliLog('Moved task',(t.title||'')+' → '+_tkStat(st)[1]);saveTrack();renderTracking();}
 function _tkDeb(fn){if(_tkDebT)clearTimeout(_tkDebT);_tkDebT=setTimeout(fn,260);}
 function _tkClearDrop(){var cs=document.querySelectorAll('.tkcolbody.dropon');for(var i=0;i<cs.length;i++)cs[i].classList.remove('dropon');}
 function _tkBind(){
@@ -6982,7 +7020,7 @@ function _tkBind(){
   var cl=function(e,sel){return e.target&&e.target.closest?e.target.closest(sel):null;};
   pg.addEventListener('click',function(e){
     var b;
-    if((b=cl(e,'.tkmv'))){var pa=(b.getAttribute('data-mv')||'').split('|');_tkMove(pa[0],pa[1]);return;}
+    if((b=cl(e,'.tkmv'))){var mvv=b.getAttribute('data-mvv');if(mvv){var pv=mvv.split('|');_tkReorder(pv[0],pv[1]==='up'?-1:1);return;}var pa=(b.getAttribute('data-mv')||'').split('|');_tkMove(pa[0],pa[1]);return;}
     if((b=cl(e,'.tkdel'))){_tkDel(b.getAttribute('data-del'));return;}
     if((b=cl(e,'#tkAdd'))){_tkAdd('todo');return;}
     if((b=cl(e,'.tkaddcol'))){_tkAdd(b.getAttribute('data-st'));return;}
