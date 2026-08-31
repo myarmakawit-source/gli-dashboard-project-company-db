@@ -14017,11 +14017,17 @@ function _glPXCompute(){
   var ptoks=_glPXTokens(st.proj),atoks=_glPXTokens(st.acc);
   var ysel=_glPXYearsSel(st);
   var rows=(GLROWS&&GLROWS.length)?GLROWS:[];
-  var cells={},cellOrd=[],perP={},pOrd=[],perA={},aOrd=[],D=0,C=0,N=0;
+  var cells={},cellOrd=[],perP={},pOrd=[],perA={},aOrd=[],D=0,C=0,N=0,tokHit={};
   for(var i=0;i<rows.length;i++){var r=rows[i];if(!r)continue;
     if(ysel&&!ysel[''+(+r[2]||0)])continue;
-    if(!_glPXMatch(r[13],ptoks,st.pmode))continue;
     if(!_glPXMatch(r[0],atoks,st.amode))continue;
+    /* per-token project match: mark each pasted project code that has ≥1 row (after year+account filter), so codes with none are reported as "ไม่มีข้อมูล" */
+    var _pvl=(''+(r[13]==null?'':r[13])).trim().toLowerCase(),_pmatch=false;
+    if(!ptoks.length){_pmatch=true;}
+    else{for(var _ti=0;_ti<ptoks.length;_ti++){var _tk=(''+ptoks[_ti]).toLowerCase();if(!_tk)continue;
+      var _hit=(st.pmode==='exact')?(_pvl===_tk):(st.pmode==='contains')?(_pvl.indexOf(_tk)>=0):(_pvl.lastIndexOf(_tk,0)===0);
+      if(_hit){_pmatch=true;tokHit[ptoks[_ti].toUpperCase()]=1;}}}
+    if(!_pmatch)continue;
     var pj=(''+(r[13]==null?'':r[13])).trim()||'(ไม่ระบุโปรเจค)';
     var ac=(''+(r[0]==null?'':r[0])).trim()||'(ไม่มีรหัส)';
     var anm=(''+(r[1]==null?'':r[1])).trim();
@@ -14033,7 +14039,8 @@ function _glPXCompute(){
     var ga=perA[ac]; if(!ga){ga=perA[ac]={acc:ac,anm:anm,n:0,d:0,c:0,projs:{}};aOrd.push(ac);} ga.n++;ga.d+=d;ga.c+=c;if(!ga.anm&&anm)ga.anm=anm;ga.projs[pj]=1;
     D+=d;C+=c;N++;
   }
-  _glPXLast={cells:cells,cellOrd:cellOrd,perP:perP,pOrd:pOrd,perA:perA,aOrd:aOrd,D:D,C:C,N:N,ptoks:ptoks,atoks:atoks,yrTxt:(ysel?Object.keys(ysel).sort().join(', '):'ทุกปี'),st:{pmode:st.pmode,amode:st.amode,view:st.view}};
+  var missTok=[];for(var _mi=0;_mi<ptoks.length;_mi++){if(!tokHit[ptoks[_mi].toUpperCase()])missTok.push(ptoks[_mi]);}
+  _glPXLast={cells:cells,cellOrd:cellOrd,perP:perP,pOrd:pOrd,perA:perA,aOrd:aOrd,D:D,C:C,N:N,ptoks:ptoks,atoks:atoks,missTok:missTok,yrTxt:(ysel?Object.keys(ysel).sort().join(', '):'ทุกปี'),st:{pmode:st.pmode,amode:st.amode,view:st.view}};
   var net=D-C,nP=pOrd.length,nA=aOrd.length;
   var yrTxt=ysel?Object.keys(ysel).sort().join(', '):'ทุกปี';
   sum.innerHTML=''
@@ -14041,10 +14048,15 @@ function _glPXCompute(){
     +'<span class="glvj-pill">โปรเจค '+nP.toLocaleString()+' · บัญชี '+nA.toLocaleString()+'</span>'
     +'<span class="glvj-pill">ปี: '+esc(yrTxt)+'</span>'
     +'<span class="glvj-pill">โปรเจค: '+(ptoks.length?esc(_glPXModeLabel(st.pmode))+' '+ptoks.length+' ค่า':'ทั้งหมด')+' · บัญชี: '+(atoks.length?esc(_glPXModeLabel(st.amode))+' '+atoks.length+' ค่า':'ทั้งหมด')+'</span>'
+    +(missTok.length?'<span class="glvj-pill warn">⚠ ไม่มีข้อมูล '+missTok.length+' โปรเจค</span>':'')
     +'<span class="glvj-pill d">Debit ฿'+fmt(D)+'</span><span class="glvj-pill c">Credit ฿'+fmt(C)+'</span>'
     +'<span class="glvj-pill '+(Math.abs(net)<0.005?'bal':'')+'">Net ฿'+fmt(net)+'</span>';
-  if(!N){res.innerHTML='<div class="glvj-empty">ไม่พบแถวที่ตรง — วาง<b>รหัสโปรเจค</b> (เช่น GLI23005) และ/หรือ <b>รหัสบัญชี</b> (เช่น 5311001) แล้วลองปรับโหมดการจับคู่ (เช่น “ขึ้นต้นด้วย” สำหรับ 5311 = ทุกบัญชี 5311xxx)</div>';return;}
+  if(!N){res.innerHTML=_glPXNoDataBlock()+'<div class="glvj-empty">ไม่พบแถวที่ตรง — วาง<b>รหัสโปรเจค</b> (เช่น GLI23005) และ/หรือ <b>รหัสบัญชี</b> (เช่น 5311001) แล้วลองปรับโหมดการจับคู่ (เช่น “ขึ้นต้นด้วย” สำหรับ 5311 = ทุกบัญชี 5311xxx)</div>';return;}
   res.innerHTML=_glPXRenderTable();
+}
+function _glPXNoDataBlock(){var L=_glPXLast;if(!L||!L.missTok||!L.missTok.length)return '';
+  var chips='';for(var i=0;i<L.missTok.length;i++)chips+='<span class="glpx-nd-chip">'+esc(L.missTok[i])+'</span>';
+  return '<div class="glpx-nd"><div class="glpx-nd-hd">⚠ ไม่มีข้อมูล — '+L.missTok.length+' โปรเจค (วางไว้แต่ไม่พบรายการในบัญชี/ปีที่เลือก)</div><div class="glpx-nd-list">'+chips+'</div></div>';
 }
 function _glPXRenderTable(){
   var L=_glPXLast;if(!L)return '';var view=L.st.view;
@@ -14056,7 +14068,7 @@ function _glPXRenderTable(){
     for(var i=0;i<shown;i++){var g=list[i],nn=g.d-g.c,na=0,k;for(k in g.accs)na++;
       body+='<tr><td class="gldf-i">'+(i+1)+'</td><td class="gldf-v">'+esc(g.proj)+'</td><td class="n">'+na.toLocaleString()+'</td><td class="n">'+g.n.toLocaleString()+'</td><td class="n d">'+(g.d?fmt(g.d):'')+'</td><td class="n c">'+(g.c?fmt(g.c):'')+'</td><td class="n net'+netcls(nn)+'">'+fmt(nn)+'</td></tr>';}
     return '<table class="glvj-tbl glpx-tbl"><thead><tr><th class="gldf-i">#</th><th>โปรเจค (Ref.Code)</th><th class="n">#บัญชี</th><th class="n">แถว</th><th class="n">Debit</th><th class="n">Credit</th><th class="n">Net</th></tr></thead><tbody>'+body
-      +'<tr class="glpx-gt"><td></td><td>รวมทั้งสิ้น ('+L.pOrd.length+' โปรเจค)</td><td class="n">'+L.aOrd.length.toLocaleString()+'</td><td class="n">'+L.N.toLocaleString()+'</td><td class="n">'+fmt(L.D)+'</td><td class="n">'+fmt(L.C)+'</td><td class="n">'+fmt(L.D-L.C)+'</td></tr></tbody></table>';
+      +'<tr class="glpx-gt"><td></td><td>รวมทั้งสิ้น ('+L.pOrd.length+' โปรเจค)</td><td class="n">'+L.aOrd.length.toLocaleString()+'</td><td class="n">'+L.N.toLocaleString()+'</td><td class="n">'+fmt(L.D)+'</td><td class="n">'+fmt(L.C)+'</td><td class="n">'+fmt(L.D-L.C)+'</td></tr></tbody></table>'+_glPXNoDataBlock();
   }
   if(view==='byacc'){
     var la=L.aOrd.map(function(a){return L.perA[a];});
@@ -14065,7 +14077,7 @@ function _glPXRenderTable(){
     for(var j=0;j<sh;j++){var ga=la[j],nn2=ga.d-ga.c,np=0,kk;for(kk in ga.projs)np++;
       bd+='<tr><td class="gldf-i">'+(j+1)+'</td><td class="gldf-v">'+esc(ga.acc)+'</td><td class="gldf-nm">'+esc(ga.anm||'')+'</td><td class="n">'+np.toLocaleString()+'</td><td class="n">'+ga.n.toLocaleString()+'</td><td class="n d">'+(ga.d?fmt(ga.d):'')+'</td><td class="n c">'+(ga.c?fmt(ga.c):'')+'</td><td class="n net'+netcls(nn2)+'">'+fmt(nn2)+'</td></tr>';}
     return '<table class="glvj-tbl glpx-tbl"><thead><tr><th class="gldf-i">#</th><th>รหัสบัญชี</th><th>ชื่อบัญชี</th><th class="n">#โปรเจค</th><th class="n">แถว</th><th class="n">Debit</th><th class="n">Credit</th><th class="n">Net</th></tr></thead><tbody>'+bd
-      +'<tr class="glpx-gt"><td></td><td>รวมทั้งสิ้น ('+L.aOrd.length+' บัญชี)</td><td></td><td class="n">'+L.pOrd.length.toLocaleString()+'</td><td class="n">'+L.N.toLocaleString()+'</td><td class="n">'+fmt(L.D)+'</td><td class="n">'+fmt(L.C)+'</td><td class="n">'+fmt(L.D-L.C)+'</td></tr></tbody></table>';
+      +'<tr class="glpx-gt"><td></td><td>รวมทั้งสิ้น ('+L.aOrd.length+' บัญชี)</td><td></td><td class="n">'+L.pOrd.length.toLocaleString()+'</td><td class="n">'+L.N.toLocaleString()+'</td><td class="n">'+fmt(L.D)+'</td><td class="n">'+fmt(L.C)+'</td><td class="n">'+fmt(L.D-L.C)+'</td></tr></tbody></table>'+_glPXNoDataBlock();
   }
   /* matrix: grouped by project, a row per account, subtotal per project */
   var html='<table class="glvj-tbl glpx-tbl"><thead><tr><th class="gldf-i">#</th><th>รหัสบัญชี</th><th>ชื่อบัญชี</th><th class="n">แถว</th><th class="n">Debit</th><th class="n">Credit</th><th class="n">Net</th></tr></thead><tbody>';
@@ -14080,7 +14092,7 @@ function _glPXRenderTable(){
     html+='<tr class="glpx-sub"><td></td><td colspan="2">รวมโปรเจค '+esc(pj)+'</td><td class="n">'+gp.n.toLocaleString()+'</td><td class="n">'+fmt(gp.d)+'</td><td class="n">'+fmt(gp.c)+'</td><td class="n">'+fmt(pn)+'</td></tr>';
   }
   html+='<tr class="glpx-gt"><td></td><td colspan="2">รวมทั้งสิ้น ('+L.pOrd.length+' โปรเจค · '+L.aOrd.length+' บัญชี)</td><td class="n">'+L.N.toLocaleString()+'</td><td class="n">'+fmt(L.D)+'</td><td class="n">'+fmt(L.C)+'</td><td class="n">'+fmt(L.D-L.C)+'</td></tr></tbody></table>';
-  return html;
+  return html+_glPXNoDataBlock();
 }
 function _glPXExport(){
   if(typeof XLSX==='undefined'){alert('The Excel reader is still loading — please wait and try again');return;}
@@ -14092,6 +14104,7 @@ function _glPXExport(){
       ['รหัสบัญชีที่ค้น',L.atoks.join(', ')||'(ทั้งหมด)'],['โหมดจับคู่บัญชี',_glPXModeLabel(L.st.amode)],
       ['ปี (Year)',L.yrTxt||'ทุกปี'],
       ['จำนวนโปรเจค',L.pOrd.length],['จำนวนบัญชี',L.aOrd.length],['จำนวนแถว',L.N],
+      ['โปรเจคไม่มีข้อมูล',(L.missTok&&L.missTok.length)?(L.missTok.length+' โปรเจค: '+L.missTok.join(', ')):'—'],
       ['รวม Debit',R2(L.D)],['รวม Credit',R2(L.C)],['รวม Net',R2(L.D-L.C)],['จัดทำ',(new Date()).toLocaleString('th-TH')]];
     var wsI=XLSX.utils.aoa_to_sheet(info);wsI['!cols']=[{wch:22},{wch:52}];XLSX.utils.book_append_sheet(wb,wsI,'Summary');
     /* Matrix: Project | Account | Name | Rows | Debit | Credit | Net */
@@ -14107,6 +14120,8 @@ function _glPXExport(){
     var ap=[['โปรเจค','#บัญชี','แถว','Debit','Credit','Net']];
     L.pOrd.map(function(x){return L.perP[x];}).sort(function(a,b){return (b.d-b.c)-(a.d-a.c);}).forEach(function(g){var na=0,k;for(k in g.accs)na++;ap.push([g.proj,na,g.n,R2(g.d),R2(g.c),R2(g.d-g.c)]);});
     ap.push(['รวมทั้งสิ้น',L.aOrd.length,L.N,R2(L.D),R2(L.C),R2(L.D-L.C)]);
+    if(L.missTok&&L.missTok.length){ap.push([]);ap.push(['ไม่มีข้อมูล ('+L.missTok.length+' โปรเจค) — วางไว้แต่ไม่พบรายการในบัญชี/ปีที่เลือก']);
+      L.missTok.forEach(function(pj){ap.push([pj,0,0,'','','ไม่มีข้อมูล']);});}
     var wsP=XLSX.utils.aoa_to_sheet(ap);wsP['!cols']=[{wch:18},{wch:9},{wch:9},{wch:16},{wch:16},{wch:16}];XLSX.utils.book_append_sheet(wb,wsP,'By Project');
     /* By Account */
     var aa=[['รหัสบัญชี','ชื่อบัญชี','#โปรเจค','แถว','Debit','Credit','Net']];
@@ -14116,6 +14131,52 @@ function _glPXExport(){
     XLSX.writeFile(wb,'GL_Project_x_Account_'+new Date().toISOString().slice(0,10)+'.xlsx');
     try{if(typeof gliLog==='function')gliLog('Export Project × Account',L.pOrd.length+' โปรเจค · '+L.aOrd.length+' บัญชี · '+L.N+' แถว');}catch(e){}
   }catch(e){alert('Export failed: '+((e&&e.message)||e));}
+}
+/* Export PDF ของ Project × Account — พิมพ์ผลลัพธ์ (โปรเจค × บัญชี) เป็น PDF หัวเขียวแบบระบบ + โปรเจคที่ไม่มีข้อมูล */
+function _glPXExportPDF(){
+  var L=_glPXLast;
+  if(!L||(!L.N&&!(L.missTok&&L.missTok.length))){alert('ยังไม่มีผลลัพธ์ให้ส่งออก — วางรหัสโปรเจค / รหัสบัญชี ก่อน');return;}
+  try{
+    function money(v){v=+v||0;return v?v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'';}
+    function e2(s){return (''+(s==null?'':s)).replace(/[&<>]/g,function(c){return c==='&'?'&amp;':c==='<'?'&lt;':'&gt;';});}
+    var body='';
+    for(var p=0;p<L.pOrd.length;p++){var pj=L.pOrd[p];var gp=L.perP[pj];
+      var accs=L.cellOrd.filter(function(k){return L.cells[k].proj===pj;}).map(function(k){return L.cells[k];});
+      accs.sort(function(a,b){return (b.d-b.c)-(a.d-a.c);});
+      var pn=gp.d-gp.c,naP=0,kx;for(kx in gp.accs)naP++;
+      body+='<tr class="band"><td colspan="6">โปรเจค '+e2(pj)+' · '+naP+' บัญชี · '+gp.n.toLocaleString()+' แถว · Net '+money(pn)+'</td></tr>';
+      accs.forEach(function(g){var gn=g.d-g.c;body+='<tr><td>'+e2(g.acc)+'</td><td>'+e2(g.anm||'')+'</td><td class="n">'+g.n.toLocaleString()+'</td><td class="n">'+money(g.d)+'</td><td class="n">'+money(g.c)+'</td><td class="n">'+money(gn)+'</td></tr>';});
+      body+='<tr class="sub"><td colspan="2">รวมโปรเจค '+e2(pj)+'</td><td class="n">'+gp.n.toLocaleString()+'</td><td class="n">'+money(gp.d)+'</td><td class="n">'+money(gp.c)+'</td><td class="n">'+money(pn)+'</td></tr>';
+    }
+    if(L.missTok&&L.missTok.length){
+      body+='<tr class="band nd"><td colspan="6">ไม่มีข้อมูล ('+L.missTok.length+' โปรเจค) — วางไว้แต่ไม่พบรายการในบัญชี/ปีที่เลือก</td></tr>';
+      for(var mi=0;mi<L.missTok.length;mi++)body+='<tr class="ndrow"><td>'+e2(L.missTok[mi])+'</td><td>— ไม่มีข้อมูล —</td><td class="n">0</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>';
+    }
+    var tot='<tr class="gt"><td colspan="2">รวมทั้งสิ้น ('+L.pOrd.length+' โปรเจค · '+L.aOrd.length+' บัญชี)</td><td class="n">'+L.N.toLocaleString()+'</td><td class="n">'+money(L.D)+'</td><td class="n">'+money(L.C)+'</td><td class="n">'+money(L.D-L.C)+'</td></tr>';
+    var title='สรุปยอดตามโปรเจค × รหัสบัญชี · Project × Account';
+    var meta='โปรเจค: '+((L.ptoks&&L.ptoks.length)?e2(_glPXModeLabel(L.st.pmode))+' '+L.ptoks.length+' ค่า':'ทั้งหมด')+' · บัญชี: '+((L.atoks&&L.atoks.length)?e2(_glPXModeLabel(L.st.amode))+' '+L.atoks.length+' ค่า':'ทั้งหมด')+' · ปี '+e2(L.yrTxt||'ทุกปี')+' · '+L.pOrd.length+' โปรเจค · '+L.aOrd.length+' บัญชี · '+L.N.toLocaleString()+' แถว'+((L.missTok&&L.missTok.length)?(' · ไม่มีข้อมูล '+L.missTok.length+' โปรเจค'):'')+' · เดบิต '+money(L.D)+' · เครดิต '+money(L.C)+' · สุทธิ (D−C) '+money(L.D-L.C)+' · พิมพ์ '+new Date().toLocaleDateString('th-TH');
+    var w=window.open('','_blank');if(!w){alert('เปิดหน้าต่างพิมพ์ไม่ได้ — โปรดอนุญาต pop-up ของหน้านี้');return;}
+    var css='@page{size:A4 portrait;margin:10mm}'
+      +'*{box-sizing:border-box}body{margin:0;padding:14px 16px;font-family:\'Sarabun\',\'Noto Sans Thai\',\'Inter\',sans-serif;color:#19222E;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+      +'.hd .co{font-size:15px;font-weight:800;color:#0A463E}.hd .tt{font-size:12.5px;font-weight:700;margin-top:2px;color:#123}.hd .mt{font-size:9.5px;color:#556;margin-top:3px;line-height:1.5}'
+      +'table{border-collapse:collapse;width:100%;font-size:9px;margin-top:9px}'
+      +'thead th{background:#0F3D37;color:#fff;font-weight:700;padding:5px 7px;text-align:left;border:1px solid #0B322C;white-space:nowrap}'
+      +'thead th.n{text-align:right}thead{display:table-header-group}'
+      +'tbody td{padding:3px 7px;border:1px solid #E4EAE7;vertical-align:top}'
+      +'td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}'
+      +'tr{page-break-inside:avoid}'
+      +'tr.band td{background:#E6F0EC;color:#0A463E;font-weight:800;border-top:1.5px solid #0E5C52}'
+      +'tr.band.nd td{background:#FEF1E3;color:#8A4212;border-top:1.5px solid #E7A867}'
+      +'tr.ndrow td{color:#8A4212;background:#FFFBF6}'
+      +'tr.sub td{background:#F6FAF9;font-weight:800}'
+      +'tr.gt td{background:#0F3D37;color:#fff;font-weight:800;border:1px solid #0B322C}';
+    w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+e2(title)+'</title><style>'+css+'</style></head><body>'
+      +'<div class="hd"><div class="co">บริษัท แกรนด์ไลน์ อินโนเวชั่น จำกัด</div><div class="tt">'+e2(title)+'</div><div class="mt">'+e2(meta)+'</div></div>'
+      +'<table><thead><tr><th>รหัสบัญชี</th><th>ชื่อบัญชี</th><th class="n">แถว</th><th class="n">Debit</th><th class="n">Credit</th><th class="n">Net</th></tr></thead>'
+      +'<tbody>'+body+'</tbody><tfoot>'+tot+'</tfoot></table></body></html>');
+    w.document.close();setTimeout(function(){try{w.focus();w.print();}catch(e){}},450);
+    try{if(typeof gliLog==='function')gliLog('Export Project × Account PDF',L.pOrd.length+' โปรเจค · '+L.aOrd.length+' บัญชี · '+L.N+' แถว'+((L.missTok&&L.missTok.length)?(' · ไม่มีข้อมูล '+L.missTok.length):''));}catch(e){}
+  }catch(e){alert('Export PDF failed: '+((e&&e.message)||e));}
 }
 function _glPXCSS(){return ''
   +'.glpx-card{max-width:1080px;}'
@@ -14132,6 +14193,11 @@ function _glPXCSS(){return ''
   +'.glpx-yrs{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:12px;padding-top:11px;border-top:1px dashed var(--line,#E6E0D4);}'
   +'.glpx-yrs .gldf-chips{gap:6px;}'
   +'.glpx-yrs .gldf-chip{padding:5px 12px;font-variant-numeric:tabular-nums;}'
+  +'.glvj-pill.warn{background:#FBEEE0;color:#8A4212;border:1px solid #EBC79E;}'
+  +'.glpx-nd{margin-top:11px;border:1px solid #EBC79E;background:#FEF7EF;border-radius:11px;padding:11px 14px;}'
+  +'.glpx-nd-hd{font-weight:800;color:#8A4212;font-size:12px;margin-bottom:8px;}'
+  +'.glpx-nd-list{display:flex;flex-wrap:wrap;gap:6px;}'
+  +'.glpx-nd-chip{background:#fff;border:1px solid #E7C49B;color:#7A3A10;border-radius:999px;padding:3px 11px;font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums;}'
   +'@media(max-width:640px){.glpx-cell{min-width:100%;}}';
 }
 function _glPXEnsure(){
@@ -14165,6 +14231,7 @@ function _glPXEnsure(){
       +'<div class="gldf-toolbar"><span class="gldf-lab" style="margin:0 2px 0 0">มุมมอง</span><div class="gldf-segw glpx-views" id="glPXViews">'+viewSeg+'</div>'
         +'<span class="gldf-tbspacer"></span>'
         +'<button class="glvj-b" id="glPXClear" type="button">✕ ล้างค่า</button>'
+        +'<button class="glvj-b" id="glPXPdf" type="button">🖨 Export PDF</button>'
         +'<button class="glvj-b prim" id="glPXXlsx" type="button">⤓ Export Excel</button></div>'
       +'<div class="glvj-sum gldf-sum" id="glPXSum"></div>'
       +'<div class="glvj-res gldf-res" id="glPXRes"></div>'
@@ -14177,6 +14244,7 @@ function _glPXEnsure(){
   ae.addEventListener('input',function(){clearTimeout(_glPXTimer);_glPXTimer=setTimeout(_glPXCompute,150);});
   m.querySelector('#glPXClear').addEventListener('click',function(){pe.value='';ae.value='';_glPXCompute();pe.focus();});
   m.querySelector('#glPXXlsx').addEventListener('click',_glPXExport);
+  m.querySelector('#glPXPdf').addEventListener('click',_glPXExportPDF);
   m.querySelector('#glPXPmode').addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('[data-pxpm]'):null;if(!b)return;var md=b.getAttribute('data-pxpm');_glPXLoadState().pmode=md;_glPXSaveState();var sg=this.querySelectorAll('.gldf-seg');for(var i=0;i<sg.length;i++)sg[i].classList.toggle('on',sg[i].getAttribute('data-pxpm')===md);_glPXCompute();});
   m.querySelector('#glPXAmode').addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('[data-pxam]'):null;if(!b)return;var md=b.getAttribute('data-pxam');_glPXLoadState().amode=md;_glPXSaveState();var sg=this.querySelectorAll('.gldf-seg');for(var i=0;i<sg.length;i++)sg[i].classList.toggle('on',sg[i].getAttribute('data-pxam')===md);_glPXCompute();});
   m.querySelector('#glPXViews').addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('[data-pxview]'):null;if(!b)return;var vw=b.getAttribute('data-pxview');_glPXLoadState().view=vw;_glPXSaveState();var sg=this.querySelectorAll('.gldf-seg');for(var i=0;i<sg.length;i++)sg[i].classList.toggle('on',sg[i].getAttribute('data-pxview')===vw);var res=document.getElementById('glPXRes');if(res&&_glPXLast&&_glPXLast.N)res.innerHTML=_glPXRenderTable();});
