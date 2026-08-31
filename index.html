@@ -1694,7 +1694,7 @@ h1{ background:var(--g-aurora) !important;
 .tkcard{background:#fff;border-radius:11px;border:1px solid var(--line);border-left:4px solid var(--p);padding:10px 11px;cursor:grab;position:relative;box-shadow:0 1px 2px rgba(16,24,40,.04)}
 .tkcard:hover{box-shadow:0 4px 12px rgba(16,24,40,.10);transform:translateY(-1px)}
 .tkcard.dragging{opacity:.4}
-.tkcardtop{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;padding-right:46px}
+.tkcardtop{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;padding-right:20px}
 .tkprio{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:11px;white-space:nowrap}
 .tkproj{font-size:10.5px;font-weight:700;color:var(--blue,#1D5FAE);background:var(--blue-bg,#E7EFF8);padding:2px 8px;border-radius:9px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
 .tkcardttl{font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;line-height:1.35;margin-bottom:3px}
@@ -1754,8 +1754,10 @@ h1{ background:var(--g-aurora) !important;
 .tkmsb.on{border-color:var(--c);color:#fff;background:var(--c)}
 .tkmmeta{font-size:11.5px;color:var(--muted);padding-top:2px}
 .tkmft{display:flex;align-items:center;gap:9px;padding:15px 20px;border-top:1px solid var(--line);background:var(--line2,#F7F9FB)}
-.tkmove{position:absolute;top:8px;right:9px;display:grid;grid-template-columns:auto auto;gap:3px;opacity:.28;transition:.12s}
-.tkmv.up:hover:not(:disabled),.tkmv.down:hover:not(:disabled){background:#0E7C52;color:#fff;border-color:transparent}
+.tkgrip{position:absolute;top:7px;right:9px;font-size:13px;line-height:1;color:var(--muted,#8C8676);opacity:.3;cursor:grab;letter-spacing:-1px;transition:opacity .12s;user-select:none}
+.tkcard:hover .tkgrip{opacity:.8}
+.tkcard:active{cursor:grabbing}
+.tkcolbody.dropon{background:var(--brand-t,#EEF4FB);border-radius:11px;outline:2px dashed var(--brand,#1D5FAE);outline-offset:-3px}
 .tksw{width:26px;height:25px;padding:0;font-size:12.5px;line-height:1;display:inline-flex;align-items:center;justify-content:center;border-radius:7px}
 .tksw.on{outline:2.5px solid var(--brand,#1D5FAE);outline-offset:1px}
 .tkswt{background:#fff}
@@ -6821,14 +6823,24 @@ function _tkHL(c){for(var i=0;i<TK_HL.length;i++)if(TK_HL[i][0]===(c||''))return
 function _tkTC(c){for(var i=0;i<TK_TC.length;i++)if(TK_TC[i][0]===(c||''))return TK_TC[i];return TK_TC[0];}
 /* v10.52: column ordering respects a manual "ord" (set by ▲▼); tasks without ord fall back to the priority sort and sit below the manually-ordered ones */
 function _tkColSort(a,b){var ao=(a.ord==null?Infinity:+a.ord),bo=(b.ord==null?Infinity:+b.ord);if(ao!==bo)return ao-bo;return _tkSort(a,b);}
-function _tkReorder(id,dir){var t=_tkFind(id);if(!t)return;var st=t.status||'todo';
-  var col=TRACKDATA.filter(function(x){return (x.status||'todo')===st;}).sort(_tkColSort);
-  for(var i=0;i<col.length;i++)col[i].ord=i;/* normalise to contiguous order as shown */
-  var idx=-1;for(var j=0;j<col.length;j++)if(col[j].id===id){idx=j;break;}
-  var ni=idx+(dir<0?-1:1);if(idx<0||ni<0||ni>=col.length)return;
-  var tmp=col[idx].ord;col[idx].ord=col[ni].ord;col[ni].ord=tmp;
-  if(typeof gliLog==='function')gliLog('Reordered task',(t.title||'')+' '+(dir<0?'↑':'↓'));
-  saveTrack();renderTracking();}
+/* v10.53: free drag-and-drop reordering — find the card under the cursor to drop BEFORE, and re-stamp ord for the whole column */
+function _tkDragAfter(colBody,y){
+  var cards=[].slice.call(colBody.querySelectorAll('.tkcard:not(.dragging)'));
+  var best=null,bestD=-Infinity;
+  for(var i=0;i<cards.length;i++){var box=cards[i].getBoundingClientRect();var off=y-(box.top+box.height/2);if(off<0&&off>bestD){bestD=off;best=cards[i];}}
+  return best;/* the card to insert BEFORE (null → append at the end) */
+}
+function _tkDropReorder(id,st,beforeId){
+  var t=_tkFind(id);if(!t)return;
+  var col=TRACKDATA.filter(function(x){return (x.status||'todo')===st&&x.id!==id;}).sort(_tkColSort);
+  var idx=col.length;
+  if(beforeId){for(var i=0;i<col.length;i++){if(col[i].id===beforeId){idx=i;break;}}}
+  var wasSt=(t.status||'todo');t.status=st;
+  if(st==='done'){if(wasSt!=='done')t.done_dt=_tkToday();}else{t.done_dt='';}
+  col.splice(idx,0,t);for(var j=0;j<col.length;j++)col[j].ord=j;
+  if(typeof gliLog==='function')gliLog(wasSt!==st?'Moved task':'Reordered task',(t.title||'')+(wasSt!==st?(' → '+_tkStat(st)[1]):''));
+  saveTrack();renderTracking();
+}
 var _tkView='kanban',_tkQ='',_tkFA='',_tkFP='',_tkFC='',_tkModalId=null,_tkDragId=null,_tkNewStatus='todo',_tkDebT=null;
 function _tkToday(){return new Date().toISOString().slice(0,10);}
 /* v8.23: defeat browser saved-form-history autofill on search boxes. Browsers key autofill on the field's name/id; a per-page-load random name means nothing matches, so stale values (e.g. project codes) stop being suggested as you type. */
@@ -6935,12 +6947,7 @@ function _tkCard(t,pos){
   h+='<div class="tkcardttl" data-edit="'+t.id+'"'+(t.tc?(' style="color:'+tc[2]+'"'):'')+'>'+esc(t.title||'(Untitled)')+'</div>';
   if(t.desc)h+='<div class="tkcarddesc"'+(t.tc?(' style="color:'+tc[2]+';opacity:.8"'):'')+'>'+esc((t.desc||'').slice(0,90))+(((t.desc||'').length>90)?'…':'')+'</div>';
   var _na=(t.att&&t.att.length)||0;h+='<div class="tkcardbot"><span class="tkassign">'+_tkAvatar(t.assignee)+'</span>'+(d?('<span class="'+d.cls+'">'+d.txt+'</span>'):'')+(_na?('<span class="tkattcount" title="'+_na+' ไฟล์แนบ">📎 '+_na+'</span>'):'')+'</div>';
-  h+='<div class="tkmove">'
-    +'<button class="tkmv up" data-mvv="'+t.id+'|up" type="button" title="เลื่อนขึ้น (ในคอลัมน์เดียวกัน)"'+((pos&&pos.first)?' disabled':'')+'>▲</button>'
-    +'<button class="tkmv" data-mv="'+t.id+'|-1" type="button" title="ย้ายไปคอลัมน์ก่อนหน้า"'+(si<=0?' disabled':'')+'>◀</button>'
-    +'<button class="tkmv down" data-mvv="'+t.id+'|down" type="button" title="เลื่อนลง (ในคอลัมน์เดียวกัน)"'+((pos&&pos.last)?' disabled':'')+'>▼</button>'
-    +'<button class="tkmv" data-mv="'+t.id+'|1" type="button" title="ย้ายไปคอลัมน์ถัดไป"'+(si>=TK_STAT.length-1?' disabled':'')+'>▶</button>'
-    +'</div>';
+  h+='<div class="tkgrip" title="ลากการ์ดเพื่อย้ายคอลัมน์ หรือจัดลำดับขึ้น–ลงในคอลัมน์เดียวกัน">⠿</div>';
   return h+'</div>';
 }
 function _tkList(view){
@@ -7020,7 +7027,6 @@ function _tkBind(){
   var cl=function(e,sel){return e.target&&e.target.closest?e.target.closest(sel):null;};
   pg.addEventListener('click',function(e){
     var b;
-    if((b=cl(e,'.tkmv'))){var mvv=b.getAttribute('data-mvv');if(mvv){var pv=mvv.split('|');_tkReorder(pv[0],pv[1]==='up'?-1:1);return;}var pa=(b.getAttribute('data-mv')||'').split('|');_tkMove(pa[0],pa[1]);return;}
     if((b=cl(e,'.tkdel'))){_tkDel(b.getAttribute('data-del'));return;}
     if((b=cl(e,'#tkAdd'))){_tkAdd('todo');return;}
     if((b=cl(e,'.tkaddcol'))){_tkAdd(b.getAttribute('data-st'));return;}
@@ -7041,9 +7047,9 @@ function _tkBind(){
   pg.addEventListener('change',function(e){var el=e.target;if(!el)return;if(el.id==='tkmAttFile'){var _fl=el.files?[].slice.call(el.files):[];el.value='';if(_fl.length)_tkAttAddFiles(_fl);return;}if(el.id==='tkFA'){_tkFA=el.value;renderTracking();}else if(el.id==='tkFP'){_tkFP=el.value;renderTracking();}else if(el.id==='tkFC'){_tkFC=el.value;renderTracking();}});
   pg.addEventListener('dragstart',function(e){var c=e.target&&e.target.closest?e.target.closest('.tkcard'):null;if(c){_tkDragId=c.getAttribute('data-id');c.classList.add('dragging');try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',_tkDragId);}catch(_e){}}});
   pg.addEventListener('dragend',function(e){var c=e.target&&e.target.closest?e.target.closest('.tkcard'):null;if(c)c.classList.remove('dragging');_tkClearDrop();_tkDragId=null;});
-  pg.addEventListener('dragover',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.add('over');return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();_tkClearDrop();col.classList.add('dropon');}});
+  pg.addEventListener('dragover',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.add('over');return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();_tkClearDrop();col.classList.add('dropon');var dragging=document.querySelector('.tkcard.dragging');if(dragging){var after=_tkDragAfter(col,e.clientY);var addb=col.querySelector('.tkaddcol');if(after==null){if(dragging.nextElementSibling!==addb)col.insertBefore(dragging,addb||null);}else if(after!==dragging){col.insertBefore(dragging,after);}}}});
   pg.addEventListener('dragleave',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz&&!dz.contains(e.relatedTarget))dz.classList.remove('over');var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&!col.contains(e.relatedTarget))col.classList.remove('dropon');});
-  pg.addEventListener('drop',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.remove('over');var _ff=e.dataTransfer&&e.dataTransfer.files;if(_ff&&_ff.length)_tkAttAddFiles(_ff);return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();_tkSetStatus(_tkDragId,col.getAttribute('data-st'));_tkDragId=null;}});
+  pg.addEventListener('drop',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.remove('over');var _ff=e.dataTransfer&&e.dataTransfer.files;if(_ff&&_ff.length)_tkAttAddFiles(_ff);return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();var after=_tkDragAfter(col,e.clientY);var beforeId=after?after.getAttribute('data-id'):null;_tkDropReorder(_tkDragId,col.getAttribute('data-st'),beforeId);_tkDragId=null;}});
 }
 
 var curPayer=null,curWco=null,_whtEdit=null,_wView='reg',_wSumMo=0;
@@ -16777,7 +16783,7 @@ var HEROT={adv:['Advance (CEO) &middot; Payee Database','Record &amp; track comp
 /* v9.152: per-module English description banners (shown in #modDesc under the hero) — Database (gl) keeps its own #glIntro */
 var HERODESC={adv:"The <b>Advance (CEO)</b> module records company <b>advance / reimbursement</b> payments &mdash; click the <b>Intake Bin</b> to attach a document and add details, and each entry is summarised into a report: <b>Payment Date &middot; Payer &middot; Payee &middot; Description &middot; Amount</b> with a <b>Paid / Unpaid</b> status (paid entries can attach a transfer slip). Attach a slip and use <b>Read file</b> to auto-fill the amount, date and payee &middot; search, filter and export to Excel / PDF.",pdrepjv:"The <b>Report AP JV</b> module keeps a separate <b>two-sided ledger per company</b> &mdash; pick a company (<b>GLR &middot; ARG &middot; GLE &middot; GRW &middot; CGL &middot; ECM</b>) from the tabs. <b>Liability (AP)</b> on the left, <b>Asset</b> on the right. On each side you can <b>add entries</b> &mdash; <b>Date &middot; Voucher &middot; Description &middot; Company &middot; Amount</b> &mdash; and tag each with an <b>Index</b> (e.g. Advance / Operating). The Liability side also keeps a <b>Routine expenses</b> list (Description &middot; Company &middot; Amount); the Asset side keeps a <b>Bank statement</b> list (Account no. &middot; Account name &middot; Amount &middot; as-of date). Everything is saved on this device and synced to the cloud.",bbl:"A read-only <b>Hire-Purchase-style repayment schedule</b> for the two Bangkok Bank (BBL) long-term loans — contracts <b>BLC26800000090 (฿200M)</b> and <b>BLC26800000093 (฿100M)</b>. The schedule is built live from the app&#39;s <b>General Ledger</b> by the configured account &amp; project codes: it shows all <b>54 principal instalments</b> (equal instalments with a final balloon), the <b>actual interest paid</b>, and both the principal- and interest-payment <b>vouchers</b>. Click a voucher to view its journal entry; export to Excel or PDF.",
   ov:"A one-page <b>Command Center</b> aggregating the whole app · a Thai tax-filing calendar sorted by urgency (e-Filing dates, paper filing in parentheses) covering monthly WHT/VAT/SBT/Social Security plus per-company annual CIT &amp; DBD deadlines by fiscal year-end · Action Required due &amp; overdue list · KPI tiles (Companies · Tasks · Pending · Filed · Paid) · open team tasks · Recent Activity log · click any task to jump to its module",
-  tk:"A team <b>Task Board</b> for accounting work, viewed as a Kanban board or a List · tasks flow across four columns (Book keeping · Accounting &amp; Tax · Remind · Done) by drag-and-drop or ◀▶ move · each card carries priority, category, assignee, due date (overdue/today badges), a linked GLI project &amp; file/image attachments · search plus Assignee / Priority / Category filters · Total, Overdue &amp; Done counters · stored on this device and synced to the cloud across devices",
+  tk:"A team <b>Task Board</b> for accounting work, viewed as a Kanban board or a List · drag a card freely to move it between the four columns (Book keeping · Accounting &amp; Tax · Remind · Done) or to reorder it up/down within a column · each card carries priority, category, assignee, due date (overdue/today badges), a linked GLI project &amp; file/image attachments · open a card to highlight it and colour its text · search plus Assignee / Priority / Category filters · Total, Overdue &amp; Done counters · stored on this device and synced to the cloud across devices",
   bp:"Reconciles construction projects across <b>Contract · Billing · Revenue (GL) · Cost</b>, deriving Gross Profit and Variance per project · paste Code+Amount from Excel (or export a per-type template) to update · switch Comparison / GL-by-Year / Invoice-by-Year views · filter every column like Excel (text or &gt;100, &lt;0) with totals that follow the filters · edit names, customers &amp; value cells inline · add password-locked per-year databases · export a 4-sheet Excel · stored on this device and synced to the cloud",
   pg:"Tracks per-project construction <b>Progress %</b> (Cost GL ÷ Contract Expense) with percentage-of-completion Earned Revenue (% × Contract Revenue) · columns: Project · Status · Contract/GL/Earned/Diff/Accrued revenue · Contract Exp./GL cost · reads Business Performance data for the selected Database Year · KPI tiles &amp; filtered totals · search, status chips, Excel-style ▾ column filters, click-header sort · <b>Paste %</b> for manual overrides (or Actual % recomputes from GL) with per-project 🔒 lock · stored on this device and synced to the cloud",
   fs:"Builds Thai statutory financial statements automatically from the active <b>GL</b> — no separate import · tabs for Trial Balance, Balance Sheet, Income Statement, Changes in Equity, Cash Flow (indirect &amp; direct), Ratios, Working Papers &amp; Anomalies · pick a fiscal year (prior year auto-compared), all years, or any month for interim statements · filter, sort &amp; resize every <b>Trial Balance</b> column Excel-style · reconcile against an uploaded TB file · export the four statements + 24 notes to Excel or PDF",
