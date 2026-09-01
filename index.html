@@ -1770,7 +1770,7 @@ h1{ background:var(--g-aurora) !important;
 .tkboard.vert .tkcard .tkcardbot{margin-top:auto}
 .tkcolnm{cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .tkcolnm:hover{text-decoration:underline dotted}
-.tkcolact{display:inline-flex;gap:3px;margin-left:7px;opacity:.35;transition:opacity .12s}
+.tkcolact{display:inline-flex;align-items:center;gap:4px;margin-left:7px;opacity:.9;transition:opacity .12s}
 .tkcolhd:hover .tkcolact{opacity:1}
 .tkcolb{width:20px;height:20px;border-radius:6px;border:1px solid var(--line);background:#fff;color:var(--ink2,#4A5563);font-size:9.5px;line-height:1;cursor:pointer;padding:0}
 .tkcolb:hover:not(:disabled){background:var(--c);color:#fff;border-color:transparent}
@@ -1804,6 +1804,10 @@ body.tkcoldrag{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .tkcolswb.on{outline:2.5px solid var(--brand,#0E5C52);outline-offset:1.5px}
 .tkcolhd .tkcoldot{background:currentColor}
 .tkcolb.on{background:var(--c);color:#fff;border-color:transparent}
+.tkcolsw2{display:inline-flex;align-items:center;gap:5px;height:21px;padding:0 8px 0 5px;border-radius:7px;border:1px solid var(--line);background:#fff;color:var(--ink2,#4A5563);font-family:inherit;font-size:10.5px;font-weight:800;line-height:1.5;cursor:pointer;white-space:nowrap}
+.tkcolsw2:hover,.tkcolsw2.on{background:var(--c);color:#fff;border-color:transparent}
+.tkswdot{display:inline-block;flex:none;width:13px;height:13px;border-radius:4px;border:1px solid rgba(16,24,40,.25);background:#fff}
+.tkswdot.none{background:linear-gradient(135deg,#fff 43%,#E11D48 43%,#E11D48 57%,#fff 57%)}
 .tkcolcust{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .tkcolcf{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:var(--ink2,#4A5563);cursor:pointer}
 .tkcolcf input[type=color]{width:28px;height:23px;padding:0;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer}
@@ -7146,7 +7150,7 @@ function _tkKanban(view){
       +'<span class="tkcolgrip" title="ลากแถบหัวข้อเพื่อย้ายไปวางตรงไหนก็ได้">⠿</span>'
       +'<span class="tkcoldot"></span><span class="tkcolnm" data-colren="'+st[0]+'" title="คลิกเพื่อเปลี่ยนชื่อหัวข้อ">'+esc(st[1])+'</span><span class="tkcoln">'+col.length+'</span>'
       +'<span class="tkcolact">'
-      +'<button class="tkcolb'+((_tkColPick===st[0])?' on':'')+'" data-colpick="'+st[0]+'" type="button" title="สีพื้นหลังหัวข้อ">🎨</button>'
+      +'<button class="tkcolsw2'+((_tkColPick===st[0])?' on':'')+'" data-colpick="'+st[0]+'" type="button" title="เปลี่ยนสีพื้นหลังหัวข้อ"><i class="tkswdot'+(st[4]?'':' none')+'"'+(st[4]?(' style="background:'+st[4]+'"'):'')+'></i>สี</button>'
       +'<button class="tkcolb" data-colren="'+st[0]+'" type="button" title="เปลี่ยนชื่อหัวข้อ">✎</button>'
       +'<button class="tkcolb del" data-coldel="'+st[0]+'" type="button" title="ลบหัวข้อ"'+(n<=1?' disabled':'')+'>🗑</button>'
       +'</span></div>';
