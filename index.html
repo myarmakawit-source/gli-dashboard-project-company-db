@@ -1785,14 +1785,17 @@ h1{ background:var(--g-aurora) !important;
 .tkcolhd:active .tkcolgrip{cursor:grabbing}
 .tkcoln{background:rgba(255,255,255,.92)}
 .tkboard{position:relative}
-.tkcolhd{cursor:grab}
+.tkcolhd{cursor:grab;user-select:none;-webkit-user-select:none}
 .tkcolhd:active{cursor:grabbing}
-.tkcolgrip{touch-action:none;padding:3px 5px;margin:-3px -1px -3px -5px}
-.tkcol.tkcolfly{position:relative;z-index:55;pointer-events:none;transition:none;box-shadow:0 22px 48px -14px rgba(16,24,40,.55);cursor:grabbing}
+.tkcolgrip{touch-action:none;padding:7px 9px;margin:-7px -5px -7px -7px}/* พื้นที่กดใหญ่พอสำหรับนิ้ว (~25×26px) โดยไม่เปลี่ยนหน้าตา */
+.tkcol.tkcolfly{position:fixed;z-index:9500;margin:0;pointer-events:none;transition:none;box-shadow:0 22px 48px -14px rgba(16,24,40,.55);cursor:grabbing}
 .tkcolmark{position:absolute;background:var(--brand,#0E5C52);border-radius:4px;pointer-events:none;z-index:60;box-shadow:0 0 0 3px rgba(14,92,82,.18)}
 .tkcolmark.h{left:0;right:0;height:6px}
 .tkcolmark.v{top:0;bottom:0;width:6px}
 body.tkcoldrag{user-select:none;-webkit-user-select:none;cursor:grabbing}
+.tkboard.colmoving .tkcolbody,.tkboard.colmoving .tkcolpick{display:none}
+.tkboard.colmoving .tkcol{padding-bottom:6px}
+.tkboard.colmoving .tkcolhd{margin-bottom:0}
 .tkcolpick{background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px 11px;margin-bottom:10px;box-shadow:0 10px 24px -14px rgba(16,24,40,.5)}
 .tkcolpickhd{display:flex;align-items:center;font-size:11.5px;font-weight:800;color:var(--ink2,#4A5563);margin-bottom:8px}
 .tkcolpickx{margin-left:auto;width:20px;height:20px;border-radius:6px;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:10px;line-height:1;cursor:pointer;padding:0}
@@ -6955,56 +6958,101 @@ function _tkColAutoScroll(x,y){
 function _tkColDown(hd,e){
   if(e.button!=null&&e.button!==0)return;
   if(e.target&&e.target.closest&&e.target.closest('button,input,select,textarea,a'))return;
-  if(e.pointerType==='touch'&&!(e.target.closest&&e.target.closest('.tkcolgrip')))return;/* บนจอสัมผัสให้ลากที่ ⠿ เพื่อไม่ชนกับการเลื่อนหน้าจอ */
+  if((e.pointerType==='touch'||e.pointerType==='pen')&&!(e.target.closest&&e.target.closest('.tkcolgrip')))return;/* นิ้ว/ปากกาให้ลากที่ ⠿ เพื่อไม่ชนกับการเลื่อนหน้าจอ */
   if(TK_STAT.length<2)return;
   var col=hd.closest('.tkcol'),board=col&&col.parentNode;if(!col||!board)return;
   var r=col.getBoundingClientRect();
-  _tkCD={key:col.getAttribute('data-st'),col:col,board:board,sx:e.clientX,sy:e.clientY,ox:r.left,oy:r.top,live:false,mark:null,idx:-1};
+  /* gx,gy = จุดที่จับไว้ในตัวคอลัมน์ · tx,ty = ระยะเลื่อนปัจจุบัน (คำนวณใหม่ทุกครั้งจากตำแหน่งจริง จึงไม่หลุดเวลาหน้าจอเลื่อน) */
+  _tkCD={key:col.getAttribute('data-st'),col:col,board:board,id:(e.pointerId==null?-1:e.pointerId),
+         sx:e.clientX,sy:e.clientY,px:e.clientX,py:e.clientY,gx:e.clientX-r.left,gy:e.clientY-r.top,tx:0,ty:0,live:false,mark:null,idx:-1,raf:0};
   window.addEventListener('pointermove',_tkColMoveH,true);
   window.addEventListener('pointerup',_tkColUpH,true);
   window.addEventListener('pointercancel',_tkColCancelH,true);
   window.addEventListener('keydown',_tkColKeyH,true);
+  window.addEventListener('blur',_tkColAbortH,true);
+  window.addEventListener('contextmenu',_tkColCtxH,true);
+  document.addEventListener('visibilitychange',_tkColAbortH,true);
 }
+/* รับเฉพาะนิ้ว/เมาส์ตัวที่เริ่มลากเท่านั้น — นิ้วที่สองแตะจอตอนกำลังลากอยู่ต้องไม่มาแย่งวางแทน */
+function _tkColSamePtr(e){return !!_tkCD&&(_tkCD.id===-1||e.pointerId==null||e.pointerId===_tkCD.id);}
 function _tkColLift(){
   _tkCD.live=true;
+  if(_tkCD.board&&_tkCD.board.classList)_tkCD.board.classList.add('colmoving');/* ย่อบอร์ดเหลือแค่แถบหัวข้อระหว่างลาก — เห็นทุกหัวข้อและเส้นบอกตำแหน่งพร้อมกันในจอเดียว */
+  var r=_tkCD.col.getBoundingClientRect();
+  _tkCD.col.style.width=r.width+'px';/* หลุดออกจาก flow แล้วความกว้างจะหดตามเนื้อหา จึงต้องล็อกไว้ก่อน */
   _tkCD.col.classList.add('tkcolfly');
   document.body.classList.add('tkcoldrag');
+  _tkCD.raf=requestAnimationFrame(_tkColTick);
+}
+/* วางตำแหน่งหัวข้อที่กำลังลาก + เส้นบอกตำแหน่ง — คำนวณจากตำแหน่งจริงทุกครั้ง จึงไม่หลุดมือเวลาหน้าจอเลื่อน */
+function _tkColApplyPos(){
+  if(!_tkCD||!_tkCD.live)return;
+  var c=_tkCD.col,r=c.getBoundingClientRect();
+  _tkCD.tx+=(_tkCD.px-_tkCD.gx)-r.left;_tkCD.ty+=(_tkCD.py-_tkCD.gy)-r.top;
+  c.style.transform='translate('+_tkCD.tx+'px,'+_tkCD.ty+'px)';
+  var others=_tkColBoardCols().filter(function(x){return x!==c;});
+  _tkCD.idx=_tkColIndexAt(_tkCD.px,_tkCD.py,others);
+  _tkColShowMark(_tkCD.idx,others,_tkCD.board);
+}
+/* เลื่อนหน้าจออัตโนมัติต้องเดินต่อแม้ผู้ใช้จะจ่อนิ้วนิ่งอยู่ที่ขอบ จึงวิ่งเป็นลูปแทนที่จะรอ pointermove */
+function _tkColTick(){
+  if(!_tkCD||!_tkCD.live)return;
+  _tkColAutoScroll(_tkCD.px,_tkCD.py);
+  _tkColApplyPos();
+  _tkCD.raf=requestAnimationFrame(_tkColTick);
 }
 function _tkColMoveH(e){
-  if(!_tkCD)return;
+  if(!_tkCD||!_tkColSamePtr(e))return;
+  if(e.pointerType==='mouse'&&e.buttons===0){_tkColCleanup();return;}/* ปล่อยปุ่มไปแล้วแต่ pointerup ไม่ถึงหน้าเว็บ (เช่นโดนเมนูคลิกขวากิน) — เจอตอนขยับเมาส์ครั้งแรกก็เลิกลากทันที */
+  _tkCD.px=e.clientX;_tkCD.py=e.clientY;
   if(!_tkCD.live){
     if(Math.abs(e.clientX-_tkCD.sx)<5&&Math.abs(e.clientY-_tkCD.sy)<5)return;
     _tkColLift();
   }
   e.preventDefault();
-  _tkCD.col.style.transform='translate('+(e.clientX-_tkCD.sx)+'px,'+(e.clientY-_tkCD.sy)+'px)';
-  _tkColAutoScroll(e.clientX,e.clientY);
-  var others=_tkColBoardCols().filter(function(c){return c!==_tkCD.col;});
-  _tkCD.idx=_tkColIndexAt(e.clientX,e.clientY,others);
-  _tkColShowMark(_tkCD.idx,others,_tkCD.board);
+  _tkColApplyPos();
 }
 function _tkColCleanup(){
   window.removeEventListener('pointermove',_tkColMoveH,true);
   window.removeEventListener('pointerup',_tkColUpH,true);
   window.removeEventListener('pointercancel',_tkColCancelH,true);
   window.removeEventListener('keydown',_tkColKeyH,true);
+  window.removeEventListener('blur',_tkColAbortH,true);
+  window.removeEventListener('contextmenu',_tkColCtxH,true);
+  document.removeEventListener('visibilitychange',_tkColAbortH,true);
   if(_tkCD){
+    if(_tkCD.raf)cancelAnimationFrame(_tkCD.raf);
     if(_tkCD.mark&&_tkCD.mark.parentNode)_tkCD.mark.parentNode.removeChild(_tkCD.mark);
-    if(_tkCD.col){_tkCD.col.classList.remove('tkcolfly');_tkCD.col.style.transform='';}
+    if(_tkCD.col){_tkCD.col.classList.remove('tkcolfly');_tkCD.col.style.transform='';_tkCD.col.style.width='';}
+    if(_tkCD.board&&_tkCD.board.classList)_tkCD.board.classList.remove('colmoving');
   }
+  var bs=document.querySelectorAll('.tkboard.colmoving');for(var i=0;i<bs.length;i++)bs[i].classList.remove('colmoving');
   document.body.classList.remove('tkcoldrag');
   _tkCD=null;
 }
-function _tkColKeyH(e){if(e.key==='Escape'&&_tkCD){e.preventDefault();e.stopPropagation();_tkColCleanup();}}
-function _tkColCancelH(){_tkColCleanup();}
+/* ธงกลืน click: ตั้งไว้ให้กิน click ที่ตามหลัง pointerup ของการลากนี้ แล้วล้างทิ้งทันทีใน tick ถัดไป */
+function _tkColArmClickGuard(){_tkColClickGuard=true;setTimeout(function(){_tkColClickGuard=false;},0);}
+function _tkColKeyH(e){
+  if(e.key!=='Escape'||!_tkCD)return;
+  var live=_tkCD.live;e.preventDefault();e.stopPropagation();_tkColCleanup();
+  if(!live)return;
+  /* ยกเลิกทั้งที่ยังกดค้างอยู่ — ต้องรอกลืน click ตอนปล่อยนิ้ว ไม่งั้นจะไปเปิดหน้าต่างเปลี่ยนชื่อหัวข้อ */
+  var f=function(){window.removeEventListener('pointerup',f,true);_tkColArmClickGuard();};
+  window.addEventListener('pointerup',f,true);
+  setTimeout(function(){window.removeEventListener('pointerup',f,true);},5000);
+}
+function _tkColCancelH(e){if(_tkCD&&_tkColSamePtr(e))_tkColCleanup();}
+/* คลิกขวาระหว่างลาก: เบราว์เซอร์จะกลืน pointerup ของปุ่มซ้ายไปกับเมนู ทำให้การลางค้างอยู่ทั้งบอร์ด — ยกเลิกการลากทิ้งไปเลย */
+function _tkColCtxH(e){if(!_tkCD)return;if(_tkCD.live)e.preventDefault();_tkColCleanup();}
+function _tkColAbortH(){if(_tkCD&&(document.hidden||!document.hasFocus||!document.hasFocus()))_tkColCleanup();}/* สลับแท็บ/สลับโปรแกรมทั้งที่ยังกดค้าง — เบราว์เซอร์อาจไม่ส่ง pointerup มาเลย */
 function _tkColUpH(e){
-  if(!_tkCD)return;
+  if(!_tkCD||!_tkColSamePtr(e))return;
+  if(e.button!=null&&e.button>0){_tkColCleanup();return;}/* ปล่อยปุ่มขวา/กลางระหว่างลาก = ยกเลิก ไม่ใช่ปล่อยค้างไว้ */
   var live=_tkCD.live,key=_tkCD.key,idx=_tkCD.idx;
   _tkColCleanup();
   if(!live)return;/* กดแล้วปล่อยเฉย ๆ = คลิกปกติ (เปลี่ยนชื่อหัวข้อ) */
   e.preventDefault();e.stopPropagation();
-  _tkColClickGuard=true;/* กลืน click ที่เบราว์เซอร์ยิงต่อท้าย pointerup ของการลากนี้เท่านั้น */
-  setTimeout(function(){_tkColClickGuard=false;},0);/* click สังเคราะห์มาก่อน timer เสมอ — ถ้าไม่มี (เพราะเรนเดอร์ใหม่) ธงก็ถูกล้างทันที ไม่ค้างไปกินคลิกถัดไป */
+  _tkColArmClickGuard();
   if(idx>=0)_tkColMoveToIndex(key,idx);
 }
 function _tkColMoveToIndex(key,idx){
