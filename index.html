@@ -1689,11 +1689,13 @@ h1{ background:var(--g-aurora) !important;
 .tkcolhd{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:800;color:var(--c);margin-bottom:10px;padding:1px 3px}
 .tkcoldot{width:10px;height:10px;border-radius:50%;background:var(--c)}
 .tkcoln{margin-left:auto;background:#fff;color:var(--c);font-size:11.5px;font-weight:800;padding:1px 9px;border-radius:12px;border:1px solid var(--c)}
-.tkcolbody{display:flex;flex-direction:column;gap:9px;min-height:44px;border-radius:9px;transition:.12s;padding:2px}
+.tkcolbody{display:flex;flex-direction:column;gap:9px;min-height:44px;border-radius:9px;transition:.12s;padding:2px;position:relative}
 .tkcolbody.dropon{background:rgba(29,95,174,.07);outline:2px dashed var(--c);outline-offset:1px}
 .tkcard{background:#fff;border-radius:11px;border:1px solid var(--line);border-left:4px solid var(--p);padding:10px 11px;cursor:grab;position:relative;box-shadow:0 1px 2px rgba(16,24,40,.04)}
 .tkcard:hover{box-shadow:0 4px 12px rgba(16,24,40,.10);transform:translateY(-1px)}
-.tkcard.dragging{opacity:.4}
+.tkcard.dragging{opacity:.34}
+/* v10.57: เส้นบอกตำแหน่งที่การ์ดจะไปลง — ระหว่างลากจะไม่สลับ DOM แล้ว ตำแหน่งจึงนิ่ง ไม่ไหลหนีเคอร์เซอร์ */
+.tkcardmark{position:absolute;background:var(--c,#0E5C52);border-radius:3px;pointer-events:none;z-index:6;box-shadow:0 0 0 3px rgba(14,92,82,.16)}
 .tkcardtop{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;padding-right:20px}
 .tkprio{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:11px;white-space:nowrap}
 .tkproj{font-size:10.5px;font-weight:700;color:var(--blue,#1D5FAE);background:var(--blue-bg,#E7EFF8);padding:2px 8px;border-radius:9px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
@@ -7079,24 +7081,37 @@ function _tkTC(c){for(var i=0;i<TK_TC.length;i++)if(TK_TC[i][0]===(c||''))return
 /* v10.52: column ordering respects a manual "ord" (set by ▲▼); tasks without ord fall back to the priority sort and sit below the manually-ordered ones */
 function _tkColSort(a,b){var ao=(a.ord==null?Infinity:+a.ord),bo=(b.ord==null?Infinity:+b.ord);if(ao!==bo)return ao-bo;return _tkSort(a,b);}
 /* v10.53: free drag-and-drop reordering — find the card under the cursor to drop BEFORE, and re-stamp ord for the whole column */
-function _tkDragAfter(colBody,x,y,grid){
-  var cards=[].slice.call(colBody.querySelectorAll('.tkcard:not(.dragging)'));
-  if(!cards.length)return null;
-  if(!grid){/* single-column: pure vertical midpoint */
-    var best=null,bestD=-Infinity;
-    for(var i=0;i<cards.length;i++){var box=cards[i].getBoundingClientRect();var off=y-(box.top+box.height/2);if(off<0&&off>bestD){bestD=off;best=cards[i];}}
-    return best;
+/* v10.57: หาช่องที่การ์ดจะไปลง — นับว่ามีการ์ดกี่ใบที่อยู่ "ก่อนหน้า" ตำแหน่งเคอร์เซอร์ตามลำดับการอ่าน
+   ค่าที่ได้เพิ่มขึ้นทีละขั้นตามการขยับเมาส์ (monotonic) จึงไม่กระโดดไปมาแบบวิธีเดิมที่หา "การ์ดที่ใกล้ที่สุด"
+   และไม่สลับ DOM ระหว่างลาก ตำแหน่งการ์ดใบอื่นจึงนิ่ง เล็งตรงไหนก็ลงตรงนั้น */
+function _tkCardSlot(colBody,x,y,grid){
+  var cards=[],ch=colBody.children,i;
+  for(i=0;i<ch.length;i++)if(ch[i].classList&&ch[i].classList.contains('tkcard')&&!ch[i].classList.contains('dragging'))cards.push(ch[i]);
+  var n=0;
+  for(i=0;i<cards.length;i++){
+    var r=cards[i].getBoundingClientRect();
+    if(grid){if(y>r.bottom||(y>r.top&&x>r.left+r.width/2))n++;}
+    else{if(y>r.top+r.height/2)n++;}
   }
-  /* grid: closest card centre, then decide before/after by reading order */
-  var b=null,bd=Infinity,after=false;
-  for(var j=0;j<cards.length;j++){var r=cards[j].getBoundingClientRect();var cx=r.left+r.width/2,cy=r.top+r.height/2;var d=(x-cx)*(x-cx)+(y-cy)*(y-cy);
-    if(d<bd){bd=d;b=cards[j];var sameRow=Math.abs(y-cy)<=r.height*0.6;after=sameRow?(x>cx):(y>cy);}}
-  if(!after)return b;
-  var nx=b.nextElementSibling;while(nx&&!(nx.classList&&nx.classList.contains('tkcard')))nx=nx.nextElementSibling;return nx||null;/* card to insert BEFORE (null → append) */
+  return {i:n,before:(cards[n]||null),cards:cards};
 }
+function _tkCardShowMark(colBody,slot,grid){
+  var m=colBody.querySelector('.tkcardmark');
+  if(!slot.cards.length){if(m&&m.parentNode)m.parentNode.removeChild(m);return;}
+  if(!m){m=document.createElement('div');m.className='tkcardmark';colBody.appendChild(m);}
+  var atEnd=(slot.i>=slot.cards.length),ref=atEnd?slot.cards[slot.cards.length-1]:slot.cards[slot.i];
+  var br=colBody.getBoundingClientRect(),r=ref.getBoundingClientRect();
+  if(grid){m.className='tkcardmark';m.style.width='5px';m.style.height=Math.round(r.height)+'px';
+    m.style.top=(r.top-br.top+colBody.scrollTop)+'px';
+    m.style.left=((atEnd?r.right:r.left)-br.left+colBody.scrollLeft-2.5)+'px';}
+  else{m.className='tkcardmark';m.style.height='5px';m.style.width=Math.round(r.width)+'px';
+    m.style.left=(r.left-br.left+colBody.scrollLeft)+'px';
+    m.style.top=((atEnd?r.bottom:r.top)-br.top+colBody.scrollTop-2.5)+'px';}
+}
+function _tkCardClearMark(){var ms=document.querySelectorAll('.tkcardmark');for(var i=0;i<ms.length;i++)if(ms[i].parentNode)ms[i].parentNode.removeChild(ms[i]);}
 function _tkDropReorder(id,st,beforeId){
   var t=_tkFind(id);if(!t)return;
-  var col=TRACKDATA.filter(function(x){return (x.status||'todo')===st&&x.id!==id;}).sort(_tkColSort);
+  var col=TRACKDATA.filter(function(x){return (x.status||TK_STAT[0][0])===st&&x.id!==id;}).sort(_tkColSort);
   var idx=col.length;
   if(beforeId){for(var i=0;i<col.length;i++){if(col[i].id===beforeId){idx=i;break;}}}
   var wasSt=(t.status||TK_STAT[0][0]),dk=_tkDoneKey();t.status=st;
@@ -7298,7 +7313,7 @@ function _tkDel(id){var t=_tkFind(id);if(!t)return;if(!confirm('Delete "'+(t.tit
 function _tkMove(id,dir){var t=_tkFind(id);if(!t)return;var i=_tkStatIdx(t.status||'todo')+(+dir);if(i<0||i>=TK_STAT.length)return;t.status=TK_STAT[i][0];t.ord=null;/* moved to another column → drop manual order so it lands at the bottom, then can be re-ordered */if(t.status==='done')t.done_dt=_tkToday();else t.done_dt='';if(typeof gliLog==='function')gliLog('Moved task',(t.title||'')+' → '+TK_STAT[i][1]);saveTrack();renderTracking();}
 function _tkSetStatus(id,st){var t=_tkFind(id);if(!t||(t.status||'todo')===st)return;t.status=st;t.ord=null;if(st==='done')t.done_dt=_tkToday();else t.done_dt='';if(typeof gliLog==='function')gliLog('Moved task',(t.title||'')+' → '+_tkStat(st)[1]);saveTrack();renderTracking();}
 function _tkDeb(fn){if(_tkDebT)clearTimeout(_tkDebT);_tkDebT=setTimeout(fn,260);}
-function _tkClearDrop(){var cs=document.querySelectorAll('.tkcolbody.dropon');for(var i=0;i<cs.length;i++)cs[i].classList.remove('dropon');}
+function _tkClearDrop(){var cs=document.querySelectorAll('.tkcolbody.dropon');for(var i=0;i<cs.length;i++)cs[i].classList.remove('dropon');_tkCardClearMark();}
 function _tkBind(){
   var pg=document.getElementById('page-tk');if(!pg||pg._tb)return;pg._tb=1;
   var cl=function(e,sel){return e.target&&e.target.closest?e.target.closest(sel):null;};
@@ -7333,9 +7348,9 @@ function _tkBind(){
   pg.addEventListener('pointerdown',function(e){_tkColClickGuard=false;var _hd=e.target&&e.target.closest?e.target.closest('.tkcolhd'):null;if(_hd&&!_tkCD)_tkColDown(_hd,e);});
   pg.addEventListener('dragstart',function(e){var c=e.target&&e.target.closest?e.target.closest('.tkcard'):null;if(c){_tkDragId=c.getAttribute('data-id');c.classList.add('dragging');try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',_tkDragId);}catch(_e){}}});
   pg.addEventListener('dragend',function(e){var c=e.target&&e.target.closest?e.target.closest('.tkcard'):null;if(c)c.classList.remove('dragging');_tkClearDrop();_tkDragId=null;});
-  pg.addEventListener('dragover',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.add('over');return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();_tkClearDrop();col.classList.add('dropon');var dragging=document.querySelector('.tkcard.dragging');if(dragging){var after=_tkDragAfter(col,e.clientX,e.clientY,_tkLayout==='vert');var addb=col.querySelector('.tkaddcol');if(after==null){if(dragging.nextElementSibling!==addb)col.insertBefore(dragging,addb||null);}else if(after!==dragging){col.insertBefore(dragging,after);}}}});
+  pg.addEventListener('dragover',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.add('over');return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();_tkClearDrop();col.classList.add('dropon');_tkCardShowMark(col,_tkCardSlot(col,e.clientX,e.clientY,_tkLayout==='vert'),_tkLayout==='vert');}});
   pg.addEventListener('dragleave',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz&&!dz.contains(e.relatedTarget))dz.classList.remove('over');var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&!col.contains(e.relatedTarget))col.classList.remove('dropon');});
-  pg.addEventListener('drop',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.remove('over');var _ff=e.dataTransfer&&e.dataTransfer.files;if(_ff&&_ff.length)_tkAttAddFiles(_ff);return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();var after=_tkDragAfter(col,e.clientX,e.clientY,_tkLayout==='vert');var beforeId=after?after.getAttribute('data-id'):null;_tkDropReorder(_tkDragId,col.getAttribute('data-st'),beforeId);_tkDragId=null;}});
+  pg.addEventListener('drop',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.remove('over');var _ff=e.dataTransfer&&e.dataTransfer.files;if(_ff&&_ff.length)_tkAttAddFiles(_ff);return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();var slot=_tkCardSlot(col,e.clientX,e.clientY,_tkLayout==='vert');_tkClearDrop();_tkDropReorder(_tkDragId,col.getAttribute('data-st'),slot.before?slot.before.getAttribute('data-id'):null);_tkDragId=null;}});
 }
 
 var curPayer=null,curWco=null,_whtEdit=null,_wView='reg',_wSumMo=0;
