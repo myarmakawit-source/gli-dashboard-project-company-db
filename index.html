@@ -1706,6 +1706,20 @@ h1{ background:var(--g-aurora) !important;
 .tkpastex{flex:none;width:18px;height:18px;line-height:17px;text-align:center;border-radius:5px;font-size:10px;color:var(--muted,#8C8676);background:rgba(255,255,255,.75)}
 .tkpastex:hover{background:#FDECEA;color:#B42318}
 .tkcard.justadded{animation:tkflash 1.4s ease-out}
+/* v10.59: จับกลุ่มงานเรื่องเดียวกันไว้ด้วยกันภายในหัวข้อ */
+.tkgrp{display:flex;align-items:center;gap:7px;padding:5px 9px;margin:7px 0 -1px;border-radius:8px;background:rgba(255,255,255,.75);border:1px solid var(--line);cursor:pointer;user-select:none;line-height:1.7}
+.tkgrp:hover{background:#fff}
+.tkgrp.first{margin-top:0}
+.tkgrp.loose{background:transparent;border-style:dashed}
+.tkgrp.loose:hover{background:rgba(255,255,255,.7)}
+.tkgrpnm{flex:1;min-width:0;font-size:11.5px;font-weight:800;color:var(--c);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tkgrpnm:hover{text-decoration:underline dotted}
+.tkgrpnm.none{color:var(--muted,#8C8676);font-weight:700}
+.tkgrpn{flex:none;font-size:10.5px;font-weight:800;color:var(--c);background:var(--cb);border-radius:9px;padding:0 8px;line-height:17px}
+.tkgrpb{flex:none;width:19px;height:19px;border-radius:6px;border:1px solid var(--line);background:#fff;color:var(--ink2,#4A5563);font-size:9.5px;line-height:1;cursor:pointer;padding:0}
+.tkgrpb:hover{background:var(--c);color:#fff;border-color:transparent}
+.tkboard.vert .tkcolbody .tkgrp{grid-column:1/-1}
+.tkgrpchip{font-size:10.5px;font-weight:700;color:var(--ink2,#4A5563);background:var(--line2,#EEF2F7);border-radius:9px;padding:2px 8px;white-space:nowrap}
 @keyframes tkflash{0%{box-shadow:0 0 0 3px rgba(14,92,82,.6)}70%{box-shadow:0 0 0 3px rgba(14,92,82,.35)}100%{box-shadow:0 0 0 3px rgba(14,92,82,0)}}
 .tkcardtop{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;padding-right:46px}
 .tkprio{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:11px;white-space:nowrap}
@@ -7126,7 +7140,7 @@ function _tkClipSave(){try{if(_tkClip)localStorage.setItem('gli_tkclip',JSON.str
 function _tkClipClear(){_tkClip=null;_tkClipSave();renderTracking();}
 function _tkCopyCard(id){
   var t=_tkFind(id);if(!t)return;
-  _tkClip={title:t.title||'',desc:t.desc||'',prio:t.prio||'med',assignee:t.assignee||'',due:t.due||'',proj:t.proj||'',cat:t.cat||'',hl:t.hl||'',tc:t.tc||'',att:(t.att||[]).slice()};
+  _tkClip={title:t.title||'',desc:t.desc||'',prio:t.prio||'med',assignee:t.assignee||'',due:t.due||'',proj:t.proj||'',cat:t.cat||'',hl:t.hl||'',tc:t.tc||'',grp:((t.grp||'')+'').trim(),att:(t.att||[]).slice()};
   _tkClipSave();
   if(typeof gliLog==='function')gliLog('คัดลอกงาน (Tracking)',t.title||'');
   renderTracking();
@@ -7147,10 +7161,10 @@ function _tkAttClone(list,taskId,done){
   })();
 }
 /* สร้างงานใหม่จากสิ่งที่คัดลอกไว้ แล้ววางในหัวข้อ st (beforeId = วางก่อนการ์ดใบไหน · ไม่ระบุ = ต่อท้าย) */
-function _tkClipMake(src,st,beforeId){
+function _tkClipMake(src,st,beforeId,grp){
   var dk=_tkDoneKey(),nid=_uid();
   var nt={id:nid,title:src.title||'',desc:src.desc||'',status:st,prio:src.prio||'med',assignee:src.assignee||'',
-          due:src.due||'',proj:src.proj||'',cat:src.cat||'',hl:src.hl||'',tc:src.tc||'',att:[],
+          due:src.due||'',proj:src.proj||'',cat:src.cat||'',hl:src.hl||'',tc:src.tc||'',grp:((grp!=null)?grp:(src.grp||'')),att:[],
           created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done_dt:(st===dk)?_tkToday():''};
   loadTrack();TRACKDATA.push(nt);_tkPlaceIn(nt,st,beforeId||null);
   _tkFlashId=nid;saveTrack();
@@ -7162,6 +7176,44 @@ function _tkClipMake(src,st,beforeId){
   return nt;
 }
 function _tkPasteInto(st){if(!_tkClip)return;_tkClipMake(_tkClip,st,null);}
+/* v10.59: กลุ่ม (grp) = ป้ายข้อความอิสระบนการ์ด · การ์ดที่มีกลุ่มเดียวกันในหัวข้อเดียวกันจะถูกจัดไว้ติดกันใต้แถบกลุ่ม
+   สถานะย่อ/ขยายกลุ่มเก็บไว้ในเครื่องนี้เท่านั้น (มุมมองส่วนตัว ไม่ต้องซิงค์ให้คนอื่น) */
+var _tkGrpCol={};try{var _gc0=JSON.parse(localStorage.getItem('gli_tkgrpc')||'{}');if(_gc0&&typeof _gc0==='object')_tkGrpCol=_gc0;}catch(e){_tkGrpCol={};}
+var _tkNewGrp='';
+function _tkGrpKey(st,g){return st+'\u0001'+(g||'');}
+function _tkGrpSaveCol(){try{localStorage.setItem('gli_tkgrpc',JSON.stringify(_tkGrpCol));}catch(e){}}
+function _tkGrpToggle(st,g){var k=_tkGrpKey(st,g);if(_tkGrpCol[k])delete _tkGrpCol[k];else _tkGrpCol[k]=1;_tkGrpSaveCol();renderTracking();}
+function _tkGrpAll(){loadTrack();var seen={},out=[];for(var i=0;i<TRACKDATA.length;i++){var g=((TRACKDATA[i].grp||'')+'').trim();if(g&&!seen[g]){seen[g]=1;out.push(g);}}out.sort();return out;}
+function _tkGrpRename(st,g){
+  var name=prompt(g?'เปลี่ยนชื่อกลุ่ม · Rename group':'ตั้งชื่อกลุ่มให้การ์ดที่ยังไม่ได้จัดกลุ่ม · Name this group',g||'');
+  if(name==null)return;name=name.trim();if(name===g)return;
+  loadTrack();var n=0;
+  for(var i=0;i<TRACKDATA.length;i++){var t=TRACKDATA[i];
+    if((t.status||TK_STAT[0][0])===st&&((t.grp||'')+'').trim()===g){t.grp=name;n++;}}
+  if(n){saveTrack();if(typeof gliLog==='function')gliLog('เปลี่ยนชื่อกลุ่ม (Tracking)',(g||'(ไม่ได้จัดกลุ่ม)')+' → '+(name||'(ไม่ได้จัดกลุ่ม)')+' · '+n+' งาน');}
+  renderTracking();
+}
+/* กลุ่มที่ตำแหน่ง y อยู่ — ใช้ตอนลากการ์ดมาวาง: ตกในโซนกลุ่มไหน การ์ดก็เข้ากลุ่มนั้น · null = หัวข้อนี้ยังไม่มีการจัดกลุ่ม */
+function _tkGrpAt(colBody,y){
+  var ch=colBody.children,found=null,first=null,i;
+  for(i=0;i<ch.length;i++){
+    var el=ch[i];if(!(el.classList&&el.classList.contains('tkgrp')))continue;
+    var g=el.getAttribute('data-grp')||'';
+    if(first===null)first=g;
+    if(el.getBoundingClientRect().top<=y)found=g;
+  }
+  return (found===null)?first:found;
+}
+function _tkGrpHTML(st,g,n,first){
+  var cl=!!_tkGrpCol[_tkGrpKey(st,g)];
+  return '<div class="tkgrp'+(first?' first':'')+(g?'':' loose')+'" data-gst="'+_eatt(st)+'" data-grp="'+_eatt(g)+'" title="คลิกแถบนี้เพื่อย่อ/ขยายกลุ่ม · ลากการ์ดมาวางในโซนนี้เพื่อย้ายเข้ากลุ่ม">'
+    +'<button class="tkgrpb" type="button" tabindex="-1">'+(cl?'▸':'▾')+'</button>'
+    +'<span class="tkgrpnm'+(g?'':' none')+'">'+(g?esc(g):'— ยังไม่ได้จัดกลุ่ม · ลากมาวางที่นี่เพื่อออกจากกลุ่ม —')+'</span>'
+    +'<span class="tkgrpn">'+n+'</span>'
+    +((g||n)?('<button class="tkgrpb" data-grpren="1" type="button" title="'+(g?'เปลี่ยนชื่อกลุ่ม':'ตั้งชื่อกลุ่มให้การ์ดที่ยังไม่ได้จัดกลุ่ม')+'">✎</button>'):'')
+    +'<button class="tkgrpb" data-grpadd="1" type="button" title="เพิ่มงานใหม่ในกลุ่มนี้">＋</button>'
+    +'</div>';
+}
 /* วางงาน t ลงในหัวข้อ st ที่ตำแหน่งก่อนการ์ด beforeId แล้วเรียงเลขลำดับใหม่ทั้งคอลัมน์ */
 function _tkPlaceIn(t,st,beforeId){
   var col=TRACKDATA.filter(function(x){return (x.status||TK_STAT[0][0])===st&&x.id!==t.id;}).sort(_tkColSort);
@@ -7170,8 +7222,9 @@ function _tkPlaceIn(t,st,beforeId){
   col.splice(idx,0,t);
   for(i=0;i<col.length;i++)col[i].ord=i;
 }
-function _tkDropReorder(id,st,beforeId){
+function _tkDropReorder(id,st,beforeId,grp){
   var t=_tkFind(id);if(!t)return;
+  if(grp!=null)t.grp=grp;/* วางในโซนกลุ่มไหน = เข้ากลุ่มนั้น (โซน “ยังไม่ได้จัดกลุ่ม” = เอาออกจากกลุ่ม) */
   var wasSt=(t.status||TK_STAT[0][0]),dk=_tkDoneKey();t.status=st;
   if(st===dk){if(wasSt!==dk)t.done_dt=_tkToday();}else{t.done_dt='';}
   _tkPlaceIn(t,st,beforeId);
@@ -7248,14 +7301,14 @@ function _tkSnapModal(){
   var hOn=m.querySelector('#tkmHL .tkmsb.on'),tOn=m.querySelector('#tkmTC .tkmsb.on');
   var ae=document.activeElement,af=(ae&&ae.id&&m.contains(ae))?ae.id:'',ss=null,se=null;
   try{if(af&&ae&&('selectionStart' in ae)){ss=ae.selectionStart;se=ae.selectionEnd;}}catch(e){}
-  return {title:v('tkmTitle'),desc:v('tkmDesc'),assign:v('tkmAssign'),due:v('tkmDue'),cat:v('tkmCat'),proj:v('tkmProj'),
+  return {title:v('tkmTitle'),desc:v('tkmDesc'),assign:v('tkmAssign'),due:v('tkmDue'),cat:v('tkmCat'),proj:v('tkmProj'),grp:v('tkmGrp'),
     st:sOn?sOn.getAttribute('data-st'):null,pr:pOn?pOn.getAttribute('data-pr'):null,
     hl:hOn?hOn.getAttribute('data-hl'):null,tc:tOn?tOn.getAttribute('data-tc'):null,af:af,ss:ss,se:se};
 }
 function _tkRestoreModal(s){
   if(!s)return;var m=document.getElementById('tkModal');if(!m)return;
   var set=function(id,val){if(val===undefined)return;var e=document.getElementById(id);if(e&&e.value!==val)e.value=val;};
-  set('tkmTitle',s.title);set('tkmDesc',s.desc);set('tkmAssign',s.assign);set('tkmDue',s.due);set('tkmCat',s.cat);set('tkmProj',s.proj);
+  set('tkmTitle',s.title);set('tkmDesc',s.desc);set('tkmAssign',s.assign);set('tkmDue',s.due);set('tkmCat',s.cat);set('tkmProj',s.proj);set('tkmGrp',s.grp);
   var seg=function(wrap,attr,val){if(!val)return;var box=document.getElementById(wrap);if(!box)return;var bs=box.querySelectorAll('.tkmsb');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].getAttribute(attr)===val);};
   seg('tkmStatus','data-st',s.st);seg('tkmPrio','data-pr',s.pr);
   var segAny=function(wrap,attr,val){var box=document.getElementById(wrap);if(!box||val==null)return;var bs=box.querySelectorAll('.tkmsb');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].getAttribute(attr)===val);};
@@ -7278,7 +7331,17 @@ function _tkKanban(view){
       +'</span></div>';
     if(_tkColPick===st[0])h+=_tkColPickHTML(st);
     h+='<div class="tkcolbody" data-st="'+st[0]+'">';
-    col.forEach(function(t){h+=_tkCard(t);});
+    var _hasG=false;for(var _q=0;_q<col.length;_q++)if(((col[_q].grp||'')+'').trim()){_hasG=true;break;}
+    if(!_hasG){col.forEach(function(t){h+=_tkCard(t);});}
+    else{
+      var _gs={},_go=[];
+      col.forEach(function(t){var g=((t.grp||'')+'').trim();if(!Object.prototype.hasOwnProperty.call(_gs,g)){if(g)_go.push(g);_gs[g]=[];}_gs[g].push(t);});
+      _go.push('');if(!_gs[''])_gs['']=[];/* โซน "ยังไม่ได้จัดกลุ่ม" อยู่ล่างสุดเสมอ แม้ยังไม่มีการ์ด — เอาไว้ลากการ์ดมาวางเพื่อออกจากกลุ่ม */
+      _go.forEach(function(g,gi){
+        h+=_tkGrpHTML(st[0],g,_gs[g].length,gi===0);
+        if(!_tkGrpCol[_tkGrpKey(st[0],g)])_gs[g].forEach(function(t){h+=_tkCard(t);});
+      });
+    }
     if(_tkClip)h+='<button class="tkpaste" data-paste="'+st[0]+'" type="button" title="วางสำเนาของงานที่คัดลอกไว้ ลงในหัวข้อนี้">📋 วางที่นี่ ·<span class="tkpastenm">'+esc(_tkClip.title||'(ไม่มีชื่อ)')+'</span><span class="tkpastex" data-clipx="1" title="ล้างสิ่งที่คัดลอกไว้">✕</span></button>';
     h+='<button class="tkaddcol" data-st="'+st[0]+'" type="button">+ Add Task</button>';
     h+='</div></div>';
@@ -7308,7 +7371,7 @@ function _tkList(view){
   var h='<div class="tklistwrap"><table class="tklist"><thead><tr><th>Task</th><th>Project</th><th>Assignee</th><th>Priority</th><th>Due</th><th>Status</th><th></th></tr></thead><tbody>';
   if(!view.length)h+='<tr><td colspan="7" class="tknone">No tasks match the filters</td></tr>';
   view.forEach(function(t){var pr=_tkPrio(t.prio||'med'),st=_tkStat(t.status||'todo'),d=_tkDue(t),ct=_tkCat(t.cat||'');
-    h+='<tr data-edit="'+t.id+'"><td class="tkltitle">'+(ct?('<span class="tkcat tkcatsm" style="background:'+ct[3]+';color:'+ct[2]+'">'+esc(ct[1])+'</span> '):'')+esc(t.title||'(Untitled)')+(t.desc?('<span class="tkldesc">'+esc((t.desc||'').slice(0,70))+'</span>'):'')+'</td>';
+    h+='<tr data-edit="'+t.id+'"><td class="tkltitle">'+(((t.grp||'')+'').trim()?('<span class="tkgrpchip">🗂 '+esc(((t.grp||'')+'').trim())+'</span> '):'')+(ct?('<span class="tkcat tkcatsm" style="background:'+ct[3]+';color:'+ct[2]+'">'+esc(ct[1])+'</span> '):'')+esc(t.title||'(Untitled)')+(t.desc?('<span class="tkldesc">'+esc((t.desc||'').slice(0,70))+'</span>'):'')+'</td>';
     h+='<td>'+(t.proj?('<span class="tkproj">🔗 '+esc(t.proj)+'</span>'):'<span class="tkdim">—</span>')+'</td>';
     h+='<td><span class="tkassign">'+_tkAvatar(t.assignee)+'</span></td>';
     h+='<td><span class="tkprio" style="background:'+pr[3]+';color:'+pr[2]+'">'+pr[1]+'</span></td>';
@@ -7321,7 +7384,7 @@ function _tkList(view){
 function _tkModalHTML(){
   if(!_tkModalId)return '';
   var isNew=(_tkModalId==='__new__');
-  var t=isNew?{title:'',desc:'',status:_tkNewStatus||'todo',prio:'med',assignee:'',due:'',proj:'',cat:''}:_tkFind(_tkModalId);
+  var t=isNew?{title:'',desc:'',status:_tkNewStatus||'todo',prio:'med',assignee:'',due:'',proj:'',cat:'',grp:(_tkNewGrp||'')}:_tkFind(_tkModalId);
   if(!t)return '';
   var meta='';if(!isNew&&(t.by||t.created)){meta='<div class="tkmmeta">Created by '+esc(t.by||'—')+(t.created?(' · '+_tkFmtDate(new Date(t.created).toISOString().slice(0,10))):'')+(t.done_dt?(' · Done '+_tkFmtDate(t.done_dt)):'')+'</div>';}
   var h='<div class="tkmodal" id="tkModal"><div class="tkmcard">';
@@ -7338,6 +7401,7 @@ function _tkModalHTML(){
   h+='<div class="tkmrow"><label class="tkmf"><div class="tkmlbl">Assignee</div><select class="tkmin" id="tkmAssign">'+((typeof _ptUserOptions==='function')?_ptUserOptions(t.assignee):'<option value="">—</option>')+'</select></label>';
   h+='<label class="tkmf"><div class="tkmlbl">Due date</div><input class="tkmin" id="tkmDue" type="date" value="'+_eatt(t.due||'')+'"></label></div>';
   h+='<label class="tkml"><div class="tkmlbl">Category</div><select class="tkmin" id="tkmCat"><option value="">— None —</option>'+TK_CAT.map(function(c){return '<option value="'+c[0]+'"'+((t.cat||'')===c[0]?' selected':'')+'>'+c[1]+'</option>';}).join('')+'</select></label>';
+  h+='<label class="tkml"><div class="tkmlbl">กลุ่ม · Group <span style="font-weight:500;color:var(--muted)">— งานเรื่องเดียวกันใส่ชื่อกลุ่มเดียวกัน จะถูกจัดไว้ด้วยกันในหัวข้อ</span></div><input class="tkmin" id="tkmGrp" list="tkmGrpList" value="'+_eatt(t.grp||'')+'" placeholder="เช่น ขายรถ B1–B5 · เว้นว่าง = ไม่จัดกลุ่ม" autocomplete="off"><datalist id="tkmGrpList">'+_tkGrpAll().map(function(g){return '<option value="'+_eatt(g)+'">';}).join('')+'</datalist></label>';
   h+='<label class="tkml"><div class="tkmlbl">GLI Project (optional)</div><select class="tkmin" id="tkmProj">'+_tkProjOptions(t.proj)+'</select></label>';
   h+='<div class="tkml"><div class="tkmlbl">ไฟล์แนบ / รูปภาพ (Attachments)</div><div class="tkattdrop" id="tkmAttDrop"><div class="tkattbar"><button class="tkbtn ghost" id="tkmAttAdd" type="button">📎 เพิ่มไฟล์/รูป</button><span class="tkatthint">เลือกได้หลายไฟล์ (กด Ctrl/⌘ หรือ Shift) หรือลากไฟล์หลายไฟล์มาวางตรงนี้</span><span class="tkattstatus" id="tkmAttStatus"></span></div><input type="file" id="tkmAttFile" multiple style="display:none"><div class="tkattlist" id="tkmAttList">'+_tkAttListHTML()+'</div></div></div>';
   h+=meta;
@@ -7346,29 +7410,29 @@ function _tkModalHTML(){
   return h+'</div></div>';
 }
 function _tkOpen(id){_tkModalId=id;var _t=_tkFind(id);_tkAtt=(_t&&_t.att)?_t.att.slice():[];renderTracking();}
-function _tkCloseModal(){_tkAttCleanupNew();_tkModalId=null;renderTracking();}
-function _tkAdd(st){_tkModalId='__new__';_tkNewStatus=st||'todo';_tkNewId=_uid();_tkAtt=[];renderTracking();var ti=document.getElementById('tkmTitle');if(ti)ti.focus();}
+function _tkCloseModal(){_tkAttCleanupNew();_tkModalId=null;_tkNewGrp='';renderTracking();}
+function _tkAdd(st,grp){_tkModalId='__new__';_tkNewStatus=st||'todo';_tkNewGrp=grp||'';_tkNewId=_uid();_tkAtt=[];renderTracking();var ti=document.getElementById('tkmTitle');if(ti)ti.focus();}
 function _tkSaveModal(){
   var g=function(id){var e=document.getElementById(id);return e?e.value:'';};
   var title=g('tkmTitle').trim();if(!title){alert('Please enter a task name');var ti=document.getElementById('tkmTitle');if(ti)ti.focus();return;}
   var sEl=document.querySelector('#tkmStatus .tkmsb.on'),pEl=document.querySelector('#tkmPrio .tkmsb.on');
   var status=sEl?sEl.getAttribute('data-st'):'todo',prio=pEl?pEl.getAttribute('data-pr'):'med';
-  var assignee=g('tkmAssign'),due=g('tkmDue'),proj=g('tkmProj'),desc=g('tkmDesc'),cat=g('tkmCat');
+  var assignee=g('tkmAssign'),due=g('tkmDue'),proj=g('tkmProj'),desc=g('tkmDesc'),cat=g('tkmCat'),grp=(g('tkmGrp')||'').trim();
   var hlEl=document.querySelector('#tkmHL .tkmsb.on'),tcEl=document.querySelector('#tkmTC .tkmsb.on');
   var hl=hlEl?hlEl.getAttribute('data-hl'):'',tc=tcEl?tcEl.getAttribute('data-tc'):'';
   var isNew=(_tkModalId==='__new__'),_dk=_tkDoneKey();loadTrack();
   if(isNew){
-    var nt={id:(_tkNewId||_uid()),title:title,desc:desc,status:status,prio:prio,assignee:assignee,due:due,proj:proj,cat:cat,hl:hl,tc:tc,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done_dt:(status===_dk)?_tkToday():''};
+    var nt={id:(_tkNewId||_uid()),title:title,desc:desc,status:status,prio:prio,assignee:assignee,due:due,proj:proj,cat:cat,grp:grp,hl:hl,tc:tc,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done_dt:(status===_dk)?_tkToday():''};
     TRACKDATA.push(nt);
     if(typeof gliLog==='function')gliLog('Added task',title+(assignee&&_ptFind(assignee)?(' · assigned to '+_ptName(_ptFind(assignee))):''));
   }else{
     var t=_tkFind(_tkModalId);if(!t){_tkModalId=null;renderTracking();return;}
     var oldSt=t.status;
-    t.title=title;t.desc=desc;t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.cat=cat;t.hl=hl;t.tc=tc;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));
+    t.title=title;t.desc=desc;t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.cat=cat;t.grp=grp;t.hl=hl;t.tc=tc;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));
     if(status===_dk&&oldSt!==_dk)t.done_dt=_tkToday();if(status!==_dk)t.done_dt='';
     if(typeof gliLog==='function')gliLog((oldSt!==status)?'Updated status':'Edited task',title+(oldSt!==status?(' → '+_tkStat(status)[1]):''));
   }
-  _tkModalId=null;_tkAtt=[];_tkNewId=null;saveTrack();renderTracking();
+  _tkModalId=null;_tkAtt=[];_tkNewId=null;_tkNewGrp='';saveTrack();renderTracking();
 }
 function _tkDel(id){var t=_tkFind(id);if(!t)return;if(!confirm('Delete "'+(t.title||'')+'" ?\nThis cannot be undone'))return;loadTrack();_tkAttDelTask(t);TRACKDATA=TRACKDATA.filter(function(x){return x.id!==id;});if(typeof gliLog==='function')gliLog('Deleted task',t.title||'');_tkModalId=null;saveTrack();renderTracking();}
 function _tkMove(id,dir){var t=_tkFind(id);if(!t)return;var i=_tkStatIdx(t.status||'todo')+(+dir);if(i<0||i>=TK_STAT.length)return;t.status=TK_STAT[i][0];t.ord=null;/* moved to another column → drop manual order so it lands at the bottom, then can be re-ordered */if(t.status==='done')t.done_dt=_tkToday();else t.done_dt='';if(typeof gliLog==='function')gliLog('Moved task',(t.title||'')+' → '+TK_STAT[i][1]);saveTrack();renderTracking();}
@@ -7381,12 +7445,18 @@ function _tkBind(){
   pg.addEventListener('click',function(e){
     var b;
     if(_tkColClickGuard){_tkColClickGuard=false;e.stopPropagation();e.preventDefault();return;}
+    if((b=cl(e,'.tkgrp'))){
+      var _gst=b.getAttribute('data-gst')||'',_gnm=b.getAttribute('data-grp')||'';
+      if(e.target&&e.target.closest&&e.target.closest('[data-grpren]')){_tkGrpRename(_gst,_gnm);return;}
+      if(e.target&&e.target.closest&&e.target.closest('[data-grpadd]')){_tkAdd(_gst,_gnm);return;}
+      _tkGrpToggle(_gst,_gnm);return;
+    }
     if((b=cl(e,'[data-clipx]'))){_tkClipClear();return;}
     if((b=cl(e,'[data-paste]'))){_tkPasteInto(b.getAttribute('data-paste'));return;}
     if((b=cl(e,'[data-copy]'))){_tkCopyCard(b.getAttribute('data-copy'));return;}
     if((b=cl(e,'.tkdel'))){_tkDel(b.getAttribute('data-del'));return;}
     if((b=cl(e,'#tkAdd'))){_tkAdd('todo');return;}
-    if((b=cl(e,'.tkaddcol'))){_tkAdd(b.getAttribute('data-st'));return;}
+    if((b=cl(e,'.tkaddcol'))){_tkAdd(b.getAttribute('data-st'),'');return;}
     if((b=cl(e,'.tkvb'))){var _lay=b.getAttribute('data-lay');if(_lay){_tkSetLayout(_lay);return;}var _vv=b.getAttribute('data-v');if(_vv){_tkView=_vv;renderTracking();}return;}
     if((b=cl(e,'#tkAddCol'))){_tkColAdd();return;}
     if((b=cl(e,'[data-coldel]'))){_tkColDel(b.getAttribute('data-coldel'));return;}
@@ -7414,7 +7484,7 @@ function _tkBind(){
   pg.addEventListener('dragend',function(e){var c=e.target&&e.target.closest?e.target.closest('.tkcard'):null;if(c)c.classList.remove('dragging');_tkClearDrop();_tkDragId=null;});
   pg.addEventListener('dragover',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.add('over');return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();_tkClearDrop();col.classList.add('dropon');_tkCardShowMark(col,_tkCardSlot(col,e.clientX,e.clientY,_tkLayout==='vert'),_tkLayout==='vert');try{e.dataTransfer.dropEffect=(e.altKey||e.ctrlKey||e.metaKey)?'copy':'move';}catch(_de){}}});
   pg.addEventListener('dragleave',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz&&!dz.contains(e.relatedTarget))dz.classList.remove('over');var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&!col.contains(e.relatedTarget))col.classList.remove('dropon');});
-  pg.addEventListener('drop',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.remove('over');var _ff=e.dataTransfer&&e.dataTransfer.files;if(_ff&&_ff.length)_tkAttAddFiles(_ff);return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();var slot=_tkCardSlot(col,e.clientX,e.clientY,_tkLayout==='vert');_tkClearDrop();var _bid=slot.before?slot.before.getAttribute('data-id'):null,_cst=col.getAttribute('data-st');if(e.altKey||e.ctrlKey||e.metaKey){var _sc=_tkFind(_tkDragId);if(_sc)_tkClipMake(_sc,_cst,_bid);}/* กด Alt/Ctrl ค้างขณะลาก = คัดลอก ไม่ใช่ย้าย */else _tkDropReorder(_tkDragId,_cst,_bid);_tkDragId=null;}});
+  pg.addEventListener('drop',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.remove('over');var _ff=e.dataTransfer&&e.dataTransfer.files;if(_ff&&_ff.length)_tkAttAddFiles(_ff);return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();var slot=_tkCardSlot(col,e.clientX,e.clientY,_tkLayout==='vert');_tkClearDrop();var _bid=slot.before?slot.before.getAttribute('data-id'):null,_cst=col.getAttribute('data-st');var _gg=_tkGrpAt(col,e.clientY);if(e.altKey||e.ctrlKey||e.metaKey){var _sc=_tkFind(_tkDragId);if(_sc)_tkClipMake(_sc,_cst,_bid,_gg);}/* กด Alt/Ctrl ค้างขณะลาก = คัดลอก ไม่ใช่ย้าย */else _tkDropReorder(_tkDragId,_cst,_bid,_gg);_tkDragId=null;}});
 }
 
 var curPayer=null,curWco=null,_whtEdit=null,_wView='reg',_wSumMo=0;
