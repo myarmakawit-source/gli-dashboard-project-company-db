@@ -1696,7 +1696,18 @@ h1{ background:var(--g-aurora) !important;
 .tkcard.dragging{opacity:.34}
 /* v10.57: เส้นบอกตำแหน่งที่การ์ดจะไปลง — ระหว่างลากจะไม่สลับ DOM แล้ว ตำแหน่งจึงนิ่ง ไม่ไหลหนีเคอร์เซอร์ */
 .tkcardmark{position:absolute;background:var(--c,#0E5C52);border-radius:3px;pointer-events:none;z-index:6;box-shadow:0 0 0 3px rgba(14,92,82,.16)}
-.tkcardtop{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;padding-right:20px}
+/* v10.58: คัดลอกการ์ด แล้ววางลงหัวข้อไหนก็ได้ */
+.tkcopy{position:absolute;top:5px;right:26px;font-family:inherit;font-size:12px;line-height:1;padding:3px 4px;border:none;border-radius:6px;background:transparent;color:var(--muted,#8C8676);opacity:.45;cursor:pointer;transition:.12s}
+.tkcard:hover .tkcopy{opacity:.9}
+.tkcopy:hover{opacity:1;background:var(--brand-t,#E6F0EC);color:var(--brand,#0E5C52)}
+.tkpaste{display:flex;align-items:center;gap:7px;font-family:inherit;font-size:12px;line-height:1.7;font-weight:800;color:var(--brand-d,#0A463E);background:var(--brand-t,#E6F0EC);border:1.5px dashed var(--brand,#0E5C52);border-radius:9px;padding:8px 11px;cursor:pointer;text-align:left;min-width:0}
+.tkpaste:hover{background:#fff}
+.tkpastenm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;line-height:1.7}
+.tkpastex{flex:none;width:18px;height:18px;line-height:17px;text-align:center;border-radius:5px;font-size:10px;color:var(--muted,#8C8676);background:rgba(255,255,255,.75)}
+.tkpastex:hover{background:#FDECEA;color:#B42318}
+.tkcard.justadded{animation:tkflash 1.4s ease-out}
+@keyframes tkflash{0%{box-shadow:0 0 0 3px rgba(14,92,82,.6)}70%{box-shadow:0 0 0 3px rgba(14,92,82,.35)}100%{box-shadow:0 0 0 3px rgba(14,92,82,0)}}
+.tkcardtop{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;padding-right:46px}
 .tkprio{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:11px;white-space:nowrap}
 .tkproj{font-size:10.5px;font-weight:700;color:var(--blue,#1D5FAE);background:var(--blue-bg,#E7EFF8);padding:2px 8px;border-radius:9px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
 .tkcardttl{font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;line-height:1.35;margin-bottom:3px}
@@ -1767,7 +1778,7 @@ h1{ background:var(--g-aurora) !important;
 .tkboard.vert{flex-direction:column;overflow-x:visible;gap:14px}
 .tkboard.vert .tkcol{flex:none;width:100%;max-width:none}
 .tkboard.vert .tkcolbody{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:9px;align-items:stretch}
-.tkboard.vert .tkcolbody .tkaddcol{grid-column:1/-1;align-self:start}
+.tkboard.vert .tkcolbody .tkaddcol,.tkboard.vert .tkcolbody .tkpaste{grid-column:1/-1;align-self:start}
 .tkboard.vert .tkcard{display:flex;flex-direction:column;min-height:128px}
 .tkboard.vert .tkcard .tkcardbot{margin-top:auto}
 .tkcolnm{cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
@@ -7109,14 +7120,61 @@ function _tkCardShowMark(colBody,slot,grid){
     m.style.top=((atEnd?r.bottom:r.top)-br.top+colBody.scrollTop-2.5)+'px';}
 }
 function _tkCardClearMark(){var ms=document.querySelectorAll('.tkcardmark');for(var i=0;i<ms.length;i++)if(ms[i].parentNode)ms[i].parentNode.removeChild(ms[i]);}
+/* v10.58: คัดลอกงาน แล้ววางลงหัวข้อไหนก็ได้ — เก็บไว้ในเครื่องนี้เท่านั้น (ไม่ซิงค์ขึ้นคลาวด์) จึงยังอยู่แม้รีเฟรชหน้า */
+var _tkClip=(function(){try{var c=JSON.parse(localStorage.getItem('gli_tkclip')||'null');return (c&&c.title!=null)?c:null;}catch(e){return null;}})(),_tkFlashId='';
+function _tkClipSave(){try{if(_tkClip)localStorage.setItem('gli_tkclip',JSON.stringify(_tkClip));else localStorage.removeItem('gli_tkclip');}catch(e){}}
+function _tkClipClear(){_tkClip=null;_tkClipSave();renderTracking();}
+function _tkCopyCard(id){
+  var t=_tkFind(id);if(!t)return;
+  _tkClip={title:t.title||'',desc:t.desc||'',prio:t.prio||'med',assignee:t.assignee||'',due:t.due||'',proj:t.proj||'',cat:t.cat||'',hl:t.hl||'',tc:t.tc||'',att:(t.att||[]).slice()};
+  _tkClipSave();
+  if(typeof gliLog==='function')gliLog('คัดลอกงาน (Tracking)',t.title||'');
+  renderTracking();
+}
+/* สำเนาไฟล์แนบเป็นก้อนใหม่ (id ใหม่) — ถ้าใช้ id เดิมร่วมกัน ลบงานใบหนึ่งจะทำให้ไฟล์ของอีกใบหายไปด้วย */
+function _tkAttClone(list,taskId,done){
+  var src=(list||[]).slice(),out=[],i=0;
+  if(!src.length){done(out);return;}
+  (function next(){
+    if(i>=src.length){done(out);return;}
+    var a=src[i++];
+    _tkAdbGet(a.id).then(function(rec){
+      if(!rec||!rec.blob)return null;
+      var nid=_tkAttId();
+      return _tkAdbPut({id:nid,taskId:taskId,name:a.name,type:a.type||'',size:a.size||0,blob:rec.blob,ts:Date.now()})
+        .then(function(){out.push({id:nid,name:a.name,type:a.type||'',size:a.size||0,ts:Date.now()});});
+    }).catch(function(){}).then(next,next);
+  })();
+}
+/* สร้างงานใหม่จากสิ่งที่คัดลอกไว้ แล้ววางในหัวข้อ st (beforeId = วางก่อนการ์ดใบไหน · ไม่ระบุ = ต่อท้าย) */
+function _tkClipMake(src,st,beforeId){
+  var dk=_tkDoneKey(),nid=_uid();
+  var nt={id:nid,title:src.title||'',desc:src.desc||'',status:st,prio:src.prio||'med',assignee:src.assignee||'',
+          due:src.due||'',proj:src.proj||'',cat:src.cat||'',hl:src.hl||'',tc:src.tc||'',att:[],
+          created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done_dt:(st===dk)?_tkToday():''};
+  loadTrack();TRACKDATA.push(nt);_tkPlaceIn(nt,st,beforeId||null);
+  _tkFlashId=nid;saveTrack();
+  if(typeof gliLog==='function')gliLog('วางสำเนางาน (Tracking)',(nt.title||'')+' → '+_tkStat(st)[1]);
+  renderTracking();
+  if((src.att||[]).length)_tkAttClone(src.att,nid,function(att){
+    var t=_tkFind(nid);if(!t)return;t.att=att;saveTrack();renderTracking();
+  });
+  return nt;
+}
+function _tkPasteInto(st){if(!_tkClip)return;_tkClipMake(_tkClip,st,null);}
+/* วางงาน t ลงในหัวข้อ st ที่ตำแหน่งก่อนการ์ด beforeId แล้วเรียงเลขลำดับใหม่ทั้งคอลัมน์ */
+function _tkPlaceIn(t,st,beforeId){
+  var col=TRACKDATA.filter(function(x){return (x.status||TK_STAT[0][0])===st&&x.id!==t.id;}).sort(_tkColSort);
+  var idx=col.length,i;
+  if(beforeId){for(i=0;i<col.length;i++){if(col[i].id===beforeId){idx=i;break;}}}
+  col.splice(idx,0,t);
+  for(i=0;i<col.length;i++)col[i].ord=i;
+}
 function _tkDropReorder(id,st,beforeId){
   var t=_tkFind(id);if(!t)return;
-  var col=TRACKDATA.filter(function(x){return (x.status||TK_STAT[0][0])===st&&x.id!==id;}).sort(_tkColSort);
-  var idx=col.length;
-  if(beforeId){for(var i=0;i<col.length;i++){if(col[i].id===beforeId){idx=i;break;}}}
   var wasSt=(t.status||TK_STAT[0][0]),dk=_tkDoneKey();t.status=st;
   if(st===dk){if(wasSt!==dk)t.done_dt=_tkToday();}else{t.done_dt='';}
-  col.splice(idx,0,t);for(var j=0;j<col.length;j++)col[j].ord=j;
+  _tkPlaceIn(t,st,beforeId);
   if(typeof gliLog==='function')gliLog(wasSt!==st?'Moved task':'Reordered task',(t.title||'')+(wasSt!==st?(' → '+_tkStat(st)[1]):''));
   saveTrack();renderTracking();
 }
@@ -7173,6 +7231,7 @@ function renderTracking(){
      re-renders the board via _applyState → this used to wipe whatever the user was typing). */
   var _msnap=_tkModalId?_tkSnapModal():null;
   pg.innerHTML=h;
+  if(_tkFlashId)setTimeout(function(){_tkFlashId='';},60);
   _tkBind();
   try{if(typeof _disarmAutofill==='function')_disarmAutofill(document.getElementById('tkSearch'));}catch(e){}
   if(_tkModalId)_tkAttThumbs();
@@ -7220,6 +7279,7 @@ function _tkKanban(view){
     if(_tkColPick===st[0])h+=_tkColPickHTML(st);
     h+='<div class="tkcolbody" data-st="'+st[0]+'">';
     col.forEach(function(t){h+=_tkCard(t);});
+    if(_tkClip)h+='<button class="tkpaste" data-paste="'+st[0]+'" type="button" title="วางสำเนาของงานที่คัดลอกไว้ ลงในหัวข้อนี้">📋 วางที่นี่ ·<span class="tkpastenm">'+esc(_tkClip.title||'(ไม่มีชื่อ)')+'</span><span class="tkpastex" data-clipx="1" title="ล้างสิ่งที่คัดลอกไว้">✕</span></button>';
     h+='<button class="tkaddcol" data-st="'+st[0]+'" type="button">+ Add Task</button>';
     h+='</div></div>';
   });
@@ -7231,7 +7291,7 @@ function _tkCard(t,pos){
   var pr=_tkPrio(t.prio||'med'),d=_tkDue(t),si=_tkStatIdx(t.status||'todo');
   var hl=_tkHL(t.hl),tc=_tkTC(t.tc);
   var cstyle='--p:'+pr[2]+';'+(t.hl?('background:'+hl[2]+';border-color:'+hl[3]+';'):'');
-  var h='<div class="tkcard" draggable="true" data-id="'+t.id+'" style="'+cstyle+'">';
+  var h='<div class="tkcard'+((t.id===_tkFlashId)?' justadded':'')+'" draggable="true" data-id="'+t.id+'" style="'+cstyle+'">';
   h+='<div class="tkcardtop"><span class="tkprio" style="background:'+pr[3]+';color:'+pr[2]+'">'+pr[1]+'</span>';
   if(t.proj)h+='<span class="tkproj" title="'+_eatt(_tkProjName(t.proj))+'">🔗 '+esc(t.proj)+'</span>';
   if(t.cat){var _tc=_tkCat(t.cat);if(_tc)h+='<span class="tkcat" style="background:'+_tc[3]+';color:'+_tc[2]+'">'+esc(_tc[1])+'</span>';}
@@ -7239,7 +7299,8 @@ function _tkCard(t,pos){
   h+='<div class="tkcardttl" data-edit="'+t.id+'"'+(t.tc?(' style="color:'+tc[2]+'"'):'')+'>'+esc(t.title||'(Untitled)')+'</div>';
   if(t.desc)h+='<div class="tkcarddesc"'+(t.tc?(' style="color:'+tc[2]+';opacity:.8"'):'')+'>'+esc((t.desc||'').slice(0,90))+(((t.desc||'').length>90)?'…':'')+'</div>';
   var _na=(t.att&&t.att.length)||0;h+='<div class="tkcardbot"><span class="tkassign">'+_tkAvatar(t.assignee)+'</span>'+(d?('<span class="'+d.cls+'">'+d.txt+'</span>'):'')+(_na?('<span class="tkattcount" title="'+_na+' ไฟล์แนบ">📎 '+_na+'</span>'):'')+'</div>';
-  h+='<div class="tkgrip" title="ลากการ์ดเพื่อย้ายคอลัมน์ หรือจัดลำดับขึ้น–ลงในคอลัมน์เดียวกัน">⠿</div>';
+  h+='<button class="tkcopy" data-copy="'+t.id+'" type="button" title="คัดลอกงานนี้ — แล้วกด “วางที่นี่” ในหัวข้อที่ต้องการ (หรือกด Alt ค้างแล้วลากการ์ด = คัดลอก)">⧉</button>';
+  h+='<div class="tkgrip" title="ลากการ์ดเพื่อย้ายคอลัมน์ หรือจัดลำดับขึ้น–ลงในคอลัมน์เดียวกัน · กด Alt ค้างขณะลาก = คัดลอก">⠿</div>';
   return h+'</div>';
 }
 function _tkList(view){
@@ -7320,6 +7381,9 @@ function _tkBind(){
   pg.addEventListener('click',function(e){
     var b;
     if(_tkColClickGuard){_tkColClickGuard=false;e.stopPropagation();e.preventDefault();return;}
+    if((b=cl(e,'[data-clipx]'))){_tkClipClear();return;}
+    if((b=cl(e,'[data-paste]'))){_tkPasteInto(b.getAttribute('data-paste'));return;}
+    if((b=cl(e,'[data-copy]'))){_tkCopyCard(b.getAttribute('data-copy'));return;}
     if((b=cl(e,'.tkdel'))){_tkDel(b.getAttribute('data-del'));return;}
     if((b=cl(e,'#tkAdd'))){_tkAdd('todo');return;}
     if((b=cl(e,'.tkaddcol'))){_tkAdd(b.getAttribute('data-st'));return;}
@@ -7346,11 +7410,11 @@ function _tkBind(){
   pg.addEventListener('input',function(e){if(e.target&&e.target.id==='tkSearch'){_tkQ=e.target.value;_tkDeb(function(){_tkRefocus=true;renderTracking();});}});
   pg.addEventListener('change',function(e){var el=e.target;if(!el)return;var _ca=(el.getAttribute&&el.getAttribute('data-colcolor'))||'';if(_ca){var _cc=_ca.split('|'),_co={};if(_cc[0]==='hb')_co.hb=el.value;else if(_cc[0]==='cb')_co.cb=el.value;else _co.fg=el.value;_tkColApply(_cc[1],_co);return;}if(el.id==='tkmAttFile'){var _fl=el.files?[].slice.call(el.files):[];el.value='';if(_fl.length)_tkAttAddFiles(_fl);return;}if(el.id==='tkFA'){_tkFA=el.value;renderTracking();}else if(el.id==='tkFP'){_tkFP=el.value;renderTracking();}else if(el.id==='tkFC'){_tkFC=el.value;renderTracking();}});
   pg.addEventListener('pointerdown',function(e){_tkColClickGuard=false;var _hd=e.target&&e.target.closest?e.target.closest('.tkcolhd'):null;if(_hd&&!_tkCD)_tkColDown(_hd,e);});
-  pg.addEventListener('dragstart',function(e){var c=e.target&&e.target.closest?e.target.closest('.tkcard'):null;if(c){_tkDragId=c.getAttribute('data-id');c.classList.add('dragging');try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',_tkDragId);}catch(_e){}}});
+  pg.addEventListener('dragstart',function(e){var c=e.target&&e.target.closest?e.target.closest('.tkcard'):null;if(c){_tkDragId=c.getAttribute('data-id');c.classList.add('dragging');try{e.dataTransfer.effectAllowed='copyMove';/* ต้องอนุญาต copy ด้วย ไม่งั้นตอนกด Alt ค้างเบราว์เซอร์จะไม่ยอมให้วางเลย */e.dataTransfer.setData('text/plain',_tkDragId);}catch(_e){}}});
   pg.addEventListener('dragend',function(e){var c=e.target&&e.target.closest?e.target.closest('.tkcard'):null;if(c)c.classList.remove('dragging');_tkClearDrop();_tkDragId=null;});
-  pg.addEventListener('dragover',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.add('over');return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();_tkClearDrop();col.classList.add('dropon');_tkCardShowMark(col,_tkCardSlot(col,e.clientX,e.clientY,_tkLayout==='vert'),_tkLayout==='vert');}});
+  pg.addEventListener('dragover',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.add('over');return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();_tkClearDrop();col.classList.add('dropon');_tkCardShowMark(col,_tkCardSlot(col,e.clientX,e.clientY,_tkLayout==='vert'),_tkLayout==='vert');try{e.dataTransfer.dropEffect=(e.altKey||e.ctrlKey||e.metaKey)?'copy':'move';}catch(_de){}}});
   pg.addEventListener('dragleave',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz&&!dz.contains(e.relatedTarget))dz.classList.remove('over');var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&!col.contains(e.relatedTarget))col.classList.remove('dropon');});
-  pg.addEventListener('drop',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.remove('over');var _ff=e.dataTransfer&&e.dataTransfer.files;if(_ff&&_ff.length)_tkAttAddFiles(_ff);return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();var slot=_tkCardSlot(col,e.clientX,e.clientY,_tkLayout==='vert');_tkClearDrop();_tkDropReorder(_tkDragId,col.getAttribute('data-st'),slot.before?slot.before.getAttribute('data-id'):null);_tkDragId=null;}});
+  pg.addEventListener('drop',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.remove('over');var _ff=e.dataTransfer&&e.dataTransfer.files;if(_ff&&_ff.length)_tkAttAddFiles(_ff);return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();var slot=_tkCardSlot(col,e.clientX,e.clientY,_tkLayout==='vert');_tkClearDrop();var _bid=slot.before?slot.before.getAttribute('data-id'):null,_cst=col.getAttribute('data-st');if(e.altKey||e.ctrlKey||e.metaKey){var _sc=_tkFind(_tkDragId);if(_sc)_tkClipMake(_sc,_cst,_bid);}/* กด Alt/Ctrl ค้างขณะลาก = คัดลอก ไม่ใช่ย้าย */else _tkDropReorder(_tkDragId,_cst,_bid);_tkDragId=null;}});
 }
 
 var curPayer=null,curWco=null,_whtEdit=null,_wView='reg',_wSumMo=0;
