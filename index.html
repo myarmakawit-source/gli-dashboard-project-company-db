@@ -7188,8 +7188,35 @@ function _tkDocSeed(){return [
  ['qt','ใบเสนอราคา','#0E7490','#E0F2FE'],
  ['con','สัญญา','#7C3AED','#F3E8FF'],
  ['dn','ใบส่งของ','#0F766E','#D9F2EE'],
- ['fsdoc','งบการเงิน','#475569','#F1F5F9']];}
-var TK_DOC=(function(){try{var d=JSON.parse(localStorage.getItem('gli_tkdocs')||'null');if(Array.isArray(d)&&d.every(function(x){return Array.isArray(x)&&x.length>=2&&x[0];}))return d;}catch(e){}return _tkDocSeed();})();
+ ['fsdoc','งบการเงิน','#475569','#F1F5F9'],
+ /* v10.62: ชุดใบสำคัญทางบัญชี — ใบสำคัญคือเอกสารภายในที่ใช้บันทึกบัญชี (คู่กับสมุดรายวันเฉพาะ) */
+ ['pv','ใบสำคัญจ่าย (PV)','#C2410C','#FFEDD5'],
+ ['rv','ใบสำคัญรับ (RV)','#047857','#D1FAE5'],
+ ['pu','ใบสำคัญซื้อ (PU)','#4338CA','#E0E7FF'],
+ ['sv','ใบสำคัญขาย (SV)','#A16207','#FEF9C3'],
+ ['jv','ใบสำคัญทั่วไป (JV)','#6D28D9','#EDE9FE'],
+ ['aj','ใบสำคัญปรับปรุง (AJ)','#B91C1C','#FEE2E2'],
+ ['pc','ใบสำคัญจ่ายเงินสดย่อย','#0369A1','#DBEAFE'],
+ ['rcv','ใบสำคัญรับเงิน','#9D174D','#FCE7F3']];}
+var TK_DOC=(function(){
+  var seed=_tkDocSeed(),cur=null;
+  try{var d=JSON.parse(localStorage.getItem('gli_tkdocs')||'null');
+    if(Array.isArray(d)&&d.length&&d.every(function(x){return Array.isArray(x)&&x.length>=2&&x[0];}))cur=d;}catch(e){}
+  if(!cur)return seed;
+  /* v10.62: รายการเดิมถูกบันทึกไว้ก่อนที่จะมีชุดใบสำคัญ — เติมเฉพาะคีย์ที่ยังไม่มี "ครั้งเดียว"
+     (ทำเครื่องหมายเวอร์ชันไว้ ถ้าผู้ใช้ลบทิ้งทีหลังจะไม่โผล่กลับมาอีก) และไม่แตะประเภทที่แก้/สร้างเอง */
+  var v=0;try{v=+(localStorage.getItem('gli_tkdocs_v')||0)||0;}catch(e){}
+  if(v<2){
+    var NEW2={pv:1,rv:1,pu:1,sv:1,jv:1,aj:1,pc:1,rcv:1};/* เติมเฉพาะคีย์ที่เพิ่มใน v2 — ประเภทเดิมที่ผู้ใช้เคยลบทิ้ง ต้องไม่โผล่กลับมา */
+    var have={},i;for(i=0;i<cur.length;i++)have[cur[i][0]]=1;
+    var added=0;for(i=0;i<seed.length;i++)if(NEW2[seed[i][0]]&&!have[seed[i][0]]){cur.push(seed[i].slice());added++;}
+    try{localStorage.setItem('gli_tkdocs',JSON.stringify(cur));localStorage.setItem('gli_tkdocs_v','2');}catch(e){}
+    /* บันทึก+ซิงค์ใน tick ถัดไป ตอนที่สคริปต์ทั้งไฟล์รันจบแล้ว (saveTkDocs พึ่ง _TS ที่ประกาศทีหลัง)
+       เพื่อให้รายการที่เติมแล้วเป็นฝ่ายชนะตอนซิงค์ ไม่โดนสำเนาเก่าจากเครื่องอื่นทับ */
+    if(added)setTimeout(function(){try{saveTkDocs();}catch(e){}},0);
+  }
+  return cur;
+})();
 var _tkDocPanel=false;
 function saveTkDocs(){try{localStorage.setItem('gli_tkdocs',JSON.stringify(TK_DOC));}catch(e){}if(typeof _tsTouch==='function')_tsTouch('tkd');if(typeof cloudPush==='function')cloudPush();}
 function _tkDoc(k){k=(k||'')+'';if(!k)return null;for(var i=0;i<TK_DOC.length;i++)if(TK_DOC[i][0]===k)return TK_DOC[i];return null;}
@@ -7214,7 +7241,7 @@ function _tkDocDel(key){
   if(_tkFD===key)_tkFD='';
   saveTkDocs();if(typeof gliLog==='function')gliLog('ลบประเภทเอกสาร (Tracking)',(d[1]||'')+(n?(' · ล้างจากงาน '+n+' รายการ'):''));renderTracking();
 }
-function _tkDocReset(){if(!confirm('คืนค่าประเภทเอกสารกลับเป็นชุดเริ่มต้น?\nประเภทที่สร้างเองจะหายไป แต่งานไม่ถูกลบ'))return;TK_DOC=_tkDocSeed();saveTkDocs();renderTracking();}
+function _tkDocReset(){if(!confirm('คืนค่าประเภทเอกสารกลับเป็นชุดเริ่มต้น?\nประเภทที่สร้างเองจะหายไป แต่งานไม่ถูกลบ'))return;TK_DOC=_tkDocSeed();try{localStorage.setItem('gli_tkdocs_v','2');}catch(e){}saveTkDocs();renderTracking();}
 function _tkDocPanelHTML(){
   var h='<div class="tkdocpanel"><div class="tkdocpt">🗂 ตั้งค่าประเภทเอกสาร<span class="tkdocps">เลือกให้การ์ดไหน การ์ดนั้นจะไฮไลท์ด้วยสีของประเภทนั้น</span><button class="tkdocpx" data-docclose="1" type="button" title="ปิด">✕</button></div>';
   if(!TK_DOC.length)h+='<div class="tkdocnone">ยังไม่มีประเภทเอกสาร — กด “เพิ่มประเภท” ด้านล่าง</div>';
