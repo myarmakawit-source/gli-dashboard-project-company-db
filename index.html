@@ -1845,6 +1845,66 @@ body.tkcoldrag{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .tkcolclr:hover{background:var(--line2,#EEF2F7)}
 @media(max-width:640px){.tkhdr{margin-left:0}.tkstat{margin-left:0;width:100%}.tksearch{max-width:none}.tkcol{min-width:228px}.tkboard.vert .tkcol{min-width:0}}
 </style>
+<style id="gmCss">
+.gmwrap{padding:2px 0}
+.gmhd{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.gmtitle{font-size:17px;font-weight:800;color:var(--ink)}
+.gmsub{font-size:12px;color:var(--muted);font-weight:600;margin-left:8px}
+.gmacct{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#15803D;background:#E7F6EC;border-radius:20px;padding:5px 13px}
+.gmbtn{font-family:inherit;font-size:12.5px;font-weight:700;border-radius:9px;padding:8px 14px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink2,#4A5563)}
+.gmbtn:hover{background:var(--line2,#EEF2F7)}
+.gmbtn.primary{background:var(--brand,#0E5C52);color:#fff;border-color:transparent}
+.gmbtn.primary:hover{filter:brightness(1.08)}
+.gmbtn.ghost{color:var(--muted)}
+.gmbtn.danger{background:#FDECEA;color:#B42318;border-color:transparent}
+.gmbtn:disabled{opacity:.5;cursor:default}
+.gmcard{background:#fff;border:1px solid var(--line);border-radius:13px;padding:16px 18px;margin-bottom:14px}
+.gmsetup{background:linear-gradient(135deg,#F0FDFA,#EFF6FF);border:1px solid #A7D8D0}
+.gmsetup h3{margin:0 0 10px;font-size:14.5px;font-weight:800;color:var(--brand-d,#0A463E)}
+.gmstep{display:flex;gap:10px;margin-bottom:11px;font-size:12.5px;line-height:1.65;color:var(--ink2,#4A5563)}
+.gmstepn{flex:none;width:21px;height:21px;border-radius:50%;background:var(--brand,#0E5C52);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.gmstep b{color:var(--ink)}
+.gmorigin{display:flex;align-items:center;gap:8px;background:#0B1220;color:#7DD3FC;border-radius:8px;padding:8px 11px;font-family:"IBM Plex Mono",monospace;font-size:12px;margin:6px 0;flex-wrap:wrap}
+.gmorigin b{color:#FDE68A;font-weight:700}
+.gmwarn{background:#FEF3C7;border:1px solid #FCD34D;color:#92400E;border-radius:9px;padding:10px 13px;font-size:12.5px;line-height:1.6;margin:8px 0}
+.gmerr{background:#FDECEA;border:1px solid #F1B0A8;color:#B42318;border-radius:9px;padding:10px 13px;font-size:12.5px;line-height:1.6;margin:8px 0}
+.gmok{background:#E7F6EC;border:1px solid #A7D8B4;color:#15803D;border-radius:9px;padding:10px 13px;font-size:12.5px;margin:8px 0}
+.gmtool{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:13px}
+.gmin{font-family:inherit;font-size:12.5px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;color:var(--ink);background:#fff}
+.gmin:focus{outline:none;border-color:var(--brand,#0E5C52)}
+.gmin.wide{flex:1;min-width:200px}
+.gmchk{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink2,#4A5563);cursor:pointer;white-space:nowrap}
+.gmkpi{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.gmk{flex:1;min-width:118px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 14px;border-left:4px solid var(--k,#0E5C52)}
+.gmkn{font-size:20px;font-weight:800;color:var(--ink);line-height:1.15}
+.gmkl{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px}
+.gmcatbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}
+.gmcatb{font-family:inherit;font-size:11.5px;font-weight:800;border:1px solid transparent;border-radius:20px;padding:5px 13px;cursor:pointer;background:var(--cb,#F1F5F9);color:var(--c,#475569)}
+.gmcatb.on{outline:2px solid var(--c,#475569);outline-offset:1px}
+.gmgrp{display:flex;align-items:center;gap:8px;margin:16px 0 8px;font-size:13px;font-weight:800;color:var(--c,#475569)}
+.gmgrp .gmgn{font-size:11px;font-weight:800;background:var(--cb,#F1F5F9);border-radius:10px;padding:1px 9px}
+.gmlist{display:flex;flex-direction:column;gap:7px}
+.gmmsg{display:flex;gap:11px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--c,#CBD5E1);border-radius:10px;padding:10px 13px;cursor:pointer;transition:.12s}
+.gmmsg:hover{box-shadow:0 4px 12px rgba(16,24,40,.09);transform:translateY(-1px)}
+.gmmsg.unread{background:#FCFEFF;border-left-width:5px}
+.gmmsg.unread .gmsubj{font-weight:800}
+.gmav{flex:none;width:32px;height:32px;border-radius:50%;background:var(--c,#475569);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.gmbody{flex:1;min-width:0}
+.gmrow1{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.gmfrom{font-size:12.5px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:270px}
+.gmmail{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gmdate{margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap}
+.gmsubj{font-size:13px;font-weight:600;color:var(--ink);margin-top:2px;line-height:1.4}
+.gmsnip{font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.gmtag{font-size:10px;font-weight:800;border-radius:9px;padding:1px 8px;background:var(--cb,#F1F5F9);color:var(--c,#475569);white-space:nowrap}
+.gmnew{font-size:10px;font-weight:800;border-radius:9px;padding:1px 8px;background:#DBEAFE;color:#1D4ED8;white-space:nowrap}
+.gmempty{text-align:center;color:var(--muted);padding:38px 20px;background:#fff;border:1px dashed var(--line);border-radius:13px}
+.gmemptyic{font-size:38px;margin-bottom:9px}
+.gmbusy{font-size:12.5px;font-weight:700;color:var(--brand,#0E5C52);padding:6px 0}
+.gmnote{font-size:11.5px;color:var(--muted);line-height:1.65;margin-top:10px}
+.gmnote code{background:var(--line2,#EEF2F7);border-radius:5px;padding:1px 6px;font-family:"IBM Plex Mono",monospace;font-size:11px}
+@media(max-width:640px){.gmfrom{max-width:150px}.gmk{min-width:100px}}
+</style>
 <style id="vatCss">
 .vwrap{padding:2px 0}
 .vbtn{font-family:inherit;font-size:12.5px;font-weight:700;border-radius:8px;padding:7px 13px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink2)}
@@ -2917,7 +2977,7 @@ body{padding-left:236px;padding-right:8px}
 /* ===================== REMOVE MONTHLY SALES BAR CHART (per request) ===================== */
 #page-vat .v30spark{display:none}
 </style>
-<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><button class="modtab modtab-pg" data-mod="pg" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Progress %</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">🗄️</span><span class="sblbl">Database</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Finance &amp; Reconcile</div><button class="modtab" data-mod="bbl" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Bank loan</span></button><div class="sbsec">PAYEE DATABASE</div><button class="modtab" data-mod="pdrepjv" role="tab" aria-selected="false"><span class="sbic">📑</span><span class="sblbl">Report AP JV</span></button><div class="sbsec">Database Taxation</div><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><div class="sbsec">Routine Work</div><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-cb" data-mod="cb" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Confirm Bank</span></button><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><div class="sbsec">Security &amp; Data</div><button class="modtab modtab-sec" data-mod="sec" role="tab" aria-selected="false"><span class="sbic">🛡️</span><span class="sblbl">Security</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — auto-refreshes every open device when a newer build is deployed (v9.19+)">V10.51</span></div></nav>
+<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><button class="modtab modtab-pg" data-mod="pg" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Progress %</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">🗄️</span><span class="sblbl">Database</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Finance &amp; Reconcile</div><button class="modtab" data-mod="bbl" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Bank loan</span></button><div class="sbsec">PAYEE DATABASE</div><button class="modtab" data-mod="pdrepjv" role="tab" aria-selected="false"><span class="sbic">📑</span><span class="sblbl">Report AP JV</span></button><div class="sbsec">Database Taxation</div><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><div class="sbsec">Routine Work</div><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-gm" data-mod="gm" role="tab" aria-selected="false"><span class="sbic">📧</span><span class="sblbl">Gmail Inbox</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-cb" data-mod="cb" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Confirm Bank</span></button><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><div class="sbsec">Security &amp; Data</div><button class="modtab modtab-sec" data-mod="sec" role="tab" aria-selected="false"><span class="sbic">🛡️</span><span class="sblbl">Security</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — auto-refreshes every open device when a newer build is deployed (v9.19+)">V10.51</span></div></nav>
 <header>
 <div class="letter"><svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0E5C52"></rect><path d="M15 43 L27 31 L35 37 L49 21" fill="none" stroke="#D9A441" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="49" cy="21" r="3.7" fill="#D9A441"></circle><text x="32" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#9FCFC4" letter-spacing="2.5">GLI</text></svg>
 <div class="brand"><div class="brandL"><div class="th">GRANDLINE INNOVATION <span class="th-co">COMPANY LIMITED</span></div><span class="ho">Head Office</span></div><div class="brandR"><div class="addr">333 Soi Lat Phrao 64 Yaek 12, Lat Phrao Road, Wang Thong Lang Sub-District, Wang Thong Lang District, Bangkok 10310</div><div class="taxid">Tax ID · 0105553002230</div></div></div>
@@ -3021,6 +3081,7 @@ NEW-001	4200000"></textarea>
   <div class="mnhint">Create users here — <b>no login</b>: each computer just picks its user once below (or in MN) and the choice is <b>remembered on that device forever</b>; the name is then auto-stamped on Preparer / Reviewer / Approver / N-A actions · Fields: First name (ชื่อ) · Last name (นามสกุล) · Position (ตำแหน่ง) · Username / Password · Stored &amp; cloud-synced like other modules</div>
   <div id="ptWrap"></div>
 </div>
+<div class="page" id="page-gm" hidden=""></div>
 <div class="page" id="page-up" hidden="">
   <div class="uptop"><h2 class="uptitle">E-Filing &amp; DBD Login Credentials · 10 Companies</h2><button class="upshowall" id="upShowAll" type="button" data-on="0">👁 Show all passwords</button></div>
   <div class="uphint">Stores <b>E-Filing</b> credentials (Revenue Department · efiling.rd.go.th) and <b>DBD</b> credentials (Department of Business Development · DBD e-Filing) per company · Edits <b>save automatically and sync to the cloud</b> like other data · Passwords are hidden — click 👁 to reveal or ⧉ to copy</div>
@@ -7485,6 +7546,292 @@ function _tkBind(){
   pg.addEventListener('dragover',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.add('over');return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();_tkClearDrop();col.classList.add('dropon');_tkCardShowMark(col,_tkCardSlot(col,e.clientX,e.clientY,_tkLayout==='vert'),_tkLayout==='vert');try{e.dataTransfer.dropEffect=(e.altKey||e.ctrlKey||e.metaKey)?'copy':'move';}catch(_de){}}});
   pg.addEventListener('dragleave',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz&&!dz.contains(e.relatedTarget))dz.classList.remove('over');var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&!col.contains(e.relatedTarget))col.classList.remove('dropon');});
   pg.addEventListener('drop',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.remove('over');var _ff=e.dataTransfer&&e.dataTransfer.files;if(_ff&&_ff.length)_tkAttAddFiles(_ff);return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();var slot=_tkCardSlot(col,e.clientX,e.clientY,_tkLayout==='vert');_tkClearDrop();var _bid=slot.before?slot.before.getAttribute('data-id'):null,_cst=col.getAttribute('data-st');var _gg=_tkGrpAt(col,e.clientY);if(e.altKey||e.ctrlKey||e.metaKey){var _sc=_tkFind(_tkDragId);if(_sc)_tkClipMake(_sc,_cst,_bid,_gg);}/* กด Alt/Ctrl ค้างขณะลาก = คัดลอก ไม่ใช่ย้าย */else _tkDropReorder(_tkDragId,_cst,_bid,_gg);_tkDragId=null;}});
+}
+
+/* ===== v10.60: Gmail Inbox — เชื่อม Gmail ของผู้ใช้ (อ่านอย่างเดียว) แล้วสรุปว่ามีเรื่องอะไรบ้าง =====
+   ทำงานในเบราว์เซอร์ล้วน ๆ ผ่าน Google Identity Services + Gmail REST API (ไม่มีเซิร์ฟเวอร์ตรงกลาง)
+   · ขอสิทธิ์ gmail.readonly อย่างเดียว — อ่านได้ ส่ง/ลบ/แก้ไม่ได้
+   · เก็บเฉพาะ OAuth Client ID (ไม่ใช่ความลับ) + ตัวเลือกการค้นหา ไว้ใน localStorage ของเครื่องนี้
+   · access token อยู่ในหน่วยความจำเท่านั้น ไม่เขียนลงดิสก์ และหมดอายุเองใน 1 ชั่วโมง
+   · ไม่ส่งอะไรขึ้น Firebase — อีเมลเป็นเรื่องส่วนตัว ไม่ปนกับข้อมูลทีม */
+var GMCFG={};try{var _gm0=JSON.parse(localStorage.getItem('gli_gm')||'{}');if(_gm0&&typeof _gm0==='object')GMCFG=_gm0;}catch(e){GMCFG={};}
+function _gmSave(){try{localStorage.setItem('gli_gm',JSON.stringify(GMCFG));}catch(e){}}
+var _gmTok=null,_gmExp=0,_gmMsgs=[],_gmBusy='',_gmErr='',_gmNote='',_gmAcct='',_gmTC=null,_gmFC='',_gmLoaded=false;
+var GM_CAT=[
+ ['tax','ภาษี · สรรพากร','#B45309','#FEF3C7',/สรรพากร|ภ\.?ง\.?ด|ภ\.?พ\.?\s?30|ภาษี|rd\.go\.th|e-?filing|withholding|vat|หัก ?ณ ?ที่จ่าย/i],
+ ['audit','ผู้สอบบัญชี · งบการเงิน','#BE123C','#FFE4E6',/ผู้สอบบัญชี|auditor|งบการเงิน|financial statement|dbd|กรมพัฒนาธุรกิจ|นำส่งงบ|บอจ|สบช/i],
+ ['bank','ธนาคาร · การเงิน','#1D5FAE','#E7EFF8',/ธนาคาร|\bbank\b|โอนเงิน|statement|เช็ค|cheque|bbl|kbank|kasikorn|scb|ktb|\bttb\b|\buob\b|cimb|gsb|exim|เงินเข้า|เงินออก|สินเชื่อ|ค้ำประกัน/i],
+ ['inv','ใบแจ้งหนี้ · วางบิล','#15803D','#E7F6EC',/ใบแจ้งหนี้|invoice|ใบเสร็จ|receipt|ใบกำกับ|วางบิล|billing|ใบส่งของ|quotation|ใบเสนอราคา|po\b|purchase order/i],
+ ['bid','ประมูล · จัดซื้อจัดจ้าง','#7C3AED','#F3E8FF',/ประกวดราคา|e-?gp|จัดซื้อ|จัดจ้าง|ประมูล|\btor\b|ยื่นซอง|เสนอราคา|\bbid\b|procurement|สัญญาจ้าง/i],
+ ['gov','หน่วยงานราชการ','#0E7490','#E0F2FE',/go\.th|or\.th|กรมชลประทาน|การไฟฟ้า|การประปา|กระทรวง|เทศบาล|อบจ|อบต|องค์การบริหารส่วน|สำนักงานเขต/i],
+ ['proj','โครงการ · หน้างาน','#0F766E','#D9F2EE',/GLI\d{5}|BID\d{3}|โครงการ|หน้างาน|ส่งมอบงาน|ตรวจรับ|งวดงาน|site/i],
+ ['sys','ระบบ · แจ้งเตือน','#475569','#F1F5F9',/no-?reply|noreply|notification|newsletter|alert|security|verify|\botp\b|ยืนยันตัวตน|subscription|unsubscribe/i]
+];
+var GM_OTHER=['other','อื่น ๆ','#8C8676','#F0EDE6',null];
+function _gmCat(m){var hay=(m.subj+' '+m.snip+' '+m.email+' '+m.from);
+  for(var i=0;i<GM_CAT.length;i++)if(GM_CAT[i][4].test(hay))return GM_CAT[i];return GM_OTHER;}
+function _gmCatOf(k){for(var i=0;i<GM_CAT.length;i++)if(GM_CAT[i][0]===k)return GM_CAT[i];return GM_OTHER;}
+function _gmDate(ts){if(!ts)return '';var d=new Date(+ts),n=new Date();
+  var sameDay=d.toDateString()===n.toDateString();
+  var p=function(x){return (x<10?'0':'')+x;};
+  if(sameDay)return p(d.getHours())+':'+p(d.getMinutes());
+  var mm=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return d.getDate()+' '+mm[d.getMonth()]+(d.getFullYear()!==n.getFullYear()?(' '+(d.getFullYear()+543-2500)):'')+' '+p(d.getHours())+':'+p(d.getMinutes());}
+function _gmLoadGis(cb){
+  if(window.google&&window.google.accounts&&google.accounts.oauth2){cb(null);return;}
+  var done=false,fin=function(e){if(done)return;done=true;cb(e);};
+  if(!document.getElementById('gmGisScript')){
+    var sc=document.createElement('script');sc.id='gmGisScript';sc.src='https://accounts.google.com/gsi/client';sc.async=true;sc.defer=true;
+    sc.onerror=function(){fin(new Error('โหลดสคริปต์ของ Google ไม่สำเร็จ — ตรวจอินเทอร์เน็ต หรือตัวบล็อกโฆษณา/ส่วนขยายเบราว์เซอร์'));};
+    document.head.appendChild(sc);
+  }
+  var t0=Date.now(),iv=setInterval(function(){
+    if(window.google&&window.google.accounts&&google.accounts.oauth2){clearInterval(iv);fin(null);}
+    else if(Date.now()-t0>20000){clearInterval(iv);fin(new Error('รอสคริปต์ของ Google นานเกินไป — ลองรีเฟรชหน้า'));}
+  },120);
+}
+function _gmConnect(){
+  var cid=((GMCFG.cid||'')+'').trim();
+  _gmErr='';_gmNote='';
+  if(!cid){_gmErr='ยังไม่ได้ใส่ OAuth Client ID — ทำตามขั้นตอนที่ 1–3 ด้านล่างก่อน';renderGm();return;}
+  if(location.protocol==='file:'){_gmErr='หน้านี้เปิดจากไฟล์ในเครื่อง (file://) — Google ไม่อนุญาตให้เชื่อมจากที่อยู่แบบนี้ ต้องเปิดผ่าน http(s) เช่น GitHub Pages หรือรัน local server ก่อน';renderGm();return;}
+  _gmBusy='กำลังขอสิทธิ์เข้าถึง Gmail…';renderGm();
+  _gmLoadGis(function(err){
+    if(err){_gmBusy='';_gmErr=err.message;renderGm();return;}
+    try{
+      _gmTC=google.accounts.oauth2.initTokenClient({
+        client_id:cid,
+        scope:'https://www.googleapis.com/auth/gmail.readonly',
+        callback:function(resp){
+          if(resp&&resp.access_token){
+            _gmTok=resp.access_token;_gmExp=Date.now()+(((+resp.expires_in)||3600)-90)*1000;
+            _gmErr='';_gmBusy='';_gmAcctFetch();_gmFetch();
+          }else{_gmBusy='';_gmErr='ไม่ได้รับสิทธิ์: '+((resp&&(resp.error_description||resp.error))||'ไม่ทราบสาเหตุ');renderGm();}
+        },
+        error_callback:function(e){_gmBusy='';
+          var msg=(e&&(e.message||e.type))||'';
+          if(/popup_closed/i.test(msg))msg='ปิดหน้าต่างขออนุญาตก่อนเสร็จ';
+          _gmErr='เชื่อมต่อไม่สำเร็จ: '+msg+' · ถ้าขึ้น redirect_uri / origin mismatch ให้ไปเพิ่ม '+location.origin+' ใน Authorized JavaScript origins ของ Client ID';
+          renderGm();}
+      });
+      _gmTC.requestAccessToken({prompt:_gmTok?'':'consent'});
+    }catch(e){_gmBusy='';_gmErr='เริ่มการเชื่อมต่อไม่สำเร็จ: '+((e&&e.message)||e);renderGm();}
+  });
+}
+function _gmDisconnect(){
+  try{if(_gmTok&&window.google&&google.accounts&&google.accounts.oauth2)google.accounts.oauth2.revoke(_gmTok,function(){});}catch(e){}
+  _gmTok=null;_gmExp=0;_gmMsgs=[];_gmAcct='';_gmLoaded=false;_gmErr='';_gmNote='ตัดการเชื่อมต่อแล้ว — ล้างอีเมลออกจากหน้านี้เรียบร้อย';renderGm();
+}
+function _gmApi(path,cb){
+  if(!_gmTok||Date.now()>_gmExp){cb(new Error('เซสชันหมดอายุ — กด “เชื่อมต่อ Gmail” อีกครั้ง'));return;}
+  fetch('https://gmail.googleapis.com/gmail/v1/users/me/'+path,{headers:{Authorization:'Bearer '+_gmTok}})
+    .then(function(r){
+      return r.text().then(function(tx){
+        var j=null;try{j=tx?JSON.parse(tx):null;}catch(_p){}
+        if(r.status===401){_gmTok=null;throw new Error('สิทธิ์หมดอายุหรือถูกเพิกถอน — กดเชื่อมต่อใหม่');}
+        if(r.status===403)throw new Error(((j&&j.error&&j.error.message)||'ถูกปฏิเสธ')+' — ตรวจว่าเปิดใช้ Gmail API ในโปรเจกต์แล้ว และบัญชีนี้อยู่ในรายชื่อ Test users');
+        if(!r.ok)throw new Error((j&&j.error&&j.error.message)||('HTTP '+r.status));
+        return j;
+      });
+    })
+    .then(function(j){cb(null,j);})
+    .catch(function(e){cb(e);});
+}
+function _gmAcctFetch(){_gmApi('profile',function(e,j){if(!e&&j&&j.emailAddress){_gmAcct=j.emailAddress;renderGm();}});}
+function _gmQuery(){
+  var parts=[],d=+(GMCFG.days||7);
+  if(d>0)parts.push('newer_than:'+d+'d');
+  if(GMCFG.unread)parts.push('is:unread');
+  if(GMCFG.att)parts.push('has:attachment');
+  if(GMCFG.noPromo)parts.push('-category:promotions','-category:social');
+  var q=((GMCFG.q||'')+'').trim();if(q)parts.push(q);
+  return parts.join(' ');
+}
+function _gmSetBusy(t){_gmBusy=t;var el=document.getElementById('gmBusy');if(el)el.textContent=t;}
+function _gmFetch(){
+  if(!_gmTok){_gmErr='ยังไม่ได้เชื่อมต่อ Gmail';renderGm();return;}
+  _gmErr='';_gmNote='';_gmSetBusy('กำลังค้นหาอีเมล…');renderGm();
+  var max=Math.min(200,Math.max(10,+(GMCFG.max||50)));
+  _gmApi('messages?maxResults='+max+'&q='+encodeURIComponent(_gmQuery()),function(err,j){
+    if(err){_gmBusy='';_gmErr=err.message;renderGm();return;}
+    var ids=((j&&j.messages)||[]).map(function(m){return m.id;});
+    if(!ids.length){_gmMsgs=[];_gmLoaded=true;_gmBusy='';renderGm();return;}
+    var out=[],done=0,next=0,POOL=5;
+    var step=function(){
+      if(next>=ids.length)return;
+      var i=next++;
+      _gmApi('messages/'+ids[i]+'?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date',function(e2,m){
+        if(!e2&&m)out.push(_gmNorm(m));
+        done++;_gmSetBusy('กำลังอ่านหัวข้ออีเมล '+done+'/'+ids.length+' …');
+        if(done>=ids.length){out.sort(function(a,b){return b.ts-a.ts;});_gmMsgs=out;_gmLoaded=true;_gmBusy='';renderGm();}
+        else step();
+      });
+    };
+    for(var k=0;k<Math.min(POOL,ids.length);k++)step();
+  });
+}
+function _gmNorm(m){
+  var h={},hs=(m.payload&&m.payload.headers)||[],i;
+  for(i=0;i<hs.length;i++)h[((hs[i].name||'')+'').toLowerCase()]=hs[i].value||'';
+  var from=h.from||'',nm=from,em='';
+  var mm=from.match(/^\s*"?([^"<]*)"?\s*<([^>]+)>\s*$/);
+  if(mm){em=(mm[2]||'').trim();nm=(mm[1]||'').trim()||em;}else{em=from.replace(/[<>]/g,'').trim();nm=em;}
+  var lb=m.labelIds||[];
+  return {id:m.id,thread:m.threadId||m.id,from:nm,email:em,domain:((em.split('@')[1]||'')+'').toLowerCase(),
+    subj:h.subject||'(ไม่มีหัวข้อ)',snip:((m.snippet||'')+'').replace(/\s+/g,' ').trim(),
+    ts:+(m.internalDate||0),labels:lb,unread:lb.indexOf('UNREAD')>=0,imp:lb.indexOf('IMPORTANT')>=0};
+}
+function _gmFiltered(){return _gmFC?_gmMsgs.filter(function(m){return _gmCat(m)[0]===_gmFC;}):_gmMsgs;}
+function _gmDigest(){
+  var L=_gmFiltered(),out=[],g={},o=[];
+  out.push('# สรุปอีเมล Gmail'+(_gmAcct?(' · '+_gmAcct):''));
+  out.push('ช่วงเวลา: '+((+(GMCFG.days||7))>0?(((GMCFG.days||7))+' วันล่าสุด'):'ทั้งหมด')+' · จำนวน '+L.length+' ฉบับ · ยังไม่อ่าน '+L.filter(function(m){return m.unread;}).length+' ฉบับ');
+  out.push('เงื่อนไขค้นหา Gmail: '+(_gmQuery()||'(ไม่ระบุ)'));
+  out.push('');
+  L.forEach(function(m){var c=_gmCat(m);if(!g[c[1]]){g[c[1]]=[];o.push(c[1]);}g[c[1]].push(m);});
+  o.forEach(function(k){
+    out.push('## '+k+' ('+g[k].length+' ฉบับ)');
+    g[k].forEach(function(m){
+      out.push('- ['+_gmDate(m.ts)+']'+(m.unread?' (ยังไม่อ่าน)':'')+' '+m.from+' <'+m.email+'>');
+      out.push('  หัวข้อ: '+m.subj);
+      if(m.snip)out.push('  ย่อ: '+m.snip.slice(0,240));
+    });
+    out.push('');
+  });
+  out.push('---');
+  out.push('ช่วยสรุปให้หน่อยว่ามีเรื่องอะไรบ้าง เรื่องไหนต้องทำ/ต้องตอบก่อน และมีอะไรที่เกี่ยวกับงานบัญชี ภาษี หรือโครงการที่ต้องรีบจัดการ');
+  return out.join('\n');
+}
+function _gmCopyDigest(){
+  var t=_gmDigest();
+  var ok=function(){_gmNote='คัดลอกแล้ว '+_gmFiltered().length+' ฉบับ — เอาไปวางในแชท Claude แล้วให้สรุปได้เลย';renderGm();};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok).catch(function(){_gmFallbackCopy(t,ok);});
+  else _gmFallbackCopy(t,ok);
+}
+function _gmFallbackCopy(t,ok){
+  try{var ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.top='-2000px';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);ok();}
+  catch(e){_gmErr='คัดลอกไม่สำเร็จ — ใช้ปุ่มดาวน์โหลดแทน';renderGm();}
+}
+function _gmDownload(){
+  try{
+    var blob=new Blob([_gmDigest()],{type:'text/plain;charset=utf-8'});
+    var u=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=u;a.download='gmail-digest-'+new Date().toISOString().slice(0,10)+'.txt';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(u);},4000);
+  }catch(e){_gmErr='ดาวน์โหลดไม่สำเร็จ: '+((e&&e.message)||e);renderGm();}
+}
+function _gmSetupHTML(){
+  var cid=((GMCFG.cid||'')+'').trim(),isFile=(location.protocol==='file:');
+  var h='<div class="gmcard gmsetup"><h3>⚙️ ตั้งค่าครั้งเดียว — เชื่อม Gmail ของคุณ</h3>';
+  if(isFile)h+='<div class="gmwarn"><b>หน้านี้เปิดจากไฟล์ในเครื่อง (file://)</b> — Google ไม่ยอมให้เชื่อมจากที่อยู่แบบนี้ ต้องเปิดผ่าน http(s) ก่อน เช่น GitHub Pages หรือรัน <code>npx http-server</code> ในโฟลเดอร์ไฟล์นี้แล้วเปิด <code>http://localhost:8080</code></div>';
+  h+='<div class="gmstep"><span class="gmstepn">1</span><div>เปิด <b><a href="https://console.cloud.google.com/apis/library/gmail.googleapis.com" target="_blank" rel="noopener">Google Cloud Console</a></b> → สร้างโปรเจกต์ (หรือใช้ที่มีอยู่) → กด <b>Enable</b> ที่ <b>Gmail API</b></div></div>';
+  h+='<div class="gmstep"><span class="gmstepn">2</span><div>ไป <b><a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" rel="noopener">OAuth consent screen</a></b> → เลือก <b>External</b> → ในหน้า <b>Audience</b> เพิ่มอีเมลของคุณใน <b>Test users</b><div class="gmnote">อยู่สถานะ <b>Testing</b> ใช้ได้เลยโดยไม่ต้องรอ Google ตรวจสอบ เพราะจำกัดเฉพาะบัญชีที่เป็น Test users · ถ้าจะเปิดให้คนนอกใช้ (Publish) สิทธิ์ <code>gmail.readonly</code> เป็น restricted scope ต้องผ่านการตรวจสอบความปลอดภัยของ Google ก่อน</div></div></div>';
+  h+='<div class="gmstep"><span class="gmstepn">3</span><div>ไป <b><a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Credentials</a></b> → <b>Create credentials → OAuth client ID</b> → เลือก <b>Web application</b> → ใส่ที่อยู่นี้ใน <b>Authorized JavaScript origins</b>:'
+   +'<div class="gmorigin"><b>'+esc(isFile?'(เปิดผ่าน http(s) ก่อน แล้วค่อยกลับมาดูค่านี้)':location.origin)+'</b>'
+   +(isFile?'':'<button class="gmbtn" id="gmCopyOrigin" type="button">📋 คัดลอก</button>')+'</div>'
+   +'แล้วคัดลอก <b>Client ID</b> ที่ได้ (ลงท้ายด้วย <code>.apps.googleusercontent.com</code>) มาวางด้านล่าง</div></div>';
+  h+='<div class="gmtool"><input class="gmin wide" id="gmCid" type="text" placeholder="วาง OAuth Client ID ที่นี่ — xxxxx.apps.googleusercontent.com" value="'+_eatt(cid)+'" autocomplete="off" spellcheck="false">'
+   +'<button class="gmbtn primary" id="gmSaveCid" type="button">บันทึก Client ID</button>'
+   +(cid?'<button class="gmbtn ghost" id="gmClearCid" type="button">ล้าง</button>':'')+'</div>';
+  h+='<div class="gmnote">Client ID <b>ไม่ใช่ความลับ</b> (ฝั่งเว็บเปิดเผยได้อยู่แล้ว) เก็บไว้ใน localStorage ของเครื่องนี้เท่านั้น ไม่ซิงค์ขึ้นคลาวด์ ไม่แชร์ให้คนอื่นในทีม · โมดูลนี้ขอสิทธิ์ <code>gmail.readonly</code> อย่างเดียว — <b>อ่านได้ ส่ง/ลบ/แก้ไม่ได้</b> · access token เก็บในหน่วยความจำ ปิดหน้าเว็บก็หายไป</div>';
+  return h+'</div>';
+}
+function renderGm(){
+  var pg=document.getElementById('page-gm');if(!pg)return;
+  var cid=((GMCFG.cid||'')+'').trim(),conn=!!_gmTok&&Date.now()<_gmExp;
+  var h='<div class="gmwrap">';
+  h+='<div class="gmhd"><div class="gmtitle">📧 Gmail Inbox<span class="gmsub">อ่านอีเมลของคุณแล้วจัดหมวดว่ามีเรื่องอะไรบ้าง</span></div>';
+  if(conn){h+='<span class="gmacct">● เชื่อมแล้ว'+(_gmAcct?(' · '+esc(_gmAcct)):'')+'</span>';
+    h+='<button class="gmbtn" id="gmRefresh" type="button">↻ ดึงใหม่</button><button class="gmbtn danger" id="gmDisc" type="button">ตัดการเชื่อมต่อ</button>';}
+  else h+='<button class="gmbtn primary" id="gmConn" type="button"'+(cid?'':' disabled')+'>🔗 เชื่อมต่อ Gmail</button>';
+  h+='<button class="gmbtn ghost" id="gmToggleSetup" type="button">'+(GMCFG.setup?'ซ่อนการตั้งค่า':'⚙️ ตั้งค่า')+'</button></div>';
+  if(_gmErr)h+='<div class="gmerr">⚠ '+esc(_gmErr)+'</div>';
+  if(_gmNote)h+='<div class="gmok">✓ '+esc(_gmNote)+'</div>';
+  if(!cid||GMCFG.setup)h+=_gmSetupHTML();
+  if(conn||_gmLoaded){
+    h+='<div class="gmcard"><div class="gmtool">';
+    h+='<label class="gmchk">ช่วงเวลา <select class="gmin" id="gmDays">'+[['1','วันนี้–เมื่อวาน'],['3','3 วัน'],['7','7 วัน'],['14','14 วัน'],['30','30 วัน'],['90','90 วัน'],['0','ทั้งหมด']].map(function(o){return '<option value="'+o[0]+'"'+((''+(GMCFG.days==null?7:GMCFG.days))===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></label>';
+    h+='<label class="gmchk">สูงสุด <select class="gmin" id="gmMax">'+['25','50','100','200'].map(function(v){return '<option value="'+v+'"'+((''+(GMCFG.max||50))===v?' selected':'')+'>'+v+' ฉบับ</option>';}).join('')+'</select></label>';
+    h+='<label class="gmchk"><input type="checkbox" id="gmUnread"'+(GMCFG.unread?' checked':'')+'> เฉพาะที่ยังไม่อ่าน</label>';
+    h+='<label class="gmchk"><input type="checkbox" id="gmAtt"'+(GMCFG.att?' checked':'')+'> เฉพาะที่มีไฟล์แนบ</label>';
+    h+='<label class="gmchk"><input type="checkbox" id="gmNoPromo"'+(GMCFG.noPromo?' checked':'')+'> ตัดโปรโมชัน/โซเชียล</label>';
+    h+='<input class="gmin wide" id="gmQ" type="text" placeholder="ค้นหาเพิ่ม (ไวยากรณ์ Gmail) เช่น from:rd.go.th หรือ subject:ใบแจ้งหนี้" value="'+_eatt(GMCFG.q||'')+'" autocomplete="off">';
+    h+='<button class="gmbtn primary" id="gmGo" type="button"'+(conn?'':' disabled')+'>ค้นหา</button>';
+    h+='</div>';
+    h+='<div class="gmnote">คำค้นที่ส่งให้ Gmail: <code>'+esc(_gmQuery()||'(ไม่ระบุ)')+'</code></div></div>';
+  }
+  if(_gmBusy)h+='<div class="gmbusy" id="gmBusy">'+esc(_gmBusy)+'</div>';
+  if(_gmLoaded&&!_gmBusy){
+    var L=_gmMsgs,F=_gmFiltered();
+    if(!L.length){h+='<div class="gmempty"><div class="gmemptyic">📭</div><div style="font-size:15px;font-weight:800;color:var(--ink2)">ไม่พบอีเมลตามเงื่อนไข</div><div style="font-size:12.5px;margin-top:5px">ลองขยายช่วงเวลา หรือเอาตัวกรองออก</div></div>';}
+    else{
+      var un=L.filter(function(m){return m.unread;}).length;
+      var senders={},cats={};
+      L.forEach(function(m){senders[m.email]=1;var c=_gmCat(m);cats[c[0]]=(cats[c[0]]||0)+1;});
+      h+='<div class="gmkpi">'
+       +'<div class="gmk" style="--k:#0E5C52"><div class="gmkn">'+L.length+'</div><div class="gmkl">อีเมลทั้งหมด</div></div>'
+       +'<div class="gmk" style="--k:#1D4ED8"><div class="gmkn">'+un+'</div><div class="gmkl">ยังไม่อ่าน</div></div>'
+       +'<div class="gmk" style="--k:#B45309"><div class="gmkn">'+Object.keys(senders).length+'</div><div class="gmkl">ผู้ส่ง (ไม่ซ้ำ)</div></div>'
+       +'<div class="gmk" style="--k:#7C3AED"><div class="gmkn">'+Object.keys(cats).length+'</div><div class="gmkl">หมวดเรื่อง</div></div></div>';
+      h+='<div class="gmtool"><button class="gmbtn primary" id="gmCopy" type="button">📋 คัดลอกให้ Claude สรุป ('+F.length+' ฉบับ)</button>'
+       +'<button class="gmbtn" id="gmDl" type="button">⬇ ดาวน์โหลด .txt</button>'
+       +'<span class="gmnote" style="margin:0">คัดลอกแล้ววางในแชท Claude → ผมจะสรุปให้ว่ามีเรื่องอะไร เรื่องไหนต้องรีบทำก่อน</span></div>';
+      h+='<div class="gmcatbar"><button class="gmcatb'+(_gmFC?'':' on')+'" data-cat="" type="button" style="--c:#0E5C52;--cb:#E6F0EC">ทั้งหมด '+L.length+'</button>';
+      GM_CAT.concat([GM_OTHER]).forEach(function(c){if(!cats[c[0]])return;
+        h+='<button class="gmcatb'+(_gmFC===c[0]?' on':'')+'" data-cat="'+c[0]+'" type="button" style="--c:'+c[2]+';--cb:'+c[3]+'">'+esc(c[1])+' '+cats[c[0]]+'</button>';});
+      h+='</div>';
+      var g={},o=[];
+      F.forEach(function(m){var c=_gmCat(m);if(!g[c[0]]){g[c[0]]=[];o.push(c[0]);}g[c[0]].push(m);});
+      o.forEach(function(k){
+        var c=_gmCatOf(k);
+        h+='<div class="gmgrp" style="--c:'+c[2]+';--cb:'+c[3]+'">'+esc(c[1])+'<span class="gmgn">'+g[k].length+'</span></div><div class="gmlist">';
+        g[k].forEach(function(m){
+          var ini=((m.from||'?').trim().charAt(0)||'?').toUpperCase();
+          h+='<div class="gmmsg'+(m.unread?' unread':'')+'" data-open="'+_eatt(m.thread)+'" style="--c:'+c[2]+';--cb:'+c[3]+'" title="คลิกเพื่อเปิดใน Gmail">'
+           +'<span class="gmav">'+esc(ini)+'</span><div class="gmbody">'
+           +'<div class="gmrow1"><span class="gmfrom">'+esc(m.from)+'</span><span class="gmmail">'+esc(m.email)+'</span>'
+           +(m.unread?'<span class="gmnew">ใหม่</span>':'')+'<span class="gmdate">'+esc(_gmDate(m.ts))+'</span></div>'
+           +'<div class="gmsubj">'+esc(m.subj)+'</div>'
+           +(m.snip?('<div class="gmsnip">'+esc(m.snip)+'</div>'):'')
+           +'</div></div>';
+        });
+        h+='</div>';
+      });
+    }
+  }
+  else if(!conn&&!_gmBusy&&cid&&!_gmLoaded){
+    h+='<div class="gmempty"><div class="gmemptyic">🔗</div><div style="font-size:15px;font-weight:800;color:var(--ink2)">ยังไม่ได้เชื่อม Gmail</div><div style="font-size:12.5px;margin-top:5px">กด “เชื่อมต่อ Gmail” ด้านบน — จะมีหน้าต่างของ Google ให้เลือกบัญชีและอนุญาต</div></div>';
+  }
+  h+='</div>';
+  pg.innerHTML=h;_gmBind();
+}
+function _gmBind(){
+  var pg=document.getElementById('page-gm');if(!pg||pg._gb)return;pg._gb=1;
+  pg.addEventListener('click',function(e){
+    var b,cl=function(s){return e.target&&e.target.closest?e.target.closest(s):null;};
+    if((b=cl('#gmConn'))){_gmConnect();return;}
+    if((b=cl('#gmDisc'))){_gmDisconnect();return;}
+    if((b=cl('#gmRefresh'))||(b=cl('#gmGo'))){_gmFetch();return;}
+    if((b=cl('#gmToggleSetup'))){GMCFG.setup=!GMCFG.setup;_gmSave();renderGm();return;}
+    if((b=cl('#gmSaveCid'))){var i=document.getElementById('gmCid');GMCFG.cid=i?(i.value||'').trim():'';GMCFG.setup=false;_gmSave();_gmErr='';_gmNote=GMCFG.cid?'บันทึก Client ID แล้ว — กด “เชื่อมต่อ Gmail” ได้เลย':'';renderGm();return;}
+    if((b=cl('#gmClearCid'))){GMCFG.cid='';_gmSave();_gmTok=null;_gmMsgs=[];_gmLoaded=false;renderGm();return;}
+    if((b=cl('#gmCopyOrigin'))){_gmFallbackCopy(location.origin,function(){_gmNote='คัดลอก '+location.origin+' แล้ว';renderGm();});return;}
+    if((b=cl('#gmCopy'))){_gmCopyDigest();return;}
+    if((b=cl('#gmDl'))){_gmDownload();return;}
+    if((b=cl('[data-cat]'))){_gmFC=b.getAttribute('data-cat')||'';renderGm();return;}
+    if((b=cl('[data-open]'))){window.open('https://mail.google.com/mail/u/'+encodeURIComponent(_gmAcct||0)+'/#all/'+encodeURIComponent(b.getAttribute('data-open')),'_blank','noopener');return;}
+  });
+  pg.addEventListener('change',function(e){
+    var el=e.target;if(!el||!el.id)return;
+    if(el.id==='gmDays'){GMCFG.days=+el.value;_gmSave();renderGm();}
+    else if(el.id==='gmMax'){GMCFG.max=+el.value;_gmSave();renderGm();}
+    else if(el.id==='gmUnread'){GMCFG.unread=!!el.checked;_gmSave();renderGm();}
+    else if(el.id==='gmAtt'){GMCFG.att=!!el.checked;_gmSave();renderGm();}
+    else if(el.id==='gmNoPromo'){GMCFG.noPromo=!!el.checked;_gmSave();renderGm();}
+    else if(el.id==='gmQ'){GMCFG.q=el.value||'';_gmSave();renderGm();}
+  });
 }
 
 var curPayer=null,curWco=null,_whtEdit=null,_wView='reg',_wSumMo=0;
@@ -16667,7 +17014,7 @@ function _authApply(){try{setTimeout(_safeUpdate,0);}catch(_e){}if(typeof loadPt
   if(g&&!g.hidden){_authUpdSetup();return;}
   _authShow();
 }
-(function(){var MOD_META={adv:['Advance (CEO) · Payee Database','Company advance / reimbursement payments — attach a document, track paid / unpaid',''],pdrepjv:['Report AP JV · Payee Database','Two-sided ledger — Liability (AP) & Asset · add entries, index, routine expenses & bank statement',''],bbl:['Bank Loan · Finance & Reconcile','Hire-purchase loan repayment schedule · sourced from GL',''],sec:['Security & Data Protection','Backup · Restore · File repair · Master device · Storage — always-on Auto-Guard',''],ov:['Overall · Command Center','Tax calendar · Status summary · Recent activity',''],tk:['Tracking · Task Board','Track team tasks · Kanban + List · Link to GLI projects',''],bp:['Financial Performance Report','Contract · Billing · Revenue · Cost','FY 2015–2025'],pg:['Progress %','Project progress · Cost GL ÷ Contract Expense',''],gl:['Database','General Ledger &amp; data files · Excel-style filtering · imported from a Template',''],fs:['FS — Financial Statements','Trial Balance → 4 statements · NPAEs · nature-aware working papers',''],wpb:['Working Paper · Balance','Per-account composition of a closing balance · open items · tie-out · aging',''],wht:['Withholding Tax','Deduction Register & 50 bis Certificate',''],vat:['VAT · Value Added Tax (P.P.30)','Input–Output VAT report · reconciliation · P.P.30 e-Filing',''],cfb:['DOC — Company Document Vault','Company × Category · drag &amp; drop files to embed &amp; sync across devices',''],up:['E-Filing & DBD Credentials','10 companies · Revenue Department · DBD',''],cb:['Confirm Bank','Bank database by company · year-partitioned · click a company for the full-screen editor',''],mn:['Tax Filing Monitor · 10 Companies','Company × filing matrix · click a dot to open its popup',''],pt:['User Directory','Name · Position · Username / Password — no login, per-device user','']};/* ===================== OVERVIEW HUB (v6.80) ===================== */
+(function(){var MOD_META={gm:['Gmail Inbox · Routine Work','Read-only view of your own mailbox — grouped by subject, ready to hand to Claude',''],adv:['Advance (CEO) · Payee Database','Company advance / reimbursement payments — attach a document, track paid / unpaid',''],pdrepjv:['Report AP JV · Payee Database','Two-sided ledger — Liability (AP) & Asset · add entries, index, routine expenses & bank statement',''],bbl:['Bank Loan · Finance & Reconcile','Hire-purchase loan repayment schedule · sourced from GL',''],sec:['Security & Data Protection','Backup · Restore · File repair · Master device · Storage — always-on Auto-Guard',''],ov:['Overall · Command Center','Tax calendar · Status summary · Recent activity',''],tk:['Tracking · Task Board','Track team tasks · Kanban + List · Link to GLI projects',''],bp:['Financial Performance Report','Contract · Billing · Revenue · Cost','FY 2015–2025'],pg:['Progress %','Project progress · Cost GL ÷ Contract Expense',''],gl:['Database','General Ledger &amp; data files · Excel-style filtering · imported from a Template',''],fs:['FS — Financial Statements','Trial Balance → 4 statements · NPAEs · nature-aware working papers',''],wpb:['Working Paper · Balance','Per-account composition of a closing balance · open items · tie-out · aging',''],wht:['Withholding Tax','Deduction Register & 50 bis Certificate',''],vat:['VAT · Value Added Tax (P.P.30)','Input–Output VAT report · reconciliation · P.P.30 e-Filing',''],cfb:['DOC — Company Document Vault','Company × Category · drag &amp; drop files to embed &amp; sync across devices',''],up:['E-Filing & DBD Credentials','10 companies · Revenue Department · DBD',''],cb:['Confirm Bank','Bank database by company · year-partitioned · click a company for the full-screen editor',''],mn:['Tax Filing Monitor · 10 Companies','Company × filing matrix · click a dot to open its popup',''],pt:['User Directory','Name · Position · Username / Password — no login, per-device user','']};/* ===================== OVERVIEW HUB (v6.80) ===================== */
 /* ---------- Audit / Activity log (per-device, attributed) ---------- */
 var GLILOG=null;
 function loadLog(){if(!GLILOG){try{var s=localStorage.getItem('gli_log');if(s)GLILOG=JSON.parse(s);}catch(e){}}if(!Array.isArray(GLILOG))GLILOG=[];}
@@ -17213,12 +17560,13 @@ function renderHub(){var pg=document.getElementById('page-ov');if(!pg)return;
   if(typeof _navWarnUpd==='function')_navWarnUpd();
 }
 
-var HEROC={adv:'#B26A12',pdrepjv:'#B26A12',bbl:'#0E5C52',sec:'#7C3AED',line:'#0E5C52',ov:'#0E5C52',tk:'#0E5C52',bp:'#0E5C52',pg:'#0E5C52',gl:'#0E5C52',wht:'#0E5C52',vat:'#0E5C52',cfb:'#0E5C52',up:'#0E5C52',cb:'#155E75',mn:'#0E5C52',pt:'#0E5C52',ad:'#0E5C52',fs:'#0E5C52',wpb:'#0E5C52'};
+var HEROC={gm:'#B23B3B',adv:'#B26A12',pdrepjv:'#B26A12',bbl:'#0E5C52',sec:'#7C3AED',line:'#0E5C52',ov:'#0E5C52',tk:'#0E5C52',bp:'#0E5C52',pg:'#0E5C52',gl:'#0E5C52',wht:'#0E5C52',vat:'#0E5C52',cfb:'#0E5C52',up:'#0E5C52',cb:'#155E75',mn:'#0E5C52',pt:'#0E5C52',ad:'#0E5C52',fs:'#0E5C52',wpb:'#0E5C52'};
 var HEROIC={adv:'ADV',pdrepjv:'JV',bbl:'LOAN',sec:'SEC',line:'LINE',ov:'OV',tk:'TK',bp:'BP',pg:'PG',gl:'DB',wht:'WHT',vat:'VAT',cfb:'DOC',up:'UP',cb:'CB',mn:'MN',pt:'PT',ad:'AD',fs:'FS',wpb:'WP'};
-var HEROT={adv:['Advance (CEO) &middot; Payee Database','Record &amp; track company advance / reimbursement payments &middot; attach documents and slips &middot; summarised into a report with a paid / unpaid status'],pdrepjv:['Report AP JV &middot; Payee Database','Two-sided ledger &mdash; <b>Liability (AP)</b> on the left, <b>Asset</b> on the right &middot; add entries with an index, plus routine expenses and bank statement'],bbl:['Bank Loan · Finance &amp; Reconcile','Hire-purchase repayment schedule · read-only, sourced from the live GL · Bangkok Bank (BBL)'],sec:['Security &amp; Data Protection','ระบบป้องกันข้อมูลสูญหายขั้นสูงสุด · สำรอง/กู้คืน · ซ่อมไฟล์แนบ · อุปกรณ์หลัก · พื้นที่จัดเก็บ · Auto-Guard'],line:['Cash Receipts &amp; Payments · via LINE','Bank slips → bill detail → VAT / WHT → reconciliation · cash basis'],ov:['Overall \u00b7 Command Center','Tax calendar \u00b7 status summary \u00b7 recent activity'],tk:['Tracking \u00b7 Task Board','Team tasks \u00b7 Kanban + List \u00b7 linked to GLI projects'],bp:['Project Financial Performance &amp; Reconciliation','Contract \u00b7 Billing \u00b7 Revenue (GL) \u00b7 Cost \u00b7 Gross Profit'],pg:['Progress % \u00b7 Project Progress','Cost GL \u00f7 Contract Expense \u00b7 from Business Performance by database year'],gl:['Database','General Ledger &amp; data files \u00b7 Excel-style filtering \u00b7 imported from a template'],wht:['Withholding Tax \u2014 Deduction Register &amp; 50 bis','P.N.D.3 / 53 \u00b7 e-Filing text \u00b7 50 bis certificate'],vat:['VAT · Value Added Tax (P.P.30)','Input–Output VAT report · reconciliation · P.P.30 e-Filing'],cfb:['Company Document Vault','Company \u00d7 Category \u00b7 drag &amp; drop \u00b7 synced across devices'],up:['E-Filing &amp; DBD Credentials','10 companies \u00b7 Revenue Department \u00b7 DBD'],cb:['Confirm Bank','Bank database \u00b7 year-partitioned \u00b7 10 companies \u00b7 click a company for the full-screen editor'],mn:['Tax Filing Monitor \u00b7 10 Companies','Company \u00d7 filing matrix \u00b7 click a dot to open'],pt:['User Directory','Name \u00b7 position \u00b7 username \u2014 per-device user'],ad:['Audit Log \u00b7 Activity','Who changed what \u00b7 date &amp; time \u00b7 synced across devices'],fs:['FS — Financial Statements','Trial Balance → 4 statements · NPAEs · nature-aware working papers'],wpb:['Working Paper · Balance','Composition of a closing balance · open items · tie-out vs GL · aging · reconciliation'],tfrs:['TFRS Thailand','คลังมาตรฐานการรายงานทางการเงินไทย · ค้นย่อหน้าและเลขหน้าที่อ้างอิง · วิเคราะห์เชิงโครงสร้างและ AI']};
+var HEROT={gm:['Gmail Inbox &middot; Routine Work','Connect your own Gmail (read-only) &middot; group what came in by subject &middot; copy a digest for Claude to summarise'],adv:['Advance (CEO) &middot; Payee Database','Record &amp; track company advance / reimbursement payments &middot; attach documents and slips &middot; summarised into a report with a paid / unpaid status'],pdrepjv:['Report AP JV &middot; Payee Database','Two-sided ledger &mdash; <b>Liability (AP)</b> on the left, <b>Asset</b> on the right &middot; add entries with an index, plus routine expenses and bank statement'],bbl:['Bank Loan · Finance &amp; Reconcile','Hire-purchase repayment schedule · read-only, sourced from the live GL · Bangkok Bank (BBL)'],sec:['Security &amp; Data Protection','ระบบป้องกันข้อมูลสูญหายขั้นสูงสุด · สำรอง/กู้คืน · ซ่อมไฟล์แนบ · อุปกรณ์หลัก · พื้นที่จัดเก็บ · Auto-Guard'],line:['Cash Receipts &amp; Payments · via LINE','Bank slips → bill detail → VAT / WHT → reconciliation · cash basis'],ov:['Overall \u00b7 Command Center','Tax calendar \u00b7 status summary \u00b7 recent activity'],tk:['Tracking \u00b7 Task Board','Team tasks \u00b7 Kanban + List \u00b7 linked to GLI projects'],bp:['Project Financial Performance &amp; Reconciliation','Contract \u00b7 Billing \u00b7 Revenue (GL) \u00b7 Cost \u00b7 Gross Profit'],pg:['Progress % \u00b7 Project Progress','Cost GL \u00f7 Contract Expense \u00b7 from Business Performance by database year'],gl:['Database','General Ledger &amp; data files \u00b7 Excel-style filtering \u00b7 imported from a template'],wht:['Withholding Tax \u2014 Deduction Register &amp; 50 bis','P.N.D.3 / 53 \u00b7 e-Filing text \u00b7 50 bis certificate'],vat:['VAT · Value Added Tax (P.P.30)','Input–Output VAT report · reconciliation · P.P.30 e-Filing'],cfb:['Company Document Vault','Company \u00d7 Category \u00b7 drag &amp; drop \u00b7 synced across devices'],up:['E-Filing &amp; DBD Credentials','10 companies \u00b7 Revenue Department \u00b7 DBD'],cb:['Confirm Bank','Bank database \u00b7 year-partitioned \u00b7 10 companies \u00b7 click a company for the full-screen editor'],mn:['Tax Filing Monitor \u00b7 10 Companies','Company \u00d7 filing matrix \u00b7 click a dot to open'],pt:['User Directory','Name \u00b7 position \u00b7 username \u2014 per-device user'],ad:['Audit Log \u00b7 Activity','Who changed what \u00b7 date &amp; time \u00b7 synced across devices'],fs:['FS — Financial Statements','Trial Balance → 4 statements · NPAEs · nature-aware working papers'],wpb:['Working Paper · Balance','Composition of a closing balance · open items · tie-out vs GL · aging · reconciliation'],tfrs:['TFRS Thailand','คลังมาตรฐานการรายงานทางการเงินไทย · ค้นย่อหน้าและเลขหน้าที่อ้างอิง · วิเคราะห์เชิงโครงสร้างและ AI']};
 /* v9.152: per-module English description banners (shown in #modDesc under the hero) — Database (gl) keeps its own #glIntro */
 var HERODESC={adv:"The <b>Advance (CEO)</b> module records company <b>advance / reimbursement</b> payments &mdash; click the <b>Intake Bin</b> to attach a document and add details, and each entry is summarised into a report: <b>Payment Date &middot; Payer &middot; Payee &middot; Description &middot; Amount</b> with a <b>Paid / Unpaid</b> status (paid entries can attach a transfer slip). Attach a slip and use <b>Read file</b> to auto-fill the amount, date and payee &middot; search, filter and export to Excel / PDF.",pdrepjv:"The <b>Report AP JV</b> module keeps a separate <b>two-sided ledger per company</b> &mdash; pick a company (<b>GLR &middot; ARG &middot; GLE &middot; GRW &middot; CGL &middot; ECM</b>) from the tabs. <b>Liability (AP)</b> on the left, <b>Asset</b> on the right. On each side you can <b>add entries</b> &mdash; <b>Date &middot; Voucher &middot; Description &middot; Company &middot; Amount</b> &mdash; and tag each with an <b>Index</b> (e.g. Advance / Operating). The Liability side also keeps a <b>Routine expenses</b> list (Description &middot; Company &middot; Amount); the Asset side keeps a <b>Bank statement</b> list (Account no. &middot; Account name &middot; Amount &middot; as-of date). Everything is saved on this device and synced to the cloud.",bbl:"A read-only <b>Hire-Purchase-style repayment schedule</b> for the two Bangkok Bank (BBL) long-term loans — contracts <b>BLC26800000090 (฿200M)</b> and <b>BLC26800000093 (฿100M)</b>. The schedule is built live from the app&#39;s <b>General Ledger</b> by the configured account &amp; project codes: it shows all <b>54 principal instalments</b> (equal instalments with a final balloon), the <b>actual interest paid</b>, and both the principal- and interest-payment <b>vouchers</b>. Click a voucher to view its journal entry; export to Excel or PDF.",
   ov:"A one-page <b>Command Center</b> aggregating the whole app · a Thai tax-filing calendar sorted by urgency (e-Filing dates, paper filing in parentheses) covering monthly WHT/VAT/SBT/Social Security plus per-company annual CIT &amp; DBD deadlines by fiscal year-end · Action Required due &amp; overdue list · KPI tiles (Companies · Tasks · Pending · Filed · Paid) · open team tasks · Recent Activity log · click any task to jump to its module",
+  gm:"Connects <b>your own Gmail</b> read-only, in this browser, using a Google OAuth client you create once &middot; pulls the last N days of mail and sorts it into subjects that matter here &mdash; <b>Tax/Revenue Dept &middot; Auditor &amp; Financial Statements &middot; Banking &middot; Invoices &amp; Billing &middot; Bidding/Procurement &middot; Government agencies &middot; Projects &middot; System notices</b> &middot; filter by Gmail search syntax, unread only, attachments only &middot; counters for total, unread, distinct senders and subjects &middot; <b>Copy for Claude</b> builds a compact digest you paste into chat to get it summarised &middot; the access token stays in memory and nothing is written to the cloud &mdash; your mail is never shared with the team",
   tk:"A team <b>Task Board</b> for accounting work, viewed as a Kanban board or a List · drag a card freely to move it between the four columns (Book keeping · Accounting &amp; Tax · Remind · Done) or to reorder it up/down within a column · each card carries priority, category, assignee, due date (overdue/today badges), a linked GLI project &amp; file/image attachments · drag a column heading (⠿) freely to drop the whole heading wherever you want it, and set each heading&rsquo;s background colour with 🎨 · open a card to highlight it and colour its text · search plus Assignee / Priority / Category filters · Total, Overdue &amp; Done counters · stored on this device and synced to the cloud across devices",
   bp:"Reconciles construction projects across <b>Contract · Billing · Revenue (GL) · Cost</b>, deriving Gross Profit and Variance per project · paste Code+Amount from Excel (or export a per-type template) to update · switch Comparison / GL-by-Year / Invoice-by-Year views · filter every column like Excel (text or &gt;100, &lt;0) with totals that follow the filters · edit names, customers &amp; value cells inline · add password-locked per-year databases · export a 4-sheet Excel · stored on this device and synced to the cloud",
   pg:"Tracks per-project construction <b>Progress %</b> (Cost GL ÷ Contract Expense) with percentage-of-completion Earned Revenue (% × Contract Revenue) · columns: Project · Status · Contract/GL/Earned/Diff/Accrued revenue · Contract Exp./GL cost · reads Business Performance data for the selected Database Year · KPI tiles &amp; filtered totals · search, status chips, Excel-style ▾ column filters, click-header sort · <b>Paste %</b> for manual overrides (or Actual % recomputes from GL) with per-project 🔒 lock · stored on this device and synced to the cloud",
@@ -17387,7 +17735,7 @@ function _slSetPrompt(){var need=_slLocked();
   else doSet();}
 function _slRemovePrompt(){if(!_slLocked())return;_slAsk({title:'🔓 ปิดล็อกหน้าจอ',msg:'ใส่รหัสปัจจุบันเพื่อปิดล็อก',errText:'รหัสไม่ถูกต้อง',onOk:function(code){if(_slHash(code)===(SECLOCK&&SECLOCK.h)){SECLOCK=null;if(typeof saveSecLock==='function')saveSecLock();_slUnlockedUntil=0;try{renderSec();}catch(e){}try{if(typeof _mnToast==='function')_mnToast('ปิดล็อกแล้ว',3000);}catch(e){}return true;}return false;}});}
 try{window.gliLockNow=function(){try{sessionStorage.removeItem('gli_sec_unlock');}catch(_e){}try{var b=document.querySelector('.modtab[data-mod="sec"]');if(b)b.click();else if(typeof renderSec==='function')renderSec();}catch(_e2){}};}catch(_e){}
-function showMod(mod){/* v9.17: passcode gate before opening Audit Log / Security */var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].hidden=(pages[i].id!=='page-'+mod);}var tabs=document.querySelectorAll('.modtab');for(var j=0;j<tabs.length;j++){var on=tabs[j].getAttribute('data-mod')===mod;tabs[j].classList.toggle('active',on);tabs[j].setAttribute('aria-selected',on?'true':'false');}var dm=document.querySelector('.dmeta');if(dm&&MOD_META[mod]){var m=MOD_META[mod];dm.innerHTML='<div><b>'+m[0]+'</b></div>'+(m[1]?('<div>'+m[1]+'</div>'):'')+(m[2]?('<div>'+m[2]+'</div>'):'');}var _mh=document.getElementById('modHero');if(_mh){var _ht=HEROT[mod];if(_ht){_mh.hidden=false;_mh.style.setProperty('--mh',HEROC[mod]||'#0E5C52');_mh.innerHTML='<span class="mh-logo"><svg viewBox="0 0 64 64"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg></span><div><div class="mh-t">'+_ht[0]+'</div>'+(_ht[1]?'<div class="mh-s">'+_ht[1]+'</div>':'')+'</div>';}else{_mh.hidden=true;}}var _md=document.getElementById('modDesc');if(_md){var _dd=(typeof HERODESC!=='undefined'&&HERODESC)?HERODESC[mod]:'';if(_dd){_md.hidden=false;_md.innerHTML=_dd;}else{_md.hidden=true;}}/* v9.151: per-module English description banner */try{localStorage.setItem('gli_module',mod);}catch(e){}window.scrollTo(0,0);if(mod==='ov'&&typeof renderHub==='function')renderHub();if(mod==='tk'&&typeof renderTracking==='function')renderTracking();if(mod==='vat'&&typeof renderVat==='function')renderVat();if(mod==='up'&&typeof renderUp==='function')renderUp();if(mod==='mn'&&typeof renderMn==='function')renderMn();if(mod==='gl'&&typeof renderGl==='function')renderGl();if(mod==='pt'&&typeof renderPt==='function')renderPt();if(mod==='cfb'&&typeof renderDoc==='function')renderDoc();if(mod==='sec'&&typeof renderSec==='function')renderSec();if(mod==='adv'&&typeof renderAdv==='function')renderAdv();if(mod==='pdrepjv'&&typeof renderApjv==='function')renderApjv();if(mod==='bbl'&&typeof renderBbl==='function')renderBbl();if(mod==='fs'&&typeof renderFs==='function')renderFs();if(mod==='pg'&&typeof renderProgress==='function')renderProgress();if(mod==='bp'&&typeof _bpOnShow==='function')_bpOnShow();if(mod==='line'&&typeof renderLine==='function')renderLine();if(mod==='wpb'&&typeof renderWpb==='function')renderWpb();if(mod==='cb'&&typeof renderCb==='function')renderCb();}var _mt=document.querySelectorAll('.modtab');for(var k=0;k<_mt.length;k++){_mt[k].addEventListener('click',function(){showMod(this.getAttribute('data-mod'));});}var saved='ov';try{saved=localStorage.getItem('gli_module')||'ov';}catch(e){}if(!MOD_META[saved])saved='ov';/* v9.17: don't let a locked page block initial load with a passcode modal */showMod(saved);if(typeof _authApply==='function')_authApply();if(typeof _tkUpdNotif==='function')_tkUpdNotif();if(typeof _navWarnUpd==='function')_navWarnUpd();try{document.addEventListener('click',_auditClick,true);}catch(_ae){}})();
+function showMod(mod){/* v9.17: passcode gate before opening Audit Log / Security */var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].hidden=(pages[i].id!=='page-'+mod);}var tabs=document.querySelectorAll('.modtab');for(var j=0;j<tabs.length;j++){var on=tabs[j].getAttribute('data-mod')===mod;tabs[j].classList.toggle('active',on);tabs[j].setAttribute('aria-selected',on?'true':'false');}var dm=document.querySelector('.dmeta');if(dm&&MOD_META[mod]){var m=MOD_META[mod];dm.innerHTML='<div><b>'+m[0]+'</b></div>'+(m[1]?('<div>'+m[1]+'</div>'):'')+(m[2]?('<div>'+m[2]+'</div>'):'');}var _mh=document.getElementById('modHero');if(_mh){var _ht=HEROT[mod];if(_ht){_mh.hidden=false;_mh.style.setProperty('--mh',HEROC[mod]||'#0E5C52');_mh.innerHTML='<span class="mh-logo"><svg viewBox="0 0 64 64"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg></span><div><div class="mh-t">'+_ht[0]+'</div>'+(_ht[1]?'<div class="mh-s">'+_ht[1]+'</div>':'')+'</div>';}else{_mh.hidden=true;}}var _md=document.getElementById('modDesc');if(_md){var _dd=(typeof HERODESC!=='undefined'&&HERODESC)?HERODESC[mod]:'';if(_dd){_md.hidden=false;_md.innerHTML=_dd;}else{_md.hidden=true;}}/* v9.151: per-module English description banner */try{localStorage.setItem('gli_module',mod);}catch(e){}window.scrollTo(0,0);if(mod==='ov'&&typeof renderHub==='function')renderHub();if(mod==='tk'&&typeof renderTracking==='function')renderTracking();if(mod==='vat'&&typeof renderVat==='function')renderVat();if(mod==='up'&&typeof renderUp==='function')renderUp();if(mod==='mn'&&typeof renderMn==='function')renderMn();if(mod==='gm'&&typeof renderGm==='function')renderGm();if(mod==='gl'&&typeof renderGl==='function')renderGl();if(mod==='pt'&&typeof renderPt==='function')renderPt();if(mod==='cfb'&&typeof renderDoc==='function')renderDoc();if(mod==='sec'&&typeof renderSec==='function')renderSec();if(mod==='adv'&&typeof renderAdv==='function')renderAdv();if(mod==='pdrepjv'&&typeof renderApjv==='function')renderApjv();if(mod==='bbl'&&typeof renderBbl==='function')renderBbl();if(mod==='fs'&&typeof renderFs==='function')renderFs();if(mod==='pg'&&typeof renderProgress==='function')renderProgress();if(mod==='bp'&&typeof _bpOnShow==='function')_bpOnShow();if(mod==='line'&&typeof renderLine==='function')renderLine();if(mod==='wpb'&&typeof renderWpb==='function')renderWpb();if(mod==='cb'&&typeof renderCb==='function')renderCb();}var _mt=document.querySelectorAll('.modtab');for(var k=0;k<_mt.length;k++){_mt[k].addEventListener('click',function(){showMod(this.getAttribute('data-mod'));});}var saved='ov';try{saved=localStorage.getItem('gli_module')||'ov';}catch(e){}if(!MOD_META[saved])saved='ov';/* v9.17: don't let a locked page block initial load with a passcode modal */showMod(saved);if(typeof _authApply==='function')_authApply();if(typeof _tkUpdNotif==='function')_tkUpdNotif();if(typeof _navWarnUpd==='function')_navWarnUpd();try{document.addEventListener('click',_auditClick,true);}catch(_ae){}})();
 </script>
 <!-- ===== v7.91: RESTORED MODULES grafted from GLI_Dashboard_v7_76 (FS / LINE / WPB / TFRS) — verified no missing deps, no global-var collisions ===== -->
 <script id="fsScript">
