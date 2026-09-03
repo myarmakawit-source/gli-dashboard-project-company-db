@@ -1772,6 +1772,39 @@ h1{ background:var(--g-aurora) !important;
 .tkmnpull{flex:none;font-family:inherit;font-size:10.5px;font-weight:700;color:var(--brand-d,#0A463E);background:#fff;border:1px solid var(--line);border-radius:7px;padding:6px 9px;cursor:pointer;white-space:nowrap}
 .tkmnpull:hover{background:var(--brand,#0E5C52);color:#fff;border-color:transparent}
 .tkmnhint{font-size:10.5px;line-height:1.6;color:var(--muted,#8C8676);padding:1px 0 4px 28px;min-height:15px}
+.tkmnn.doc{background:#fff;color:var(--ink2,#4A5563);border:1.5px solid var(--line);font-size:11px}
+/* v10.66: Description กลายเป็นรายการติ๊ก — วันเวลา + ข้อความ + ปุ่มติ๊กถูก ติ๊กแล้วเป็นสีเขียว */
+.tkck{display:flex;flex-direction:column;gap:6px}
+.tkckrow{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-left:3px solid var(--line2,#E6E0D4);border-radius:9px;padding:6px 9px;transition:.12s}
+.tkckrow.done{background:#EAF7EF;border-color:#A7D8B4;border-left-color:#15803D}
+.tkckb{flex:none;width:23px;height:23px;border-radius:7px;border:1.5px solid var(--line);background:#fff;color:transparent;font-size:12px;font-weight:800;line-height:1;cursor:pointer;padding:0}
+.tkckb:hover{border-color:#15803D;color:#A7D8B4}
+.tkckrow.done .tkckb{background:#15803D;border-color:#15803D;color:#fff}
+.tkckt{flex:none;font-size:10.5px;font-weight:700;color:var(--muted,#8C8676);font-family:"IBM Plex Mono",monospace;white-space:nowrap}
+.tkckrow.done .tkckt{color:#15803D}
+.tkckin{flex:1;min-width:0;font-family:inherit;font-size:12.5px;padding:4px 7px;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--ink)}
+.tkckin:focus{outline:none;border-color:var(--brand,#0E5C52);background:#fff}
+.tkckrow.done .tkckin{color:#15803D;font-weight:600}
+.tkckx{flex:none;border:none;background:transparent;color:var(--neg,#B42318);opacity:.4;font-size:12px;font-weight:800;cursor:pointer;padding:0 3px}
+.tkckx:hover{opacity:1}
+.tkckadd{display:flex;gap:7px;align-items:center;margin-top:2px}
+.tkckadd .tkmin{flex:1;min-width:0}
+.tkckaddb{flex:none;font-family:inherit;font-size:12px;font-weight:800;color:var(--brand-d,#0A463E);background:var(--brand-t,#E6F0EC);border:1.5px dashed var(--brand,#0E5C52);border-radius:9px;padding:8px 13px;cursor:pointer;white-space:nowrap}
+.tkckaddb:hover{background:#fff}
+.tkckempty{font-size:12px;color:var(--muted);padding:4px 0}
+.tkckn{align-self:flex-start;font-size:10.5px;font-weight:800;color:var(--ink2,#4A5563);background:var(--line2,#EEF2F7);border-radius:9px;padding:1px 9px;margin:2px 0 0}
+.tkckn.all{background:#E7F6EC;color:#15803D}
+/* รายการติ๊กบนการ์ด — ติ๊กได้จากหน้าบอร์ดเลย ไม่ต้องเปิดการ์ด */
+.tkcardck{display:flex;flex-direction:column;gap:3px;margin:5px 0 2px}
+.tkcck{display:flex;align-items:flex-start;gap:6px;font-size:11.5px;line-height:1.5;color:var(--ink2,#4A5563)}
+.tkcck.done{color:#15803D}
+.tkcckb{flex:none;width:16px;height:16px;margin-top:1px;border-radius:5px;border:1.5px solid var(--line);background:#fff;color:transparent;font-size:9px;font-weight:800;line-height:1;cursor:pointer;padding:0}
+.tkcck.done .tkcckb{background:#15803D;border-color:#15803D;color:#fff}
+.tkcckb:hover{border-color:#15803D}
+.tkcckt{flex:none;font-size:10px;font-weight:700;color:var(--muted,#8C8676);font-family:"IBM Plex Mono",monospace;white-space:nowrap}
+.tkcck.done .tkcckt{color:#3E9E68}
+.tkcckx{flex:1;min-width:0;overflow-wrap:break-word}
+.tkcckmore{font-size:10.5px;color:var(--muted);padding-left:22px}
 .tkmnhint.ok{color:#15803D;font-weight:700}
 .tkmnhint.warn{color:#B45309;font-weight:700}
 @media(max-width:560px){.tkmnrow{flex-wrap:wrap}.tkmnl{width:auto}.tkmnf{flex:1 0 100%}}
@@ -6919,6 +6952,58 @@ function _tkAdbDel(id){if(!id)return Promise.resolve(false);return _tkAdbOpen().
 function _tkAttId(){return 'tka_'+Date.now().toString(36)+'_'+Math.floor(Math.random()*1e9).toString(36);}
 
 function _tkAttList(t){return (t&&t.att&&t.att.length)?t.att:[];}
+/* v10.66: Description → รายการติ๊ก (checklist) · แต่ละรายการ = {id, ts เวลาที่เพิ่ม, txt, done, dts เวลาที่ติ๊ก}
+   งานเก่าที่ยังเก็บเป็นข้อความยาว (desc) จะถูกแปลงเป็นรายการแรกให้ตอนเปิดการ์ด — ข้อความเดิมไม่หาย */
+var _tkNotes=[];
+function _tkNoteList(t){
+  if(t&&Array.isArray(t.notes))return t.notes;
+  var d=((t&&t.desc)||'')+'';d=d.trim();
+  if(!d)return [];
+  return [{id:'n0',ts:(t&&t.created)||0,txt:d,done:false,dts:0}];
+}
+function _tkNoteId(){return 'n'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);}
+function _tkNoteStamp(ts){
+  if(!ts)return '';
+  var d=new Date(+ts);if(isNaN(d))return '';
+  var p=function(x){return (x<10?'0':'')+x;};
+  return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+(d.getFullYear()+543)+' '+p(d.getHours())+'.'+p(d.getMinutes());
+}
+function _tkNoteFind(list,id){for(var i=0;i<list.length;i++)if(list[i].id===id)return list[i];return null;}
+function _tkNoteToggle(id){
+  var n=_tkNoteFind(_tkNotes,id);if(!n)return;
+  n.done=!n.done;n.dts=n.done?Date.now():0;renderTracking();
+}
+function _tkNoteAdd(){
+  var el=document.getElementById('tkckNew');if(!el)return;
+  var v=(el.value||'').trim();if(!v)return;
+  _tkNotes.push({id:_tkNoteId(),ts:Date.now(),txt:v,done:false,dts:0});
+  el.value='';renderTracking();
+  var e2=document.getElementById('tkckNew');if(e2)e2.focus();
+}
+function _tkNoteDel(id){for(var i=0;i<_tkNotes.length;i++)if(_tkNotes[i].id===id){_tkNotes.splice(i,1);break;}renderTracking();}
+/* ติ๊กจากหน้าบอร์ดโดยตรง (ไม่ต้องเปิดการ์ด) — เขียนลงข้อมูลจริงแล้วบันทึกทันที */
+function _tkCardNoteToggle(taskId,noteId){
+  var t=_tkFind(taskId);if(!t)return;
+  var list=_tkNoteList(t).map(function(n){return {id:n.id,ts:n.ts,txt:n.txt,done:n.done,dts:n.dts};});
+  var n=_tkNoteFind(list,noteId);if(!n)return;
+  n.done=!n.done;n.dts=n.done?Date.now():0;
+  t.notes=list;t.desc='';
+  saveTrack();renderTracking();
+}
+function _tkNoteHTML(){
+  var h='<div class="tkck">';
+  if(!_tkNotes.length)h+='<div class="tkckempty">ยังไม่มีรายการ — พิมพ์ด้านล่างแล้วกด Enter</div>';
+  _tkNotes.forEach(function(n){
+    h+='<div class="tkckrow'+(n.done?' done':'')+'">'
+      +'<button class="tkckb" data-nck="'+_eatt(n.id)+'" type="button" title="'+(n.done?'ติ๊กออก (ยังไม่เสร็จ)':'ติ๊กว่าเสร็จแล้ว')+'">✓</button>'
+      +'<span class="tkckt" title="'+(n.done?('เสร็จเมื่อ '+_tkNoteStamp(n.dts)):'เพิ่มเมื่อ '+_tkNoteStamp(n.ts))+'">'+esc(_tkNoteStamp(n.done?(n.dts||n.ts):n.ts))+'</span>'
+      +'<input class="tkckin" data-ntx="'+_eatt(n.id)+'" value="'+_eatt(n.txt||'')+'" placeholder="คำอธิบาย" autocomplete="off">'
+      +'<button class="tkckx" data-ndel="'+_eatt(n.id)+'" type="button" title="ลบรายการนี้">✕</button>'
+      +'</div>';
+  });
+  h+='<div class="tkckadd"><input class="tkmin" id="tkckNew" type="text" placeholder="เพิ่มรายการใหม่ — วันที่และเวลาจะบันทึกให้อัตโนมัติ" autocomplete="off"><button class="tkckaddb" id="tkckAdd" type="button">＋ เพิ่ม</button></div>';
+  return h+'</div>';
+}
 function _tkIsImg(ty,nm){return /^image\//.test(ty||'')||/\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(nm||'');}
 function _tkIsPdf(ty,nm){return /pdf/i.test(ty||'')||/\.pdf$/i.test(nm||'');}
 function _tkFmtSize(b){b=b||0;return b<1024?(b+' B'):(b<1048576?((b/1024).toFixed(0)+' KB'):((b/1048576).toFixed(1)+' MB'));}
@@ -7267,6 +7352,7 @@ function _tkDocDel(key){
   saveTkDocs();if(typeof gliLog==='function')gliLog('ลบประเภทเอกสาร (Tracking)',(d[1]||'')+(n?(' · ล้างจากงาน '+n+' รายการ'):''));renderTracking();
 }
 function _tkDocReset(){if(!confirm('คืนค่าประเภทเอกสารกลับเป็นชุดเริ่มต้น?\nประเภทที่สร้างเองจะหายไป แต่งานไม่ถูกลบ'))return;TK_DOC=_tkDocSeed();try{localStorage.setItem('gli_tkdocs_v','2');}catch(e){}saveTkDocs();renderTracking();}
+function _tkDocSelStyle(k){var d=_tkDoc(k);return d?(' style="background:'+d[3]+';color:'+d[2]+';border-color:'+d[2]+'"'):'';}
 function _tkDocPanelHTML(){
   var h='<div class="tkdocpanel"><div class="tkdocpt">🗂 ตั้งค่าประเภทเอกสาร<span class="tkdocps">เลือกให้การ์ดไหน การ์ดนั้นจะไฮไลท์ด้วยสีของประเภทนั้น</span><button class="tkdocpx" data-docclose="1" type="button" title="ปิด">✕</button></div>';
   if(!TK_DOC.length)h+='<div class="tkdocnone">ยังไม่มีประเภทเอกสาร — กด “เพิ่มประเภท” ด้านล่าง</div>';
@@ -7332,7 +7418,7 @@ function _tkClipSave(){try{if(_tkClip)localStorage.setItem('gli_tkclip',JSON.str
 function _tkClipClear(){_tkClip=null;_tkClipSave();renderTracking();}
 function _tkCopyCard(id){
   var t=_tkFind(id);if(!t)return;
-  _tkClip={title:t.title||'',desc:t.desc||'',prio:t.prio||'med',assignee:t.assignee||'',due:t.due||'',proj:t.proj||'',owner:t.owner||'',docno:t.docno||'',cat:t.cat||'',doc:t.doc||'',hl:t.hl||'',tc:t.tc||'',grp:((t.grp||'')+'').trim(),att:(t.att||[]).slice()};
+  _tkClip={title:t.title||'',desc:t.desc||'',prio:t.prio||'med',assignee:t.assignee||'',due:t.due||'',proj:t.proj||'',owner:t.owner||'',docno:t.docno||'',cat:t.cat||'',doc:t.doc||'',hl:t.hl||'',tc:t.tc||'',grp:((t.grp||'')+'').trim(),notes:_tkNoteList(t).map(function(n){return {id:_tkNoteId(),ts:n.ts,txt:n.txt,done:!!n.done,dts:n.dts};}),att:(t.att||[]).slice()};
   _tkClipSave();
   if(typeof gliLog==='function')gliLog('คัดลอกงาน (Tracking)',t.title||'');
   renderTracking();
@@ -7356,7 +7442,7 @@ function _tkAttClone(list,taskId,done){
 function _tkClipMake(src,st,beforeId,grp){
   var dk=_tkDoneKey(),nid=_uid();
   var nt={id:nid,title:src.title||'',desc:src.desc||'',status:st,prio:src.prio||'med',assignee:src.assignee||'',
-          due:src.due||'',proj:src.proj||'',owner:src.owner||'',docno:src.docno||'',cat:src.cat||'',doc:src.doc||'',hl:src.hl||'',tc:src.tc||'',grp:((grp!=null)?grp:(src.grp||'')),att:[],
+          due:src.due||'',proj:src.proj||'',owner:src.owner||'',docno:src.docno||'',cat:src.cat||'',doc:src.doc||'',hl:src.hl||'',tc:src.tc||'',notes:(src.notes||[]).map(function(n){return {id:_tkNoteId(),ts:n.ts,txt:n.txt,done:!!n.done,dts:n.dts};}),grp:((grp!=null)?grp:(src.grp||'')),att:[],
           created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done_dt:(st===dk)?_tkToday():''};
   loadTrack();TRACKDATA.push(nt);_tkPlaceIn(nt,st,beforeId||null);
   _tkFlashId=nid;saveTrack();
@@ -7502,7 +7588,7 @@ function renderTracking(){
   var pg=document.getElementById('page-tk');if(!pg)return;_tkAttInjectStyle();
   var q=_tkQ.trim().toLowerCase();
   var view=TRACKDATA.filter(function(t){
-    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+((_tkDoc(t.doc)||[])[1]||''))).toLowerCase().indexOf(q)<0))return false;
+    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+((_tkDoc(t.doc)||[])[1]||''))).toLowerCase().indexOf(q)<0))return false;
     if(_tkFA&&t.assignee!==_tkFA)return false;
     if(_tkFP&&(t.prio||'med')!==_tkFP)return false;if(_tkFC&&(t.cat||'')!==_tkFC)return false;if(_tkFD&&(t.doc||'')!==_tkFD)return false;
     return true;
@@ -7549,19 +7635,19 @@ function _tkSnapModal(){
   var hOn=m.querySelector('#tkmHL .tkmsb.on'),tOn=m.querySelector('#tkmTC .tkmsb.on');
   var ae=document.activeElement,af=(ae&&ae.id&&m.contains(ae))?ae.id:'',ss=null,se=null;
   try{if(af&&ae&&('selectionStart' in ae)){ss=ae.selectionStart;se=ae.selectionEnd;}}catch(e){}
-  return {title:v('tkmTitle'),desc:v('tkmDesc'),assign:v('tkmAssign'),due:v('tkmDue'),cat:v('tkmCat'),proj:v('tkmProj'),owner:v('tkmOwner'),docno:v('tkmDocNo'),grp:v('tkmGrp'),
+  return {title:v('tkmTitle'),cknew:v('tkckNew'),assign:v('tkmAssign'),due:v('tkmDue'),cat:v('tkmCat'),proj:v('tkmProj'),owner:v('tkmOwner'),docno:v('tkmDocNo'),grp:v('tkmGrp'),
     st:sOn?sOn.getAttribute('data-st'):null,pr:pOn?pOn.getAttribute('data-pr'):null,
-    doc:(function(){var e=m.querySelector('#tkmDoc .tkmsb.on');return e?e.getAttribute('data-doc'):null;})(),
+    doc:v('tkmDoc'),
     hl:hOn?hOn.getAttribute('data-hl'):null,tc:tOn?tOn.getAttribute('data-tc'):null,af:af,ss:ss,se:se};
 }
 function _tkRestoreModal(s){
   if(!s)return;var m=document.getElementById('tkModal');if(!m)return;
   var set=function(id,val){if(val===undefined)return;var e=document.getElementById(id);if(e&&e.value!==val)e.value=val;};
-  set('tkmTitle',s.title);set('tkmDesc',s.desc);set('tkmAssign',s.assign);set('tkmDue',s.due);set('tkmCat',s.cat);set('tkmProj',s.proj);set('tkmOwner',s.owner);set('tkmDocNo',s.docno);set('tkmGrp',s.grp);
+  set('tkmTitle',s.title);set('tkckNew',s.cknew);set('tkmDoc',s.doc);set('tkmAssign',s.assign);set('tkmDue',s.due);set('tkmCat',s.cat);set('tkmProj',s.proj);set('tkmOwner',s.owner);set('tkmDocNo',s.docno);set('tkmGrp',s.grp);
   var seg=function(wrap,attr,val){if(!val)return;var box=document.getElementById(wrap);if(!box)return;var bs=box.querySelectorAll('.tkmsb');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].getAttribute(attr)===val);};
   seg('tkmStatus','data-st',s.st);seg('tkmPrio','data-pr',s.pr);
   var segAny=function(wrap,attr,val){var box=document.getElementById(wrap);if(!box||val==null)return;var bs=box.querySelectorAll('.tkmsb');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].getAttribute(attr)===val);};
-  segAny('tkmHL','data-hl',s.hl);segAny('tkmTC','data-tc',s.tc);segAny('tkmDoc','data-doc',s.doc);
+  segAny('tkmHL','data-hl',s.hl);segAny('tkmTC','data-tc',s.tc);
   if(s.af){var fe=document.getElementById(s.af);if(fe){try{fe.focus();if(s.ss!=null&&('setSelectionRange' in fe))fe.setSelectionRange(s.ss,s.se);}catch(e){}}}
 }
 function _tkKanban(view){
@@ -7615,7 +7701,18 @@ function _tkCard(t,pos){
   if(_ow)h+='<div class="tkhl tkhl2"><span class="tkhlk">2</span><span class="tkhlv" title="'+_eatt(_ow)+'">'+esc(_ow)+'</span></div>';
   if(_dn)h+='<div class="tkhl tkhl3"><span class="tkhlk">3</span><span class="tkhlv" title="'+_eatt(_dn)+'">'+esc(_dn)+'</span></div>';
   h+='<div class="tkcardttl">'+esc(t.title||'(ไม่มีคำอธิบาย)')+'</div></div>';
-  if(t.desc)h+='<div class="tkcarddesc"'+(t.tc?(' style="color:'+tc[2]+';opacity:.8"'):'')+'>'+esc((t.desc||'').slice(0,180))+(((t.desc||'').length>180)?'…':'')+'</div>';
+  var _nl=_tkNoteList(t);
+  if(_nl.length){
+    h+='<div class="tkcardck">';
+    _nl.slice(0,3).forEach(function(n){
+      h+='<div class="tkcck'+(n.done?' done':'')+'">'
+        +'<button class="tkcckb" data-cnck="'+_eatt(t.id)+'|'+_eatt(n.id)+'" type="button" title="'+(n.done?'ติ๊กออก':'ติ๊กว่าเสร็จแล้ว')+'">✓</button>'
+        +'<span class="tkcckt">'+esc(_tkNoteStamp(n.done?(n.dts||n.ts):n.ts))+'</span>'
+        +'<span class="tkcckx">'+esc(n.txt||'')+'</span></div>';
+    });
+    if(_nl.length>3)h+='<div class="tkcckmore">+ อีก '+(_nl.length-3)+' รายการ</div>';
+    h+='</div>';
+  }
   var _na=(t.att&&t.att.length)||0;h+='<div class="tkcardbot"><span class="tkassign">'+_tkAvatar(t.assignee)+'</span>'+(d?('<span class="'+d.cls+'">'+d.txt+'</span>'):'')+(_na?('<span class="tkattcount" title="'+_na+' ไฟล์แนบ">📎 '+_na+'</span>'):'')+'</div>';
   h+='<button class="tkcopy" data-copy="'+t.id+'" type="button" title="คัดลอกงานนี้ — แล้วกด “วางที่นี่” ในหัวข้อที่ต้องการ (หรือกด Alt ค้างแล้วลากการ์ด = คัดลอก)">⧉</button>';
   h+='<div class="tkgrip" title="ลากการ์ดเพื่อย้ายคอลัมน์ หรือจัดลำดับขึ้น–ลงในคอลัมน์เดียวกัน · กด Alt ค้างขณะลาก = คัดลอก">⠿</div>';
@@ -7657,10 +7754,14 @@ function _tkModalHTML(){
     +'<div class="tkmnrow"><span class="tkmnn">2</span><span class="tkmnl">ชื่อผู้ว่าจ้าง</span><span class="tkmnf"><input class="tkmin" id="tkmOwner" value="'+_eatt(t.owner||'')+'" placeholder="เช่น กิจการร่วมค้า GLR · การไฟฟ้าส่วนภูมิภาค" autocomplete="off"></span></div>'
     +'<div class="tkmnrow"><span class="tkmnn">3</span><span class="tkmnl">รหัสเอกสาร</span><span class="tkmnf"><input class="tkmin" id="tkmDocNo" value="'+_eatt(t.docno||'')+'" placeholder="เช่น RV2026080004 · PV2569-0881" autocomplete="off" spellcheck="false"></span></div>'
     +'<div class="tkmnrow"><span class="tkmnn">4</span><span class="tkmnl">คำอธิบาย</span><span class="tkmnf"><input class="tkmin" id="tkmTitle" value="'+_eatt(t.title||'')+'" placeholder="เรื่องที่ต้องทำ เช่น Settlement-ใบกำกับภาษี/ใบเสร็จรับเงิน ระยะ 7 (งวด 21)" autocomplete="off"></span></div>'
+    +'<div class="tkmnrow"><span class="tkmnn doc">🗂</span><span class="tkmnl">ประเภทเอกสาร</span><span class="tkmnf"><select class="tkmin" id="tkmDoc"'+_tkDocSelStyle(t.doc)+'><option value="">— ไม่ระบุ —</option>'
+      +TK_DOC.map(function(d){return '<option value="'+_eatt(d[0])+'"'+(((t.doc||'')===d[0])?' selected':'')+'>'+esc(d[1])+'</option>';}).join('')
+      +'</select></span></div>'
     +'</div></div>';
-  h+='<label class="tkml">Description<textarea class="tkmin tkmta" id="tkmDesc" rows="3" placeholder="Task details (optional)">'+esc(t.desc||'')+'</textarea></label>';
-  h+='<div class="tkmrow"><div class="tkmf"><div class="tkmlbl">Status</div><div class="tkmseg" id="tkmStatus">'+TK_STAT.map(function(s){return '<button class="tkmsb'+((t.status||'todo')===s[0]?' on':'')+'" data-st="'+s[0]+'" type="button" style="--c:'+s[2]+'">'+s[1]+'</button>';}).join('')+'</div></div>';
-  h+='<div class="tkmf"><div class="tkmlbl">Priority</div><div class="tkmseg" id="tkmPrio">'+TK_PRIO.map(function(p){return '<button class="tkmsb'+((t.prio||'med')===p[0]?' on':'')+'" data-pr="'+p[0]+'" type="button" style="--c:'+p[2]+'">'+p[1]+'</button>';}).join('')+'</div></div></div>';
+  h+='<div class="tkml">รายการงาน · Checklist <span style="font-weight:500;color:var(--muted)">— ติ๊กถูกเมื่อทำเสร็จ แล้วรายการจะเป็นสีเขียว</span>'
+    +(_tkNotes.length?('<span class="tkckn'+((_tkNotes.filter(function(n){return n.done;}).length===_tkNotes.length)?' all':'')+'">'+_tkNotes.filter(function(n){return n.done;}).length+'/'+_tkNotes.length+'</span>'):'')
+    +_tkNoteHTML()+'</div>';
+  h+='<div class="tkmrow"><div class="tkmf"><div class="tkmlbl">Priority</div><div class="tkmseg" id="tkmPrio">'+TK_PRIO.map(function(p){return '<button class="tkmsb'+((t.prio||'med')===p[0]?' on':'')+'" data-pr="'+p[0]+'" type="button" style="--c:'+p[2]+'">'+p[1]+'</button>';}).join('')+'</div></div></div>';
   h+='<div class="tkmrow">'
     +'<div class="tkmf"><div class="tkmlbl">ไฮไลท์การ์ด · Highlight</div><div class="tkmseg tkmsw" id="tkmHL">'+TK_HL.map(function(c){return '<button class="tkmsb tksw'+((t.hl||'')===c[0]?' on':'')+'" data-hl="'+c[0]+'" type="button" title="'+esc(c[1])+'" style="background:'+c[2]+';border-color:'+c[3]+'">'+(c[0]===''?'✕':'')+'</button>';}).join('')+'</div></div>'
     +'<div class="tkmf"><div class="tkmlbl">สีตัวอักษร · Text colour</div><div class="tkmseg tkmsw" id="tkmTC">'+TK_TC.map(function(c){return '<button class="tkmsb tksw tkswt'+((t.tc||'')===c[0]?' on':'')+'" data-tc="'+c[0]+'" type="button" title="'+esc(c[1])+'" style="color:'+c[2]+'">A</button>';}).join('')+'</div></div>'
@@ -7668,10 +7769,6 @@ function _tkModalHTML(){
   h+='<div class="tkmrow"><label class="tkmf"><div class="tkmlbl">Assignee</div><select class="tkmin" id="tkmAssign">'+((typeof _ptUserOptions==='function')?_ptUserOptions(t.assignee):'<option value="">—</option>')+'</select></label>';
   h+='<label class="tkmf"><div class="tkmlbl">Due date</div><input class="tkmin" id="tkmDue" type="date" value="'+_eatt(t.due||'')+'"></label></div>';
   h+='<label class="tkml"><div class="tkmlbl">Category</div><select class="tkmin" id="tkmCat"><option value="">— None —</option>'+TK_CAT.map(function(c){return '<option value="'+c[0]+'"'+((t.cat||'')===c[0]?' selected':'')+'>'+c[1]+'</option>';}).join('')+'</select></label>';
-  h+='<div class="tkml"><div class="tkmlbl">ประเภทเอกสาร · Document type <span style="font-weight:500;color:var(--muted)">— เลือกแล้วการ์ดจะไฮไลท์สีตามประเภท</span></div><div class="tkmseg tkdocseg" id="tkmDoc">'
-    +'<button class="tkmsb tkdocb none'+((t.doc||'')?'':' on')+'" data-doc="" type="button">— ไม่ระบุ —</button>'
-    +TK_DOC.map(function(d){return '<button class="tkmsb tkdocb'+(((t.doc||'')===d[0])?' on':'')+'" data-doc="'+_eatt(d[0])+'" type="button" style="background:'+d[3]+';color:'+d[2]+';border-color:'+d[2]+'">'+esc(d[1])+'</button>';}).join('')
-    +'</div><div class="tkmmeta">สร้าง/แก้ไขรายการประเภทได้ที่ปุ่ม <b>🗂 ตั้งค่าประเภทเอกสาร</b> ในแถบเครื่องมือของบอร์ด</div></div>';
   h+='<label class="tkml"><div class="tkmlbl">กลุ่ม · Group <span style="font-weight:500;color:var(--muted)">— งานเรื่องเดียวกันใส่ชื่อกลุ่มเดียวกัน จะถูกจัดไว้ด้วยกันในหัวข้อ</span></div><input class="tkmin" id="tkmGrp" list="tkmGrpList" value="'+_eatt(t.grp||'')+'" placeholder="เช่น ขายรถ B1–B5 · เว้นว่าง = ไม่จัดกลุ่ม" autocomplete="off"><datalist id="tkmGrpList">'+_tkGrpAll().map(function(g){return '<option value="'+_eatt(g)+'">';}).join('')+'</datalist></label>';
   h+='<div class="tkml"><div class="tkmlbl">ไฟล์แนบ / รูปภาพ (Attachments)</div><div class="tkattdrop" id="tkmAttDrop"><div class="tkattbar"><button class="tkbtn ghost" id="tkmAttAdd" type="button">📎 เพิ่มไฟล์/รูป</button><span class="tkatthint">เลือกได้หลายไฟล์ (กด Ctrl/⌘ หรือ Shift) หรือลากไฟล์หลายไฟล์มาวางตรงนี้</span><span class="tkattstatus" id="tkmAttStatus"></span></div><input type="file" id="tkmAttFile" multiple style="display:none"><div class="tkattlist" id="tkmAttList">'+_tkAttListHTML()+'</div></div></div>';
   h+=meta;
@@ -7679,28 +7776,33 @@ function _tkModalHTML(){
   h+='<div class="tkmft">'+(isNew?'':'<button class="tkbtn danger" id="tkMDel" type="button">🗑 Delete</button>')+'<span style="flex:1"></span><button class="tkbtn ghost" id="tkMCancel" type="button">Cancel</button><button class="tkbtn primary" id="tkMSave" type="button">'+(isNew?'Add Task':'Save')+'</button></div>';
   return h+'</div></div>';
 }
-function _tkOpen(id){_tkAF={owner:'',title:''};_tkModalId=id;var _t=_tkFind(id);_tkAtt=(_t&&_t.att)?_t.att.slice():[];renderTracking();}
+function _tkOpen(id){_tkAF={owner:'',title:''};_tkModalId=id;var _t=_tkFind(id);_tkAtt=(_t&&_t.att)?_t.att.slice():[];
+  _tkNotes=_tkNoteList(_t).map(function(n){return {id:n.id||_tkNoteId(),ts:n.ts||0,txt:n.txt||'',done:!!n.done,dts:n.dts||0};});
+  renderTracking();}
 function _tkCloseModal(){_tkAttCleanupNew();_tkModalId=null;_tkNewGrp='';renderTracking();}
-function _tkAdd(st,grp){_tkAF={owner:'',title:''};_tkModalId='__new__';_tkNewStatus=st||'todo';_tkNewGrp=grp||'';_tkNewId=_uid();_tkAtt=[];renderTracking();var ti=document.getElementById('tkmTitle');if(ti)ti.focus();}
+function _tkAdd(st,grp){_tkAF={owner:'',title:''};_tkNotes=[];_tkModalId='__new__';_tkNewStatus=st||'todo';_tkNewGrp=grp||'';_tkNewId=_uid();_tkAtt=[];renderTracking();var ti=document.getElementById('tkmTitle');if(ti)ti.focus();}
 function _tkSaveModal(){
   var g=function(id){var e=document.getElementById(id);return e?e.value:'';};
   var title=g('tkmTitle').trim(),owner=(g('tkmOwner')||'').trim(),docno=(g('tkmDocNo')||'').trim();
   if(!title){alert('กรุณากรอกบรรทัดที่ 4 (คำอธิบาย) — ใช้เป็นชื่อเรื่องหลักของการ์ด');var ti=document.getElementById('tkmTitle');if(ti)ti.focus();return;}
-  var sEl=document.querySelector('#tkmStatus .tkmsb.on'),pEl=document.querySelector('#tkmPrio .tkmsb.on');
-  var status=sEl?sEl.getAttribute('data-st'):'todo',prio=pEl?pEl.getAttribute('data-pr'):'med';
-  var assignee=g('tkmAssign'),due=g('tkmDue'),proj=(g('tkmProj')||'').trim(),desc=g('tkmDesc'),cat=g('tkmCat'),grp=(g('tkmGrp')||'').trim();
-  var dEl=document.querySelector('#tkmDoc .tkmsb.on'),doc=dEl?(dEl.getAttribute('data-doc')||''):'';
+  var pEl=document.querySelector('#tkmPrio .tkmsb.on');
+  var prio=pEl?pEl.getAttribute('data-pr'):'med';
+  var assignee=g('tkmAssign'),due=g('tkmDue'),proj=(g('tkmProj')||'').trim(),cat=g('tkmCat'),grp=(g('tkmGrp')||'').trim();
+  var doc=(g('tkmDoc')||'').trim();
   var hlEl=document.querySelector('#tkmHL .tkmsb.on'),tcEl=document.querySelector('#tkmTC .tkmsb.on');
   var hl=hlEl?hlEl.getAttribute('data-hl'):'',tc=tcEl?tcEl.getAttribute('data-tc'):'';
   var isNew=(_tkModalId==='__new__'),_dk=_tkDoneKey();loadTrack();
+  /* ไม่มีช่อง Status ในฟอร์มแล้ว — การ์ดใหม่อยู่หัวข้อที่กด “+ Add Task”, การ์ดเดิมคงหัวข้อเดิม (ย้ายด้วยการลาก) */
+  var status=isNew?(_tkNewStatus||TK_STAT[0][0]):(((_tkFind(_tkModalId)||{}).status)||TK_STAT[0][0]);
+  var notes=_tkNotes.slice();
   if(isNew){
-    var nt={id:(_tkNewId||_uid()),title:title,desc:desc,status:status,prio:prio,assignee:assignee,due:due,proj:proj,owner:owner,docno:docno,cat:cat,doc:doc,grp:grp,hl:hl,tc:tc,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done_dt:(status===_dk)?_tkToday():''};
+    var nt={id:(_tkNewId||_uid()),title:title,desc:'',status:status,prio:prio,assignee:assignee,due:due,proj:proj,owner:owner,docno:docno,cat:cat,doc:doc,grp:grp,hl:hl,tc:tc,notes:notes,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done_dt:(status===_dk)?_tkToday():''};
     TRACKDATA.push(nt);
     if(typeof gliLog==='function')gliLog('Added task',title+(assignee&&_ptFind(assignee)?(' · assigned to '+_ptName(_ptFind(assignee))):''));
   }else{
     var t=_tkFind(_tkModalId);if(!t){_tkModalId=null;renderTracking();return;}
     var oldSt=t.status;
-    t.title=title;t.desc=desc;t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.owner=owner;t.docno=docno;t.cat=cat;t.doc=doc;t.grp=grp;t.hl=hl;t.tc=tc;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));
+    t.title=title;t.notes=notes;t.desc='';t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.owner=owner;t.docno=docno;t.cat=cat;t.doc=doc;t.grp=grp;t.hl=hl;t.tc=tc;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));
     if(status===_dk&&oldSt!==_dk)t.done_dt=_tkToday();if(status!==_dk)t.done_dt='';
     if(typeof gliLog==='function')gliLog((oldSt!==status)?'Updated status':'Edited task',title+(oldSt!==status?(' → '+_tkStat(status)[1]):''));
   }
@@ -7747,6 +7849,10 @@ function _tkBind(){
     if((b=cl(e,'#tkMClose'))||(b=cl(e,'#tkMCancel'))){_tkCloseModal();return;}
     if((b=cl(e,'#tkMSave'))){_tkSaveModal();return;}
     if((b=cl(e,'#tkMDel'))){_tkDel(_tkModalId);return;}
+    if((b=cl(e,'[data-cnck]'))){var _cn=(b.getAttribute('data-cnck')||'').split('|');_tkCardNoteToggle(_cn[0],_cn[1]);return;}
+    if((b=cl(e,'[data-nck]'))){_tkNoteToggle(b.getAttribute('data-nck'));return;}
+    if((b=cl(e,'[data-ndel]'))){_tkNoteDel(b.getAttribute('data-ndel'));return;}
+    if((b=cl(e,'#tkckAdd'))){_tkNoteAdd();return;}
     if((b=cl(e,'#tkmPmPull'))){_tkPmApply(true);return;}
     if((b=cl(e,'#tkmAttAdd'))){_tkAttPick();return;}
     if((b=cl(e,'.tkattdel'))){_tkAttRemove(b.getAttribute('data-attdel'));return;}
@@ -7756,8 +7862,12 @@ function _tkBind(){
     if((b=cl(e,'[data-edit]'))){_tkOpen(b.getAttribute('data-edit'));return;}
     if(e.target&&e.target.classList&&e.target.classList.contains('tkmodal')){_tkCloseModal();return;}
   });
-  pg.addEventListener('input',function(e){if(e.target&&e.target.id==='tkmProj'){if(_tkPmT)clearTimeout(_tkPmT);_tkPmT=setTimeout(function(){_tkPmApply(false);},350);return;}if(e.target&&e.target.id==='tkSearch'){_tkQ=e.target.value;_tkDeb(function(){_tkRefocus=true;renderTracking();});}});
+  pg.addEventListener('input',function(e){var _nt=e.target&&e.target.getAttribute&&e.target.getAttribute('data-ntx');if(_nt){var _n=_tkNoteFind(_tkNotes,_nt);if(_n)_n.txt=e.target.value;return;}if(e.target&&e.target.id==='tkmProj'){if(_tkPmT)clearTimeout(_tkPmT);_tkPmT=setTimeout(function(){_tkPmApply(false);},350);return;}if(e.target&&e.target.id==='tkSearch'){_tkQ=e.target.value;_tkDeb(function(){_tkRefocus=true;renderTracking();});}});
+  pg.addEventListener('keydown',function(e){if(e.key!=='Enter')return;var el=e.target;if(!el)return;
+    if(el.id==='tkckNew'){e.preventDefault();_tkNoteAdd();return;}
+    if(el.getAttribute&&el.getAttribute('data-ntx')){e.preventDefault();var ne=document.getElementById('tkckNew');if(ne)ne.focus();}});
   pg.addEventListener('change',function(e){var el=e.target;if(!el)return;
+    if(el.id==='tkmDoc'){var _d=_tkDoc(el.value);el.style.background=_d?_d[3]:'';el.style.color=_d?_d[2]:'';el.style.borderColor=_d?_d[2]:'';return;}
     if(el.id==='tkmProj'){if(_tkPmT)clearTimeout(_tkPmT);_tkPmApply(false);return;}/* ออกจากช่อง/กด Enter = ค้นทันที ไม่ต้องรอ debounce */
     var _dn=(el.getAttribute&&el.getAttribute('data-docnm'))||'';
     if(_dn){_tkDocSet(_dn,1,(el.value||'').trim()||'(ไม่มีชื่อ)');return;}
