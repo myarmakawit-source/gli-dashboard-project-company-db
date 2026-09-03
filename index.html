@@ -1769,8 +1769,6 @@ h1{ background:var(--g-aurora) !important;
 .tkmnl{flex:none;width:96px;font-size:11.5px;font-weight:700;color:var(--ink2,#4A5563)}
 .tkmnf{flex:1;min-width:0}
 .tkmnf .tkmin{width:100%}
-.tkmnpull{flex:none;font-family:inherit;font-size:10.5px;font-weight:700;color:var(--brand-d,#0A463E);background:#fff;border:1px solid var(--line);border-radius:7px;padding:6px 9px;cursor:pointer;white-space:nowrap}
-.tkmnpull:hover{background:var(--brand,#0E5C52);color:#fff;border-color:transparent}
 @media(max-width:560px){.tkmnrow{flex-wrap:wrap}.tkmnl{width:auto}.tkmnf{flex:1 0 100%}}
 .tkcardttl:hover{color:var(--brand,#1D5FAE)}
 .tkcarddesc{font-size:11.5px;color:var(--muted);line-height:1.4;margin-bottom:5px}
@@ -7433,14 +7431,9 @@ function _disarmAutofill(el){if(!el||el._afArmed)return;el._afArmed=1;
   el.addEventListener('blur',function(){try{el.setAttribute('readonly','readonly');}catch(e){}});
   el.addEventListener('input',function(){try{if(typeof _bpHidden==='function'&&_bpHidden((el.value||'').trim()))el.value='';}catch(e){}});
 }
-/* v10.63: ชื่อผู้ว่าจ้างของรหัสโปรเจค — ดึงจากฐานข้อมูลโครงการที่แอปมีอยู่แล้ว (ค่าที่แก้ไว้เองมาก่อน) */
-function _tkOwnerOf(code){
-  code=(code||'')+'';if(!code)return '';
-  try{if(typeof CUSTOV!=='undefined'&&CUSTOV&&Object.prototype.hasOwnProperty.call(CUSTOV,code))return CUSTOV[code]||'';}catch(e){}
-  try{if(typeof CUSTOMER!=='undefined'&&CUSTOMER&&CUSTOMER[code])return CUSTOMER[code];}catch(e){}
-  return '';
-}
 function _tkProjName(code){if(!code)return '';if(typeof DATA!=='undefined'&&DATA.rows){for(var i=0;i<DATA.rows.length;i++)if(DATA.rows[i].code===code)return DATA.rows[i].name||code;}return code;}
+/* v10.64: รหัสโปรเจคพิมพ์เอง — รายการนี้เป็นแค่ตัวช่วยเติมคำ ไม่ได้บังคับให้เลือกจากในนี้ */
+function _tkProjCodeList(){var o='';if(typeof DATA!=='undefined'&&DATA.rows){DATA.rows.forEach(function(r){if(!r.code)return;if(typeof _bpHidden==='function'&&_bpHidden(r.code))return;o+='<option value="'+_eatt(r.code)+'">'+esc((r.name||'').slice(0,60))+'</option>';});}return o;}
 function _tkProjOptions(sel){var o='<option value="">— No project (standalone) —</option>';if(typeof DATA!=='undefined'&&DATA.rows){DATA.rows.forEach(function(r){if(!r.code)return;if(typeof _bpHidden==='function'&&_bpHidden(r.code))return;var nm=r.code+' · '+(r.name||'');if(nm.length>72)nm=nm.slice(0,70)+'…';o+='<option value="'+_eatt(r.code)+'"'+(r.code===sel?' selected':'')+'>'+esc(nm)+'</option>';});}return o;}
 function _tkFmtDate(s){if(!s)return '';var p=(''+s).split('-');if(p.length!==3)return s;var mm=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return (+p[2])+' '+mm[+p[1]]+' '+p[0];}
 function _tkDue(t){if(!t.due)return null;var due=new Date(t.due+'T00:00:00'),now=new Date(_tkToday()+'T00:00:00');if(isNaN(due))return null;var diff=Math.round((due-now)/86400000);var dm=_tkFmtDate(t.due);if((t.status||TK_STAT[0][0])===_tkDoneKey())return {cls:'tkdue done',txt:'📅 '+dm};if(diff<0)return {cls:'tkdue over',txt:'⚠ Overdue '+(-diff)+'d'};if(diff===0)return {cls:'tkdue today',txt:'⏰ Due today'};if(diff<=3)return {cls:'tkdue soon',txt:'📅 In '+diff+'d'};return {cls:'tkdue',txt:'📅 '+dm};}
@@ -7603,8 +7596,8 @@ function _tkModalHTML(){
   h+='<div class="tkmbody">';
   h+='<div class="tkml">Task name <span style="font-weight:500;color:var(--muted)">— 4 บรรทัดนี้จะแสดงเป็นชื่อเรื่องบนการ์ด</span>'
     +'<div class="tkmname">'
-    +'<div class="tkmnrow"><span class="tkmnn">1</span><span class="tkmnl">รหัสโปรเจค</span><span class="tkmnf"><select class="tkmin" id="tkmProj">'+_tkProjOptions(t.proj)+'</select></span></div>'
-    +'<div class="tkmnrow"><span class="tkmnn">2</span><span class="tkmnl">ชื่อผู้ว่าจ้าง</span><span class="tkmnf"><input class="tkmin" id="tkmOwner" value="'+_eatt(t.owner||'')+'" placeholder="เว้นว่างไว้ ระบบจะดึงจากรหัสโปรเจคให้" autocomplete="off"></span><button class="tkmnpull" id="tkmOwnerPull" type="button" title="ดึงชื่อผู้ว่าจ้างจากรหัสโปรเจคที่เลือก">↓ ดึงจากโครงการ</button></div>'
+    +'<div class="tkmnrow"><span class="tkmnn">1</span><span class="tkmnl">รหัสโปรเจค</span><span class="tkmnf"><input class="tkmin" id="tkmProj" list="tkmProjList" value="'+_eatt(t.proj||'')+'" placeholder="เช่น GLI24007 · BID012/2568 · พิมพ์อะไรก็ได้" autocomplete="off" spellcheck="false"><datalist id="tkmProjList">'+_tkProjCodeList()+'</datalist></span></div>'
+    +'<div class="tkmnrow"><span class="tkmnn">2</span><span class="tkmnl">ชื่อผู้ว่าจ้าง</span><span class="tkmnf"><input class="tkmin" id="tkmOwner" value="'+_eatt(t.owner||'')+'" placeholder="เช่น กิจการร่วมค้า GLR · การไฟฟ้าส่วนภูมิภาค" autocomplete="off"></span></div>'
     +'<div class="tkmnrow"><span class="tkmnn">3</span><span class="tkmnl">รหัสเอกสาร</span><span class="tkmnf"><input class="tkmin" id="tkmDocNo" value="'+_eatt(t.docno||'')+'" placeholder="เช่น RV2026080004 · PV2569-0881" autocomplete="off" spellcheck="false"></span></div>'
     +'<div class="tkmnrow"><span class="tkmnn">4</span><span class="tkmnl">คำอธิบาย</span><span class="tkmnf"><input class="tkmin" id="tkmTitle" value="'+_eatt(t.title||'')+'" placeholder="เรื่องที่ต้องทำ เช่น Settlement-ใบกำกับภาษี/ใบเสร็จรับเงิน ระยะ 7 (งวด 21)" autocomplete="off"></span></div>'
     +'</div></div>';
@@ -7638,7 +7631,7 @@ function _tkSaveModal(){
   if(!title){alert('กรุณากรอกบรรทัดที่ 4 (คำอธิบาย) — ใช้เป็นชื่อเรื่องหลักของการ์ด');var ti=document.getElementById('tkmTitle');if(ti)ti.focus();return;}
   var sEl=document.querySelector('#tkmStatus .tkmsb.on'),pEl=document.querySelector('#tkmPrio .tkmsb.on');
   var status=sEl?sEl.getAttribute('data-st'):'todo',prio=pEl?pEl.getAttribute('data-pr'):'med';
-  var assignee=g('tkmAssign'),due=g('tkmDue'),proj=g('tkmProj'),desc=g('tkmDesc'),cat=g('tkmCat'),grp=(g('tkmGrp')||'').trim();
+  var assignee=g('tkmAssign'),due=g('tkmDue'),proj=(g('tkmProj')||'').trim(),desc=g('tkmDesc'),cat=g('tkmCat'),grp=(g('tkmGrp')||'').trim();
   var dEl=document.querySelector('#tkmDoc .tkmsb.on'),doc=dEl?(dEl.getAttribute('data-doc')||''):'';
   var hlEl=document.querySelector('#tkmHL .tkmsb.on'),tcEl=document.querySelector('#tkmTC .tkmsb.on');
   var hl=hlEl?hlEl.getAttribute('data-hl'):'',tc=tcEl?tcEl.getAttribute('data-tc'):'';
@@ -7697,8 +7690,6 @@ function _tkBind(){
     if((b=cl(e,'#tkMClose'))||(b=cl(e,'#tkMCancel'))){_tkCloseModal();return;}
     if((b=cl(e,'#tkMSave'))){_tkSaveModal();return;}
     if((b=cl(e,'#tkMDel'))){_tkDel(_tkModalId);return;}
-    if((b=cl(e,'#tkmOwnerPull'))){var _pe=document.getElementById('tkmProj'),_oe=document.getElementById('tkmOwner');
-      if(_pe&&_oe){var _nm=_tkOwnerOf(_pe.value);if(_nm)_oe.value=_nm;else alert('ไม่พบชื่อผู้ว่าจ้างของรหัสโปรเจคนี้ในฐานข้อมูล — พิมพ์เองได้เลย');}return;}
     if((b=cl(e,'#tkmAttAdd'))){_tkAttPick();return;}
     if((b=cl(e,'.tkattdel'))){_tkAttRemove(b.getAttribute('data-attdel'));return;}
     if((b=cl(e,'.tkattth'))){var _pp=b.closest('[data-attid]');if(_pp)_tkAttView(_pp.getAttribute('data-attid'));return;}
@@ -7709,7 +7700,6 @@ function _tkBind(){
   });
   pg.addEventListener('input',function(e){if(e.target&&e.target.id==='tkSearch'){_tkQ=e.target.value;_tkDeb(function(){_tkRefocus=true;renderTracking();});}});
   pg.addEventListener('change',function(e){var el=e.target;if(!el)return;
-    if(el.id==='tkmProj'){var _oe=document.getElementById('tkmOwner');if(_oe&&!(_oe.value||'').trim()){var _nm=_tkOwnerOf(el.value);if(_nm)_oe.value=_nm;}return;}/* เลือกโครงการแล้วเติมชื่อผู้ว่าจ้างให้ ถ้ายังว่างอยู่ — ไม่ทับของที่พิมพ์เอง */
     var _dn=(el.getAttribute&&el.getAttribute('data-docnm'))||'';
     if(_dn){_tkDocSet(_dn,1,(el.value||'').trim()||'(ไม่มีชื่อ)');return;}
     var _dc2=(el.getAttribute&&el.getAttribute('data-doccol'))||'';
