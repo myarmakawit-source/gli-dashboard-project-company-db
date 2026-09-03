@@ -1792,6 +1792,11 @@ h1{ background:var(--g-aurora) !important;
 .tkvadd{font-family:inherit;font-size:12px;font-weight:800;color:var(--brand-d,#0A463E);background:#fff;border:1.5px dashed var(--brand,#0E5C52);border-radius:9px;padding:8px 14px;cursor:pointer;margin-top:2px}
 .tkvadd:hover{background:var(--brand-t,#E6F0EC)}
 .tkvhd{display:flex;gap:8px;font-size:10.5px;font-weight:800;color:var(--muted);margin-bottom:5px;padding-left:27px}
+/* v10.72: แบบ 3 — หัวข้อ + คำอธิบายสั้นๆ สำหรับงานที่ไม่ต้องจดอะไรมาก */
+.tkmnta{width:100%;font-family:inherit;font-size:12.5px;line-height:1.55;padding:9px 11px;border:1px solid var(--line);border-radius:9px;color:var(--ink);background:#fff;resize:vertical;min-height:74px}
+.tkmnta:focus{outline:none;border-color:var(--brand,#0E5C52)}
+.tkmnrow.top{align-items:flex-start}
+.tkmnrow.top .tkmnn,.tkmnrow.top .tkmnl{margin-top:8px}
 .tkcardv{display:flex;flex-direction:column;gap:4px;margin-bottom:3px}
 .tkcv{display:flex;align-items:center;gap:7px}
 .tkcvn{flex:none;font-size:12.5px;font-weight:800;color:var(--brand-d,#0A463E);font-family:"IBM Plex Mono",monospace;overflow-wrap:break-word;min-width:0}
@@ -6988,9 +6993,10 @@ function _tkRowFind(id){for(var i=0;i<_tkRows.length;i++)if(_tkRows[i].id===id)r
 function _tkRowAdd(){_tkRows.push({id:_tkRowId(),vno:'',co:(_tkRows.length?_tkRows[_tkRows.length-1].co:'GLI')});renderTracking();
   var l=document.querySelectorAll('.tkvin');if(l.length)l[l.length-1].focus();}
 function _tkRowDel(id){for(var i=0;i<_tkRows.length;i++)if(_tkRows[i].id===id){_tkRows.splice(i,1);break;}renderTracking();}
-function _tkModeSet(m){_tkMode=(m==='rows')?'rows':'full';if(_tkMode==='rows'&&!_tkRows.length)_tkRows=[{id:_tkRowId(),vno:'',co:'GLI'}];renderTracking();}
+function _tkModeSet(m){_tkMode=(m==='rows'||m==='simple')?m:'full';if(_tkMode==='rows'&&!_tkRows.length)_tkRows=[{id:_tkRowId(),vno:'',co:'GLI'}];renderTracking();}
 function _tkNoteList(t){
   if(t&&Array.isArray(t.notes))return t.notes;
+  if(t&&t.mode==='simple')return [];/* แบบ 3 เก็บคำอธิบายไว้ที่ desc — ไม่ย้ายไปเป็นรายการติ๊ก */
   var d=((t&&t.desc)||'')+'';d=d.trim();
   if(!d)return [];
   return [{id:'n0',ts:(t&&t.created)||0,txt:d,done:false,dts:0}];
@@ -7025,11 +7031,14 @@ function _tkCardNoteToggle(taskId,noteId){
   saveTrack();renderTracking();
 }
 /* โหมด 1 — 5 บรรทัดเดิม + ปุ่มบริษัท GLI/JV ของทั้งการ์ด */
-function _tkFullBlockHTML(t){
+function _tkCoRowHTML(t){
   var co=((t.co||'')+'').toUpperCase();
   return '<div class="tkmnrow"><span class="tkmnn doc">🏢</span><span class="tkmnl">บริษัท</span><span class="tkmnf" id="tkmCo">'
       +TK_CO.map(function(c){return '<button class="tkmsb tkcob'+((co===c[0])?' on':'')+'" data-co="'+_eatt(c[0])+'" type="button" style="--c:'+c[2]+'">'+esc(c[1])+'</button>';}).join('')
-      +'<button class="tkmsb tkcob'+(co?'':' on')+'" data-co="" type="button" style="--c:#8C8676">— ไม่ระบุ —</button></span></div>'
+      +'<button class="tkmsb tkcob'+(co?'':' on')+'" data-co="" type="button" style="--c:#8C8676">— ไม่ระบุ —</button></span></div>';
+}
+function _tkFullBlockHTML(t){
+  return _tkCoRowHTML(t)
     +'<div class="tkmnrow"><span class="tkmnn">1</span><span class="tkmnl">รหัสโปรเจค</span><span class="tkmnf"><input class="tkmin" id="tkmProj" list="tkmProjList" value="'+_eatt(t.proj||'')+'" placeholder="พิมพ์รหัส แล้วบรรทัด 2 และ 4 จะดึงจาก PM Report ให้" autocomplete="off" spellcheck="false"><datalist id="tkmProjList">'+_tkProjCodeList()+'</datalist></span><button class="tkmnpull" id="tkmPmPull" type="button" title="ดึงชื่อผู้ว่าจ้างและชื่อโครงการจาก PM Report — ทับค่าที่มีอยู่">↻ ดึงจาก PM Report</button></div>'
     +'<div class="tkmnhint" id="tkmProjHint"></div>'
     +'<div class="tkmnrow"><span class="tkmnn">2</span><span class="tkmnl">ชื่อผู้ว่าจ้าง</span><span class="tkmnf"><input class="tkmin" id="tkmOwner" value="'+_eatt(t.owner||'')+'" placeholder="เช่น กิจการร่วมค้า GLR · การไฟฟ้าส่วนภูมิภาค" autocomplete="off"></span></div>'
@@ -7049,6 +7058,13 @@ function _tkRowsBlockHTML(){
   });
   h+='<button class="tkvadd" id="tkvAdd" type="button">＋ เพิ่มแถว</button>';
   return h;
+}
+/* โหมด 3 — แค่หัวข้อกับคำอธิบาย (ฟอร์มแบบเดิมก่อนแยกเป็น 5 บรรทัด) */
+function _tkSimpleBlockHTML(t){
+  return _tkCoRowHTML(t)
+    +'<div class="tkmnrow"><span class="tkmnn">1</span><span class="tkmnl">หัวข้อ</span><span class="tkmnf"><input class="tkmin" id="tkmTitle" value="'+_eatt(t.title||'')+'" placeholder="เรื่องที่ต้องทำ — พิมพ์สั้นๆ ได้เลย" autocomplete="off"></span></div>'
+    +'<div class="tkmnrow top"><span class="tkmnn">2</span><span class="tkmnl">คำอธิบาย</span><span class="tkmnf"><textarea class="tkmnta" id="tkmDesc" rows="3" placeholder="รายละเอียดเพิ่มเติม — เว้นว่างได้">'+esc(t.desc||'')+'</textarea></span></div>'
+    +_tkDocRowHTML(t);
 }
 function _tkDocRowHTML(t){
   return '<div class="tkmnrow"><span class="tkmnn doc">🗂</span><span class="tkmnl">ประเภทเอกสาร</span><span class="tkmnf"><select class="tkmin" id="tkmDoc"'+_tkDocSelStyle(t.doc)+'><option value="">— ไม่ระบุ —</option>'
@@ -7700,7 +7716,7 @@ function _tkSnapModal(){
   var sg=function(k,wrap,attr){var b=m.querySelector('#'+wrap+' .tkmsb.on');if(b)_tkMS[k]=b.getAttribute(attr);
     else if(document.getElementById(wrap))_tkMS[k]=null;};
   v('title','tkmTitle');v('cknew','tkckNew');v('assign','tkmAssign');v('due','tkmDue');v('cat','tkmCat');
-  v('proj','tkmProj');v('owner','tkmOwner');v('docno','tkmDocNo');v('grp','tkmGrp');v('doc','tkmDoc');
+  v('proj','tkmProj');v('owner','tkmOwner');v('docno','tkmDocNo');v('grp','tkmGrp');v('doc','tkmDoc');v('desc','tkmDesc');
   sg('st','tkmStatus','data-st');sg('pr','tkmPrio','data-pr');
   sg('hl','tkmHL','data-hl');sg('tc','tkmTC','data-tc');sg('co','tkmCo','data-co');
   var ae=document.activeElement,af=(ae&&ae.id&&m.contains(ae))?ae.id:'',ss=null,se=null;
@@ -7711,7 +7727,7 @@ function _tkSnapModal(){
 function _tkRestoreModal(s){
   if(!s)return;var m=document.getElementById('tkModal');if(!m)return;
   var set=function(id,val){if(val===undefined)return;var e=document.getElementById(id);if(e&&e.value!==val)e.value=val;};
-  set('tkmTitle',s.title);set('tkckNew',s.cknew);set('tkmDoc',s.doc);set('tkmAssign',s.assign);set('tkmDue',s.due);set('tkmCat',s.cat);set('tkmProj',s.proj);set('tkmOwner',s.owner);set('tkmDocNo',s.docno);set('tkmGrp',s.grp);
+  set('tkmTitle',s.title);set('tkckNew',s.cknew);set('tkmDoc',s.doc);set('tkmAssign',s.assign);set('tkmDue',s.due);set('tkmCat',s.cat);set('tkmProj',s.proj);set('tkmOwner',s.owner);set('tkmDocNo',s.docno);set('tkmGrp',s.grp);set('tkmDesc',s.desc);
   var seg=function(wrap,attr,val){if(!val)return;var box=document.getElementById(wrap);if(!box)return;var bs=box.querySelectorAll('.tkmsb');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].getAttribute(attr)===val);};
   seg('tkmStatus','data-st',s.st);seg('tkmPrio','data-pr',s.pr);
   var segAny=function(wrap,attr,val){var box=document.getElementById(wrap);if(!box||val==null)return;var bs=box.querySelectorAll('.tkmsb');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].getAttribute(attr)===val);};
@@ -7773,6 +7789,10 @@ function _tkCard(t,pos){
     h+='</div>';
     if(((t.title||'')+'').trim())h+='<div class="tkcardttl">'+esc(t.title)+'</div>';
     h+='</div>';
+  }else if(t.mode==='simple'){
+    h+='<div class="tkcardttl">'+esc(t.title||'(ไม่มีหัวข้อ)')+'</div>';
+    if(((t.desc||'')+'').trim())h+='<div class="tkcarddesc">'+esc(t.desc).replace(/\n/g,'<br>')+'</div>';
+    h+='</div>';
   }else{
   if(_pc)h+='<div class="tkhl tkhl1"><span class="tkhlk">1</span><span class="tkhlv" title="'+_eatt(_tkProjName(_pc))+'">'+esc(_pc)+'</span></div>';
   if(_ow)h+='<div class="tkhl tkhl2"><span class="tkhlk">2</span><span class="tkhlv" title="'+_eatt(_ow)+'">'+esc(_ow)+'</span></div>';
@@ -7827,11 +7847,12 @@ function _tkModalHTML(){
   h+='<div class="tkmbody">';
   h+='<div class="tkml">Task name'
     +'<div class="tkmodesw">'
-      +'<button class="tkmodeb'+((_tkMode==='rows')?'':' on')+'" data-tkmode="full" type="button">แบบ 1 · 5 บรรทัด + ดึง PM Report</button>'
+      +'<button class="tkmodeb'+((_tkMode==='full')?' on':'')+'" data-tkmode="full" type="button">แบบ 1 · 5 บรรทัด + ดึง PM Report</button>'
       +'<button class="tkmodeb'+((_tkMode==='rows')?' on':'')+'" data-tkmode="rows" type="button">แบบ 2 · Voucher + บริษัท (หลายแถว)</button>'
+      +'<button class="tkmodeb'+((_tkMode==='simple')?' on':'')+'" data-tkmode="simple" type="button">แบบ 3 · หัวข้อ + คำอธิบาย</button>'
     +'</div>'
     +'<div class="tkmname">'
-    +((_tkMode==='rows')?(_tkRowsBlockHTML()+_tkDocRowHTML(t)):_tkFullBlockHTML(t))
+    +((_tkMode==='rows')?(_tkRowsBlockHTML()+_tkDocRowHTML(t)):(_tkMode==='simple')?_tkSimpleBlockHTML(t):_tkFullBlockHTML(t))
     +'</div></div>';
   if(false){h+='<div class="tkmname">'
     +'<div class="tkmnrow"><span class="tkmnn">1</span><span class="tkmnl">รหัสโปรเจค</span><span class="tkmnf"><input class="tkmin" id="tkmProj" list="tkmProjList" value="'+_eatt(t.proj||'')+'" placeholder="พิมพ์รหัส แล้วบรรทัด 2 และ 4 จะดึงจาก PM Report ให้" autocomplete="off" spellcheck="false"><datalist id="tkmProjList">'+_tkProjCodeList()+'</datalist></span><button class="tkmnpull" id="tkmPmPull" type="button" title="ดึงชื่อผู้ว่าจ้างและชื่อโครงการจาก PM Report — ทับค่าที่มีอยู่">↻ ดึงจาก PM Report</button></div>'
@@ -7861,7 +7882,7 @@ function _tkModalHTML(){
 function _tkOpen(id){_tkAF={owner:'',title:''};_tkMS={};_tkModalId=id;var _t=_tkFind(id);_tkAtt=(_t&&_t.att)?_t.att.slice():[];
   _tkNotes=_tkNoteList(_t).map(function(n){return {id:n.id||_tkNoteId(),ts:n.ts||0,txt:n.txt||'',done:!!n.done,dts:n.dts||0};});
   _tkRows=_tkRowList(_t).map(function(r){return {id:r.id||_tkRowId(),vno:r.vno||'',co:r.co||''};});
-  _tkMode=((_t&&_t.mode)==='rows')?'rows':'full';
+  _tkMode=(((_t&&_t.mode)==='rows')||((_t&&_t.mode)==='simple'))?_t.mode:'full';
   renderTracking();}
 function _tkCloseModal(){_tkAttCleanupNew();_tkMS={};_tkModalId=null;_tkNewGrp='';renderTracking();}
 function _tkAdd(st,grp){_tkAF={owner:'',title:''};_tkMS={};_tkNotes=[];_tkRows=[];_tkMode='full';_tkModalId='__new__';_tkNewStatus=st||'todo';_tkNewGrp=grp||'';_tkNewId=_uid();_tkAtt=[];renderTracking();var ti=document.getElementById('tkmTitle');if(ti)ti.focus();}
@@ -7869,11 +7890,12 @@ function _tkSaveModal(){
   var g=function(id){var e=document.getElementById(id);return e?e.value:'';};
   var title=(g('tkmTitle')||'').trim(),owner=(g('tkmOwner')||'').trim(),docno=(g('tkmDocNo')||'').trim();
   var coEl=document.querySelector('#tkmCo .tkmsb.on'),co=coEl?(coEl.getAttribute('data-co')||''):'';
-  var mode=(_tkMode==='rows')?'rows':'full';
+  var mode=(_tkMode==='rows'||_tkMode==='simple')?_tkMode:'full';
+  var descv=(mode==='simple')?((g('tkmDesc')||'').replace(/\s+$/,'')):'';
   var rows=_tkRows.filter(function(r){return ((r.vno||'')+'').trim();}).map(function(r){return {id:r.id,vno:((r.vno||'')+'').trim(),co:r.co||''};});
   if(mode==='rows'){
     if(!rows.length){alert('แบบ 2 — กรุณากรอกเลขที่ Voucher อย่างน้อย 1 แถว');var ve=document.querySelector('.tkvin');if(ve)ve.focus();return;}
-  }else if(!title){alert('กรุณากรอกบรรทัดที่ 4 (คำอธิบาย) — ใช้เป็นชื่อเรื่องหลักของการ์ด');var ti=document.getElementById('tkmTitle');if(ti)ti.focus();return;}
+  }else if(!title){alert((mode==='simple')?'กรุณากรอกหัวข้อ':'กรุณากรอกบรรทัดที่ 4 (คำอธิบาย) — ใช้เป็นชื่อเรื่องหลักของการ์ด');var ti=document.getElementById('tkmTitle');if(ti)ti.focus();return;}
   var pEl=document.querySelector('#tkmPrio .tkmsb.on');
   var prio=pEl?pEl.getAttribute('data-pr'):'med';
   var assignee=g('tkmAssign'),due=g('tkmDue'),proj=(g('tkmProj')||'').trim(),cat=g('tkmCat'),grp=(g('tkmGrp')||'').trim();
@@ -7885,13 +7907,13 @@ function _tkSaveModal(){
   var status=isNew?(_tkNewStatus||TK_STAT[0][0]):(((_tkFind(_tkModalId)||{}).status)||TK_STAT[0][0]);
   var notes=_tkNotes.slice();
   if(isNew){
-    var nt={id:(_tkNewId||_uid()),title:title,desc:'',status:status,prio:prio,assignee:assignee,due:due,proj:proj,owner:owner,docno:docno,cat:cat,doc:doc,grp:grp,hl:hl,tc:tc,notes:notes,co:co,mode:mode,rows:rows,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done_dt:(status===_dk)?_tkToday():''};
+    var nt={id:(_tkNewId||_uid()),title:title,desc:descv,status:status,prio:prio,assignee:assignee,due:due,proj:proj,owner:owner,docno:docno,cat:cat,doc:doc,grp:grp,hl:hl,tc:tc,notes:notes,co:co,mode:mode,rows:rows,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done_dt:(status===_dk)?_tkToday():''};
     TRACKDATA.push(nt);
     if(typeof gliLog==='function')gliLog('Added task',title+(assignee&&_ptFind(assignee)?(' · assigned to '+_ptName(_ptFind(assignee))):''));
   }else{
     var t=_tkFind(_tkModalId);if(!t){_tkModalId=null;renderTracking();return;}
     var oldSt=t.status;
-    t.title=title;t.notes=notes;t.desc='';t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.owner=owner;t.docno=docno;t.cat=cat;t.doc=doc;t.grp=grp;t.hl=hl;t.tc=tc;t.co=co;t.mode=mode;t.rows=rows;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));
+    t.title=title;t.notes=notes;t.desc=descv;t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.owner=owner;t.docno=docno;t.cat=cat;t.doc=doc;t.grp=grp;t.hl=hl;t.tc=tc;t.co=co;t.mode=mode;t.rows=rows;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));
     if(status===_dk&&oldSt!==_dk)t.done_dt=_tkToday();if(status!==_dk)t.done_dt='';
     if(typeof gliLog==='function')gliLog((oldSt!==status)?'Updated status':'Edited task',title+(oldSt!==status?(' → '+_tkStat(status)[1]):''));
   }
