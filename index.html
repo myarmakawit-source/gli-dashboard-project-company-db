@@ -1955,6 +1955,76 @@ body.tkcoldrag{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .tkcolclr{font-family:inherit;font-size:10.5px;font-weight:700;color:var(--ink2,#4A5563);background:#fff;border:1px solid var(--line);border-radius:7px;padding:5px 9px;cursor:pointer}
 .tkcolclr:hover{background:var(--line2,#EEF2F7)}
 @media(max-width:640px){.tkhdr{margin-left:0}.tkstat{margin-left:0;width:100%}.tksearch{max-width:none}.tkcol{min-width:236px}.tkboard.vert .tkcol{min-width:0}.tkcard{padding:11px 12px}}
+/* ===== v10.72: ปุ่ม "เสร็จ" บนการ์ด + ช่องหมวดของประเภทเอกสาร ===== */
+.tkdocgrp{flex:0 1 190px;min-width:130px;font-family:inherit;font-size:11.5px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;color:var(--ink2,#4A5563);background:#FCFCFA}
+.tkdocgrp:focus{outline:none;border-color:var(--brand,#0E5C52);background:#fff}
+.tkdoneb{margin-left:auto;font-family:inherit;font-size:11px;font-weight:800;border:1px solid #A7D8B9;background:#E7F6EC;color:#15803D;border-radius:9px;padding:3px 10px;cursor:pointer;white-space:nowrap;transition:.12s;flex:none}
+.tkdoneb:hover{background:#15803D;color:#fff;border-color:transparent}
+.tkbtn.done{background:#E7F6EC;color:#15803D;border-color:#A7D8B9}
+.tkbtn.done:hover{background:#15803D;color:#fff;border-color:transparent;filter:none}
+.tkpill.done{cursor:pointer}
+.tkpill.done:hover{background:#15803D;color:#fff}
+/* ===== v10.72: REPORT งานที่เสร็จ · Completed Work ===== */
+.tkrwrap{padding:2px 0}
+.tkrhd{display:flex;align-items:center;gap:12px;margin-bottom:13px;flex-wrap:wrap}
+.tkrtitle{font-size:19px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:9px}
+.tkrtitle .tkric{font-size:22px}
+.tkrtitle .tkrsub{font-size:12.5px;font-weight:600;color:var(--muted)}
+.tkrhdr{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.tkrtool{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:13px}
+.tkrsearch{font-family:inherit;font-size:13px;padding:7px 12px;border:1px solid var(--line);border-radius:9px;min-width:160px;flex:1;max-width:250px;color:var(--ink);background:#fff}
+.tkrfilt{font-family:inherit;font-size:12.5px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink2);cursor:pointer;max-width:230px}
+.tkrdate{font-family:inherit;font-size:12.5px;padding:6px 9px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink2)}
+.tkrsearch:focus,.tkrfilt:focus,.tkrdate:focus{outline:none;border-color:var(--brand,#0E5C52)}
+.tkrlbl{font-size:11.5px;font-weight:700;color:var(--muted)}
+.tkrkpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;margin-bottom:14px}
+.tkrkpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 14px;border-left:4px solid var(--k,#15803D)}
+.tkrkn{font-size:23px;font-weight:800;color:var(--k,#15803D);line-height:1.12;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.tkrkl{font-size:11.5px;font-weight:800;color:var(--ink2,#4A5563);margin-top:3px}
+.tkrks{font-size:10.5px;color:var(--muted);margin-top:1px}
+.tkrnote{font-size:11.5px;color:var(--muted);background:#FBF1DE;border:1px solid #EBD9AE;border-radius:10px;padding:8px 12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tkrlistwrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+.tkrlist{width:100%;border-collapse:collapse;font-size:12.5px;min-width:1180px;background:#fff}
+.tkrlist thead th{text-align:left;font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:10px 11px;background:var(--line2,#F4F6F9);border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;z-index:2}
+.tkrlist tbody tr{border-bottom:1px solid var(--line2,#F1ECE2)}
+.tkrlist tbody tr:hover{background:var(--brand-t,#E6F0EC)}
+.tkrlist td{padding:9px 11px;vertical-align:top}
+.tkrno{color:var(--muted);font-variant-numeric:tabular-nums;text-align:right;width:38px}
+.tkrdt{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink)}
+.tkrtm{display:block;font-size:10.5px;font-weight:500;color:var(--muted)}
+.tkrttl{font-weight:700;color:var(--ink);cursor:pointer;min-width:210px}
+.tkrttl:hover{color:var(--brand);text-decoration:underline}
+.tkrsubl{display:block;font-size:10.5px;font-weight:500;color:var(--muted);margin-top:2px}
+.tkrchip{display:inline-block;font-size:10px;font-weight:800;padding:1px 8px;border-radius:10px;background:var(--line2,#F1ECE2);color:var(--ink2);margin:0 4px 2px 0;white-space:nowrap}
+.tkrdim{color:#AAB2BD}
+.tkrnum{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tkrok{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:10px;background:#E7F6EC;color:#15803D;white-space:nowrap}
+.tkrlate{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:10px;background:#FDECEA;color:#B42318;white-space:nowrap}
+.tkract{white-space:nowrap;text-align:center;width:86px}
+.tkrb{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer;font-size:12px;line-height:1;margin:0 1px;padding:0}
+.tkrb.undo:hover{background:var(--brand,#0E5C52);color:#fff;border-color:transparent}
+.tkrb.del:hover{background:#FDECEA;color:#B42318;border-color:transparent}
+.tkrgrow td{background:linear-gradient(90deg,var(--brand-t,#E6F0EC),#fff 70%);padding:8px 11px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.tkrgnm{font-size:12.5px;font-weight:800;color:var(--brand-d,#0A463E)}
+.tkrgn{font-size:11px;font-weight:800;color:var(--brand);background:#fff;border:1px solid var(--brand);border-radius:11px;padding:1px 9px;margin-left:8px}
+.tkrgs{font-size:11px;color:var(--muted);margin-left:8px;font-weight:600}
+.tkrnone{text-align:center;color:var(--muted);padding:34px}
+.tkrempty{text-align:center;color:var(--muted);padding:40px 24px;background:#fff;border:1px dashed var(--line);border-radius:13px}
+.tkremptyic{font-size:40px;margin-bottom:10px}
+.tkremptyt{font-size:15px;font-weight:800;color:var(--ink2);margin-bottom:5px}
+.tkremptys{font-size:12.5px;color:var(--muted)}
+.tkrfoot{font-size:11px;color:var(--muted);margin-top:9px;display:flex;gap:12px;flex-wrap:wrap}
+.tkrcap{color:#B45309;font-weight:700}
+.tkrmore{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+@media(max-width:640px){.tkrhdr{margin-left:0}.tkrsearch{max-width:none}}
+@media print{
+  .modnav,.sidebar,#modHero,#modDesc,.dmeta,.tkrtool,.tkrhdr,.tkract,.tkrnote,.tkrmore{display:none!important}
+  body{padding:0;background:#fff}
+  .tkrlistwrap{border:none;overflow:visible}
+  .tkrlist{min-width:0;font-size:10.5px}
+  .tkrlist thead th{position:static}
+  .tkrkpi{break-inside:avoid}
+}
 </style>
 <style id="gmCss">
 .gmwrap{padding:2px 0}
@@ -3088,7 +3158,7 @@ body{padding-left:236px;padding-right:8px}
 /* ===================== REMOVE MONTHLY SALES BAR CHART (per request) ===================== */
 #page-vat .v30spark{display:none}
 </style>
-<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><button class="modtab modtab-pg" data-mod="pg" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Progress %</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">🗄️</span><span class="sblbl">Database</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Finance &amp; Reconcile</div><button class="modtab" data-mod="bbl" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Bank loan</span></button><div class="sbsec">PAYEE DATABASE</div><button class="modtab" data-mod="pdrepjv" role="tab" aria-selected="false"><span class="sbic">📑</span><span class="sblbl">Report AP JV</span></button><div class="sbsec">Database Taxation</div><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><div class="sbsec">Routine Work</div><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-gm" data-mod="gm" role="tab" aria-selected="false"><span class="sbic">📧</span><span class="sblbl">Gmail Inbox</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-cb" data-mod="cb" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Confirm Bank</span></button><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><div class="sbsec">Security &amp; Data</div><button class="modtab modtab-sec" data-mod="sec" role="tab" aria-selected="false"><span class="sbic">🛡️</span><span class="sblbl">Security</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — auto-refreshes every open device when a newer build is deployed (v9.19+)">V10.51</span></div></nav>
+<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab modtab-tkr" data-mod="tkr" role="tab" aria-selected="false"><span class="sbic">✅</span><span class="sblbl">Report งานที่เสร็จ</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><button class="modtab modtab-pg" data-mod="pg" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Progress %</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">🗄️</span><span class="sblbl">Database</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Finance &amp; Reconcile</div><button class="modtab" data-mod="bbl" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Bank loan</span></button><div class="sbsec">PAYEE DATABASE</div><button class="modtab" data-mod="pdrepjv" role="tab" aria-selected="false"><span class="sbic">📑</span><span class="sblbl">Report AP JV</span></button><div class="sbsec">Database Taxation</div><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><div class="sbsec">Routine Work</div><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-gm" data-mod="gm" role="tab" aria-selected="false"><span class="sbic">📧</span><span class="sblbl">Gmail Inbox</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-cb" data-mod="cb" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Confirm Bank</span></button><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><div class="sbsec">Security &amp; Data</div><button class="modtab modtab-sec" data-mod="sec" role="tab" aria-selected="false"><span class="sbic">🛡️</span><span class="sblbl">Security</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — auto-refreshes every open device when a newer build is deployed (v9.19+)">V10.51</span></div></nav>
 <header>
 <div class="letter"><svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0E5C52"></rect><path d="M15 43 L27 31 L35 37 L49 21" fill="none" stroke="#D9A441" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="49" cy="21" r="3.7" fill="#D9A441"></circle><text x="32" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#9FCFC4" letter-spacing="2.5">GLI</text></svg>
 <div class="brand"><div class="brandL"><div class="th">GRANDLINE INNOVATION <span class="th-co">COMPANY LIMITED</span></div><span class="ho">Head Office</span></div><div class="brandR"><div class="addr">333 Soi Lat Phrao 64 Yaek 12, Lat Phrao Road, Wang Thong Lang Sub-District, Wang Thong Lang District, Bangkok 10310</div><div class="taxid">Tax ID · 0105553002230</div></div></div>
@@ -3102,6 +3172,7 @@ body{padding-left:236px;padding-right:8px}
 <div class="page" id="page-wpb" hidden=""></div>
 <div class="page" id="page-cb" hidden=""></div>
 <div class="page" id="page-tk" hidden=""></div>
+<div class="page" id="page-tkr" hidden=""></div>
 <div class="page active" id="page-bp">
 <div class="titleblock">
 <div class="tb-left">
@@ -7068,7 +7139,7 @@ function _tkSimpleBlockHTML(t){
 }
 function _tkDocRowHTML(t){
   return '<div class="tkmnrow"><span class="tkmnn doc">🗂</span><span class="tkmnl">ประเภทเอกสาร</span><span class="tkmnf"><select class="tkmin" id="tkmDoc"'+_tkDocSelStyle(t.doc)+'><option value="">— ไม่ระบุ —</option>'
-    +TK_DOC.map(function(d){return '<option value="'+_eatt(d[0])+'"'+(((t.doc||'')===d[0])?' selected':'')+'>'+esc(d[1])+'</option>';}).join('')
+    +_tkDocOptions(t.doc)
     +'</select></span></div>';
 }
 function _tkNoteHTML(){
@@ -7164,7 +7235,7 @@ function _tkAttInjectStyle(){
    '.tkattcount{font-size:11px;color:var(--ink2);background:var(--line2);border-radius:6px;padding:1px 7px;margin-left:6px;white-space:nowrap}'+'.tkattdrop{border:1.5px dashed var(--line);border-radius:10px;padding:10px;transition:.15s}.tkattdrop.over{border-color:var(--brand);background:var(--card)}.tkatthint{font-size:11px;color:var(--muted);flex:1;min-width:0}'+'.tkattbar{flex-wrap:wrap}';
   document.head.appendChild(s);
 }
-function _tkMyOpen(){loadTrack();var me=(typeof _curUserId!=='undefined')?_curUserId:'';if(!me)return [];var myN=((typeof _mnUser!=='undefined'&&_mnUser)?_mnUser:'').trim().toUpperCase();var out=[];for(var i=0;i<TRACKDATA.length;i++){var t=TRACKDATA[i];if(t.assignee===me&&(t.status||'todo')!=='done'){var by=((t.by||'')+'').trim().toUpperCase();if(!by||by!==myN)out.push(t);}}return out;}
+function _tkMyOpen(){loadTrack();var me=(typeof _curUserId!=='undefined')?_curUserId:'';if(!me)return [];var myN=((typeof _mnUser!=='undefined'&&_mnUser)?_mnUser:'').trim().toUpperCase();var out=[];for(var i=0;i<TRACKDATA.length;i++){var t=TRACKDATA[i];if(t.assignee===me&&!_tkIsDone(t)&&(t.status||'todo')!=='done'){var by=((t.by||'')+'').trim().toUpperCase();if(!by||by!==myN)out.push(t);}}return out;}
 function _tkUpdNotif(){var el=document.getElementById('tkNotif');if(!el)return;var n=_tkMyOpen().length;var c=el.querySelector('.tknotifn');if(n>0){el.hidden=false;el.classList.add('on');if(c)c.textContent=(n>99?'99+':(''+n));el.title=n+' งานที่ถูกมอบหมายให้คุณและยังไม่เสร็จ — คลิกเพื่อดู';}else{el.hidden=true;el.classList.remove('on');}if(!el._b){el._b=1;el.addEventListener('click',function(){try{_tkFA=_curUserId;}catch(e){}var b=document.querySelector('.modtab[data-mod="tk"]');if(b)b.click();});}}
 function _tkFind(id){loadTrack();for(var i=0;i<TRACKDATA.length;i++)if(TRACKDATA[i].id===id)return TRACKDATA[i];return null;}
 /* v10.54: custom board columns (headings) — add / rename / delete / reorder, stored + synced */
@@ -7372,23 +7443,54 @@ function _tkColMoveToIndex(key,idx){
 /* v10.61: ประเภทเอกสาร (Document type) — รายการที่ผู้ใช้สร้าง/แก้เองได้ · เก็บ + ซิงค์ขึ้นคลาวด์เหมือนหัวข้อบอร์ด
    เลือกให้การ์ดไหน การ์ดนั้นจะไฮไลท์ด้วยสีของประเภทนั้น (ถ้าตั้งสีไฮไลท์เองไว้ที่การ์ด สีที่ตั้งเองจะชนะ) */
 function _tkDocSeed(){return [
- ['inv','ใบแจ้งหนี้','#B45309','#FEF3C7'],
- ['rcp','ใบเสร็จรับเงิน','#15803D','#E7F6EC'],
- ['tinv','ใบกำกับภาษี','#BE123C','#FFE4E6'],
- ['po','ใบสั่งซื้อ (PO)','#1D5FAE','#E7EFF8'],
- ['qt','ใบเสนอราคา','#0E7490','#E0F2FE'],
- ['con','สัญญา','#7C3AED','#F3E8FF'],
- ['dn','ใบส่งของ','#0F766E','#D9F2EE'],
- ['fsdoc','งบการเงิน','#475569','#F1F5F9'],
+ ['inv','ใบแจ้งหนี้','#B45309','#FEF3C7','ซื้อ–ขาย · เอกสารธุรกิจ'],
+ ['rcp','ใบเสร็จรับเงิน','#15803D','#E7F6EC','ซื้อ–ขาย · เอกสารธุรกิจ'],
+ ['tinv','ใบกำกับภาษี','#BE123C','#FFE4E6','ซื้อ–ขาย · เอกสารธุรกิจ'],
+ ['po','ใบสั่งซื้อ (PO)','#1D5FAE','#E7EFF8','ซื้อ–ขาย · เอกสารธุรกิจ'],
+ ['qt','ใบเสนอราคา','#0E7490','#E0F2FE','ซื้อ–ขาย · เอกสารธุรกิจ'],
+ ['con','สัญญา','#7C3AED','#F3E8FF','ซื้อ–ขาย · เอกสารธุรกิจ'],
+ ['dn','ใบส่งของ','#0F766E','#D9F2EE','ซื้อ–ขาย · เอกสารธุรกิจ'],
+ ['dnote','ใบเพิ่มหนี้','#DB2777','#FCE7F3','ซื้อ–ขาย · เอกสารธุรกิจ'],
+ ['cnote','ใบลดหนี้','#BE185D','#FCE7F3','ซื้อ–ขาย · เอกสารธุรกิจ'],
+ ['fsdoc','งบการเงิน','#475569','#F1F5F9','งบการเงิน & ทะเบียน (DBD)'],
  /* v10.62: ชุดใบสำคัญทางบัญชี — ใบสำคัญคือเอกสารภายในที่ใช้บันทึกบัญชี (คู่กับสมุดรายวันเฉพาะ) */
- ['pv','ใบสำคัญจ่าย (PV)','#C2410C','#FFEDD5'],
- ['rv','ใบสำคัญรับ (RV)','#047857','#D1FAE5'],
- ['pu','ใบสำคัญซื้อ (PU)','#4338CA','#E0E7FF'],
- ['sv','ใบสำคัญขาย (SV)','#A16207','#FEF9C3'],
- ['jv','ใบสำคัญทั่วไป (JV)','#6D28D9','#EDE9FE'],
- ['aj','ใบสำคัญปรับปรุง (AJ)','#B91C1C','#FEE2E2'],
- ['pc','ใบสำคัญจ่ายเงินสดย่อย','#0369A1','#DBEAFE'],
- ['rcv','ใบสำคัญรับเงิน','#9D174D','#FCE7F3']];}
+ ['pv','ใบสำคัญจ่าย (PV)','#C2410C','#FFEDD5','ใบสำคัญบัญชี'],
+ ['rv','ใบสำคัญรับ (RV)','#047857','#D1FAE5','ใบสำคัญบัญชี'],
+ ['pu','ใบสำคัญซื้อ (PU)','#4338CA','#E0E7FF','ใบสำคัญบัญชี'],
+ ['sv','ใบสำคัญขาย (SV)','#A16207','#FEF9C3','ใบสำคัญบัญชี'],
+ ['jv','ใบสำคัญทั่วไป (JV)','#6D28D9','#EDE9FE','ใบสำคัญบัญชี'],
+ ['aj','ใบสำคัญปรับปรุง (AJ)','#B91C1C','#FEE2E2','ใบสำคัญบัญชี'],
+ ['pc','ใบสำคัญจ่ายเงินสดย่อย','#0369A1','#DBEAFE','ใบสำคัญบัญชี'],
+ ['rcv','ใบสำคัญรับเงิน','#9D174D','#FCE7F3','ใบสำคัญบัญชี'],
+ /* v10.72: งานภาษี — แบบยื่นสรรพากร · ประกันสังคม · กรมพัฒนธุรกิจการค้า (DBD)
+    ชื่อแบบสะกดตามที่ใช้ในโมดูล Monitor / ปฏิทินภาษี ของระบบนี้ */
+ ['pnd1','ภ.ง.ด.1 · หัก ณ ที่จ่าย (เงินเดือน–ค่าจ้าง)','#1D4ED8','#DBEAFE','ภาษีหัก ณ ที่จ่าย (WHT)'],
+ ['pnd1k','ภ.ง.ด.1ก · สรุปหัก ณ ที่จ่ายประจำปี','#1E3A8A','#DBEAFE','ภาษีหัก ณ ที่จ่าย (WHT)'],
+ ['pnd2','ภ.ง.ด.2 · หัก ณ ที่จ่าย (เงินได้จากทุน)','#1E40AF','#E0E7FF','ภาษีหัก ณ ที่จ่าย (WHT)'],
+ ['pnd3','ภ.ง.ด.3 · หัก ณ ที่จ่าย (บุคคลธรรมดา)','#2563EB','#DBEAFE','ภาษีหัก ณ ที่จ่าย (WHT)'],
+ ['pnd53','ภ.ง.ด.53 · หัก ณ ที่จ่าย (นิติบุคคล)','#1D5FAE','#E7EFF8','ภาษีหัก ณ ที่จ่าย (WHT)'],
+ ['pnd54','ภ.ง.ด.54 · นำส่งภาษีจ่ายไปต่างประเทศ','#3730A3','#E0E7FF','ภาษีหัก ณ ที่จ่าย (WHT)'],
+ ['wht50','หนังสือรับรองหัก ณ ที่จ่าย (50 ทวิ)','#0369A1','#E0F2FE','ภาษีหัก ณ ที่จ่าย (WHT)'],
+ ['pp30','ภ.พ.30 · ภาษีมูลค่าเพิ่ม','#92400E','#FDE68A','ภาษีมูลค่าเพิ่ม (VAT)'],
+ ['pp36','ภ.พ.36 · นำส่ง VAT แทนผู้ประกอบการต่างประเทศ','#B45309','#FDE68A','ภาษีมูลค่าเพิ่ม (VAT)'],
+ ['vatin','รายงานภาษีซื้อ','#9A3412','#FFEDD5','ภาษีมูลค่าเพิ่ม (VAT)'],
+ ['vatout','รายงานภาษีขาย','#7C2D12','#FFF7ED','ภาษีมูลค่าเพิ่ม (VAT)'],
+ ['pp20','ภ.พ.20 · ทะเบียนภาษีมูลค่าเพิ่ม (ภ.พ.01/ภ.พ.09)','#78350F','#FEF3C7','ภาษีมูลค่าเพิ่ม (VAT)'],
+ ['pnd50','ภ.ง.ด.50 · ภาษีเงินได้นิติบุคคล (ประจำปี)','#5B21B6','#EDE9FE','ภาษีเงินได้ & ธุรกิจเฉพาะ'],
+ ['pnd51','ภ.ง.ด.51 · ภาษีเงินได้นิติบุคคล (ครึ่งปี)','#6D28D9','#F3E8FF','ภาษีเงินได้ & ธุรกิจเฉพาะ'],
+ ['discl','Disclosure Form · ธุรกรรมระหว่างกัน (ยื่นพร้อม ภ.ง.ด.50)','#9333EA','#F5E8FF','ภาษีเงินได้ & ธุรกิจเฉพาะ'],
+ ['pnd90','ภ.ง.ด.90/91 · ภาษีเงินได้บุคคลธรรมดา (ประจำปี)','#A21CAF','#FAE8FF','ภาษีเงินได้ & ธุรกิจเฉพาะ'],
+ ['pnd94','ภ.ง.ด.94 · ภาษีเงินได้บุคคลธรรมดา (ครึ่งปี)','#86198F','#FAE8FF','ภาษีเงินได้ & ธุรกิจเฉพาะ'],
+ ['pt40','ภ.ธ.40 · ภาษีธุรกิจเฉพาะ','#9F1239','#FFE4E6','ภาษีเงินได้ & ธุรกิจเฉพาะ'],
+ ['stamp','อากรแสตมป์ · อ.ส.4','#7E22CE','#F3E8FF','ภาษีเงินได้ & ธุรกิจเฉพาะ'],
+ ['sso110','สปส. 1-10 · เงินสมทบประกันสังคม','#0F766E','#CCFBF1','ประกันสังคม & กองทุน'],
+ ['sso103','สปส. 1-03 / 6-09 · ขึ้นทะเบียน–แจ้งออกลูกจ้าง','#115E59','#D9F2EE','ประกันสังคม & กองทุน'],
+ ['kt20k','กท.20ก · เงินสมทบกองทุนเงินทดแทน','#134E4A','#D1FAE5','ประกันสังคม & กองทุน'],
+ ['sbch3','ส.บช.3 · นำส่งงบการเงิน (DBD)','#334155','#E2E8F0','งบการเงิน & ทะเบียน (DBD)'],
+ ['boj5','บอจ.5 · บัญชีรายชื่อผู้ถือหุ้น','#1E293B','#E2E8F0','งบการเงิน & ทะเบียน (DBD)'],
+ ['dbdcert','หนังสือรับรองบริษัท · จดทะเบียนเปลี่ยนแปลง','#0F172A','#E2E8F0','งบการเงิน & ทะเบียน (DBD)'],
+ ['efile','หลักฐานการยื่น e-Filing (ใบเสร็จ / RDX)','#0891B2','#CFFAFE','หลักฐานการยื่น & อื่นๆ'],
+ ['taxrcp','ใบเสร็จรับเงินค่าภาษี · ใบนำส่งชำระภาษี','#155E75','#CFFAFE','หลักฐานการยื่น & อื่นๆ']];}
 var TK_DOC=(function(){
   var seed=_tkDocSeed(),cur=null;
   try{var d=JSON.parse(localStorage.getItem('gli_tkdocs')||'null');
@@ -7397,14 +7499,29 @@ var TK_DOC=(function(){
   /* v10.62: รายการเดิมถูกบันทึกไว้ก่อนที่จะมีชุดใบสำคัญ — เติมเฉพาะคีย์ที่ยังไม่มี "ครั้งเดียว"
      (ทำเครื่องหมายเวอร์ชันไว้ ถ้าผู้ใช้ลบทิ้งทีหลังจะไม่โผล่กลับมาอีก) และไม่แตะประเภทที่แก้/สร้างเอง */
   var v=0;try{v=+(localStorage.getItem('gli_tkdocs_v')||0)||0;}catch(e){}
+  var _added=0,_have={},_i;
+  var _mig=function(NEWK){
+    _have={};for(_i=0;_i<cur.length;_i++)_have[cur[_i][0]]=1;
+    for(_i=0;_i<seed.length;_i++)if(NEWK[seed[_i][0]]&&!_have[seed[_i][0]]){cur.push(seed[_i].slice());_added++;}
+  };
   if(v<2){
-    var NEW2={pv:1,rv:1,pu:1,sv:1,jv:1,aj:1,pc:1,rcv:1};/* เติมเฉพาะคีย์ที่เพิ่มใน v2 — ประเภทเดิมที่ผู้ใช้เคยลบทิ้ง ต้องไม่โผล่กลับมา */
-    var have={},i;for(i=0;i<cur.length;i++)have[cur[i][0]]=1;
-    var added=0;for(i=0;i<seed.length;i++)if(NEW2[seed[i][0]]&&!have[seed[i][0]]){cur.push(seed[i].slice());added++;}
-    try{localStorage.setItem('gli_tkdocs',JSON.stringify(cur));localStorage.setItem('gli_tkdocs_v','2');}catch(e){}
+    _mig({pv:1,rv:1,pu:1,sv:1,jv:1,aj:1,pc:1,rcv:1});/* เติมเฉพาะคีย์ที่เพิ่มใน v2 — ประเภทเดิมที่ผู้ใช้เคยลบทิ้ง ต้องไม่โผล่กลับมา */
+  }
+  /* v10.72: ชุดงานภาษี (สรรพากร · ประกันสังคม · DBD) + ใบเพิ่มหนี้/ใบลดหนี้ + ป้าย "หมวด" ของแต่ละประเภท
+     เติมครั้งเดียวเหมือน v2 · ประเภทที่ผู้ใช้แก้ชื่อ/สีเองไว้ ไม่ถูกแตะ (เติมเฉพาะหมวดที่ยังว่าง) */
+  if(v<3){
+    _mig({dnote:1,cnote:1,pnd1:1,pnd1k:1,pnd2:1,pnd3:1,pnd53:1,pnd54:1,wht50:1,
+          pp30:1,pp36:1,vatin:1,vatout:1,pp20:1,
+          pnd50:1,pnd51:1,discl:1,pnd90:1,pnd94:1,pt40:1,stamp:1,
+          sso110:1,sso103:1,kt20k:1,sbch3:1,boj5:1,dbdcert:1,efile:1,taxrcp:1});
+    var _sg={};for(_i=0;_i<seed.length;_i++)_sg[seed[_i][0]]=seed[_i][4]||'';
+    for(_i=0;_i<cur.length;_i++){var _c=cur[_i];if(!((_c[4]||'')+'').trim()){var _g=_sg[_c[0]];if(_g){_c[4]=_g;_added++;}}}
+  }
+  if(v<3){
+    try{localStorage.setItem('gli_tkdocs',JSON.stringify(cur));localStorage.setItem('gli_tkdocs_v','3');}catch(e){}
     /* บันทึก+ซิงค์ใน tick ถัดไป ตอนที่สคริปต์ทั้งไฟล์รันจบแล้ว (saveTkDocs พึ่ง _TS ที่ประกาศทีหลัง)
        เพื่อให้รายการที่เติมแล้วเป็นฝ่ายชนะตอนซิงค์ ไม่โดนสำเนาเก่าจากเครื่องอื่นทับ */
-    if(added)setTimeout(function(){try{saveTkDocs();}catch(e){}},0);
+    if(_added)setTimeout(function(){try{saveTkDocs();}catch(e){}},0);
   }
   return cur;
 })();
@@ -7415,7 +7532,7 @@ function _tkDocIdx(k){for(var i=0;i<TK_DOC.length;i++)if(TK_DOC[i][0]===k)return
 function _tkDocAdd(){
   var key='d'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);
   var p=TK_COLPAL[TK_DOC.length%TK_COLPAL.length];
-  TK_DOC.push([key,'ประเภทใหม่ '+(TK_DOC.length+1),p[0],p[1]]);
+  TK_DOC.push([key,'ประเภทใหม่ '+(TK_DOC.length+1),p[0],p[1],TK_DOC_UG]);
   saveTkDocs();if(typeof gliLog==='function')gliLog('เพิ่มประเภทเอกสาร (Tracking)','');renderTracking();
 }
 function _tkDocSet(key,i,val){var d=_tkDoc(key);if(!d)return;d[i]=val;saveTkDocs();renderTracking();}
@@ -7432,8 +7549,30 @@ function _tkDocDel(key){
   if(_tkFD===key)_tkFD='';
   saveTkDocs();if(typeof gliLog==='function')gliLog('ลบประเภทเอกสาร (Tracking)',(d[1]||'')+(n?(' · ล้างจากงาน '+n+' รายการ'):''));renderTracking();
 }
-function _tkDocReset(){if(!confirm('คืนค่าประเภทเอกสารกลับเป็นชุดเริ่มต้น?\nประเภทที่สร้างเองจะหายไป แต่งานไม่ถูกลบ'))return;TK_DOC=_tkDocSeed();try{localStorage.setItem('gli_tkdocs_v','2');}catch(e){}saveTkDocs();renderTracking();}
+function _tkDocReset(){if(!confirm('คืนค่าประเภทเอกสารกลับเป็นชุดเริ่มต้น?\nประเภทที่สร้างเองจะหายไป แต่งานไม่ถูกลบ'))return;TK_DOC=_tkDocSeed();try{localStorage.setItem('gli_tkdocs_v','3');}catch(e){}saveTkDocs();renderTracking();}
 function _tkDocSelStyle(k){var d=_tkDoc(k);return d?(' style="background:'+d[3]+';color:'+d[2]+';border-color:'+d[2]+'"'):'';}
+/* v10.72: ประเภทเอกสารมีเยอะขึ้นมาก (งานภาษี/ประกันสังคม/DBD) — จัดเป็นหมวดใน dropdown ด้วย <optgroup>
+   หมวดเรียงตามลำดับที่พบครั้งแรกในรายการ · ประเภทที่ยังไม่มีหมวดจะไปรวมกันท้ายสุด */
+var TK_DOC_UG='อื่นๆ · กำหนดเอง';
+function _tkDocGroups(){
+  var ord=[],map={},i,d,g;
+  for(i=0;i<TK_DOC.length;i++){d=TK_DOC[i];g=((d[4]||'')+'').trim()||TK_DOC_UG;
+    if(!Object.prototype.hasOwnProperty.call(map,g)){map[g]=[];ord.push(g);}
+    map[g].push(d);}
+  var ug=ord.indexOf(TK_DOC_UG);if(ug>=0&&ug<ord.length-1){ord.splice(ug,1);ord.push(TK_DOC_UG);}
+  return {ord:ord,map:map};
+}
+function _tkDocGrpList(){var g=_tkDocGroups(),o='',i;for(i=0;i<g.ord.length;i++)o+='<option value="'+_eatt(g.ord[i])+'">';return o;}
+function _tkDocOptions(sel){
+  var g=_tkDocGroups(),o='',i,j,list;
+  for(i=0;i<g.ord.length;i++){
+    list=g.map[g.ord[i]];
+    o+='<optgroup label="'+_eatt(g.ord[i])+'">';
+    for(j=0;j<list.length;j++)o+='<option value="'+_eatt(list[j][0])+'"'+((((sel||'')+'')===list[j][0])?' selected':'')+'>'+esc(list[j][1])+'</option>';
+    o+='</optgroup>';
+  }
+  return o;
+}
 function _tkDocPanelHTML(){
   var h='<div class="tkdocpanel"><div class="tkdocpt">🗂 ตั้งค่าประเภทเอกสาร<span class="tkdocps">เลือกให้การ์ดไหน การ์ดนั้นจะไฮไลท์ด้วยสีของประเภทนั้น</span><button class="tkdocpx" data-docclose="1" type="button" title="ปิด">✕</button></div>';
   if(!TK_DOC.length)h+='<div class="tkdocnone">ยังไม่มีประเภทเอกสาร — กด “เพิ่มประเภท” ด้านล่าง</div>';
@@ -7441,6 +7580,7 @@ function _tkDocPanelHTML(){
     h+='<div class="tkdocrow">'
      +'<span class="tkdocprev" style="background:'+d[3]+';color:'+d[2]+';border-color:'+d[2]+'">'+esc(d[1]||'(ไม่มีชื่อ)')+'</span>'
      +'<input class="tkdocnm" data-docnm="'+_eatt(d[0])+'" type="text" value="'+_eatt(d[1]||'')+'" placeholder="ชื่อประเภทเอกสาร" autocomplete="off">'
+     +'<input class="tkdocgrp" data-docgrp="'+_eatt(d[0])+'" type="text" list="tkDocGrpList" value="'+_eatt(d[4]||'')+'" placeholder="หมวด (เว้นว่าง = อื่นๆ)" autocomplete="off" title="หมวดที่ใช้จัดกลุ่มใน dropdown เช่น ภาษีหัก ณ ที่จ่าย (WHT)">'
      +'<label class="tkdoccf">พื้นหลัง<input type="color" data-doccol="bg|'+_eatt(d[0])+'" value="'+_eatt(d[3]||'#EEF2F7')+'"></label>'
      +'<label class="tkdoccf">ตัวอักษร<input type="color" data-doccol="fg|'+_eatt(d[0])+'" value="'+_eatt(d[2]||'#475569')+'"></label>'
      +'<button class="tkdocb2" data-docmv="'+_eatt(d[0])+'|-1" type="button" title="เลื่อนขึ้น"'+(i<=0?' disabled':'')+'>▲</button>'
@@ -7448,6 +7588,7 @@ function _tkDocPanelHTML(){
      +'<button class="tkdocb2 del" data-docdel="'+_eatt(d[0])+'" type="button" title="ลบประเภทนี้">🗑</button>'
      +'</div>';
   });
+  h+='<datalist id="tkDocGrpList">'+_tkDocGrpList()+'</datalist>';
   h+='<button class="tkdocadd" data-docadd="1" type="button">＋ เพิ่มประเภท</button> <button class="tkbtn ghost" data-docreset="1" type="button">คืนค่าเริ่มต้น</button>';
   return h+'</div>';
 }
@@ -7524,7 +7665,7 @@ function _tkClipMake(src,st,beforeId,grp){
   var dk=_tkDoneKey(),nid=_uid();
   var nt={id:nid,title:src.title||'',desc:src.desc||'',status:st,prio:src.prio||'med',assignee:src.assignee||'',
           due:src.due||'',proj:src.proj||'',owner:src.owner||'',docno:src.docno||'',cat:src.cat||'',doc:src.doc||'',hl:src.hl||'',tc:src.tc||'',co:src.co||'',mode:src.mode||'full',rows:(src.rows||[]).map(function(r){return {id:_tkRowId(),vno:r.vno,co:r.co};}),notes:(src.notes||[]).map(function(n){return {id:_tkNoteId(),ts:n.ts,txt:n.txt,done:!!n.done,dts:n.dts};}),grp:((grp!=null)?grp:(src.grp||'')),att:[],
-          created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done_dt:(st===dk)?_tkToday():''};
+          created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done:0,done_dt:(st===dk)?_tkToday():''};
   loadTrack();TRACKDATA.push(nt);_tkPlaceIn(nt,st,beforeId||null);
   _tkFlashId=nid;saveTrack();
   if(typeof gliLog==='function')gliLog('วางสำเนางาน (Tracking)',(nt.title||'')+' → '+_tkStat(st)[1]);
@@ -7575,7 +7716,10 @@ function _tkGrpHTML(st,g,n,first){
 }
 /* วางงาน t ลงในหัวข้อ st ที่ตำแหน่งก่อนการ์ด beforeId แล้วเรียงเลขลำดับใหม่ทั้งคอลัมน์ */
 function _tkPlaceIn(t,st,beforeId){
-  var col=TRACKDATA.filter(function(x){return (x.status||TK_STAT[0][0])===st&&x.id!==t.id;}).sort(_tkColSort);
+  /* v10.72: งานที่เก็บเข้า Report แล้วยังคงค่า status เดิมไว้ (เพื่อให้ "นำกลับ" คืนหัวข้อเดิมได้)
+     จึงต้องกันออกจากการเรียงลำดับ ไม่งั้นการลากการ์ดหนึ่งครั้งจะไปเขียนทับ ord ของงานที่มองไม่เห็น
+     แล้วส่งข้อมูลที่ไม่ได้เปลี่ยนจริงขึ้นคลาวด์ทุกครั้ง */
+  var col=TRACKDATA.filter(function(x){return !_tkIsDone(x)&&(x.status||TK_STAT[0][0])===st&&x.id!==t.id;}).sort(_tkColSort);
   var idx=col.length,i;
   if(beforeId){for(i=0;i<col.length;i++){if(col[i].id===beforeId){idx=i;break;}}}
   col.splice(idx,0,t);
@@ -7663,12 +7807,52 @@ function _tkDue(t){if(!t.due)return null;var due=new Date(t.due+'T00:00:00'),now
 function _tkAvatar(uid){var u=(typeof _ptFind==='function')?_ptFind(uid):null;if(!u)return '<span class="tkav none" title="Unassigned">—</span>';var nm=_ptName(u);var ini=(((u.fn||' ')[0]||'')+((u.ln||' ')[0]||'')).trim()||nm.charAt(0)||'?';return '<span class="tkav" title="'+_eatt(nm)+'">'+esc(ini.toUpperCase())+'</span><span class="tkavn">'+esc(nm)+'</span>';}
 function _tkSort(a,b){var pr={high:0,med:1,low:2};var pa=pr[a.prio||'med'],pb=pr[b.prio||'med'];if(pa!==pb)return pa-pb;var da=a.due||'9999-99',db=b.due||'9999-99';if(da!==db)return da<db?-1:1;return (a.created||0)-(b.created||0);}
 
+/* ===== v10.72: กด "เสร็จ" ที่การ์ด → เก็บเข้าหน้า "Report งานที่เสร็จ" (โมดูล tkr) =====
+   t.done=1 · t.done_ts เวลาที่กด (ms) · t.done_by ชื่อคนที่กด · t.done_dt วันที่ (คงรูปแบบเดิม YYYY-MM-DD)
+   งานที่ done จะถูกซ่อนจากบอร์ด/ลิสต์/หน้า Overall/กระดิ่งแจ้งเตือน แต่ยังอยู่ใน TRACKDATA ตัวเดิม
+   จึงถูกบันทึกและซิงค์ขึ้นคลาวด์ด้วยคีย์ 'tk' เหมือนเดิม — ไม่ต้องเพิ่มคีย์ซิงค์ใหม่
+   กด "นำกลับ" ในหน้า Report เพื่อคืนการ์ดกลับไปที่หัวข้อเดิมได้ทุกเมื่อ */
+function _tkIsDone(t){return !!(t&&t.done);}
+function _tkDoneTasks(){loadTrack();return TRACKDATA.filter(_tkIsDone);}
+function _tkDoneN(){loadTrack();var n=0,i;for(i=0;i<TRACKDATA.length;i++)if(_tkIsDone(TRACKDATA[i]))n++;return n;}
+function _tkDoneTs(t){
+  if(!t)return 0;
+  var v=+t.done_ts||0;if(v)return v;
+  if(t.done_dt){var d=new Date(t.done_dt+'T00:00:00');if(!isNaN(d))return d.getTime();}
+  return +t.created||0;
+}
+function _tkTaskName(t){
+  if(!t)return '';
+  if(t.mode==='rows'){var v=_tkRowList(t).map(function(r){return ((r.vno||'')+'').trim();}).filter(function(x){return x;}).join(' · ');
+    if(v)return v;}
+  return ((t.title||'')+'').trim();
+}
+function _tkDoneMark(id){
+  var t=_tkFind(id);if(!t||t.done)return;
+  t.done=1;t.done_ts=Date.now();t.done_dt=_tkToday();
+  t.done_by=((typeof _hubUser==='function')?_hubUser():'')||'';
+  if(typeof gliLog==='function')gliLog('ปิดงานเสร็จ (Tracking task done)',(_tkTaskName(t)||'(ไม่มีชื่อ)')+' → Report งานที่เสร็จ');
+  if(_tkModalId===id){_tkModalId=null;_tkAtt=[];_tkMS={};}
+  saveTrack();renderTracking();
+  try{var _rp=document.getElementById('page-tkr');if(_rp&&!_rp.hidden&&typeof renderTkr==='function')renderTkr();}catch(_e){}
+}
+function _tkDoneUndo(id){
+  var t=_tkFind(id);if(!t||!t.done)return;
+  t.done=0;t.done_ts=0;t.done_by='';t.ord=null;/* ปล่อยลำดับเดิม เพื่อให้ไปต่อท้ายหัวข้อที่กลับไปอยู่ */
+  if((t.status||TK_STAT[0][0])!==_tkDoneKey())t.done_dt='';
+  if(typeof gliLog==='function')gliLog('นำงานกลับเข้าบอร์ด (Tracking)',(_tkTaskName(t)||'(ไม่มีชื่อ)')+' → '+_tkStat(t.status||TK_STAT[0][0])[1]);
+  saveTrack();renderTracking();
+  try{var _rp=document.getElementById('page-tkr');if(_rp&&!_rp.hidden&&typeof renderTkr==='function')renderTkr();}catch(_e){}
+}
 function renderTracking(){
   if(_tkCD)_tkColCleanup();/* ถ้ามีการลากหัวข้อค้างอยู่ตอนที่บอร์ดถูกวาดใหม่ (เช่น ซิงค์คลาวด์เข้ามาระหว่างลาก) ให้ยกเลิกการลากทิ้ง — ไม่งั้นจะไปคำนวณตำแหน่งจาก DOM ชุดเก่าแล้วสลับหัวข้อผิด */
   loadTrack();if(typeof loadPt==='function')loadPt();
   var pg=document.getElementById('page-tk');if(!pg)return;_tkAttInjectStyle();
   var q=_tkQ.trim().toLowerCase();
+  var _doneN=0;for(var _di=0;_di<TRACKDATA.length;_di++)if(_tkIsDone(TRACKDATA[_di]))_doneN++;
+  var _openN=TRACKDATA.length-_doneN;
   var view=TRACKDATA.filter(function(t){
+    if(_tkIsDone(t))return false;/* v10.72: งานที่กดเสร็จแล้วย้ายไปหน้า Report งานที่เสร็จ */
     if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.co||'')+' '+_tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+((_tkDoc(t.doc)||[])[1]||''))).toLowerCase().indexOf(q)<0))return false;
     if(_tkFA&&t.assignee!==_tkFA)return false;
     if(_tkFP&&(t.prio||'med')!==_tkFP)return false;if(_tkFC&&(t.cat||'')!==_tkFC)return false;if(_tkFD&&(t.doc||'')!==_tkFD)return false;
@@ -7685,13 +7869,14 @@ function renderTracking(){
   h+='<select class="tkfilt" id="tkFA"><option value="">Assignee: All</option>'+((typeof PTDATA!=='undefined'&&PTDATA)?PTDATA.map(function(u){return '<option value="'+u.id+'"'+(u.id===_tkFA?' selected':'')+'>'+esc(_ptName(u))+'</option>';}).join(''):'')+'</select>';
   h+='<select class="tkfilt" id="tkFP"><option value="">Priority: All</option>'+TK_PRIO.map(function(p){return '<option value="'+p[0]+'"'+(p[0]===_tkFP?' selected':'')+'>'+p[1]+'</option>';}).join('')+'</select>';
   h+='<select class="tkfilt" id="tkFC"><option value="">Category: All</option>'+TK_CAT.map(function(c){return '<option value="'+c[0]+'"'+(c[0]===_tkFC?' selected':'')+'>'+c[1]+'</option>';}).join('')+'</select>';
-  h+='<select class="tkfilt" id="tkFD"><option value="">ประเภทเอกสาร: ทั้งหมด</option>'+TK_DOC.map(function(d){return '<option value="'+_eatt(d[0])+'"'+(d[0]===_tkFD?' selected':'')+'>'+esc(d[1])+'</option>';}).join('')+'</select>';
+  h+='<select class="tkfilt" id="tkFD"><option value="">ประเภทเอกสาร: ทั้งหมด</option>'+_tkDocOptions(_tkFD)+'</select>';
   h+='<button class="tkbtn ghost" id="tkDocCfg" type="button" title="สร้าง/แก้ไขประเภทเอกสาร">🗂 ตั้งค่าประเภทเอกสาร</button>';
+  h+='<button class="tkbtn ghost" id="tkGoRep" type="button" title="เปิดหน้ารายงานงานที่กดเสร็จแล้ว">✅ Report งานที่เสร็จ'+(_doneN?(' · '+_doneN):'')+'</button>';
   if(_tkQ||_tkFA||_tkFP||_tkFC||_tkFD)h+='<button class="tkbtn ghost" id="tkClr" type="button">✕ Clear filters</button>';
-  h+='<div class="tkstat"><span class="tkpill total">Total '+view.length+'</span>'+(over?('<span class="tkpill over">⚠ Overdue '+over+'</span>'):'')+'<span class="tkpill done">✓ Done '+(cnt[_dk]||0)+'</span></div>';
+  h+='<div class="tkstat"><span class="tkpill total">Total '+view.length+'</span>'+(over?('<span class="tkpill over">⚠ Overdue '+over+'</span>'):'')+'<span class="tkpill done" id="tkDoneN" title="งานที่กด “เสร็จ” แล้ว — คลิกเพื่อเปิดหน้า Report งานที่เสร็จ">✅ เสร็จแล้ว '+_doneN+'</span></div>';
   h+='</div>';
   if(_tkDocPanel)h+=_tkDocPanelHTML();
-  if(!TRACKDATA.length){h+='<div class="tkempty"><div class="tkemptyic">🗂️</div><div class="tkemptyt">No tasks yet</div><div class="tkemptys">Click “+ Add Task” to add your first task</div></div>';}
+  if(!_openN){h+='<div class="tkempty"><div class="tkemptyic">'+(_doneN?'✅':'🗂️')+'</div><div class="tkemptyt">'+(_doneN?'ไม่มีงานค้างบนบอร์ด':'No tasks yet')+'</div><div class="tkemptys">'+(_doneN?('งานทั้งหมด '+_doneN+' รายการเสร็จแล้ว — ดูได้ที่หน้า “Report งานที่เสร็จ”'):'Click “+ Add Task” to add your first task')+'</div></div>';}
   else if(_tkView==='kanban'){h+=_tkKanban(view);}
   else{h+=_tkList(view);}
   h+='</div>'+_tkModalHTML();
@@ -7810,7 +7995,7 @@ function _tkCard(t,pos){
     if(_nl.length>3)h+='<div class="tkcckmore">+ อีก '+(_nl.length-3)+' รายการ</div>';
     h+='</div>';
   }
-  var _na=(t.att&&t.att.length)||0;h+='<div class="tkcardbot"><span class="tkassign">'+_tkAvatar(t.assignee)+'</span>'+(d?('<span class="'+d.cls+'">'+d.txt+'</span>'):'')+(_na?('<span class="tkattcount" title="'+_na+' ไฟล์แนบ">📎 '+_na+'</span>'):'')+'</div>';
+  var _na=(t.att&&t.att.length)||0;h+='<div class="tkcardbot"><span class="tkassign">'+_tkAvatar(t.assignee)+'</span>'+(d?('<span class="'+d.cls+'">'+d.txt+'</span>'):'')+(_na?('<span class="tkattcount" title="'+_na+' ไฟล์แนบ">📎 '+_na+'</span>'):'')+'<button class="tkdoneb" data-done="'+t.id+'" type="button" title="ทำเสร็จแล้ว — ย้ายการ์ดนี้ไปหน้า “Report งานที่เสร็จ” (นำกลับได้)">✓ เสร็จ</button></div>';
   h+='<button class="tkcopy" data-copy="'+t.id+'" type="button" title="คัดลอกงานนี้ — แล้วกด “วางที่นี่” ในหัวข้อที่ต้องการ (หรือกด Alt ค้างแล้วลากการ์ด = คัดลอก)">⧉</button>';
   h+='<div class="tkgrip" title="ลากการ์ดเพื่อย้ายคอลัมน์ หรือจัดลำดับขึ้น–ลงในคอลัมน์เดียวกัน · กด Alt ค้างขณะลาก = คัดลอก">⠿</div>';
   return h+'</div>';
@@ -7876,7 +8061,7 @@ function _tkModalHTML(){
   h+='<div class="tkml"><div class="tkmlbl">ไฟล์แนบ / รูปภาพ (Attachments)</div><div class="tkattdrop" id="tkmAttDrop"><div class="tkattbar"><button class="tkbtn ghost" id="tkmAttAdd" type="button">📎 เพิ่มไฟล์/รูป</button><span class="tkatthint">เลือกได้หลายไฟล์ (กด Ctrl/⌘ หรือ Shift) หรือลากไฟล์หลายไฟล์มาวางตรงนี้</span><span class="tkattstatus" id="tkmAttStatus"></span></div><input type="file" id="tkmAttFile" multiple style="display:none"><div class="tkattlist" id="tkmAttList">'+_tkAttListHTML()+'</div></div></div>';
   h+=meta;
   h+='</div>';
-  h+='<div class="tkmft">'+(isNew?'':'<button class="tkbtn danger" id="tkMDel" type="button">🗑 Delete</button>')+'<span style="flex:1"></span><button class="tkbtn ghost" id="tkMCancel" type="button">Cancel</button><button class="tkbtn primary" id="tkMSave" type="button">'+(isNew?'Add Task':'Save')+'</button></div>';
+  h+='<div class="tkmft">'+(isNew?'':'<button class="tkbtn danger" id="tkMDel" type="button">🗑 Delete</button>')+(isNew?'':'<button class="tkbtn done" id="tkMDone" type="button" title="บันทึกแล้วทำเครื่องหมายว่าเสร็จ — ย้ายไปหน้า Report งานที่เสร็จ">✓ เสร็จแล้ว</button>')+'<span style="flex:1"></span><button class="tkbtn ghost" id="tkMCancel" type="button">Cancel</button><button class="tkbtn primary" id="tkMSave" type="button">'+(isNew?'Add Task':'Save')+'</button></div>';
   return h+'</div></div>';
 }
 function _tkOpen(id){_tkAF={owner:'',title:''};_tkMS={};_tkModalId=id;var _t=_tkFind(id);_tkAtt=(_t&&_t.att)?_t.att.slice():[];
@@ -7907,14 +8092,16 @@ function _tkSaveModal(){
   var status=isNew?(_tkNewStatus||TK_STAT[0][0]):(((_tkFind(_tkModalId)||{}).status)||TK_STAT[0][0]);
   var notes=_tkNotes.slice();
   if(isNew){
-    var nt={id:(_tkNewId||_uid()),title:title,desc:descv,status:status,prio:prio,assignee:assignee,due:due,proj:proj,owner:owner,docno:docno,cat:cat,doc:doc,grp:grp,hl:hl,tc:tc,notes:notes,co:co,mode:mode,rows:rows,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done_dt:(status===_dk)?_tkToday():''};
+    var nt={id:(_tkNewId||_uid()),title:title,desc:descv,status:status,prio:prio,assignee:assignee,due:due,proj:proj,owner:owner,docno:docno,cat:cat,doc:doc,grp:grp,hl:hl,tc:tc,notes:notes,co:co,mode:mode,rows:rows,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done:0,done_dt:(status===_dk)?_tkToday():''};
     TRACKDATA.push(nt);
     if(typeof gliLog==='function')gliLog('Added task',title+(assignee&&_ptFind(assignee)?(' · assigned to '+_ptName(_ptFind(assignee))):''));
   }else{
     var t=_tkFind(_tkModalId);if(!t){_tkModalId=null;renderTracking();return;}
     var oldSt=t.status;
     t.title=title;t.notes=notes;t.desc=descv;t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.owner=owner;t.docno=docno;t.cat=cat;t.doc=doc;t.grp=grp;t.hl=hl;t.tc=tc;t.co=co;t.mode=mode;t.rows=rows;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));
-    if(status===_dk&&oldSt!==_dk)t.done_dt=_tkToday();if(status!==_dk)t.done_dt='';
+    /* v10.72: การ์ดที่เก็บเข้า Report งานที่เสร็จแล้ว — แก้ไขรายละเอียดได้ แต่ต้องไม่ล้างวันที่เสร็จทิ้ง
+       (เดิมกฎนี้ผูกกับหัวข้อ "Done" ของบอร์ดอย่างเดียว งานที่ done แต่ค้างอยู่หัวข้ออื่นจึงโดนล้าง) */
+    if(!t.done){if(status===_dk&&oldSt!==_dk)t.done_dt=_tkToday();if(status!==_dk)t.done_dt='';}
     if(typeof gliLog==='function')gliLog((oldSt!==status)?'Updated status':'Edited task',title+(oldSt!==status?(' → '+_tkStat(status)[1]):''));
   }
   _tkModalId=null;_tkAtt=[];_tkNewId=null;_tkNewGrp='';_tkMS={};saveTrack();renderTracking();
@@ -7945,6 +8132,8 @@ function _tkBind(){
     if((b=cl(e,'[data-clipx]'))){_tkClipClear();return;}
     if((b=cl(e,'[data-paste]'))){_tkPasteInto(b.getAttribute('data-paste'));return;}
     if((b=cl(e,'[data-copy]'))){_tkCopyCard(b.getAttribute('data-copy'));return;}
+    if((b=cl(e,'[data-done]'))){_tkDoneMark(b.getAttribute('data-done'));return;}
+    if((b=cl(e,'#tkGoRep'))||(b=cl(e,'#tkDoneN'))){var _rb=document.querySelector('.modtab[data-mod="tkr"]');if(_rb)_rb.click();return;}
     if((b=cl(e,'.tkdel'))){_tkDel(b.getAttribute('data-del'));return;}
     if((b=cl(e,'#tkAdd'))){_tkAdd('todo');return;}
     if((b=cl(e,'.tkaddcol'))){_tkAdd(b.getAttribute('data-st'),'');return;}
@@ -7960,6 +8149,7 @@ function _tkBind(){
     if((b=cl(e,'#tkMClose'))||(b=cl(e,'#tkMCancel'))){_tkCloseModal();return;}
     if((b=cl(e,'#tkMSave'))){_tkSaveModal();return;}
     if((b=cl(e,'#tkMDel'))){_tkDel(_tkModalId);return;}
+    if((b=cl(e,'#tkMDone'))){var _mid=_tkModalId;if(!_mid||_mid==='__new__')return;_tkSaveModal();if(_tkModalId===null)_tkDoneMark(_mid);return;}
     if((b=cl(e,'[data-tkmode]'))){_tkModeSet(b.getAttribute('data-tkmode'));return;}
     if((b=cl(e,'#tkvAdd'))){_tkRowAdd();return;}
     if((b=cl(e,'[data-vdel]'))){_tkRowDel(b.getAttribute('data-vdel'));return;}
@@ -7990,6 +8180,8 @@ function _tkBind(){
     if(el.id==='tkmProj'){if(_tkPmT)clearTimeout(_tkPmT);_tkPmApply(false);return;}/* ออกจากช่อง/กด Enter = ค้นทันที ไม่ต้องรอ debounce */
     var _dn=(el.getAttribute&&el.getAttribute('data-docnm'))||'';
     if(_dn){_tkDocSet(_dn,1,(el.value||'').trim()||'(ไม่มีชื่อ)');return;}
+    var _dg=(el.getAttribute&&el.getAttribute('data-docgrp'))||'';
+    if(_dg){_tkDocSet(_dg,4,(el.value||'').trim());return;}
     var _dc2=(el.getAttribute&&el.getAttribute('data-doccol'))||'';
     if(_dc2){var _dp=_dc2.split('|');_tkDocSet(_dp[1],(_dp[0]==='bg')?3:2,el.value);return;}
     if(el.id==='tkFD'){_tkFD=el.value;renderTracking();return;}
@@ -8000,6 +8192,312 @@ var _ca=(el.getAttribute&&el.getAttribute('data-colcolor'))||'';if(_ca){var _cc=
   pg.addEventListener('dragover',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.add('over');return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();_tkClearDrop();col.classList.add('dropon');_tkCardShowMark(col,_tkCardSlot(col,e.clientX,e.clientY,_tkLayout==='vert'),_tkLayout==='vert');try{e.dataTransfer.dropEffect=(e.altKey||e.ctrlKey||e.metaKey)?'copy':'move';}catch(_de){}}});
   pg.addEventListener('dragleave',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz&&!dz.contains(e.relatedTarget))dz.classList.remove('over');var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&!col.contains(e.relatedTarget))col.classList.remove('dropon');});
   pg.addEventListener('drop',function(e){var dz=e.target&&e.target.closest?e.target.closest('.tkattdrop'):null;if(dz){e.preventDefault();dz.classList.remove('over');var _ff=e.dataTransfer&&e.dataTransfer.files;if(_ff&&_ff.length)_tkAttAddFiles(_ff);return;}var col=e.target&&e.target.closest?e.target.closest('.tkcolbody'):null;if(col&&_tkDragId){e.preventDefault();var slot=_tkCardSlot(col,e.clientX,e.clientY,_tkLayout==='vert');_tkClearDrop();var _bid=slot.before?slot.before.getAttribute('data-id'):null,_cst=col.getAttribute('data-st');var _gg=_tkGrpAt(col,e.clientY);if(e.altKey||e.ctrlKey||e.metaKey){var _sc=_tkFind(_tkDragId);if(_sc)_tkClipMake(_sc,_cst,_bid,_gg);}/* กด Alt/Ctrl ค้างขณะลาก = คัดลอก ไม่ใช่ย้าย */else _tkDropReorder(_tkDragId,_cst,_bid,_gg);_tkDragId=null;}});
+}
+
+/* ===================== v10.72: REPORT งานที่เสร็จ · Completed Work (โมดูล tkr) =====================
+   อ่านจาก TRACKDATA ชุดเดียวกับ Tracking — เฉพาะงานที่ t.done=1 (กดปุ่ม "✓ เสร็จ" บนการ์ด)
+   กรองตามช่วงเวลาที่กดเสร็จ · ผู้รับผิดชอบ · ประเภทเอกสาร · บริษัท · หัวข้อบอร์ด · ค้นหาข้อความ
+   จัดกลุ่มพร้อมยอดรวมย่อย · ส่งออก CSV (เปิดด้วย Excel) · สั่งพิมพ์ · นำงานกลับขึ้นบอร์ด · ลบถาวร
+   มุมมอง (ตัวกรองที่เลือกไว้) เก็บในเครื่องนี้เท่านั้น ไม่ซิงค์ให้เครื่องอื่น */
+var TKR_THMON=['','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+var TKR_PAGE=300;/* v10.72: ตารางแสดงทีละหน้า — 5,000 แถวใช้เวลาวาดเกือบ 1 วินาที ทำให้พิมพ์ค้นหาแล้วสะดุด
+   ตัวเลขสรุป (KPI) และไฟล์ CSV ยังคิดจากรายการที่ตรงตัวกรอง "ทั้งหมด" เสมอ · ค่านี้ไม่ถูกจำข้ามการเปิดหน้าใหม่ */
+var _tkrLimit=TKR_PAGE;
+var _tkrQ='',_tkrPer='all',_tkrFrom='',_tkrTo='',_tkrFA='',_tkrFD='',_tkrFCo='',_tkrFSt='',_tkrGrp='',_tkrSort='dt_desc',_tkrDebT=null,_tkrRefocus=false,_tkrCol={};
+(function(){try{var o=JSON.parse(localStorage.getItem('gli_tkrview')||'null');
+  if(o&&typeof o==='object'){_tkrPer=o.per||_tkrPer;_tkrFrom=o.from||'';_tkrTo=o.to||'';_tkrFA=o.fa||'';_tkrFD=o.fd||'';_tkrFCo=o.fco||'';_tkrFSt=o.fst||'';_tkrGrp=o.grp||'';_tkrSort=o.sort||_tkrSort;if(o.col&&typeof o.col==='object')_tkrCol=o.col;}}catch(e){}})();
+function _tkrSaveView(){try{localStorage.setItem('gli_tkrview',JSON.stringify({per:_tkrPer,from:_tkrFrom,to:_tkrTo,fa:_tkrFA,fd:_tkrFD,fco:_tkrFCo,fst:_tkrFSt,grp:_tkrGrp,sort:_tkrSort,col:_tkrCol}));}catch(e){}}
+function _tkrP2(n){return (n<10?'0':'')+n;}
+function _tkrDate(ts){if(!ts)return '';var d=new Date(+ts);if(isNaN(d))return '';return _tkrP2(d.getDate())+'/'+_tkrP2(d.getMonth()+1)+'/'+(d.getFullYear()+543);}
+function _tkrTime(ts){if(!ts)return '';var d=new Date(+ts);if(isNaN(d))return '';return _tkrP2(d.getHours())+'.'+_tkrP2(d.getMinutes())+' น.';}
+function _tkrMonKey(ts){var d=new Date(+ts);if(isNaN(d))return '';return d.getFullYear()+'-'+_tkrP2(d.getMonth()+1);}
+function _tkrMonLabel(k){var p=((k||'')+'').split('-');if(p.length!==2)return '— ไม่ทราบเดือน —';return (TKR_THMON[+p[1]]||p[1])+' '+((+p[0])+543);}
+/* ช่วงเวลาที่เลือก → [a,b) เป็น timestamp (null = ไม่จำกัด) */
+function _tkrRange(){
+  var now=new Date(),y=now.getFullYear(),m=now.getMonth(),d=now.getDate(),a=null,b=null;
+  if(_tkrPer==='m0'){a=new Date(y,m,1);b=new Date(y,m+1,1);}
+  else if(_tkrPer==='m1'){a=new Date(y,m-1,1);b=new Date(y,m,1);}
+  else if(_tkrPer==='d30'){a=new Date(y,m,d-29);b=new Date(y,m,d+1);}
+  else if(_tkrPer==='d90'){a=new Date(y,m,d-89);b=new Date(y,m,d+1);}
+  else if(_tkrPer==='y0'){a=new Date(y,0,1);b=new Date(y+1,0,1);}
+  else if(_tkrPer==='cus'){
+    if(_tkrFrom){var f=new Date(_tkrFrom+'T00:00:00');if(!isNaN(f))a=f;}
+    if(_tkrTo){var t2=new Date(_tkrTo+'T00:00:00');if(!isNaN(t2)){t2.setDate(t2.getDate()+1);b=t2;}}
+  }
+  return {a:a?a.getTime():null,b:b?b.getTime():null};
+}
+function _tkrPerLabel(){
+  var R=_tkrRange();
+  if(R.a==null&&R.b==null)return 'ทุกช่วงเวลา';
+  var a=R.a!=null?_tkrDate(R.a):'เริ่มแรก',b=R.b!=null?_tkrDate(R.b-86400000):'ปัจจุบัน';
+  return a+' – '+b;
+}
+/* จำนวนวันที่ใช้ทำงาน = วันที่กดเสร็จ − วันที่สร้างการ์ด */
+function _tkrDays(t){var c=+t.created||0,d=_tkDoneTs(t);if(!c||!d||d<c)return null;return Math.round((d-c)/86400000);}
+/* เทียบกับกำหนดส่ง: >0 = ช้ากว่ากำหนดกี่วัน · <=0 = ตรงเวลา · null = ไม่ได้กำหนดวันส่ง */
+function _tkrLate(t){
+  if(!t.due)return null;
+  var du=new Date(t.due+'T00:00:00');if(isNaN(du))return null;
+  var dn=new Date(_tkDoneTs(t));if(isNaN(dn))return null;
+  var d0=new Date(dn.getFullYear(),dn.getMonth(),dn.getDate()).getTime();
+  return Math.round((d0-du.getTime())/86400000);
+}
+function _tkrRows(){
+  var R=_tkrRange(),q=((_tkrQ||'')+'').trim().toLowerCase();
+  var out=_tkDoneTasks().filter(function(t){
+    var ts=_tkDoneTs(t);
+    if(R.a!=null&&ts<R.a)return false;
+    if(R.b!=null&&ts>=R.b)return false;
+    if(_tkrFA&&(t.assignee||'')!==_tkrFA)return false;
+    if(_tkrFD&&(t.doc||'')!==_tkrFD)return false;
+    if(_tkrFCo&&((((t.co||'')+'').toUpperCase())!==_tkrFCo))return false;
+    if(_tkrFSt&&(t.status||TK_STAT[0][0])!==_tkrFSt)return false;
+    if(q){
+      var u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;
+      var hay=[_tkTaskName(t),t.desc,t.proj,t.owner,t.docno,t.grp,t.co,t.done_by,
+        (u&&typeof _ptName==='function')?_ptName(u):'',
+        _tkProjName(t.proj),((_tkDoc(t.doc)||[])[1]||''),((_tkCat(t.cat)||[])[1]||''),
+        ((_tkStat(t.status||TK_STAT[0][0])||[])[1]||''),
+        _tkNoteList(t).map(function(n){return n.txt||'';}).join(' '),
+        _tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')].join(' ').toLowerCase();
+      if(hay.indexOf(q)<0)return false;
+    }
+    return true;
+  });
+  out.sort(function(a,b){
+    if(_tkrSort==='dt_asc')return _tkDoneTs(a)-_tkDoneTs(b);
+    if(_tkrSort==='due'){var da=a.due||'9999-99-99',db=b.due||'9999-99-99';if(da!==db)return da<db?-1:1;return _tkDoneTs(b)-_tkDoneTs(a);}
+    if(_tkrSort==='days'){var xa=_tkrDays(a),xb=_tkrDays(b);return (xb==null?-1:xb)-(xa==null?-1:xa);}
+    return _tkDoneTs(b)-_tkDoneTs(a);
+  });
+  return out;
+}
+function _tkrGrpOf(t){
+  var u,d,c,k;
+  if(_tkrGrp==='as'){u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;return u?_ptName(u):'— ไม่ระบุผู้รับผิดชอบ —';}
+  if(_tkrGrp==='doc'){d=_tkDoc(t.doc);return d?d[1]:'— ไม่ระบุประเภทเอกสาร —';}
+  if(_tkrGrp==='mon')return _tkrMonLabel(_tkrMonKey(_tkDoneTs(t)));
+  if(_tkrGrp==='co'){c=_tkCo(t.co);return c?c[1]:'— ไม่ระบุบริษัท —';}
+  if(_tkrGrp==='st')return (_tkStat(t.status||TK_STAT[0][0])||['',''])[1]||'—';
+  if(_tkrGrp==='grp')return ((t.grp||'')+'').trim()||'— ไม่ได้จัดกลุ่ม —';
+  if(_tkrGrp==='cat'){k=_tkCat(t.cat);return k?k[1]:'— ไม่ระบุหมวด —';}
+  if(_tkrGrp==='by')return ((t.done_by||'')+'').trim()||'— ไม่ระบุผู้กดเสร็จ —';
+  return '';
+}
+/* งานเก่าที่ยังกองอยู่ในหัวข้อ "Done" ของบอร์ด (ยุคก่อนมีปุ่มนี้) — เสนอให้ย้ายเข้ารายงานทีเดียว */
+function _tkrLegacy(){loadTrack();var dk=_tkDoneKey(),o=[],i,t;
+  for(i=0;i<TRACKDATA.length;i++){t=TRACKDATA[i];if(!t||t.done)continue;if((t.status||TK_STAT[0][0])===dk)o.push(t);}
+  return o;}
+function _tkrAdopt(){
+  var L=_tkrLegacy(),dk=_tkDoneKey();if(!L.length){alert('ไม่มีงานค้างในหัวข้อนี้');return;}
+  if(!confirm('ย้ายงาน '+L.length+' รายการในหัวข้อ “'+_tkStat(dk)[1]+'” เข้า Report งานที่เสร็จ?\n\nวันที่เสร็จจะใช้วันที่การ์ดถูกย้ายเข้าหัวข้อนี้ (ถ้ามี)\nกด “↩ นำกลับ” ในรายงานเพื่อย้ายคืนขึ้นบอร์ดได้ทุกเมื่อ'))return;
+  var now=Date.now(),me=((typeof _hubUser==='function')?_hubUser():'')||'',i,t,dd;
+  for(i=0;i<L.length;i++){t=L[i];
+    dd=0;if(t.done_dt){var x=new Date(t.done_dt+'T00:00:00');if(!isNaN(x))dd=x.getTime();}
+    t.done=1;t.done_ts=dd||now;
+    if(!t.done_dt)t.done_dt=_tkToday();
+    if(!t.done_by)t.done_by=me;}
+  if(typeof gliLog==='function')gliLog('ย้ายงานเข้ารายงานที่เสร็จ (Tracking)',L.length+' รายการ · จากหัวข้อ '+_tkStat(dk)[1]);
+  saveTrack();renderTkr();renderTracking();
+}
+function _tkrOpen(id){var b=document.querySelector('.modtab[data-mod="tk"]');if(b)b.click();
+  setTimeout(function(){if(typeof _tkOpen==='function')_tkOpen(id);},70);}
+function _tkrDel(id){
+  var t=_tkFind(id);if(!t)return;
+  if(!confirm('ลบงาน “'+(_tkTaskName(t)||'(ไม่มีชื่อ)')+'” ออกถาวร?\n\nลบแล้วกู้คืนไม่ได้ และไฟล์แนบของงานนี้จะถูกลบด้วย\nถ้าต้องการแค่เอากลับขึ้นบอร์ด ให้กด “↩ นำกลับ” แทน'))return;
+  loadTrack();_tkAttDelTask(t);
+  TRACKDATA=TRACKDATA.filter(function(x){return x.id!==id;});
+  if(typeof gliLog==='function')gliLog('ลบงานที่เสร็จแล้ว (Tracking report)',_tkTaskName(t)||'');
+  saveTrack();renderTkr();renderTracking();
+}
+function _tkrCsvCell(v){v=(v==null?'':(''+v));return '"'+v.replace(/"/g,'""').replace(/\r?\n/g,' ')+'"';}
+function _tkrExport(){
+  var R=_tkrRows();
+  if(!R.length){alert('ไม่มีข้อมูลในช่วงที่เลือก');return;}
+  var head=['ลำดับ','วันที่เสร็จ','เวลา','งาน','คำอธิบายเพิ่มเติม','ประเภทเอกสาร','บริษัท','หัวข้อบอร์ด','กลุ่ม','หมวดงาน','รหัสโปรเจค','ชื่อโครงการ','ชื่อผู้ว่าจ้าง','รหัสเอกสาร','ผู้รับผิดชอบ','ผู้กดเสร็จ','ผู้สร้างงาน','วันที่สร้าง','กำหนดส่ง','ตรงเวลา/ช้า (วัน)','ใช้เวลา (วัน)','Checklist เสร็จ','Checklist ทั้งหมด','ไฟล์แนบ'];
+  var lines=[head.map(_tkrCsvCell).join(',')];
+  R.forEach(function(t,i){
+    var u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;
+    var nl=_tkNoteList(t),nd=0;nl.forEach(function(n){if(n.done)nd++;});
+    var lt=_tkrLate(t),dy=_tkrDays(t),ts=_tkDoneTs(t);
+    lines.push([i+1,_tkrDate(ts),_tkrTime(ts),_tkTaskName(t),(t.desc||''),
+      ((_tkDoc(t.doc)||[])[1]||''),(((t.co||'')+'').toUpperCase()),
+      ((_tkStat(t.status||TK_STAT[0][0])||[])[1]||''),((t.grp||'')+''),((_tkCat(t.cat)||[])[1]||''),
+      (t.proj||''),(t.proj?_tkProjName(t.proj):''),(t.owner||''),(t.docno||''),
+      (u?_ptName(u):''),(t.done_by||''),(t.by||''),
+      (t.created?_tkrDate(t.created):''),(t.due?_tkrDate(new Date(t.due+'T00:00:00').getTime()):''),
+      (lt==null?'':lt),(dy==null?'':dy),nd,nl.length,((t.att&&t.att.length)||0)
+    ].map(_tkrCsvCell).join(','));
+  });
+  var txt='﻿'+lines.join('\r\n');
+  try{
+    var blob=new Blob([txt],{type:'text/csv;charset=utf-8;'});
+    var url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download='GLI-completed-work_'+_tkToday()+'.csv';/* ชื่อไฟล์เป็นอักษรอังกฤษล้วน — Chrome จะตัดชื่อไฟล์ที่มีภาษาไทยทิ้งแล้วบันทึกเป็น "download" ไม่มีนามสกุล .csv */
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},30000);
+    if(typeof gliLog==='function')gliLog('ส่งออกรายงานงานที่เสร็จ (CSV)',R.length+' รายการ · '+_tkrPerLabel());
+  }catch(e){alert('ส่งออกไม่สำเร็จ: '+(e&&e.message||e));}
+}
+function _tkrRowHTML(t,no){
+  var u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;
+  var dc=_tkDoc(t.doc),co=_tkCo(t.co),st=_tkStat(t.status||TK_STAT[0][0]),ct=_tkCat(t.cat);
+  var ts=_tkDoneTs(t),lt=_tkrLate(t),dy=_tkrDays(t);
+  var nl=_tkNoteList(t),nd=0;nl.forEach(function(n){if(n.done)nd++;});
+  var na=(t.att&&t.att.length)||0;
+  var sub=[];
+  if(((t.proj||'')+'').trim())sub.push('<b>'+esc(((t.proj||'')+'').trim())+'</b>');
+  if(((t.owner||'')+'').trim())sub.push(esc(((t.owner||'')+'').trim()));
+  if(((t.docno||'')+'').trim())sub.push('<i>'+esc(((t.docno||'')+'').trim())+'</i>');
+  var h='<tr>';
+  h+='<td class="tkrno">'+no+'</td>';
+  h+='<td class="tkrdt">'+esc(_tkrDate(ts)||'—')+'<span class="tkrtm">'+esc(_tkrTime(ts))+'</span></td>';
+  h+='<td><span class="tkrttl" data-tkredit="'+_eatt(t.id)+'" title="คลิกเพื่อเปิดการ์ดงานนี้">'+esc(_tkTaskName(t)||'(ไม่มีชื่อ)')+'</span>';
+  if(((t.grp||'')+'').trim())h+=' <span class="tkrchip">🗂 '+esc(((t.grp||'')+'').trim())+'</span>';
+  if(ct)h+=' <span class="tkrchip" style="background:'+ct[3]+';color:'+ct[2]+'">'+esc(ct[1])+'</span>';
+  if(sub.length)h+='<span class="tkrsubl">'+sub.join(' · ')+'</span>';
+  if(((t.desc||'')+'').trim())h+='<span class="tkrsubl">'+esc(((t.desc||'')+'').trim().slice(0,110))+'</span>';
+  h+='</td>';
+  h+='<td>'+(dc?('<span class="tkrchip" style="background:'+dc[3]+';color:'+dc[2]+'">'+esc(dc[1])+'</span>'):'<span class="tkrdim">—</span>')+'</td>';
+  h+='<td>'+(co?('<span class="tkrchip" style="background:'+co[2]+';color:#fff">'+esc(co[1])+'</span>'):'<span class="tkrdim">—</span>')+'</td>';
+  h+='<td><span class="tkrchip" style="background:'+(st[3]||'#EEF2F7')+';color:'+st[2]+'">'+esc(st[1]||'')+'</span></td>';
+  h+='<td>'+(u?esc(_ptName(u)):'<span class="tkrdim">—</span>')+'</td>';
+  h+='<td>'+(((t.done_by||'')+'').trim()?esc(((t.done_by||'')+'').trim()):'<span class="tkrdim">—</span>')+'</td>';
+  h+='<td class="tkrnum">'+(t.due?esc(_tkrDate(new Date(t.due+'T00:00:00').getTime())):'<span class="tkrdim">—</span>')+'</td>';
+  h+='<td>'+((lt==null)?'<span class="tkrdim">—</span>':(lt>0?('<span class="tkrlate">ช้า '+lt+' วัน</span>'):'<span class="tkrok">ตรงเวลา</span>'))+'</td>';
+  h+='<td class="tkrnum">'+((dy==null)?'<span class="tkrdim">—</span>':dy)+'</td>';
+  h+='<td class="tkrnum">'+(nl.length?(nd+'/'+nl.length):'<span class="tkrdim">—</span>')+'</td>';
+  h+='<td class="tkrnum">'+(na?('📎 '+na):'<span class="tkrdim">—</span>')+'</td>';
+  h+='<td class="tkract"><button class="tkrb undo" data-tkrundo="'+_eatt(t.id)+'" type="button" title="นำกลับขึ้นบอร์ด Tracking (หัวข้อ '+_eatt(st[1]||'')+')">↩</button>'
+    +'<button class="tkrb del" data-tkrdel="'+_eatt(t.id)+'" type="button" title="ลบงานนี้ถาวร">🗑</button></td>';
+  return h+'</tr>';
+}
+function renderTkr(){
+  var pg=document.getElementById('page-tkr');if(!pg)return;
+  loadTrack();if(typeof loadPt==='function')loadPt();
+  var full=_tkrRows(),allN=_tkDoneN(),legacy=_tkrLegacy();
+  var rows=(full.length>_tkrLimit)?full.slice(0,_tkrLimit):full;/* ตารางแสดงแค่ส่วนแรก · KPI/CSV ใช้ full */
+  /* KPI — คิดจากรายการที่ตรงตัวกรองทั้งหมด ไม่ใช่แค่แถวที่แสดงอยู่ */
+  var onT=0,late=0,noDue=0,dSum=0,dN=0,people={},peopleN=0,i,t,lt,dy;
+  for(i=0;i<full.length;i++){t=full[i];lt=_tkrLate(t);dy=_tkrDays(t);
+    if(lt==null)noDue++;else if(lt>0)late++;else onT++;
+    if(dy!=null){dSum+=dy;dN++;}
+    var u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;var nm=u?_ptName(u):'';
+    if(nm&&!people[nm]){people[nm]=1;peopleN++;}}
+  var avg=dN?(Math.round((dSum/dN)*10)/10):null;
+  var pct=(onT+late)?Math.round(onT*100/(onT+late)):null;
+
+  var h='<div class="tkrwrap">';
+  h+='<div class="tkrhd"><div class="tkrtitle"><span class="tkric">✅</span> Report งานที่เสร็จ <span class="tkrsub">งานที่กด “✓ เสร็จ” จากบอร์ด Tracking · '+esc(_tkrPerLabel())+'</span></div>'
+    +'<div class="tkrhdr"><button class="tkbtn ghost" id="tkrBack" type="button" title="กลับไปที่บอร์ด Tracking">← บอร์ด Tracking</button>'
+    +'<button class="tkbtn ghost" id="tkrPrint" type="button" title="สั่งพิมพ์ / บันทึกเป็น PDF">🖨 พิมพ์</button>'
+    +'<button class="tkbtn primary" id="tkrExport" type="button" title="ส่งออกเป็นไฟล์ CSV เปิดด้วย Excel ได้">⬇ ส่งออก CSV</button></div></div>';
+
+  h+='<div class="tkrtool">';
+  h+='<input class="tkrsearch" id="tkrSearch" type="text" placeholder="ค้นหางานที่เสร็จ…" value="'+_eatt(_tkrQ)+'"'+((typeof _noAC==='function')?_noAC():'')+'>';
+  h+='<span class="tkrlbl">ช่วงเวลา</span><select class="tkrfilt" id="tkrPer">'
+    +[['all','ทั้งหมด'],['m0','เดือนนี้'],['m1','เดือนที่แล้ว'],['d30','30 วันล่าสุด'],['d90','90 วันล่าสุด'],['y0','ปีนี้'],['cus','กำหนดเอง…']]
+      .map(function(o){return '<option value="'+o[0]+'"'+(_tkrPer===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';
+  if(_tkrPer==='cus')h+='<input class="tkrdate" id="tkrFrom" type="date" value="'+_eatt(_tkrFrom)+'" title="ตั้งแต่วันที่"><span class="tkrlbl">ถึง</span><input class="tkrdate" id="tkrTo" type="date" value="'+_eatt(_tkrTo)+'" title="ถึงวันที่">';
+  h+='<select class="tkrfilt" id="tkrFA"><option value="">ผู้รับผิดชอบ: ทั้งหมด</option>'+((typeof PTDATA!=='undefined'&&PTDATA)?PTDATA.map(function(u){return '<option value="'+_eatt(u.id)+'"'+(u.id===_tkrFA?' selected':'')+'>'+esc(_ptName(u))+'</option>';}).join(''):'')+'</select>';
+  h+='<select class="tkrfilt" id="tkrFD"><option value="">ประเภทเอกสาร: ทั้งหมด</option>'+_tkDocOptions(_tkrFD)+'</select>';
+  h+='<select class="tkrfilt" id="tkrFCo"><option value="">บริษัท: ทั้งหมด</option>'+TK_CO.map(function(c){return '<option value="'+_eatt(c[0])+'"'+(c[0]===_tkrFCo?' selected':'')+'>'+esc(c[1])+'</option>';}).join('')+'</select>';
+  h+='<select class="tkrfilt" id="tkrFSt"><option value="">หัวข้อบอร์ด: ทั้งหมด</option>'+TK_STAT.map(function(c){return '<option value="'+_eatt(c[0])+'"'+(c[0]===_tkrFSt?' selected':'')+'>'+esc(c[1])+'</option>';}).join('')+'</select>';
+  h+='<span class="tkrlbl">จัดกลุ่ม</span><select class="tkrfilt" id="tkrGrp">'
+    +[['','ไม่จัดกลุ่ม'],['mon','ตามเดือนที่เสร็จ'],['as','ตามผู้รับผิดชอบ'],['by','ตามผู้กดเสร็จ'],['doc','ตามประเภทเอกสาร'],['co','ตามบริษัท'],['st','ตามหัวข้อบอร์ด'],['grp','ตามกลุ่มงาน'],['cat','ตามหมวดงาน']]
+      .map(function(o){return '<option value="'+o[0]+'"'+(_tkrGrp===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';
+  h+='<select class="tkrfilt" id="tkrSort">'
+    +[['dt_desc','เรียง: เสร็จล่าสุดก่อน'],['dt_asc','เรียง: เสร็จเก่าสุดก่อน'],['due','เรียง: ตามกำหนดส่ง'],['days','เรียง: ใช้เวลานานสุดก่อน']]
+      .map(function(o){return '<option value="'+o[0]+'"'+(_tkrSort===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';
+  if(_tkrQ||_tkrFA||_tkrFD||_tkrFCo||_tkrFSt||_tkrGrp||_tkrPer!=='all')h+='<button class="tkbtn ghost" id="tkrClr" type="button">✕ ล้างตัวกรอง</button>';
+  h+='</div>';
+
+  if(legacy.length)h+='<div class="tkrnote">📥 พบงาน <b>'+legacy.length+'</b> รายการค้างอยู่ในหัวข้อ “'+esc(_tkStat(_tkDoneKey())[1]||'Done')+'” ของบอร์ด (จากก่อนมีปุ่ม “✓ เสร็จ”) — ต้องการย้ายเข้ารายงานนี้ทีเดียวไหม?<button class="tkbtn ghost" id="tkrAdopt" type="button">ย้ายเข้ารายงาน</button></div>';
+
+  h+='<div class="tkrkpis">'
+   +'<div class="tkrkpi" style="--k:#15803D"><div class="tkrkn">'+full.length+'</div><div class="tkrkl">งานที่เสร็จ</div><div class="tkrks">'+esc(_tkrPerLabel())+'</div></div>'
+   +'<div class="tkrkpi" style="--k:#0E5C52"><div class="tkrkn">'+onT+'</div><div class="tkrkl">เสร็จตรงเวลา</div><div class="tkrks">'+(pct==null?'ไม่มีงานที่กำหนดวันส่ง':(pct+'% ของงานที่มีกำหนดส่ง'))+'</div></div>'
+   +'<div class="tkrkpi" style="--k:#B42318"><div class="tkrkn">'+late+'</div><div class="tkrkl">ช้ากว่ากำหนด</div><div class="tkrks">'+noDue+' รายการไม่ได้กำหนดวันส่ง</div></div>'
+   +'<div class="tkrkpi" style="--k:#B45309"><div class="tkrkn">'+(avg==null?'—':avg)+'</div><div class="tkrkl">ใช้เวลาเฉลี่ย (วัน)</div><div class="tkrks">นับจากวันที่สร้างการ์ดถึงวันที่กดเสร็จ</div></div>'
+   +'<div class="tkrkpi" style="--k:#1D5FAE"><div class="tkrkn">'+peopleN+'</div><div class="tkrkl">ผู้รับผิดชอบ (คน)</div><div class="tkrks">ที่มีงานเสร็จในช่วงนี้</div></div>'
+   +'</div>';
+
+  if(!allN){
+    h+='<div class="tkrempty"><div class="tkremptyic">✅</div><div class="tkremptyt">ยังไม่มีงานที่กดเสร็จ</div>'
+      +'<div class="tkremptys">ไปที่หน้า <b>Tracking</b> แล้วกดปุ่ม <b>“✓ เสร็จ”</b> ที่มุมล่างขวาของการ์ด — งานจะย้ายมาแสดงที่หน้านี้</div></div>';
+  }else{
+    h+='<div class="tkrlistwrap"><table class="tkrlist"><thead><tr>'
+      +'<th>#</th><th>วันที่เสร็จ</th><th>งาน · รายละเอียด</th><th>ประเภทเอกสาร</th><th>บริษัท</th><th>หัวข้อบอร์ด</th>'
+      +'<th>ผู้รับผิดชอบ</th><th>ผู้กดเสร็จ</th><th>กำหนดส่ง</th><th>ตรงเวลา</th><th>ใช้เวลา<br>(วัน)</th><th>Checklist</th><th>ไฟล์</th><th></th>'
+      +'</tr></thead><tbody>';
+    if(!rows.length){h+='<tr><td colspan="14" class="tkrnone">ไม่มีงานที่เสร็จตรงกับตัวกรองที่เลือก</td></tr>';}
+    else if(!_tkrGrp){rows.forEach(function(t,i){h+=_tkrRowHTML(t,i+1);});}
+    else{
+      var ord=[],map={},g;
+      rows.forEach(function(t){g=_tkrGrpOf(t);if(!Object.prototype.hasOwnProperty.call(map,g)){map[g]=[];ord.push(g);}map[g].push(t);});
+      var n=0;
+      ord.forEach(function(g){
+        var list=map[g],gs=0,gn=0,gl=0;
+        list.forEach(function(t){var d2=_tkrDays(t);if(d2!=null){gs+=d2;gn++;}var l2=_tkrLate(t);if(l2!=null&&l2>0)gl++;});
+        var cl=!!_tkrCol[g];
+        h+='<tr class="tkrgrow"><td colspan="14" data-tkrgx="'+_eatt(g)+'" style="cursor:pointer" title="คลิกเพื่อย่อ/ขยายกลุ่มนี้">'
+          +'<span class="tkrgnm">'+(cl?'▸':'▾')+' '+esc(g)+'</span><span class="tkrgn">'+list.length+' งาน</span>'
+          +'<span class="tkrgs">'+(gn?('ใช้เวลาเฉลี่ย '+(Math.round((gs/gn)*10)/10)+' วัน'):'ไม่มีข้อมูลระยะเวลา')+(gl?(' · ช้ากว่ากำหนด '+gl+' รายการ'):'')+'</span></td></tr>';
+        if(!cl)list.forEach(function(t){h+=_tkrRowHTML(t,++n);});
+        else n+=list.length;
+      });
+    }
+    h+='</tbody></table></div>';
+    h+='<div class="tkrfoot"><span>แสดง <b>'+rows.length+'</b> จาก <b>'+full.length+'</b> รายการที่ตรงตัวกรอง · งานที่เสร็จทั้งหมด <b>'+allN+'</b> รายการ</span>'
+      +((full.length>rows.length)?('<span class="tkrcap">⚠ ตารางแสดงเฉพาะ '+rows.length+' รายการที่เรียงมาก่อน — ตัวเลขสรุปด้านบนและไฟล์ CSV ครอบคลุมครบทั้ง '+full.length+' รายการ</span>'):'')
+      +'<span>↩ = นำกลับขึ้นบอร์ด · 🗑 = ลบถาวร · คลิกชื่องานเพื่อเปิดการ์ด</span></div>';
+    if(full.length>rows.length)h+='<div class="tkrmore"><button class="tkbtn ghost" id="tkrMore" type="button">＋ แสดงเพิ่มอีก '+Math.min(TKR_PAGE,full.length-rows.length)+' รายการ</button>'
+      +'<button class="tkbtn ghost" id="tkrAll" type="button" title="อาจใช้เวลาวาดสักครู่ถ้ารายการเยอะมาก">แสดงทั้งหมด ('+full.length+')</button></div>';
+  }
+  h+='</div>';
+
+  var _ae=document.activeElement,_af=(_ae&&_ae.id&&pg.contains(_ae))?_ae.id:'',_ss=null;
+  try{if(_af&&_ae&&('selectionStart' in _ae))_ss=_ae.selectionStart;}catch(e){}
+  pg.innerHTML=h;
+  _tkrBind();
+  if(_tkrRefocus||_af==='tkrSearch'){var sb=document.getElementById('tkrSearch');
+    if(sb){sb.focus();try{var p=(_ss==null?sb.value.length:_ss);sb.setSelectionRange(p,p);}catch(e){}}_tkrRefocus=false;}
+}
+function _tkrBind(){
+  var pg=document.getElementById('page-tkr');if(!pg||pg._tb)return;pg._tb=1;
+  var cl=function(e,sel){return e.target&&e.target.closest?e.target.closest(sel):null;};
+  pg.addEventListener('click',function(e){
+    var b;
+    if((b=cl(e,'[data-tkrundo]'))){_tkDoneUndo(b.getAttribute('data-tkrundo'));return;}
+    if((b=cl(e,'[data-tkrdel]'))){_tkrDel(b.getAttribute('data-tkrdel'));return;}
+    if((b=cl(e,'[data-tkredit]'))){_tkrOpen(b.getAttribute('data-tkredit'));return;}
+    if((b=cl(e,'[data-tkrgx]'))){var g=b.getAttribute('data-tkrgx')||'';if(_tkrCol[g])delete _tkrCol[g];else _tkrCol[g]=1;_tkrSaveView();renderTkr();return;}
+    if((b=cl(e,'#tkrMore'))){_tkrLimit+=TKR_PAGE;renderTkr();return;}
+    if((b=cl(e,'#tkrAll'))){_tkrLimit=Infinity;renderTkr();return;}
+    if((b=cl(e,'#tkrAdopt'))){_tkrAdopt();return;}
+    if((b=cl(e,'#tkrExport'))){_tkrExport();return;}
+    if((b=cl(e,'#tkrPrint'))){window.print();return;}
+    if((b=cl(e,'#tkrBack'))){var tb=document.querySelector('.modtab[data-mod="tk"]');if(tb)tb.click();return;}
+    if((b=cl(e,'#tkrClr'))){_tkrLimit=TKR_PAGE;_tkrQ='';_tkrPer='all';_tkrFrom='';_tkrTo='';_tkrFA='';_tkrFD='';_tkrFCo='';_tkrFSt='';_tkrGrp='';_tkrSaveView();renderTkr();return;}
+  });
+  pg.addEventListener('input',function(e){
+    if(e.target&&e.target.id==='tkrSearch'){_tkrQ=e.target.value;
+      if(_tkrDebT)clearTimeout(_tkrDebT);_tkrDebT=setTimeout(function(){_tkrRefocus=true;renderTkr();},260);}
+  });
+  pg.addEventListener('change',function(e){
+    var el=e.target;if(!el||!el.id)return;
+    if(el.id==='tkrPer'){_tkrPer=el.value;}
+    else if(el.id==='tkrFrom'){_tkrFrom=el.value;}
+    else if(el.id==='tkrTo'){_tkrTo=el.value;}
+    else if(el.id==='tkrFA'){_tkrFA=el.value;}
+    else if(el.id==='tkrFD'){_tkrFD=el.value;}
+    else if(el.id==='tkrFCo'){_tkrFCo=el.value;}
+    else if(el.id==='tkrFSt'){_tkrFSt=el.value;}
+    else if(el.id==='tkrGrp'){_tkrGrp=el.value;}
+    else if(el.id==='tkrSort'){_tkrSort=el.value;}
+    else return;
+    _tkrLimit=TKR_PAGE;_tkrSaveView();renderTkr();
+  });
 }
 
 /* ===== v10.60: Gmail Inbox — เชื่อม Gmail ของผู้ใช้ (อ่านอย่างเดียว) แล้วสรุปว่ามีเรื่องอะไรบ้าง =====
@@ -8681,7 +9179,7 @@ function _applyState(s,force){s=s||{};var rts=(s._ts&&typeof s._ts==='object')?s
   if(typeof renderDoc==='function')renderDoc();
   if(typeof _restoreCurUser==='function')_restoreCurUser();
   if(typeof renderMn==='function')renderMn();
-  if(typeof renderTracking==='function')renderTracking();if(typeof _tkUpdNotif==='function')_tkUpdNotif();if(typeof renderVat==='function')renderVat();
+  if(typeof renderTracking==='function')renderTracking();try{var _tkrP=document.getElementById('page-tkr');if(_tkrP&&!_tkrP.hidden&&typeof renderTkr==='function')renderTkr();}catch(_tkre){}if(typeof _tkUpdNotif==='function')_tkUpdNotif();if(typeof renderVat==='function')renderVat();
   if(typeof _authApply==='function')_authApply();
   if(typeof renderAd==='function')renderAd();
   if(typeof _navWarnUpd==='function')_navWarnUpd();
@@ -17469,7 +17967,7 @@ function _authApply(){try{setTimeout(_safeUpdate,0);}catch(_e){}if(typeof loadPt
   if(g&&!g.hidden){_authUpdSetup();return;}
   _authShow();
 }
-(function(){var MOD_META={gm:['Gmail Inbox · Routine Work','Read-only view of your own mailbox — grouped by subject, ready to hand to Claude',''],adv:['Advance (CEO) · Payee Database','Company advance / reimbursement payments — attach a document, track paid / unpaid',''],pdrepjv:['Report AP JV · Payee Database','Two-sided ledger — Liability (AP) & Asset · add entries, index, routine expenses & bank statement',''],bbl:['Bank Loan · Finance & Reconcile','Hire-purchase loan repayment schedule · sourced from GL',''],sec:['Security & Data Protection','Backup · Restore · File repair · Master device · Storage — always-on Auto-Guard',''],ov:['Overall · Command Center','Tax calendar · Status summary · Recent activity',''],tk:['Tracking · Task Board','Track team tasks · Kanban + List · Link to GLI projects',''],bp:['Financial Performance Report','Contract · Billing · Revenue · Cost','FY 2015–2025'],pg:['Progress %','Project progress · Cost GL ÷ Contract Expense',''],gl:['Database','General Ledger &amp; data files · Excel-style filtering · imported from a Template',''],fs:['FS — Financial Statements','Trial Balance → 4 statements · NPAEs · nature-aware working papers',''],wpb:['Working Paper · Balance','Per-account composition of a closing balance · open items · tie-out · aging',''],wht:['Withholding Tax','Deduction Register & 50 bis Certificate',''],vat:['VAT · Value Added Tax (P.P.30)','Input–Output VAT report · reconciliation · P.P.30 e-Filing',''],cfb:['DOC — Company Document Vault','Company × Category · drag &amp; drop files to embed &amp; sync across devices',''],up:['E-Filing & DBD Credentials','10 companies · Revenue Department · DBD',''],cb:['Confirm Bank','Bank database by company · year-partitioned · click a company for the full-screen editor',''],mn:['Tax Filing Monitor · 10 Companies','Company × filing matrix · click a dot to open its popup',''],pt:['User Directory','Name · Position · Username / Password — no login, per-device user','']};/* ===================== OVERVIEW HUB (v6.80) ===================== */
+(function(){var MOD_META={gm:['Gmail Inbox · Routine Work','Read-only view of your own mailbox — grouped by subject, ready to hand to Claude',''],adv:['Advance (CEO) · Payee Database','Company advance / reimbursement payments — attach a document, track paid / unpaid',''],pdrepjv:['Report AP JV · Payee Database','Two-sided ledger — Liability (AP) & Asset · add entries, index, routine expenses & bank statement',''],bbl:['Bank Loan · Finance & Reconcile','Hire-purchase loan repayment schedule · sourced from GL',''],sec:['Security & Data Protection','Backup · Restore · File repair · Master device · Storage — always-on Auto-Guard',''],ov:['Overall · Command Center','Tax calendar · Status summary · Recent activity',''],tk:['Tracking · Task Board','Track team tasks · Kanban + List · Link to GLI projects',''],tkr:['Report งานที่เสร็จ · Completed Work','งานที่กด “✓ เสร็จ” จากบอร์ด Tracking · สรุปตามช่วงเวลา ผู้รับผิดชอบ และประเภทเอกสาร',''],bp:['Financial Performance Report','Contract · Billing · Revenue · Cost','FY 2015–2025'],pg:['Progress %','Project progress · Cost GL ÷ Contract Expense',''],gl:['Database','General Ledger &amp; data files · Excel-style filtering · imported from a Template',''],fs:['FS — Financial Statements','Trial Balance → 4 statements · NPAEs · nature-aware working papers',''],wpb:['Working Paper · Balance','Per-account composition of a closing balance · open items · tie-out · aging',''],wht:['Withholding Tax','Deduction Register & 50 bis Certificate',''],vat:['VAT · Value Added Tax (P.P.30)','Input–Output VAT report · reconciliation · P.P.30 e-Filing',''],cfb:['DOC — Company Document Vault','Company × Category · drag &amp; drop files to embed &amp; sync across devices',''],up:['E-Filing & DBD Credentials','10 companies · Revenue Department · DBD',''],cb:['Confirm Bank','Bank database by company · year-partitioned · click a company for the full-screen editor',''],mn:['Tax Filing Monitor · 10 Companies','Company × filing matrix · click a dot to open its popup',''],pt:['User Directory','Name · Position · Username / Password — no login, per-device user','']};/* ===================== OVERVIEW HUB (v6.80) ===================== */
 /* ---------- Audit / Activity log (per-device, attributed) ---------- */
 var GLILOG=null;
 function loadLog(){if(!GLILOG){try{var s=localStorage.getItem('gli_log');if(s)GLILOG=JSON.parse(s);}catch(e){}}if(!Array.isArray(GLILOG))GLILOG=[];}
@@ -17930,7 +18428,7 @@ function _hubDueHTML(){
   if(typeof loadTrack==='function')loadTrack();
   var T=(typeof TRACKDATA!=='undefined'&&TRACKDATA)?TRACKDATA:[];
   var items=[];
-  for(var i=0;i<T.length;i++){var t=T[i];if(!t||(t.status||'todo')==='done'||!t.due)continue;
+  for(var i=0;i<T.length;i++){var t=T[i];if(!t||t.done||(t.status||'todo')==='done'||!t.due)continue;
     var due=new Date(t.due+'T00:00:00');if(isNaN(due))continue;
     var diff=Math.round((due.getTime()-nowT)/86400000);
     if(diff>0)continue;
@@ -17977,9 +18475,10 @@ function _hubWarnHTML(){var rows=_hubAnnualWarn();if(!rows.length)return '';var 
   var sum=rows.length+' filings'+(urgent?(' \u00b7 <b class="hubwsumu">'+urgent+' within 30 days</b>'):'');
   return '<section class="hubcard hubwarncard"><div class="hubh"><span class="hubhi">\u26A0\uFE0F</span><div><div class="hubht">Annual Filing Alerts</div><div class="hubhs">Next CIT &amp; financial-statement deadline per company \u00b7 by fiscal year-end \u00b7 '+sum+'</div></div></div><div class="hubwlist">'+body+'</div></section>';}
 function _hubTrackHTML(){if(typeof loadTrack==='function')loadTrack();var T=(typeof TRACKDATA!=='undefined'&&TRACKDATA)?TRACKDATA:[];
-  var cnt={todo:0,doing:0,review:0,done:0};for(var i=0;i<T.length;i++){var st=T[i].status||'todo';cnt[st]=(cnt[st]||0)+1;}
-  var open=T.filter(function(t){return (t.status||'todo')!=='done';}).sort(_tkSort).slice(0,6);
+  var cnt={todo:0,doing:0,review:0,done:0},_dn=0;for(var i=0;i<T.length;i++){if(T[i]&&T[i].done){_dn++;continue;}var st=T[i].status||'todo';cnt[st]=(cnt[st]||0)+1;}
+  var open=T.filter(function(t){return !(t&&t.done)&&(t.status||'todo')!=='done';}).sort(_tkSort).slice(0,6);
   var chips='';for(var j=0;j<TK_STAT.length;j++){var sd=TK_STAT[j];chips+='<span class="hubtkc" style="--c:'+sd[2]+';--cb:'+sd[3]+'">'+sd[1]+' <b>'+(cnt[sd[0]]||0)+'</b></span>';}
+  if(_dn)chips+='<span class="hubtkc" style="--c:#15803D;--cb:#E7F6EC">✅ เสร็จแล้ว <b>'+_dn+'</b></span>';
   var rows='';
   if(!open.length){rows='<div class="hubtkempty">No open tasks — all clear 🎉</div>';}
   else{for(var k=0;k<open.length;k++){var t=open[k];var stt=_tkStat(t.status||'todo');var d=(typeof _tkDue==='function')?_tkDue(t):null;var u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;var ini=u?((((u.fn||' ')[0]||'')+((u.ln||' ')[0]||'')).trim().toUpperCase()||'?'):'';
@@ -18015,11 +18514,11 @@ function renderHub(){var pg=document.getElementById('page-ov');if(!pg)return;
   if(typeof _navWarnUpd==='function')_navWarnUpd();
 }
 
-var HEROC={gm:'#B23B3B',adv:'#B26A12',pdrepjv:'#B26A12',bbl:'#0E5C52',sec:'#7C3AED',line:'#0E5C52',ov:'#0E5C52',tk:'#0E5C52',bp:'#0E5C52',pg:'#0E5C52',gl:'#0E5C52',wht:'#0E5C52',vat:'#0E5C52',cfb:'#0E5C52',up:'#0E5C52',cb:'#155E75',mn:'#0E5C52',pt:'#0E5C52',ad:'#0E5C52',fs:'#0E5C52',wpb:'#0E5C52'};
-var HEROIC={adv:'ADV',pdrepjv:'JV',bbl:'LOAN',sec:'SEC',line:'LINE',ov:'OV',tk:'TK',bp:'BP',pg:'PG',gl:'DB',wht:'WHT',vat:'VAT',cfb:'DOC',up:'UP',cb:'CB',mn:'MN',pt:'PT',ad:'AD',fs:'FS',wpb:'WP'};
-var HEROT={gm:['Gmail Inbox &middot; Routine Work','Connect your own Gmail (read-only) &middot; group what came in by subject &middot; copy a digest for Claude to summarise'],adv:['Advance (CEO) &middot; Payee Database','Record &amp; track company advance / reimbursement payments &middot; attach documents and slips &middot; summarised into a report with a paid / unpaid status'],pdrepjv:['Report AP JV &middot; Payee Database','Two-sided ledger &mdash; <b>Liability (AP)</b> on the left, <b>Asset</b> on the right &middot; add entries with an index, plus routine expenses and bank statement'],bbl:['Bank Loan · Finance &amp; Reconcile','Hire-purchase repayment schedule · read-only, sourced from the live GL · Bangkok Bank (BBL)'],sec:['Security &amp; Data Protection','ระบบป้องกันข้อมูลสูญหายขั้นสูงสุด · สำรอง/กู้คืน · ซ่อมไฟล์แนบ · อุปกรณ์หลัก · พื้นที่จัดเก็บ · Auto-Guard'],line:['Cash Receipts &amp; Payments · via LINE','Bank slips → bill detail → VAT / WHT → reconciliation · cash basis'],ov:['Overall \u00b7 Command Center','Tax calendar \u00b7 status summary \u00b7 recent activity'],tk:['Tracking \u00b7 Task Board','Team tasks \u00b7 Kanban + List \u00b7 linked to GLI projects'],bp:['Project Financial Performance &amp; Reconciliation','Contract \u00b7 Billing \u00b7 Revenue (GL) \u00b7 Cost \u00b7 Gross Profit'],pg:['Progress % \u00b7 Project Progress','Cost GL \u00f7 Contract Expense \u00b7 from Business Performance by database year'],gl:['Database','General Ledger &amp; data files \u00b7 Excel-style filtering \u00b7 imported from a template'],wht:['Withholding Tax \u2014 Deduction Register &amp; 50 bis','P.N.D.3 / 53 \u00b7 e-Filing text \u00b7 50 bis certificate'],vat:['VAT · Value Added Tax (P.P.30)','Input–Output VAT report · reconciliation · P.P.30 e-Filing'],cfb:['Company Document Vault','Company \u00d7 Category \u00b7 drag &amp; drop \u00b7 synced across devices'],up:['E-Filing &amp; DBD Credentials','10 companies \u00b7 Revenue Department \u00b7 DBD'],cb:['Confirm Bank','Bank database \u00b7 year-partitioned \u00b7 10 companies \u00b7 click a company for the full-screen editor'],mn:['Tax Filing Monitor \u00b7 10 Companies','Company \u00d7 filing matrix \u00b7 click a dot to open'],pt:['User Directory','Name \u00b7 position \u00b7 username \u2014 per-device user'],ad:['Audit Log \u00b7 Activity','Who changed what \u00b7 date &amp; time \u00b7 synced across devices'],fs:['FS — Financial Statements','Trial Balance → 4 statements · NPAEs · nature-aware working papers'],wpb:['Working Paper · Balance','Composition of a closing balance · open items · tie-out vs GL · aging · reconciliation'],tfrs:['TFRS Thailand','คลังมาตรฐานการรายงานทางการเงินไทย · ค้นย่อหน้าและเลขหน้าที่อ้างอิง · วิเคราะห์เชิงโครงสร้างและ AI']};
+var HEROC={gm:'#B23B3B',adv:'#B26A12',pdrepjv:'#B26A12',bbl:'#0E5C52',sec:'#7C3AED',line:'#0E5C52',ov:'#0E5C52',tk:'#0E5C52',tkr:'#15803D',bp:'#0E5C52',pg:'#0E5C52',gl:'#0E5C52',wht:'#0E5C52',vat:'#0E5C52',cfb:'#0E5C52',up:'#0E5C52',cb:'#155E75',mn:'#0E5C52',pt:'#0E5C52',ad:'#0E5C52',fs:'#0E5C52',wpb:'#0E5C52'};
+var HEROIC={adv:'ADV',pdrepjv:'JV',bbl:'LOAN',sec:'SEC',line:'LINE',ov:'OV',tk:'TK',tkr:'TKR',bp:'BP',pg:'PG',gl:'DB',wht:'WHT',vat:'VAT',cfb:'DOC',up:'UP',cb:'CB',mn:'MN',pt:'PT',ad:'AD',fs:'FS',wpb:'WP'};
+var HEROT={gm:['Gmail Inbox &middot; Routine Work','Connect your own Gmail (read-only) &middot; group what came in by subject &middot; copy a digest for Claude to summarise'],adv:['Advance (CEO) &middot; Payee Database','Record &amp; track company advance / reimbursement payments &middot; attach documents and slips &middot; summarised into a report with a paid / unpaid status'],pdrepjv:['Report AP JV &middot; Payee Database','Two-sided ledger &mdash; <b>Liability (AP)</b> on the left, <b>Asset</b> on the right &middot; add entries with an index, plus routine expenses and bank statement'],bbl:['Bank Loan · Finance &amp; Reconcile','Hire-purchase repayment schedule · read-only, sourced from the live GL · Bangkok Bank (BBL)'],sec:['Security &amp; Data Protection','ระบบป้องกันข้อมูลสูญหายขั้นสูงสุด · สำรอง/กู้คืน · ซ่อมไฟล์แนบ · อุปกรณ์หลัก · พื้นที่จัดเก็บ · Auto-Guard'],line:['Cash Receipts &amp; Payments · via LINE','Bank slips → bill detail → VAT / WHT → reconciliation · cash basis'],ov:['Overall \u00b7 Command Center','Tax calendar \u00b7 status summary \u00b7 recent activity'],tk:['Tracking \u00b7 Task Board','Team tasks \u00b7 Kanban + List \u00b7 linked to GLI projects'],tkr:['Report \u0e07\u0e32\u0e19\u0e17\u0e35\u0e48\u0e40\u0e2a\u0e23\u0e47\u0e08 \u00b7 Completed Work','\u0e07\u0e32\u0e19\u0e17\u0e35\u0e48\u0e01\u0e14 \u201c\u2713 \u0e40\u0e2a\u0e23\u0e47\u0e08\u201d \u0e41\u0e25\u0e49\u0e27 \u00b7 \u0e0a\u0e48\u0e27\u0e07\u0e40\u0e27\u0e25\u0e32 \u00b7 \u0e1c\u0e39\u0e49\u0e23\u0e31\u0e1a\u0e1c\u0e34\u0e14\u0e0a\u0e2d\u0e1a \u00b7 \u0e1b\u0e23\u0e30\u0e40\u0e20\u0e17\u0e40\u0e2d\u0e01\u0e2a\u0e32\u0e23 \u00b7 CSV'],bp:['Project Financial Performance &amp; Reconciliation','Contract \u00b7 Billing \u00b7 Revenue (GL) \u00b7 Cost \u00b7 Gross Profit'],pg:['Progress % \u00b7 Project Progress','Cost GL \u00f7 Contract Expense \u00b7 from Business Performance by database year'],gl:['Database','General Ledger &amp; data files \u00b7 Excel-style filtering \u00b7 imported from a template'],wht:['Withholding Tax \u2014 Deduction Register &amp; 50 bis','P.N.D.3 / 53 \u00b7 e-Filing text \u00b7 50 bis certificate'],vat:['VAT · Value Added Tax (P.P.30)','Input–Output VAT report · reconciliation · P.P.30 e-Filing'],cfb:['Company Document Vault','Company \u00d7 Category \u00b7 drag &amp; drop \u00b7 synced across devices'],up:['E-Filing &amp; DBD Credentials','10 companies \u00b7 Revenue Department \u00b7 DBD'],cb:['Confirm Bank','Bank database \u00b7 year-partitioned \u00b7 10 companies \u00b7 click a company for the full-screen editor'],mn:['Tax Filing Monitor \u00b7 10 Companies','Company \u00d7 filing matrix \u00b7 click a dot to open'],pt:['User Directory','Name \u00b7 position \u00b7 username \u2014 per-device user'],ad:['Audit Log \u00b7 Activity','Who changed what \u00b7 date &amp; time \u00b7 synced across devices'],fs:['FS — Financial Statements','Trial Balance → 4 statements · NPAEs · nature-aware working papers'],wpb:['Working Paper · Balance','Composition of a closing balance · open items · tie-out vs GL · aging · reconciliation'],tfrs:['TFRS Thailand','คลังมาตรฐานการรายงานทางการเงินไทย · ค้นย่อหน้าและเลขหน้าที่อ้างอิง · วิเคราะห์เชิงโครงสร้างและ AI']};
 /* v9.152: per-module English description banners (shown in #modDesc under the hero) — Database (gl) keeps its own #glIntro */
-var HERODESC={adv:"The <b>Advance (CEO)</b> module records company <b>advance / reimbursement</b> payments &mdash; click the <b>Intake Bin</b> to attach a document and add details, and each entry is summarised into a report: <b>Payment Date &middot; Payer &middot; Payee &middot; Description &middot; Amount</b> with a <b>Paid / Unpaid</b> status (paid entries can attach a transfer slip). Attach a slip and use <b>Read file</b> to auto-fill the amount, date and payee &middot; search, filter and export to Excel / PDF.",pdrepjv:"The <b>Report AP JV</b> module keeps a separate <b>two-sided ledger per company</b> &mdash; pick a company (<b>GLR &middot; ARG &middot; GLE &middot; GRW &middot; CGL &middot; ECM</b>) from the tabs. <b>Liability (AP)</b> on the left, <b>Asset</b> on the right. On each side you can <b>add entries</b> &mdash; <b>Date &middot; Voucher &middot; Description &middot; Company &middot; Amount</b> &mdash; and tag each with an <b>Index</b> (e.g. Advance / Operating). The Liability side also keeps a <b>Routine expenses</b> list (Description &middot; Company &middot; Amount); the Asset side keeps a <b>Bank statement</b> list (Account no. &middot; Account name &middot; Amount &middot; as-of date). Everything is saved on this device and synced to the cloud.",bbl:"A read-only <b>Hire-Purchase-style repayment schedule</b> for the two Bangkok Bank (BBL) long-term loans — contracts <b>BLC26800000090 (฿200M)</b> and <b>BLC26800000093 (฿100M)</b>. The schedule is built live from the app&#39;s <b>General Ledger</b> by the configured account &amp; project codes: it shows all <b>54 principal instalments</b> (equal instalments with a final balloon), the <b>actual interest paid</b>, and both the principal- and interest-payment <b>vouchers</b>. Click a voucher to view its journal entry; export to Excel or PDF.",
+var HERODESC={tkr:"<b>Report งานที่เสร็จ</b> — the completed-work archive for the Task Board · press <b>“✓ เสร็จ”</b> on any Tracking card (or <b>“✓ เสร็จแล้ว”</b> inside the card editor) and the task leaves the board and lands here, stamped with the date, time and the name of whoever closed it · filter by <b>period</b> (this month · last month · 30/90 days · this year · custom range), assignee, document type, company and board heading, then <b>group</b> by month, assignee, closer, document type, company, heading, work group or category — each group showing its own count, average turnaround and late count · five KPIs cover completed volume, on-time vs late against the due date, average days from card creation to completion, and how many people delivered · <b>↩</b> puts a task back on the board, <b>🗑</b> deletes it for good, and clicking a task name reopens its card · export to <b>CSV</b> (Excel-ready, 24 columns) or print / save as PDF · the archive lives in the same synced task data, so every device sees the same completed-work report",adv:"The <b>Advance (CEO)</b> module records company <b>advance / reimbursement</b> payments &mdash; click the <b>Intake Bin</b> to attach a document and add details, and each entry is summarised into a report: <b>Payment Date &middot; Payer &middot; Payee &middot; Description &middot; Amount</b> with a <b>Paid / Unpaid</b> status (paid entries can attach a transfer slip). Attach a slip and use <b>Read file</b> to auto-fill the amount, date and payee &middot; search, filter and export to Excel / PDF.",pdrepjv:"The <b>Report AP JV</b> module keeps a separate <b>two-sided ledger per company</b> &mdash; pick a company (<b>GLR &middot; ARG &middot; GLE &middot; GRW &middot; CGL &middot; ECM</b>) from the tabs. <b>Liability (AP)</b> on the left, <b>Asset</b> on the right. On each side you can <b>add entries</b> &mdash; <b>Date &middot; Voucher &middot; Description &middot; Company &middot; Amount</b> &mdash; and tag each with an <b>Index</b> (e.g. Advance / Operating). The Liability side also keeps a <b>Routine expenses</b> list (Description &middot; Company &middot; Amount); the Asset side keeps a <b>Bank statement</b> list (Account no. &middot; Account name &middot; Amount &middot; as-of date). Everything is saved on this device and synced to the cloud.",bbl:"A read-only <b>Hire-Purchase-style repayment schedule</b> for the two Bangkok Bank (BBL) long-term loans — contracts <b>BLC26800000090 (฿200M)</b> and <b>BLC26800000093 (฿100M)</b>. The schedule is built live from the app&#39;s <b>General Ledger</b> by the configured account &amp; project codes: it shows all <b>54 principal instalments</b> (equal instalments with a final balloon), the <b>actual interest paid</b>, and both the principal- and interest-payment <b>vouchers</b>. Click a voucher to view its journal entry; export to Excel or PDF.",
   ov:"A one-page <b>Command Center</b> aggregating the whole app · a Thai tax-filing calendar sorted by urgency (e-Filing dates, paper filing in parentheses) covering monthly WHT/VAT/SBT/Social Security plus per-company annual CIT &amp; DBD deadlines by fiscal year-end · Action Required due &amp; overdue list · KPI tiles (Companies · Tasks · Pending · Filed · Paid) · open team tasks · Recent Activity log · click any task to jump to its module",
   gm:"Connects <b>your own Gmail</b> read-only, in this browser, using a Google OAuth client you create once &middot; pulls the last N days of mail and sorts it into subjects that matter here &mdash; <b>Tax/Revenue Dept &middot; Auditor &amp; Financial Statements &middot; Banking &middot; Invoices &amp; Billing &middot; Bidding/Procurement &middot; Government agencies &middot; Projects &middot; System notices</b> &middot; filter by Gmail search syntax, unread only, attachments only &middot; counters for total, unread, distinct senders and subjects &middot; <b>Copy for Claude</b> builds a compact digest you paste into chat to get it summarised &middot; the access token stays in memory and nothing is written to the cloud &mdash; your mail is never shared with the team",
   tk:"A team <b>Task Board</b> for accounting work, viewed as a Kanban board or a List · drag a card freely to move it between the four columns (Book keeping · Accounting &amp; Tax · Remind · Done) or to reorder it up/down within a column · each card carries priority, category, assignee, due date (overdue/today badges), a linked GLI project &amp; file/image attachments · drag a column heading (⠿) freely to drop the whole heading wherever you want it, and set each heading&rsquo;s background colour with 🎨 · open a card to highlight it and colour its text · search plus Assignee / Priority / Category filters · Total, Overdue &amp; Done counters · stored on this device and synced to the cloud across devices",
@@ -18190,7 +18689,7 @@ function _slSetPrompt(){var need=_slLocked();
   else doSet();}
 function _slRemovePrompt(){if(!_slLocked())return;_slAsk({title:'🔓 ปิดล็อกหน้าจอ',msg:'ใส่รหัสปัจจุบันเพื่อปิดล็อก',errText:'รหัสไม่ถูกต้อง',onOk:function(code){if(_slHash(code)===(SECLOCK&&SECLOCK.h)){SECLOCK=null;if(typeof saveSecLock==='function')saveSecLock();_slUnlockedUntil=0;try{renderSec();}catch(e){}try{if(typeof _mnToast==='function')_mnToast('ปิดล็อกแล้ว',3000);}catch(e){}return true;}return false;}});}
 try{window.gliLockNow=function(){try{sessionStorage.removeItem('gli_sec_unlock');}catch(_e){}try{var b=document.querySelector('.modtab[data-mod="sec"]');if(b)b.click();else if(typeof renderSec==='function')renderSec();}catch(_e2){}};}catch(_e){}
-function showMod(mod){/* v9.17: passcode gate before opening Audit Log / Security */var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].hidden=(pages[i].id!=='page-'+mod);}var tabs=document.querySelectorAll('.modtab');for(var j=0;j<tabs.length;j++){var on=tabs[j].getAttribute('data-mod')===mod;tabs[j].classList.toggle('active',on);tabs[j].setAttribute('aria-selected',on?'true':'false');}var dm=document.querySelector('.dmeta');if(dm&&MOD_META[mod]){var m=MOD_META[mod];dm.innerHTML='<div><b>'+m[0]+'</b></div>'+(m[1]?('<div>'+m[1]+'</div>'):'')+(m[2]?('<div>'+m[2]+'</div>'):'');}var _mh=document.getElementById('modHero');if(_mh){var _ht=HEROT[mod];if(_ht){_mh.hidden=false;_mh.style.setProperty('--mh',HEROC[mod]||'#0E5C52');_mh.innerHTML='<span class="mh-logo"><svg viewBox="0 0 64 64"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg></span><div><div class="mh-t">'+_ht[0]+'</div>'+(_ht[1]?'<div class="mh-s">'+_ht[1]+'</div>':'')+'</div>';}else{_mh.hidden=true;}}var _md=document.getElementById('modDesc');if(_md){var _dd=(typeof HERODESC!=='undefined'&&HERODESC)?HERODESC[mod]:'';if(_dd){_md.hidden=false;_md.innerHTML=_dd;}else{_md.hidden=true;}}/* v9.151: per-module English description banner */try{localStorage.setItem('gli_module',mod);}catch(e){}window.scrollTo(0,0);if(mod==='ov'&&typeof renderHub==='function')renderHub();if(mod==='tk'&&typeof renderTracking==='function')renderTracking();if(mod==='vat'&&typeof renderVat==='function')renderVat();if(mod==='up'&&typeof renderUp==='function')renderUp();if(mod==='mn'&&typeof renderMn==='function')renderMn();if(mod==='gm'&&typeof renderGm==='function')renderGm();if(mod==='gl'&&typeof renderGl==='function')renderGl();if(mod==='pt'&&typeof renderPt==='function')renderPt();if(mod==='cfb'&&typeof renderDoc==='function')renderDoc();if(mod==='sec'&&typeof renderSec==='function')renderSec();if(mod==='adv'&&typeof renderAdv==='function')renderAdv();if(mod==='pdrepjv'&&typeof renderApjv==='function')renderApjv();if(mod==='bbl'&&typeof renderBbl==='function')renderBbl();if(mod==='fs'&&typeof renderFs==='function')renderFs();if(mod==='pg'&&typeof renderProgress==='function')renderProgress();if(mod==='bp'&&typeof _bpOnShow==='function')_bpOnShow();if(mod==='line'&&typeof renderLine==='function')renderLine();if(mod==='wpb'&&typeof renderWpb==='function')renderWpb();if(mod==='cb'&&typeof renderCb==='function')renderCb();}var _mt=document.querySelectorAll('.modtab');for(var k=0;k<_mt.length;k++){_mt[k].addEventListener('click',function(){showMod(this.getAttribute('data-mod'));});}var saved='ov';try{saved=localStorage.getItem('gli_module')||'ov';}catch(e){}if(!MOD_META[saved])saved='ov';/* v9.17: don't let a locked page block initial load with a passcode modal */showMod(saved);if(typeof _authApply==='function')_authApply();if(typeof _tkUpdNotif==='function')_tkUpdNotif();if(typeof _navWarnUpd==='function')_navWarnUpd();try{document.addEventListener('click',_auditClick,true);}catch(_ae){}})();
+function showMod(mod){/* v9.17: passcode gate before opening Audit Log / Security */var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].hidden=(pages[i].id!=='page-'+mod);}var tabs=document.querySelectorAll('.modtab');for(var j=0;j<tabs.length;j++){var on=tabs[j].getAttribute('data-mod')===mod;tabs[j].classList.toggle('active',on);tabs[j].setAttribute('aria-selected',on?'true':'false');}var dm=document.querySelector('.dmeta');if(dm&&MOD_META[mod]){var m=MOD_META[mod];dm.innerHTML='<div><b>'+m[0]+'</b></div>'+(m[1]?('<div>'+m[1]+'</div>'):'')+(m[2]?('<div>'+m[2]+'</div>'):'');}var _mh=document.getElementById('modHero');if(_mh){var _ht=HEROT[mod];if(_ht){_mh.hidden=false;_mh.style.setProperty('--mh',HEROC[mod]||'#0E5C52');_mh.innerHTML='<span class="mh-logo"><svg viewBox="0 0 64 64"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg></span><div><div class="mh-t">'+_ht[0]+'</div>'+(_ht[1]?'<div class="mh-s">'+_ht[1]+'</div>':'')+'</div>';}else{_mh.hidden=true;}}var _md=document.getElementById('modDesc');if(_md){var _dd=(typeof HERODESC!=='undefined'&&HERODESC)?HERODESC[mod]:'';if(_dd){_md.hidden=false;_md.innerHTML=_dd;}else{_md.hidden=true;}}/* v9.151: per-module English description banner */try{localStorage.setItem('gli_module',mod);}catch(e){}window.scrollTo(0,0);if(mod==='ov'&&typeof renderHub==='function')renderHub();if(mod==='tk'&&typeof renderTracking==='function')renderTracking();if(mod==='tkr'&&typeof renderTkr==='function')renderTkr();if(mod==='vat'&&typeof renderVat==='function')renderVat();if(mod==='up'&&typeof renderUp==='function')renderUp();if(mod==='mn'&&typeof renderMn==='function')renderMn();if(mod==='gm'&&typeof renderGm==='function')renderGm();if(mod==='gl'&&typeof renderGl==='function')renderGl();if(mod==='pt'&&typeof renderPt==='function')renderPt();if(mod==='cfb'&&typeof renderDoc==='function')renderDoc();if(mod==='sec'&&typeof renderSec==='function')renderSec();if(mod==='adv'&&typeof renderAdv==='function')renderAdv();if(mod==='pdrepjv'&&typeof renderApjv==='function')renderApjv();if(mod==='bbl'&&typeof renderBbl==='function')renderBbl();if(mod==='fs'&&typeof renderFs==='function')renderFs();if(mod==='pg'&&typeof renderProgress==='function')renderProgress();if(mod==='bp'&&typeof _bpOnShow==='function')_bpOnShow();if(mod==='line'&&typeof renderLine==='function')renderLine();if(mod==='wpb'&&typeof renderWpb==='function')renderWpb();if(mod==='cb'&&typeof renderCb==='function')renderCb();}var _mt=document.querySelectorAll('.modtab');for(var k=0;k<_mt.length;k++){_mt[k].addEventListener('click',function(){showMod(this.getAttribute('data-mod'));});}var saved='ov';try{saved=localStorage.getItem('gli_module')||'ov';}catch(e){}if(!MOD_META[saved])saved='ov';/* v9.17: don't let a locked page block initial load with a passcode modal */showMod(saved);if(typeof _authApply==='function')_authApply();if(typeof _tkUpdNotif==='function')_tkUpdNotif();if(typeof _navWarnUpd==='function')_navWarnUpd();try{document.addEventListener('click',_auditClick,true);}catch(_ae){}})();
 </script>
 <!-- ===== v7.91: RESTORED MODULES grafted from GLI_Dashboard_v7_76 (FS / LINE / WPB / TFRS) — verified no missing deps, no global-var collisions ===== -->
 <script id="fsScript">
@@ -29188,6 +29687,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'){var dds=doc
     var IC={
      ov:'<path d="M3 10.6 12 3l9 7.6"/><path d="M5 9.6V20a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1V9.6"/>',
      tk:'<path d="M9 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M8.5 11h.01M8.5 15h.01M12 11h4M12 15h4"/>',
+     tkr:'<path d="M9 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M8.6 14.2l2.2 2.2 4.6-4.6"/>',
      bp:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
      pg:'<path d="M21.2 15.9A10 10 0 1 1 8 2.8"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>',
      gl:'<ellipse cx="12" cy="6" rx="9" ry="3"/><path d="M3 6v6c0 1.66 4.03 3 9 3s9-1.34 9-3V6"/><path d="M3 12v6c0 1.66 4.03 3 9 3s9-1.34 9-3v-6"/>',
