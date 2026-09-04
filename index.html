@@ -1956,6 +1956,10 @@ body.tkcoldrag{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .tkcolclr:hover{background:var(--line2,#EEF2F7)}
 @media(max-width:640px){.tkhdr{margin-left:0}.tkstat{margin-left:0;width:100%}.tksearch{max-width:none}.tkcol{min-width:236px}.tkboard.vert .tkcol{min-width:0}.tkcard{padding:11px 12px}}
 /* ===== v10.72: ปุ่ม "เสร็จ" บนการ์ด + ช่องหมวดของประเภทเอกสาร ===== */
+.tkcono{font-size:11px;font-weight:800;color:#fff;background:var(--brand,#0E5C52);border-radius:9px;padding:2px 10px;margin-left:6px;white-space:nowrap;letter-spacing:.2px}
+.tkcono.pend{background:transparent;color:var(--muted,#8C8676);border:1px dashed var(--line,#E6E0D4);font-weight:700}
+.tkcono.sm{font-size:9.5px;padding:1px 7px;margin-left:4px}
+.tkcono[hidden]{display:none}
 .tkdocgrp{flex:0 1 190px;min-width:130px;font-family:inherit;font-size:11.5px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;color:var(--ink2,#4A5563);background:#FCFCFA}
 .tkdocgrp:focus{outline:none;border-color:var(--brand,#0E5C52);background:#fff}
 .tkdoneb{margin-left:auto;font-family:inherit;font-size:11px;font-weight:800;border:1px solid #A7D8B9;background:#E7F6EC;color:#15803D;border-radius:9px;padding:3px 10px;cursor:pointer;white-space:nowrap;transition:.12s;flex:none}
@@ -7056,8 +7060,65 @@ function _tkAttList(t){return (t&&t.att&&t.att.length)?t.att:[];}
 var _tkNotes=[],_tkRows=[],_tkMode='full';
 /* v10.67: บริษัทเจ้าของงาน — โหมด 1 ตั้งทั้งการ์ด · โหมด 2 ตั้งรายแถว Voucher */
 var TK_CO=[['GLI','GLI','#0E5C52','#E6F0EC'],['JV','JV','#B45309','#FEF3C7']];
+/* ===== v10.74: เลขลำดับรายบริษัท — เลือก GLI / JV แล้วระบบรันเลขให้เอง (GLI-1 · JV-1) =====
+   เก็บเฉพาะ "ตัวเลข" ไว้ที่ t.cono (โหมด 1/3 = ระดับการ์ด) และ r.cono (โหมด 2 = ราย Voucher)
+   ป้ายที่แสดง = รหัสบริษัท + '-' + เลข จึงเปลี่ยนชื่อบริษัทภายหลังได้โดยเลขไม่เพี้ยน
+   เลขถัดไป = เลขสูงสุดที่ใช้อยู่ของบริษัทนั้น + 1 (นับรวมงานที่เก็บเข้า Report แล้วด้วย)
+   จึงไม่ต้องเก็บตัวนับแยกและไม่ต้องเพิ่มคีย์ซิงค์ใหม่ · เปลี่ยนบริษัท = ออกเลขใหม่ให้ตามบริษัทใหม่ */
+function _tkCoLabel(k,no){var c=_tkCo(k);if(!c)return '';no=+no||0;return c[1]+(no?('-'+no):'');}
+function _tkCoNoMax(k){
+  k=((k||'')+'').trim().toUpperCase();if(!k)return 0;
+  loadTrack();var mx=0,i,j,t,rw;
+  for(i=0;i<TRACKDATA.length;i++){t=TRACKDATA[i];if(!t)continue;
+    if((((t.co||'')+'').toUpperCase()===k)&&(+t.cono||0)>mx)mx=+t.cono||0;
+    rw=Array.isArray(t.rows)?t.rows:null;/* นับแถวเก่าที่ค้างจากการสลับโหมดด้วย เลขจะได้ไม่ชนกัน */
+    if(rw)for(j=0;j<rw.length;j++)if(rw[j]&&(((rw[j].co||'')+'').toUpperCase()===k)&&(+rw[j].cono||0)>mx)mx=+rw[j].cono||0;}
+  return mx;
+}
+/* ออกเลขหลายใบในการบันทึกครั้งเดียว (เช่นโหมด 2 ที่เพิ่มหลายแถว) โดยไม่ให้เลขซ้ำกันเอง */
+function _tkCoNoIssuer(){var seen={};
+  return function(k){k=((k||'')+'').trim().toUpperCase();
+    if(!k||!_tkCo(k))return 0;
+    if(seen[k]==null)seen[k]=_tkCoNoMax(k);
+    return ++seen[k];};
+}
+/* งานโหมด 2 เก็บบริษัทไว้รายแถว การกรอง/ค้นหาตามบริษัทจึงต้องมองทั้งการ์ดและทุกแถว */
+function _tkCoMatch(t,k){
+  k=((k||'')+'').trim().toUpperCase();if(!k)return true;if(!t)return false;
+  if((((t.co||'')+'').toUpperCase())===k)return true;
+  var rw=_tkRowList(t),i;for(i=0;i<rw.length;i++)if((((rw[i].co||'')+'').toUpperCase())===k)return true;
+  return false;
+}
+function _tkCoText(t){
+  if(!t)return '';
+  if(t.mode==='rows')return _tkRowList(t).map(function(r){return _tkCoLabel(r.co,r.cono);}).join(' ');
+  return _tkCoLabel(t.co,t.cono);
+}
+/* v10.74: งานที่มีอยู่ก่อนฟีเจอร์นี้ยังไม่มีเลขลำดับ — เติมให้ครั้งเดียวเรียงตามวันที่สร้างการ์ด
+   เพื่อให้บอร์ดมีเลขครบตั้งแต่เปิดครั้งแรก · ทำเครื่องหมายเวอร์ชันไว้ จะไม่รันซ้ำและไม่ทับเลขที่มีแล้ว */
+(function(){
+  var v=0;try{v=+(localStorage.getItem('gli_tkcono_v')||0)||0;}catch(e){}
+  if(v>=1)return;
+  var n=0;
+  try{
+    loadTrack();
+    var seen={},give=function(k){k=((k||'')+'').trim().toUpperCase();
+      if(!k||!_tkCo(k))return 0;
+      if(seen[k]==null)seen[k]=_tkCoNoMax(k);
+      return ++seen[k];};
+    TRACKDATA.slice().sort(function(a,b){return (+((a&&a.created)||0))-(+((b&&b.created)||0));}).forEach(function(t){
+      if(!t)return;
+      if(t.mode==='rows'){(Array.isArray(t.rows)?t.rows:[]).forEach(function(r){
+        if(r&&r.co&&!(+r.cono||0)){r.cono=give(r.co);if(r.cono)n++;}});}
+      else if(t.co&&!(+t.cono||0)){t.cono=give(t.co);if(t.cono)n++;}
+    });
+    try{localStorage.setItem('gli_tkcono_v','1');}catch(e){}
+    /* saveTrack พึ่ง _TS / cloudPush ที่ประกาศทีหลังในไฟล์ — เลื่อนไปบันทึกใน tick ถัดไป */
+    if(n)setTimeout(function(){try{saveTrack();if(typeof gliLog==='function')gliLog('รันเลขลำดับบริษัท (Tracking)',n+' รายการ');}catch(e){}},0);
+  }catch(e){}
+})();
 function _tkCo(k){k=((k||'')+'').trim().toUpperCase();for(var i=0;i<TK_CO.length;i++)if(TK_CO[i][0]===k)return TK_CO[i];return null;}
-function _tkCoBadge(k){var c=_tkCo(k);return c?('<span class="tkco" style="background:'+c[2]+';color:#fff">'+esc(c[1])+'</span>'):'';}
+function _tkCoBadge(k,no){var c=_tkCo(k);return c?('<span class="tkco" style="background:'+c[2]+';color:#fff">'+esc(_tkCoLabel(k,no))+'</span>'):'';}
 function _tkRowId(){return 'v'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);}
 function _tkRowList(t){return (t&&Array.isArray(t.rows))?t.rows:[];}
 function _tkRowFind(id){for(var i=0;i<_tkRows.length;i++)if(_tkRows[i].id===id)return _tkRows[i];return null;}
@@ -7065,6 +7126,13 @@ function _tkRowAdd(){_tkRows.push({id:_tkRowId(),vno:'',co:(_tkRows.length?_tkRo
   var l=document.querySelectorAll('.tkvin');if(l.length)l[l.length-1].focus();}
 function _tkRowDel(id){for(var i=0;i<_tkRows.length;i++)if(_tkRows[i].id===id){_tkRows.splice(i,1);break;}renderTracking();}
 function _tkModeSet(m){_tkMode=(m==='rows'||m==='simple')?m:'full';if(_tkMode==='rows'&&!_tkRows.length)_tkRows=[{id:_tkRowId(),vno:'',co:'GLI'}];renderTracking();}
+function _tkRowNoChip(r){
+  var c=_tkCo(r&&r.co);
+  if(!c)return '<span class="tkcono sm" data-vno-chip="'+_eatt((r&&r.id)||'')+'" hidden></span>';
+  var own=(+r.cono||0);
+  /* แถวที่ยังไม่มีเลขจะโชว์เลขถัดไปแบบจาง — เลขจริงถูกออกตอนกดบันทึก จะได้ไม่กินเลขถ้ากดยกเลิก */
+  return '<span class="tkcono sm'+(own?'':' pend')+'" data-vno-chip="'+_eatt(r.id)+'" title="'+(own?'เลขลำดับของแถวนี้':'เลขลำดับที่จะได้เมื่อกดบันทึก')+'">'+esc(c[1]+'-'+(own||(_tkCoNoMax(c[0])+1)))+'</span>';
+}
 function _tkNoteList(t){
   if(t&&Array.isArray(t.notes))return t.notes;
   if(t&&t.mode==='simple')return [];/* แบบ 3 เก็บคำอธิบายไว้ที่ desc — ไม่ย้ายไปเป็นรายการติ๊ก */
@@ -7106,7 +7174,37 @@ function _tkCoRowHTML(t){
   var co=((t.co||'')+'').toUpperCase();
   return '<div class="tkmnrow"><span class="tkmnn doc">🏢</span><span class="tkmnl">บริษัท</span><span class="tkmnf" id="tkmCo">'
       +TK_CO.map(function(c){return '<button class="tkmsb tkcob'+((co===c[0])?' on':'')+'" data-co="'+_eatt(c[0])+'" type="button" style="--c:'+c[2]+'">'+esc(c[1])+'</button>';}).join('')
-      +'<button class="tkmsb tkcob'+(co?'':' on')+'" data-co="" type="button" style="--c:#8C8676">— ไม่ระบุ —</button></span></div>';
+      +'<button class="tkmsb tkcob'+(co?'':' on')+'" data-co="" type="button" style="--c:#8C8676">— ไม่ระบุ —</button>'
+      +_tkCoNoChip(t,co)+'</span></div>';
+}
+/* ป้ายเลขลำดับในฟอร์ม — ถ้าเป็นเลขที่ออกให้แล้วจะเป็นสีเข้ม ถ้ายังไม่บันทึกจะขึ้นเป็น "เลขที่จะได้" (จาง) */
+function _tkCoNoChip(t,co){
+  var c=_tkCo(co);
+  if(!c)return '<span class="tkcono" id="tkmCoNo" hidden></span>';
+  var own=((+t.cono||0)&&((((t.co||'')+'').toUpperCase())===c[0]));
+  var no=own?(+t.cono):(_tkCoNoMax(c[0])+1);
+  return '<span class="tkcono'+(own?'':' pend')+'" id="tkmCoNo" title="'+(own?'เลขลำดับของงานนี้':'เลขลำดับที่จะได้เมื่อกดบันทึก')+'">'+esc(c[1]+'-'+no)+'</span>';
+}
+function _tkRowNoChipUpd(r){
+  if(!r)return;
+  var el=document.querySelector('[data-vno-chip="'+(''+(r.id||'')).replace(/"/g,'')+'"]');if(!el)return;
+  var c=_tkCo(r.co);
+  if(!c){el.hidden=true;el.textContent='';return;}
+  var own=(+r.cono||0);
+  el.hidden=false;el.className='tkcono sm'+(own?'':' pend');
+  el.title=own?'เลขลำดับของแถวนี้':'เลขลำดับที่จะได้เมื่อกดบันทึก';
+  el.textContent=c[1]+'-'+(own||(_tkCoNoMax(c[0])+1));
+}
+function _tkCoNoChipUpd(co){
+  var el=document.getElementById('tkmCoNo');if(!el)return;
+  var c=_tkCo(co);
+  if(!c){el.hidden=true;el.textContent='';return;}
+  var t=(_tkModalId&&_tkModalId!=='__new__')?_tkFind(_tkModalId):null;
+  var own=!!(t&&(+t.cono||0)&&((((t.co||'')+'').toUpperCase())===c[0]));
+  el.hidden=false;
+  el.className='tkcono'+(own?'':' pend');
+  el.title=own?'เลขลำดับของงานนี้':'เลขลำดับที่จะได้เมื่อกดบันทึก';
+  el.textContent=c[1]+'-'+(own?(+t.cono):(_tkCoNoMax(c[0])+1));
 }
 function _tkFullBlockHTML(t){
   return _tkCoRowHTML(t)
@@ -7119,12 +7217,13 @@ function _tkFullBlockHTML(t){
 }
 /* โหมด 2 — Voucher + บริษัท แถวละรายการ เพิ่มแถวได้ */
 function _tkRowsBlockHTML(){
-  var h='<div class="tkvhd"><span style="flex:1;min-width:150px">Voucher</span><span>บริษัท</span></div>';
+  var h='<div class="tkvhd"><span style="flex:1;min-width:150px">Voucher</span><span>บริษัท · เลขลำดับ</span></div>';
   if(!_tkRows.length)h+='<div class="tkckempty">ยังไม่มีแถว — กด “＋ เพิ่มแถว” ด้านล่าง</div>';
   _tkRows.forEach(function(r,i){
     h+='<div class="tkvrow"><span class="tkvn">'+(i+1)+'</span>'
       +'<input class="tkvin" data-vno="'+_eatt(r.id)+'" value="'+_eatt(r.vno||'')+'" placeholder="เลขที่ Voucher เช่น RV2026080004" autocomplete="off" spellcheck="false">'
-      +'<span class="tkvco">'+TK_CO.map(function(c){return '<button class="tkvcob'+((((r.co||'')+'').toUpperCase()===c[0])?' on':'')+'" data-vco="'+_eatt(r.id)+'|'+c[0]+'" type="button" style="--c:'+c[2]+'">'+esc(c[1])+'</button>';}).join('')+'</span>'
+      +'<span class="tkvco">'+TK_CO.map(function(c){return '<button class="tkvcob'+((((r.co||'')+'').toUpperCase()===c[0])?' on':'')+'" data-vco="'+_eatt(r.id)+'|'+c[0]+'" type="button" style="--c:'+c[2]+'">'+esc(c[1])+'</button>';}).join('')
+        +_tkRowNoChip(r)+'</span>'
       +'<button class="tkvx" data-vdel="'+_eatt(r.id)+'" type="button" title="ลบแถวนี้">✕</button></div>';
   });
   h+='<button class="tkvadd" id="tkvAdd" type="button">＋ เพิ่มแถว</button>';
@@ -7662,9 +7761,11 @@ function _tkAttClone(list,taskId,done){
 }
 /* สร้างงานใหม่จากสิ่งที่คัดลอกไว้ แล้ววางในหัวข้อ st (beforeId = วางก่อนการ์ดใบไหน · ไม่ระบุ = ต่อท้าย) */
 function _tkClipMake(src,st,beforeId,grp){
-  var dk=_tkDoneKey(),nid=_uid();
+  var dk=_tkDoneKey(),nid=_uid(),_cIss=_tkCoNoIssuer();/* สำเนาต้องได้เลขลำดับใบใหม่ ไม่ใช้เลขเดียวกับต้นฉบับ */
   var nt={id:nid,title:src.title||'',desc:src.desc||'',status:st,prio:src.prio||'med',assignee:src.assignee||'',
-          due:src.due||'',proj:src.proj||'',owner:src.owner||'',docno:src.docno||'',cat:src.cat||'',doc:src.doc||'',hl:src.hl||'',tc:src.tc||'',co:src.co||'',mode:src.mode||'full',rows:(src.rows||[]).map(function(r){return {id:_tkRowId(),vno:r.vno,co:r.co};}),notes:(src.notes||[]).map(function(n){return {id:_tkNoteId(),ts:n.ts,txt:n.txt,done:!!n.done,dts:n.dts};}),grp:((grp!=null)?grp:(src.grp||'')),att:[],
+          due:src.due||'',proj:src.proj||'',owner:src.owner||'',docno:src.docno||'',cat:src.cat||'',doc:src.doc||'',hl:src.hl||'',tc:src.tc||'',co:src.co||'',
+          cono:((src.mode==='rows')?0:(src.co?_cIss(src.co):0)),mode:src.mode||'full',
+          rows:(src.rows||[]).map(function(r){return {id:_tkRowId(),vno:r.vno,co:r.co,cono:(r.co?_cIss(r.co):0)};}),notes:(src.notes||[]).map(function(n){return {id:_tkNoteId(),ts:n.ts,txt:n.txt,done:!!n.done,dts:n.dts};}),grp:((grp!=null)?grp:(src.grp||'')),att:[],
           created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done:0,done_dt:(st===dk)?_tkToday():''};
   loadTrack();TRACKDATA.push(nt);_tkPlaceIn(nt,st,beforeId||null);
   _tkFlashId=nid;saveTrack();
@@ -7853,7 +7954,7 @@ function renderTracking(){
   var _openN=TRACKDATA.length-_doneN;
   var view=TRACKDATA.filter(function(t){
     if(_tkIsDone(t))return false;/* v10.72: งานที่กดเสร็จแล้วย้ายไปหน้า Report งานที่เสร็จ */
-    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.co||'')+' '+_tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+((_tkDoc(t.doc)||[])[1]||''))).toLowerCase().indexOf(q)<0))return false;
+    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.co||'')+' '+_tkCoText(t)+' '+_tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+((_tkDoc(t.doc)||[])[1]||''))).toLowerCase().indexOf(q)<0))return false;
     if(_tkFA&&t.assignee!==_tkFA)return false;
     if(_tkFP&&(t.prio||'med')!==_tkFP)return false;if(_tkFC&&(t.cat||'')!==_tkFC)return false;if(_tkFD&&(t.doc||'')!==_tkFD)return false;
     return true;
@@ -7960,7 +8061,7 @@ function _tkCard(t,pos){
   /* สีไฮไลท์ที่ตั้งเองที่การ์ด (hl) ชนะสีของประเภทเอกสารเสมอ */
   var cstyle='--p:'+pr[2]+';'+(t.hl?('background:'+hl[2]+';border-color:'+hl[3]+';'):(dc?('background:'+dc[3]+';border-color:'+dc[2]+'66;'):''));
   var h='<div class="tkcard'+((t.id===_tkFlashId)?' justadded':'')+'" draggable="true" data-id="'+t.id+'" style="'+cstyle+'">';
-  h+='<div class="tkcardtop">'+((t.mode==='rows')?'':_tkCoBadge(t.co))+'<span class="tkprio" style="background:'+pr[3]+';color:'+pr[2]+'">'+pr[1]+'</span>';
+  h+='<div class="tkcardtop">'+((t.mode==='rows')?'':_tkCoBadge(t.co,t.cono))+'<span class="tkprio" style="background:'+pr[3]+';color:'+pr[2]+'">'+pr[1]+'</span>';
   if(dc)h+='<span class="tkdocchip" style="color:'+dc[2]+';border:1.5px solid '+dc[2]+'">🗂 '+esc(dc[1])+'</span>';
   if(t.cat){var _tc=_tkCat(t.cat);if(_tc)h+='<span class="tkcat" style="background:'+_tc[3]+';color:'+_tc[2]+'">'+esc(_tc[1])+'</span>';}
   h+='</div>';
@@ -7970,7 +8071,7 @@ function _tkCard(t,pos){
     var _vr=_tkRowList(t);
     h+='<div class="tkcardv">';
     _vr.forEach(function(r){var c=_tkCo(r.co);
-      h+='<div class="tkcv"><span class="tkcvn">'+esc(r.vno||'')+'</span>'+(c?('<span class="tkcvco" style="background:'+c[2]+';color:#fff">'+esc(c[1])+'</span>'):'')+'</div>';});
+      h+='<div class="tkcv"><span class="tkcvn">'+esc(r.vno||'')+'</span>'+(c?('<span class="tkcvco" style="background:'+c[2]+';color:#fff">'+esc(_tkCoLabel(r.co,r.cono))+'</span>'):'')+'</div>';});
     h+='</div>';
     if(((t.title||'')+'').trim())h+='<div class="tkcardttl">'+esc(t.title)+'</div>';
     h+='</div>';
@@ -8005,8 +8106,8 @@ function _tkList(view){
   var h='<div class="tklistwrap"><table class="tklist"><thead><tr><th>Task</th><th>Project</th><th>Assignee</th><th>Priority</th><th>Due</th><th>Status</th><th></th></tr></thead><tbody>';
   if(!view.length)h+='<tr><td colspan="7" class="tknone">No tasks match the filters</td></tr>';
   view.forEach(function(t){var pr=_tkPrio(t.prio||'med'),st=_tkStat(t.status||'todo'),d=_tkDue(t),ct=_tkCat(t.cat||'');
-    var _dcl=_tkDoc(t.doc);h+='<tr data-edit="'+t.id+'"><td class="tkltitle">'+((t.mode!=='rows'&&t.co)?(_tkCoBadge(t.co)+' '):'')
-    +((t.mode==='rows')?(_tkRowList(t).map(function(r){return '<span class="tkgrpchip">'+esc(r.vno||'')+(r.co?(' · '+esc(r.co)):'')+'</span>';}).join(' ')+' '):'')+(_dcl?('<span class="tkdocchip" style="color:'+_dcl[2]+';border:1.5px solid '+_dcl[2]+'">'+esc(_dcl[1])+'</span> '):'')+(((t.grp||'')+'').trim()?('<span class="tkgrpchip">🗂 '+esc(((t.grp||'')+'').trim())+'</span> '):'')+(ct?('<span class="tkcat tkcatsm" style="background:'+ct[3]+';color:'+ct[2]+'">'+esc(ct[1])+'</span> '):'')+esc(t.title||'(ไม่มีคำอธิบาย)')
+    var _dcl=_tkDoc(t.doc);h+='<tr data-edit="'+t.id+'"><td class="tkltitle">'+((t.mode!=='rows'&&t.co)?(_tkCoBadge(t.co,t.cono)+' '):'')
+    +((t.mode==='rows')?(_tkRowList(t).map(function(r){return '<span class="tkgrpchip">'+esc(r.vno||'')+(r.co?(' · '+esc(_tkCoLabel(r.co,r.cono))):'')+'</span>';}).join(' ')+' '):'')+(_dcl?('<span class="tkdocchip" style="color:'+_dcl[2]+';border:1.5px solid '+_dcl[2]+'">'+esc(_dcl[1])+'</span> '):'')+(((t.grp||'')+'').trim()?('<span class="tkgrpchip">🗂 '+esc(((t.grp||'')+'').trim())+'</span> '):'')+(ct?('<span class="tkcat tkcatsm" style="background:'+ct[3]+';color:'+ct[2]+'">'+esc(ct[1])+'</span> '):'')+esc(t.title||'(ไม่มีคำอธิบาย)')
     +((((t.proj||'')+'').trim()||((t.owner||'')+'').trim()||((t.docno||'')+'').trim())?('<span class="tkltl">'
       +(((t.proj||'')+'').trim()?('<b>'+esc(((t.proj||'')+'').trim())+'</b>'):'')
       +(((t.owner||'')+'').trim()?(' · '+esc(((t.owner||'')+'').trim())):'')
@@ -8066,7 +8167,7 @@ function _tkModalHTML(){
 }
 function _tkOpen(id){_tkAF={owner:'',title:''};_tkMS={};_tkModalId=id;var _t=_tkFind(id);_tkAtt=(_t&&_t.att)?_t.att.slice():[];
   _tkNotes=_tkNoteList(_t).map(function(n){return {id:n.id||_tkNoteId(),ts:n.ts||0,txt:n.txt||'',done:!!n.done,dts:n.dts||0};});
-  _tkRows=_tkRowList(_t).map(function(r){return {id:r.id||_tkRowId(),vno:r.vno||'',co:r.co||''};});
+  _tkRows=_tkRowList(_t).map(function(r){return {id:r.id||_tkRowId(),vno:r.vno||'',co:r.co||'',cono:+r.cono||0};});
   _tkMode=(((_t&&_t.mode)==='rows')||((_t&&_t.mode)==='simple'))?_t.mode:'full';
   renderTracking();}
 function _tkCloseModal(){_tkAttCleanupNew();_tkMS={};_tkModalId=null;_tkNewGrp='';renderTracking();}
@@ -8077,7 +8178,10 @@ function _tkSaveModal(){
   var coEl=document.querySelector('#tkmCo .tkmsb.on'),co=coEl?(coEl.getAttribute('data-co')||''):'';
   var mode=(_tkMode==='rows'||_tkMode==='simple')?_tkMode:'full';
   var descv=(mode==='simple')?((g('tkmDesc')||'').replace(/\s+$/,'')):'';
-  var rows=_tkRows.filter(function(r){return ((r.vno||'')+'').trim();}).map(function(r){return {id:r.id,vno:((r.vno||'')+'').trim(),co:r.co||''};});
+  var _iss=_tkCoNoIssuer();
+  var rows=_tkRows.filter(function(r){return ((r.vno||'')+'').trim();}).map(function(r){
+    /* r.cono ถูกล้างไปแล้วตอนกดเปลี่ยนบริษัท — ที่เหลืออยู่คือเลขเดิมที่ยังใช้ได้ */
+    return {id:r.id,vno:((r.vno||'')+'').trim(),co:r.co||'',cono:(r.co?((+r.cono||0)||_iss(r.co)):0)};});
   if(mode==='rows'){
     if(!rows.length){alert('แบบ 2 — กรุณากรอกเลขที่ Voucher อย่างน้อย 1 แถว');var ve=document.querySelector('.tkvin');if(ve)ve.focus();return;}
   }else if(!title){alert((mode==='simple')?'กรุณากรอกหัวข้อ':'กรุณากรอกบรรทัดที่ 4 (คำอธิบาย) — ใช้เป็นชื่อเรื่องหลักของการ์ด');var ti=document.getElementById('tkmTitle');if(ti)ti.focus();return;}
@@ -8088,17 +8192,22 @@ function _tkSaveModal(){
   var hlEl=document.querySelector('#tkmHL .tkmsb.on'),tcEl=document.querySelector('#tkmTC .tkmsb.on');
   var hl=hlEl?hlEl.getAttribute('data-hl'):'',tc=tcEl?tcEl.getAttribute('data-tc'):'';
   var isNew=(_tkModalId==='__new__'),_dk=_tkDoneKey();loadTrack();
+  /* เลขลำดับระดับการ์ด (โหมด 1/3) — คงเลขเดิมถ้าบริษัทไม่เปลี่ยน · เปลี่ยนบริษัท/เพิ่งเลือก = ออกเลขใหม่ */
+  var _prevT=isNew?null:_tkFind(_tkModalId),_cono=0;
+  if(mode!=='rows'&&co){
+    _cono=(_prevT&&(+_prevT.cono||0)&&((((_prevT.co||'')+'').toUpperCase())===co.toUpperCase()))?(+_prevT.cono):_iss(co);
+  }
   /* ไม่มีช่อง Status ในฟอร์มแล้ว — การ์ดใหม่อยู่หัวข้อที่กด “+ Add Task”, การ์ดเดิมคงหัวข้อเดิม (ย้ายด้วยการลาก) */
   var status=isNew?(_tkNewStatus||TK_STAT[0][0]):(((_tkFind(_tkModalId)||{}).status)||TK_STAT[0][0]);
   var notes=_tkNotes.slice();
   if(isNew){
-    var nt={id:(_tkNewId||_uid()),title:title,desc:descv,status:status,prio:prio,assignee:assignee,due:due,proj:proj,owner:owner,docno:docno,cat:cat,doc:doc,grp:grp,hl:hl,tc:tc,notes:notes,co:co,mode:mode,rows:rows,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done:0,done_dt:(status===_dk)?_tkToday():''};
+    var nt={id:(_tkNewId||_uid()),title:title,desc:descv,status:status,prio:prio,assignee:assignee,due:due,proj:proj,owner:owner,docno:docno,cat:cat,doc:doc,grp:grp,hl:hl,tc:tc,notes:notes,co:co,cono:_cono,mode:mode,rows:rows,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done:0,done_dt:(status===_dk)?_tkToday():''};
     TRACKDATA.push(nt);
     if(typeof gliLog==='function')gliLog('Added task',title+(assignee&&_ptFind(assignee)?(' · assigned to '+_ptName(_ptFind(assignee))):''));
   }else{
     var t=_tkFind(_tkModalId);if(!t){_tkModalId=null;renderTracking();return;}
     var oldSt=t.status;
-    t.title=title;t.notes=notes;t.desc=descv;t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.owner=owner;t.docno=docno;t.cat=cat;t.doc=doc;t.grp=grp;t.hl=hl;t.tc=tc;t.co=co;t.mode=mode;t.rows=rows;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));
+    t.title=title;t.notes=notes;t.desc=descv;t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.owner=owner;t.docno=docno;t.cat=cat;t.doc=doc;t.grp=grp;t.hl=hl;t.tc=tc;t.co=co;t.cono=_cono;t.mode=mode;t.rows=rows;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));
     /* v10.72: การ์ดที่เก็บเข้า Report งานที่เสร็จแล้ว — แก้ไขรายละเอียดได้ แต่ต้องไม่ล้างวันที่เสร็จทิ้ง
        (เดิมกฎนี้ผูกกับหัวข้อ "Done" ของบอร์ดอย่างเดียว งานที่ done แต่ค้างอยู่หัวข้ออื่นจึงโดนล้าง) */
     if(!t.done){if(status===_dk&&oldSt!==_dk)t.done_dt=_tkToday();if(status!==_dk)t.done_dt='';}
@@ -8154,8 +8263,11 @@ function _tkBind(){
     if((b=cl(e,'#tkvAdd'))){_tkRowAdd();return;}
     if((b=cl(e,'[data-vdel]'))){_tkRowDel(b.getAttribute('data-vdel'));return;}
     if((b=cl(e,'[data-vco]'))){var _vp=(b.getAttribute('data-vco')||'').split('|'),_vr2=_tkRowFind(_vp[0]);
-      if(_vr2){_vr2.co=_vp[1];var _ws=b.parentNode.querySelectorAll('[data-vco]');
-        for(var _wi=0;_wi<_ws.length;_wi++)_ws[_wi].classList.toggle('on',(_ws[_wi].getAttribute('data-vco')||'').split('|')[1]===_vp[1]);}
+      if(_vr2){var _wasCo=((_vr2.co||'')+'').toUpperCase();_vr2.co=_vp[1];
+        if(_wasCo!==(((_vp[1]||'')+'').toUpperCase()))_vr2.cono=0;/* เปลี่ยนบริษัท = ออกเลขใหม่ตอนบันทึก */
+        var _ws=b.parentNode.querySelectorAll('[data-vco]');
+        for(var _wi=0;_wi<_ws.length;_wi++)_ws[_wi].classList.toggle('on',(_ws[_wi].getAttribute('data-vco')||'').split('|')[1]===_vp[1]);
+        _tkRowNoChipUpd(_vr2);}
       return;}
     if((b=cl(e,'[data-cnck]'))){var _cn=(b.getAttribute('data-cnck')||'').split('|');_tkCardNoteToggle(_cn[0],_cn[1]);return;}
     if((b=cl(e,'[data-nck]'))){_tkNoteToggle(b.getAttribute('data-nck'));return;}
@@ -8166,6 +8278,7 @@ function _tkBind(){
     if((b=cl(e,'.tkattdel'))){_tkAttRemove(b.getAttribute('data-attdel'));return;}
     if((b=cl(e,'.tkattth'))){var _pp=b.closest('[data-attid]');if(_pp)_tkAttView(_pp.getAttribute('data-attid'));return;}
     if((b=cl(e,'[data-attview]'))){_tkAttView(b.getAttribute('data-attview'));return;}
+    if((b=cl(e,'.tkcob'))){_tkCoNoChipUpd(b.getAttribute('data-co')||'');}/* ไม่ return — ปล่อยให้ .tkmsb ด้านล่าง toggle ปุ่มต่อ */
     if((b=cl(e,'.tkmsb'))){var seg=b.parentNode,bs=seg.querySelectorAll('.tkmsb');for(var i=0;i<bs.length;i++)bs[i].classList.remove('on');b.classList.add('on');return;}
     if((b=cl(e,'[data-edit]'))){_tkOpen(b.getAttribute('data-edit'));return;}
     if(e.target&&e.target.classList&&e.target.classList.contains('tkmodal')){_tkCloseModal();return;}
@@ -8250,12 +8363,12 @@ function _tkrRows(){
     if(R.b!=null&&ts>=R.b)return false;
     if(_tkrFA&&(t.assignee||'')!==_tkrFA)return false;
     if(_tkrFD&&(t.doc||'')!==_tkrFD)return false;
-    if(_tkrFCo&&((((t.co||'')+'').toUpperCase())!==_tkrFCo))return false;
+    if(_tkrFCo&&!_tkCoMatch(t,_tkrFCo))return false;/* โหมด 2 เก็บบริษัทรายแถว ต้องมองแถวด้วย */
     if(_tkrFSt&&(t.status||TK_STAT[0][0])!==_tkrFSt)return false;
     if(q){
       var u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;
       var hay=[_tkTaskName(t),t.desc,t.proj,t.owner,t.docno,t.grp,t.co,t.done_by,
-        (u&&typeof _ptName==='function')?_ptName(u):'',
+        (u&&typeof _ptName==='function')?_ptName(u):'',_tkCoText(t),
         _tkProjName(t.proj),((_tkDoc(t.doc)||[])[1]||''),((_tkCat(t.cat)||[])[1]||''),
         ((_tkStat(t.status||TK_STAT[0][0])||[])[1]||''),
         _tkNoteList(t).map(function(n){return n.txt||'';}).join(' '),
@@ -8277,7 +8390,10 @@ function _tkrGrpOf(t){
   if(_tkrGrp==='as'){u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;return u?_ptName(u):'— ไม่ระบุผู้รับผิดชอบ —';}
   if(_tkrGrp==='doc'){d=_tkDoc(t.doc);return d?d[1]:'— ไม่ระบุประเภทเอกสาร —';}
   if(_tkrGrp==='mon')return _tkrMonLabel(_tkrMonKey(_tkDoneTs(t)));
-  if(_tkrGrp==='co'){c=_tkCo(t.co);return c?c[1]:'— ไม่ระบุบริษัท —';}
+  if(_tkrGrp==='co'){
+    if(t.mode==='rows'){var sn={},o=[];_tkRowList(t).forEach(function(r){var k=_tkCo(r.co);if(k&&!sn[k[0]]){sn[k[0]]=1;o.push(k[1]);}});
+      return o.length?o.join(' + '):'— ไม่ระบุบริษัท —';}
+    c=_tkCo(t.co);return c?c[1]:'— ไม่ระบุบริษัท —';}
   if(_tkrGrp==='st')return (_tkStat(t.status||TK_STAT[0][0])||['',''])[1]||'—';
   if(_tkrGrp==='grp')return ((t.grp||'')+'').trim()||'— ไม่ได้จัดกลุ่ม —';
   if(_tkrGrp==='cat'){k=_tkCat(t.cat);return k?k[1]:'— ไม่ระบุหมวด —';}
@@ -8321,7 +8437,7 @@ function _tkrExport(){
     var nl=_tkNoteList(t),nd=0;nl.forEach(function(n){if(n.done)nd++;});
     var lt=_tkrLate(t),dy=_tkrDays(t),ts=_tkDoneTs(t);
     lines.push([i+1,_tkrDate(ts),_tkrTime(ts),_tkTaskName(t),(t.desc||''),
-      ((_tkDoc(t.doc)||[])[1]||''),(((t.co||'')+'').toUpperCase()),
+      ((_tkDoc(t.doc)||[])[1]||''),(_tkCoText(t)||(((t.co||'')+'').toUpperCase())),
       ((_tkStat(t.status||TK_STAT[0][0])||[])[1]||''),((t.grp||'')+''),((_tkCat(t.cat)||[])[1]||''),
       (t.proj||''),(t.proj?_tkProjName(t.proj):''),(t.owner||''),(t.docno||''),
       (u?_ptName(u):''),(t.done_by||''),(t.by||''),
@@ -8338,6 +8454,16 @@ function _tkrExport(){
     setTimeout(function(){URL.revokeObjectURL(url);},30000);
     if(typeof gliLog==='function')gliLog('ส่งออกรายงานงานที่เสร็จ (CSV)',R.length+' รายการ · '+_tkrPerLabel());
   }catch(e){alert('ส่งออกไม่สำเร็จ: '+(e&&e.message||e));}
+}
+/* งานโหมด 2 เก็บบริษัทรายแถว — ช่อง "บริษัท" จึงโชว์ได้หลายป้าย (GLI-1 · JV-2) */
+function _tkrCoCell(t){
+  var out='',c;
+  if(t&&t.mode==='rows'){
+    _tkRowList(t).forEach(function(r){c=_tkCo(r.co);
+      if(c)out+='<span class="tkrchip" style="background:'+c[2]+';color:#fff">'+esc(_tkCoLabel(r.co,r.cono))+'</span>';});
+  }else{c=_tkCo(t&&t.co);
+    if(c)out='<span class="tkrchip" style="background:'+c[2]+';color:#fff">'+esc(_tkCoLabel(t.co,t.cono))+'</span>';}
+  return out||'<span class="tkrdim">—</span>';
 }
 function _tkrRowHTML(t,no){
   var u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;
@@ -8359,7 +8485,7 @@ function _tkrRowHTML(t,no){
   if(((t.desc||'')+'').trim())h+='<span class="tkrsubl">'+esc(((t.desc||'')+'').trim().slice(0,110))+'</span>';
   h+='</td>';
   h+='<td>'+(dc?('<span class="tkrchip" style="background:'+dc[3]+';color:'+dc[2]+'">'+esc(dc[1])+'</span>'):'<span class="tkrdim">—</span>')+'</td>';
-  h+='<td>'+(co?('<span class="tkrchip" style="background:'+co[2]+';color:#fff">'+esc(co[1])+'</span>'):'<span class="tkrdim">—</span>')+'</td>';
+  h+='<td>'+_tkrCoCell(t)+'</td>';
   h+='<td><span class="tkrchip" style="background:'+(st[3]||'#EEF2F7')+';color:'+st[2]+'">'+esc(st[1]||'')+'</span></td>';
   h+='<td>'+(u?esc(_ptName(u)):'<span class="tkrdim">—</span>')+'</td>';
   h+='<td>'+(((t.done_by||'')+'').trim()?esc(((t.done_by||'')+'').trim()):'<span class="tkrdim">—</span>')+'</td>';
