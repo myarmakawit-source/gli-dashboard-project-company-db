@@ -69,7 +69,7 @@ h1{font-size:26px;font-weight:800;letter-spacing:.025em;line-height:1.5;text-tra
 .modhero .mh-s{font-size:11px;opacity:.92;font-weight:600;margin-top:2px;letter-spacing:.01em}
 #page-bp .titleblock,#page-ov .titleblock{display:none}
 .uptitle{display:none}
-#page-tk .tktitle{display:none}
+#page-tk .tktitle,#page-tk .tkrtitle{display:none}
 #page-up .uptop{justify-content:flex-end}
 .tkhd .tkhdr{margin-left:auto}
 #page-wht>.sechead:first-child{display:none}
@@ -1673,7 +1673,7 @@ h1{ background:var(--g-aurora) !important;
 .tkbtn.ghost{color:var(--muted)}
 .tkbtn.danger{background:#FDECEA;color:#B42318;border-color:transparent}
 .tkbtn:hover{filter:brightness(.98)}
-.tktool{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:15px}
+.tktool{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:15px;background:var(--card,#fff);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow-card)}
 .tkviews{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
 .tkvb{font-family:inherit;font-size:12.5px;font-weight:700;padding:7px 14px;cursor:pointer;border:none;background:#fff;color:var(--muted)}
 .tkvb.on{background:var(--brand,#1D5FAE);color:#fff}
@@ -1972,36 +1972,51 @@ body.tkcoldrag{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .tkpill.done:hover{background:#15803D;color:#fff}
 /* ===== v10.72: REPORT งานที่เสร็จ · Completed Work ===== */
 .tkrwrap{padding:2px 0}
+/* v10.53: Report งานที่เสร็จ ย้ายมาเป็นหน้าที่ 2 ของโมดูล Tracking — แถบสลับหน้าใช้ผิวการ์ดของธีมหลัก */
+.tknav{display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:var(--card,#fff);border:1px solid var(--line);border-radius:13px;padding:5px;margin-bottom:14px;box-shadow:var(--shadow-card)}
+.tknavb{font-family:inherit;font-size:13px;font-weight:700;color:var(--ink2,#4A5563);background:transparent;border:none;border-radius:9px;padding:8px 16px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:background .15s ease,color .15s ease}
+.tknavb:hover{background:var(--line2,#EEF0F4)}
+.tknavb.on{background:var(--brand,#0E5C52);color:#fff}
+.tknavb.on:hover{background:var(--brand-d,#0A463E)}
+.tknavic{font-size:15px;line-height:1}
+.tknavn{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.02em;background:var(--line2,#EEF0F4);color:var(--ink2,#4A5563);border-radius:20px;padding:1px 8px;font-variant-numeric:tabular-nums}
+.tknavb.on .tknavn{background:rgba(255,255,255,.22);color:#fff}
+.tknavn[hidden]{display:none}
+.tkpane{min-width:0}
+.tkpane[hidden]{display:none}
 .tkrhd{display:flex;align-items:center;gap:12px;margin-bottom:13px;flex-wrap:wrap}
 .tkrtitle{font-size:19px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:9px}
 .tkrtitle .tkric{font-size:22px}
 .tkrtitle .tkrsub{font-size:12.5px;font-weight:600;color:var(--muted)}
 .tkrhdr{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
-.tkrtool{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:13px}
+.tkrtool{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:14px;background:var(--card,#fff);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow-card)}
 .tkrsearch{font-family:inherit;font-size:13px;padding:7px 12px;border:1px solid var(--line);border-radius:9px;min-width:160px;flex:1;max-width:250px;color:var(--ink);background:#fff}
 .tkrfilt{font-family:inherit;font-size:12.5px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink2);cursor:pointer;max-width:230px}
 .tkrdate{font-family:inherit;font-size:12.5px;padding:6px 9px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink2)}
-.tkrsearch:focus,.tkrfilt:focus,.tkrdate:focus{outline:none;border-color:var(--brand,#0E5C52)}
-.tkrlbl{font-size:11.5px;font-weight:700;color:var(--muted)}
+.tkrsearch:focus,.tkrfilt:focus,.tkrdate:focus{outline:none;border-color:var(--brand,#0E5C52);box-shadow:var(--ring)}
+.tkrfg{display:inline-flex;align-items:center;gap:7px;min-width:0}
+.tkrlbl{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .tkrkpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;margin-bottom:14px}
-.tkrkpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 14px;border-left:4px solid var(--k,#15803D)}
+.tkrkpi{position:relative;overflow:hidden;background:var(--card,#fff);border:1px solid var(--line);border-radius:14px;padding:14px 17px;box-shadow:var(--shadow-card);transition:box-shadow .18s ease}
+.tkrkpi::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--k,#15803D)}
+.tkrkpi:hover{box-shadow:var(--shadow-cardh)}
 .tkrkn{font-size:23px;font-weight:800;color:var(--k,#15803D);line-height:1.12;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
-.tkrkl{font-size:11.5px;font-weight:800;color:var(--ink2,#4A5563);margin-top:3px}
-.tkrks{font-size:10.5px;color:var(--muted);margin-top:1px}
-.tkrnote{font-size:11.5px;color:var(--muted);background:#FBF1DE;border:1px solid #EBD9AE;border-radius:10px;padding:8px 12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.tkrlistwrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
-.tkrlist{width:100%;border-collapse:collapse;font-size:12.5px;min-width:1180px;background:#fff}
-.tkrlist thead th{text-align:left;font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:10px 11px;background:var(--line2,#F4F6F9);border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;z-index:2}
+.tkrkl{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.tkrks{font-size:11.5px;font-weight:500;color:var(--muted);margin-top:3px}
+.tkrnote{font-size:12px;color:var(--ink2,#4A5563);background:var(--gold-t,#FBF3DF);border:1px solid #EBD9AE;border-radius:12px;padding:10px 14px;margin-bottom:13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tkrlistwrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card,#fff);box-shadow:var(--shadow-card)}
+.tkrlist{width:100%;border-collapse:collapse;font-size:13px;min-width:1240px;background:var(--card,#fff)}
+.tkrlist thead th{text-align:left;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:11px 13px;background:var(--line2,#F4F6F9);border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;z-index:2}
 .tkrlist tbody tr{border-bottom:1px solid var(--line2,#F1ECE2)}
 .tkrlist tbody tr:hover{background:var(--brand-t,#E6F0EC)}
-.tkrlist td{padding:9px 11px;vertical-align:top}
+.tkrlist td{padding:10px 13px;vertical-align:top}
 .tkrno{color:var(--muted);font-variant-numeric:tabular-nums;text-align:right;width:38px}
 .tkrdt{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink)}
 .tkrtm{display:block;font-size:10.5px;font-weight:500;color:var(--muted)}
 .tkrttl{font-weight:700;color:var(--ink);cursor:pointer;min-width:210px}
 .tkrttl:hover{color:var(--brand);text-decoration:underline}
-.tkrsubl{display:block;font-size:10.5px;font-weight:500;color:var(--muted);margin-top:2px}
-.tkrchip{display:inline-block;font-size:10px;font-weight:800;padding:1px 8px;border-radius:10px;background:var(--line2,#F1ECE2);color:var(--ink2);margin:0 4px 2px 0;white-space:nowrap}
+.tkrsubl{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-top:2px}
+.tkrchip{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:9px;background:var(--line2,#F1ECE2);color:var(--ink2);margin:0 4px 2px 0;white-space:nowrap}
 .tkrdim{color:#AAB2BD}
 .tkrnum{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .tkrok{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:10px;background:#E7F6EC;color:#15803D;white-space:nowrap}
@@ -2015,16 +2030,16 @@ body.tkcoldrag{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .tkrgn{font-size:11px;font-weight:800;color:var(--brand);background:#fff;border:1px solid var(--brand);border-radius:11px;padding:1px 9px;margin-left:8px}
 .tkrgs{font-size:11px;color:var(--muted);margin-left:8px;font-weight:600}
 .tkrnone{text-align:center;color:var(--muted);padding:34px}
-.tkrempty{text-align:center;color:var(--muted);padding:40px 24px;background:#fff;border:1px dashed var(--line);border-radius:13px}
+.tkrempty{text-align:center;color:var(--muted);padding:40px 24px;background:var(--card,#fff);border:1px dashed var(--line);border-radius:14px;box-shadow:var(--shadow-card)}
 .tkremptyic{font-size:40px;margin-bottom:10px}
 .tkremptyt{font-size:15px;font-weight:800;color:var(--ink2);margin-bottom:5px}
 .tkremptys{font-size:12.5px;color:var(--muted)}
 .tkrfoot{font-size:11px;color:var(--muted);margin-top:9px;display:flex;gap:12px;flex-wrap:wrap}
 .tkrcap{color:#B45309;font-weight:700}
 .tkrmore{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap}
-@media(max-width:640px){.tkrhdr{margin-left:0}.tkrsearch{max-width:none}}
+@media(max-width:640px){.tkrhdr{margin-left:0}.tkrsearch{max-width:none}.tknavb{flex:1;justify-content:center;padding:8px 10px}}
 @media print{
-  .modnav,.sidebar,#modHero,#modDesc,.dmeta,.tkrtool,.tkrhdr,.tkract,.tkrnote,.tkrmore{display:none!important}
+  .modnav,.sidebar,#modHero,#modDesc,.dmeta,.tknav,.tkrtool,.tkrhdr,.tkract,.tkrnote,.tkrmore{display:none!important}
   body{padding:0;background:#fff}
   .tkrlistwrap{border:none;overflow:visible}
   .tkrlist{min-width:0;font-size:10.5px}
@@ -3164,7 +3179,7 @@ body{padding-left:236px;padding-right:8px}
 /* ===================== REMOVE MONTHLY SALES BAR CHART (per request) ===================== */
 #page-vat .v30spark{display:none}
 </style>
-<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab modtab-tkr" data-mod="tkr" role="tab" aria-selected="false"><span class="sbic">✅</span><span class="sblbl">Report งานที่เสร็จ</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><button class="modtab modtab-pg" data-mod="pg" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Progress %</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">🗄️</span><span class="sblbl">Database</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Finance &amp; Reconcile</div><button class="modtab" data-mod="bbl" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Bank loan</span></button><div class="sbsec">PAYEE DATABASE</div><button class="modtab" data-mod="pdrepjv" role="tab" aria-selected="false"><span class="sbic">📑</span><span class="sblbl">Report AP JV</span></button><div class="sbsec">Database Taxation</div><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><div class="sbsec">Routine Work</div><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-gm" data-mod="gm" role="tab" aria-selected="false"><span class="sbic">📧</span><span class="sblbl">Gmail Inbox</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-cb" data-mod="cb" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Confirm Bank</span></button><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><div class="sbsec">Security &amp; Data</div><button class="modtab modtab-sec" data-mod="sec" role="tab" aria-selected="false"><span class="sbic">🛡️</span><span class="sblbl">Security</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — auto-refreshes every open device when a newer build is deployed (v9.19+)">V10.52</span></div></nav>
+<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><button class="modtab modtab-pg" data-mod="pg" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Progress %</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">🗄️</span><span class="sblbl">Database</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Finance &amp; Reconcile</div><button class="modtab" data-mod="bbl" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Bank loan</span></button><div class="sbsec">PAYEE DATABASE</div><button class="modtab" data-mod="pdrepjv" role="tab" aria-selected="false"><span class="sbic">📑</span><span class="sblbl">Report AP JV</span></button><div class="sbsec">Database Taxation</div><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><div class="sbsec">Routine Work</div><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-gm" data-mod="gm" role="tab" aria-selected="false"><span class="sbic">📧</span><span class="sblbl">Gmail Inbox</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-cb" data-mod="cb" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Confirm Bank</span></button><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><div class="sbsec">Security &amp; Data</div><button class="modtab modtab-sec" data-mod="sec" role="tab" aria-selected="false"><span class="sbic">🛡️</span><span class="sblbl">Security</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — auto-refreshes every open device when a newer build is deployed (v9.19+)">V10.53</span></div></nav>
 <header>
 <div class="letter"><svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0E5C52"></rect><path d="M15 43 L27 31 L35 37 L49 21" fill="none" stroke="#D9A441" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="49" cy="21" r="3.7" fill="#D9A441"></circle><text x="32" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#9FCFC4" letter-spacing="2.5">GLI</text></svg>
 <div class="brand"><div class="brandL"><div class="th">GRANDLINE INNOVATION <span class="th-co">COMPANY LIMITED</span></div><span class="ho">Head Office</span></div><div class="brandR"><div class="addr">333 Soi Lat Phrao 64 Yaek 12, Lat Phrao Road, Wang Thong Lang Sub-District, Wang Thong Lang District, Bangkok 10310</div><div class="taxid">Tax ID · 0105553002230</div></div></div>
@@ -3177,8 +3192,7 @@ body{padding-left:236px;padding-right:8px}
 <div class="page" id="page-ov" hidden=""></div>
 <div class="page" id="page-wpb" hidden=""></div>
 <div class="page" id="page-cb" hidden=""></div>
-<div class="page" id="page-tk" hidden=""></div>
-<div class="page" id="page-tkr" hidden=""></div>
+<div class="page" id="page-tk" hidden=""><div class="tknav" role="tablist" aria-label="Tracking"><button class="tknavb on" data-tkpage="board" type="button" role="tab" aria-selected="true"><span class="tknavic">📋</span><span>บอร์ดงาน</span><span class="tknavn" id="tkNavOpenN" hidden=""></span></button><button class="tknavb" data-tkpage="report" type="button" role="tab" aria-selected="false"><span class="tknavic">✅</span><span>Report งานที่เสร็จ</span><span class="tknavn" id="tkNavDoneN" hidden=""></span></button></div><div class="tkpane" id="tkPaneBoard"></div><div class="tkpane" id="page-tkr" hidden=""></div></div>
 <div class="page active" id="page-bp">
 <div class="titleblock">
 <div class="tb-left">
@@ -7024,6 +7038,45 @@ function _vBind(){
 }
 
 /* ===================== TRACKING (Task Board) ===================== */
+/* ===== v10.53: โมดูล Tracking มี 2 หน้า — "บอร์ดงาน" กับ "Report งานที่เสร็จ" =====
+   ทั้งสองหน้าอยู่ใน #page-tk เดียวกัน สลับด้วยแถบ .tknav ไม่ใช่เมนูซ้ายอีกต่อไป
+   #tkPaneBoard = บอร์ด (renderTracking) · #page-tkr = รายงาน (renderTkr) — คง id เดิมไว้
+   หน้าที่เปิดล่าสุดจำไว้ที่เครื่อง เปิดโมดูลครั้งหน้าจะกลับมาหน้าเดิม */
+var _tkPage='board';try{if(localStorage.getItem('gli_tkpage')==='report')_tkPage='report';}catch(e){}
+function _tkPageApply(){
+  var bd=document.getElementById('tkPaneBoard'),rp=document.getElementById('page-tkr');
+  if(bd)bd.hidden=(_tkPage!=='board');
+  if(rp)rp.hidden=(_tkPage!=='report');
+  var bs=document.querySelectorAll('#page-tk .tknavb'),i,on;
+  for(i=0;i<bs.length;i++){on=(bs[i].getAttribute('data-tkpage')===_tkPage);
+    bs[i].classList.toggle('on',on);bs[i].setAttribute('aria-selected',on?'true':'false');}
+  /* หัวเรื่องโมดูลด้านบน (hero + คำอธิบาย) เปลี่ยนตามหน้าที่เปิดอยู่ ใช้ข้อความชุดเดิมของ tk / tkr */
+  try{if(typeof window._gliModHero==='function')window._gliModHero(_tkPage==='report'?'tkr':'tk');}catch(e){}
+  /* เปิดหน้ารายงานก่อนเป็นหน้าแรก บอร์ดยังไม่เคยวาด — ผูก event ให้แถบสลับหน้าใช้งานได้ทันที */
+  try{if(typeof _tkBind==='function')_tkBind();}catch(e){}
+  _tkNavCount();
+}
+function _tkPageShow(){
+  _tkPageApply();
+  if(_tkPage==='report'){if(typeof renderTkr==='function')renderTkr();}
+  else if(typeof renderTracking==='function')renderTracking();
+}
+function _tkPageSet(v){
+  v=(v==='report')?'report':'board';
+  var same=(v===_tkPage);_tkPage=v;
+  try{localStorage.setItem('gli_tkpage',_tkPage);}catch(e){}
+  _tkPageShow();
+  if(!same){try{window.scrollTo(0,0);}catch(e){}}
+}
+/* ตัวเลขบนแถบสลับหน้า — งานค้างบนบอร์ด / งานที่เก็บเข้ารายงานแล้ว */
+function _tkNavCount(){
+  var o=document.getElementById('tkNavOpenN'),d=document.getElementById('tkNavDoneN');
+  if(!o&&!d)return;
+  loadTrack();var open=0,done=0,i;
+  for(i=0;i<TRACKDATA.length;i++){if(_tkIsDone(TRACKDATA[i]))done++;else open++;}
+  var put=function(el,n){if(!el)return;if(n){el.hidden=false;el.textContent=(n>999?'999+':(''+n));}else{el.hidden=true;el.textContent='';}};
+  put(o,open);put(d,done);
+}
 var TRACKDATA=null;try{TRACKDATA=JSON.parse(localStorage.getItem('gli_track')||'null');}catch(e){TRACKDATA=null;}if(!Array.isArray(TRACKDATA))TRACKDATA=[];
 function loadTrack(){if(!Array.isArray(TRACKDATA)){try{TRACKDATA=JSON.parse(localStorage.getItem('gli_track')||'[]');}catch(e){TRACKDATA=[];}}if(!Array.isArray(TRACKDATA))TRACKDATA=[];}
 function saveTrack(){try{localStorage.setItem('gli_track',JSON.stringify(TRACKDATA));}catch(e){}_tsTouch('tk');cloudPush();if(typeof _tkUpdNotif==='function')_tkUpdNotif();}
@@ -7342,7 +7395,7 @@ function _tkAttInjectStyle(){
   document.head.appendChild(s);
 }
 function _tkMyOpen(){loadTrack();var me=(typeof _curUserId!=='undefined')?_curUserId:'';if(!me)return [];var myN=((typeof _mnUser!=='undefined'&&_mnUser)?_mnUser:'').trim().toUpperCase();var out=[];for(var i=0;i<TRACKDATA.length;i++){var t=TRACKDATA[i];if(t.assignee===me&&!_tkIsDone(t)&&(t.status||'todo')!=='done'){var by=((t.by||'')+'').trim().toUpperCase();if(!by||by!==myN)out.push(t);}}return out;}
-function _tkUpdNotif(){var el=document.getElementById('tkNotif');if(!el)return;var n=_tkMyOpen().length;var c=el.querySelector('.tknotifn');if(n>0){el.hidden=false;el.classList.add('on');if(c)c.textContent=(n>99?'99+':(''+n));el.title=n+' งานที่ถูกมอบหมายให้คุณและยังไม่เสร็จ — คลิกเพื่อดู';}else{el.hidden=true;el.classList.remove('on');}if(!el._b){el._b=1;el.addEventListener('click',function(){try{_tkFA=_curUserId;}catch(e){}var b=document.querySelector('.modtab[data-mod="tk"]');if(b)b.click();});}}
+function _tkUpdNotif(){var el=document.getElementById('tkNotif');if(!el)return;var n=_tkMyOpen().length;var c=el.querySelector('.tknotifn');if(n>0){el.hidden=false;el.classList.add('on');if(c)c.textContent=(n>99?'99+':(''+n));el.title=n+' งานที่ถูกมอบหมายให้คุณและยังไม่เสร็จ — คลิกเพื่อดู';}else{el.hidden=true;el.classList.remove('on');}if(!el._b){el._b=1;el.addEventListener('click',function(){try{_tkFA=_curUserId;}catch(e){}var b=document.querySelector('.modtab[data-mod="tk"]');if(b)b.click();if(typeof _tkPageSet==='function')_tkPageSet('board');});}}
 function _tkFind(id){loadTrack();for(var i=0;i<TRACKDATA.length;i++)if(TRACKDATA[i].id===id)return TRACKDATA[i];return null;}
 /* v10.54: custom board columns (headings) — add / rename / delete / reorder, stored + synced */
 function _tkColSeed(){return [['todo','Book keeping','#64748B','#EEF2F7'],['doing','Accounting & Tax','#1D5FAE','#E7EFF8'],['review','Remind','#A8741A','#FBF1DE'],['done','Done','#15803D','#E7F6EC']];}
@@ -7955,7 +8008,7 @@ function _tkDoneUndo(id){
 function renderTracking(){
   if(_tkCD)_tkColCleanup();/* ถ้ามีการลากหัวข้อค้างอยู่ตอนที่บอร์ดถูกวาดใหม่ (เช่น ซิงค์คลาวด์เข้ามาระหว่างลาก) ให้ยกเลิกการลากทิ้ง — ไม่งั้นจะไปคำนวณตำแหน่งจาก DOM ชุดเก่าแล้วสลับหัวข้อผิด */
   loadTrack();if(typeof loadPt==='function')loadPt();
-  var pg=document.getElementById('page-tk');if(!pg)return;_tkAttInjectStyle();
+  var pg=document.getElementById('tkPaneBoard');if(!pg)return;_tkAttInjectStyle();
   var q=_tkQ.trim().toLowerCase();
   var _doneN=0;for(var _di=0;_di<TRACKDATA.length;_di++)if(_tkIsDone(TRACKDATA[_di]))_doneN++;
   var _openN=TRACKDATA.length-_doneN;
@@ -7979,7 +8032,6 @@ function renderTracking(){
   h+='<select class="tkfilt" id="tkFC"><option value="">Category: All</option>'+TK_CAT.map(function(c){return '<option value="'+c[0]+'"'+(c[0]===_tkFC?' selected':'')+'>'+c[1]+'</option>';}).join('')+'</select>';
   h+='<select class="tkfilt" id="tkFD"><option value="">ประเภทเอกสาร: ทั้งหมด</option>'+_tkDocOptions(_tkFD)+'</select>';
   h+='<button class="tkbtn ghost" id="tkDocCfg" type="button" title="สร้าง/แก้ไขประเภทเอกสาร">🗂 ตั้งค่าประเภทเอกสาร</button>';
-  h+='<button class="tkbtn ghost" id="tkGoRep" type="button" title="เปิดหน้ารายงานงานที่กดเสร็จแล้ว">✅ Report งานที่เสร็จ'+(_doneN?(' · '+_doneN):'')+'</button>';
   if(_tkQ||_tkFA||_tkFP||_tkFC||_tkFD)h+='<button class="tkbtn ghost" id="tkClr" type="button">✕ Clear filters</button>';
   h+='<div class="tkstat"><span class="tkpill total">Total '+view.length+'</span>'+(over?('<span class="tkpill over">⚠ Overdue '+over+'</span>'):'')+'<span class="tkpill done" id="tkDoneN" title="งานที่กด “เสร็จ” แล้ว — คลิกเพื่อเปิดหน้า Report งานที่เสร็จ">✅ เสร็จแล้ว '+_doneN+'</span></div>';
   h+='</div>';
@@ -7998,6 +8050,7 @@ function renderTracking(){
   if(_tkModalId){_tkAttThumbs();try{if(typeof _pmBoot==='function')_pmBoot();}catch(_pe){}}
   if(_tkRefocus){var sb=document.getElementById('tkSearch');if(sb){sb.focus();try{sb.setSelectionRange(sb.value.length,sb.value.length);}catch(e){}}_tkRefocus=false;}
   if(_msnap)_tkRestoreModal(_msnap);
+  _tkNavCount();
 }
 var _tkRefocus=false;
 /* v9.47: snapshot / restore the New-Edit Task modal's unsaved input (values, status/priority
@@ -8237,6 +8290,8 @@ function _tkBind(){
   var cl=function(e,sel){return e.target&&e.target.closest?e.target.closest(sel):null;};
   pg.addEventListener('click',function(e){
     var b;
+    if((b=cl(e,'[data-tkpage]'))){_tkPageSet(b.getAttribute('data-tkpage'));return;}
+    if(cl(e,'#page-tkr'))return;/* คลิกในหน้ารายงาน — ปล่อยให้ _tkrBind จัดการ */
     if(_tkColClickGuard){_tkColClickGuard=false;e.stopPropagation();e.preventDefault();return;}
     if((b=cl(e,'.tkgrp'))){
       var _gst=b.getAttribute('data-gst')||'',_gnm=b.getAttribute('data-grp')||'';
@@ -8254,7 +8309,7 @@ function _tkBind(){
     if((b=cl(e,'[data-paste]'))){_tkPasteInto(b.getAttribute('data-paste'));return;}
     if((b=cl(e,'[data-copy]'))){_tkCopyCard(b.getAttribute('data-copy'));return;}
     if((b=cl(e,'[data-done]'))){_tkDoneMark(b.getAttribute('data-done'));return;}
-    if((b=cl(e,'#tkGoRep'))||(b=cl(e,'#tkDoneN'))){var _rb=document.querySelector('.modtab[data-mod="tkr"]');if(_rb)_rb.click();return;}
+    if((b=cl(e,'#tkDoneN'))){_tkPageSet('report');return;}
     if((b=cl(e,'.tkdel'))){_tkDel(b.getAttribute('data-del'));return;}
     if((b=cl(e,'#tkAdd'))){_tkAdd('todo');return;}
     if((b=cl(e,'.tkaddcol'))){_tkAdd(b.getAttribute('data-st'),'');return;}
@@ -8295,12 +8350,12 @@ function _tkBind(){
     if((b=cl(e,'[data-edit]'))){_tkOpen(b.getAttribute('data-edit'));return;}
     if(e.target&&e.target.classList&&e.target.classList.contains('tkmodal')){_tkCloseModal();return;}
   });
-  pg.addEventListener('input',function(e){var _vn=e.target&&e.target.getAttribute&&e.target.getAttribute('data-vno');if(_vn){var _vr3=_tkRowFind(_vn);if(_vr3)_vr3.vno=e.target.value;return;}var _nt=e.target&&e.target.getAttribute&&e.target.getAttribute('data-ntx');if(_nt){var _n=_tkNoteFind(_tkNotes,_nt);if(_n)_n.txt=e.target.value;return;}if(e.target&&e.target.id==='tkmProj'){if(_tkPmT)clearTimeout(_tkPmT);_tkPmT=setTimeout(function(){_tkPmApply(false);},350);return;}if(e.target&&e.target.id==='tkSearch'){_tkQ=e.target.value;_tkDeb(function(){_tkRefocus=true;renderTracking();});}});
+  pg.addEventListener('input',function(e){if(cl(e,'#page-tkr'))return;var _vn=e.target&&e.target.getAttribute&&e.target.getAttribute('data-vno');if(_vn){var _vr3=_tkRowFind(_vn);if(_vr3)_vr3.vno=e.target.value;return;}var _nt=e.target&&e.target.getAttribute&&e.target.getAttribute('data-ntx');if(_nt){var _n=_tkNoteFind(_tkNotes,_nt);if(_n)_n.txt=e.target.value;return;}if(e.target&&e.target.id==='tkmProj'){if(_tkPmT)clearTimeout(_tkPmT);_tkPmT=setTimeout(function(){_tkPmApply(false);},350);return;}if(e.target&&e.target.id==='tkSearch'){_tkQ=e.target.value;_tkDeb(function(){_tkRefocus=true;renderTracking();});}});
   pg.addEventListener('keydown',function(e){if(e.key!=='Enter')return;var el=e.target;if(!el)return;
     if(el.getAttribute&&el.getAttribute('data-vno')){e.preventDefault();_tkRowAdd();return;}
     if(el.id==='tkckNew'){e.preventDefault();_tkNoteAdd();return;}
     if(el.getAttribute&&el.getAttribute('data-ntx')){e.preventDefault();var ne=document.getElementById('tkckNew');if(ne)ne.focus();}});
-  pg.addEventListener('change',function(e){var el=e.target;if(!el)return;
+  pg.addEventListener('change',function(e){if(cl(e,'#page-tkr'))return;var el=e.target;if(!el)return;
     if(el.id==='tkmDoc'){var _d=_tkDoc(el.value);el.style.background=_d?_d[3]:'';el.style.color=_d?_d[2]:'';el.style.borderColor=_d?_d[2]:'';return;}
     if(el.id==='tkmProj'){if(_tkPmT)clearTimeout(_tkPmT);_tkPmApply(false);return;}/* ออกจากช่อง/กด Enter = ค้นทันที ไม่ต้องรอ debounce */
     var _dn=(el.getAttribute&&el.getAttribute('data-docnm'))||'';
@@ -8429,6 +8484,7 @@ function _tkrAdopt(){
   saveTrack();renderTkr();renderTracking();
 }
 function _tkrOpen(id){var b=document.querySelector('.modtab[data-mod="tk"]');if(b)b.click();
+  if(typeof _tkPageSet==='function')_tkPageSet('board');
   setTimeout(function(){if(typeof _tkOpen==='function')_tkOpen(id);},70);}
 function _tkrDel(id){
   var t=_tkFind(id);if(!t)return;
@@ -8528,23 +8584,23 @@ function renderTkr(){
 
   var h='<div class="tkrwrap">';
   h+='<div class="tkrhd"><div class="tkrtitle"><span class="tkric">✅</span> Report งานที่เสร็จ <span class="tkrsub">งานที่กด “✓ เสร็จ” จากบอร์ด Tracking · '+esc(_tkrPerLabel())+'</span></div>'
-    +'<div class="tkrhdr"><button class="tkbtn ghost" id="tkrBack" type="button" title="กลับไปที่บอร์ด Tracking">← บอร์ด Tracking</button>'
+    +'<div class="tkrhdr">'
     +'<button class="tkbtn ghost" id="tkrPrint" type="button" title="สั่งพิมพ์ / บันทึกเป็น PDF">🖨 พิมพ์</button>'
     +'<button class="tkbtn primary" id="tkrExport" type="button" title="ส่งออกเป็นไฟล์ CSV เปิดด้วย Excel ได้">⬇ ส่งออก CSV</button></div></div>';
 
   h+='<div class="tkrtool">';
   h+='<input class="tkrsearch" id="tkrSearch" type="text" placeholder="ค้นหางานที่เสร็จ…" value="'+_eatt(_tkrQ)+'"'+((typeof _noAC==='function')?_noAC():'')+'>';
-  h+='<span class="tkrlbl">ช่วงเวลา</span><select class="tkrfilt" id="tkrPer">'
+  h+='<span class="tkrfg"><span class="tkrlbl">ช่วงเวลา</span><select class="tkrfilt" id="tkrPer">'
     +[['all','ทั้งหมด'],['m0','เดือนนี้'],['m1','เดือนที่แล้ว'],['d30','30 วันล่าสุด'],['d90','90 วันล่าสุด'],['y0','ปีนี้'],['cus','กำหนดเอง…']]
-      .map(function(o){return '<option value="'+o[0]+'"'+(_tkrPer===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';
-  if(_tkrPer==='cus')h+='<input class="tkrdate" id="tkrFrom" type="date" value="'+_eatt(_tkrFrom)+'" title="ตั้งแต่วันที่"><span class="tkrlbl">ถึง</span><input class="tkrdate" id="tkrTo" type="date" value="'+_eatt(_tkrTo)+'" title="ถึงวันที่">';
+      .map(function(o){return '<option value="'+o[0]+'"'+(_tkrPer===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></span>';
+  if(_tkrPer==='cus')h+='<span class="tkrfg"><input class="tkrdate" id="tkrFrom" type="date" value="'+_eatt(_tkrFrom)+'" title="ตั้งแต่วันที่"><span class="tkrlbl">ถึง</span><input class="tkrdate" id="tkrTo" type="date" value="'+_eatt(_tkrTo)+'" title="ถึงวันที่"></span>';
   h+='<select class="tkrfilt" id="tkrFA"><option value="">ผู้รับผิดชอบ: ทั้งหมด</option>'+((typeof PTDATA!=='undefined'&&PTDATA)?PTDATA.map(function(u){return '<option value="'+_eatt(u.id)+'"'+(u.id===_tkrFA?' selected':'')+'>'+esc(_ptName(u))+'</option>';}).join(''):'')+'</select>';
   h+='<select class="tkrfilt" id="tkrFD"><option value="">ประเภทเอกสาร: ทั้งหมด</option>'+_tkDocOptions(_tkrFD)+'</select>';
   h+='<select class="tkrfilt" id="tkrFCo"><option value="">บริษัท: ทั้งหมด</option>'+TK_CO.map(function(c){return '<option value="'+_eatt(c[0])+'"'+(c[0]===_tkrFCo?' selected':'')+'>'+esc(c[1])+'</option>';}).join('')+'</select>';
   h+='<select class="tkrfilt" id="tkrFSt"><option value="">หัวข้อบอร์ด: ทั้งหมด</option>'+TK_STAT.map(function(c){return '<option value="'+_eatt(c[0])+'"'+(c[0]===_tkrFSt?' selected':'')+'>'+esc(c[1])+'</option>';}).join('')+'</select>';
-  h+='<span class="tkrlbl">จัดกลุ่ม</span><select class="tkrfilt" id="tkrGrp">'
+  h+='<span class="tkrfg"><span class="tkrlbl">จัดกลุ่ม</span><select class="tkrfilt" id="tkrGrp">'
     +[['','ไม่จัดกลุ่ม'],['mon','ตามเดือนที่เสร็จ'],['as','ตามผู้รับผิดชอบ'],['by','ตามผู้กดเสร็จ'],['doc','ตามประเภทเอกสาร'],['co','ตามบริษัท'],['st','ตามหัวข้อบอร์ด'],['grp','ตามกลุ่มงาน'],['cat','ตามหมวดงาน']]
-      .map(function(o){return '<option value="'+o[0]+'"'+(_tkrGrp===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';
+      .map(function(o){return '<option value="'+o[0]+'"'+(_tkrGrp===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></span>';
   h+='<select class="tkrfilt" id="tkrSort">'
     +[['dt_desc','เรียง: เสร็จล่าสุดก่อน'],['dt_asc','เรียง: เสร็จเก่าสุดก่อน'],['due','เรียง: ตามกำหนดส่ง'],['days','เรียง: ใช้เวลานานสุดก่อน']]
       .map(function(o){return '<option value="'+o[0]+'"'+(_tkrSort===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';
@@ -8554,11 +8610,11 @@ function renderTkr(){
   if(legacy.length)h+='<div class="tkrnote">📥 พบงาน <b>'+legacy.length+'</b> รายการค้างอยู่ในหัวข้อ “'+esc(_tkStat(_tkDoneKey())[1]||'Done')+'” ของบอร์ด (จากก่อนมีปุ่ม “✓ เสร็จ”) — ต้องการย้ายเข้ารายงานนี้ทีเดียวไหม?<button class="tkbtn ghost" id="tkrAdopt" type="button">ย้ายเข้ารายงาน</button></div>';
 
   h+='<div class="tkrkpis">'
-   +'<div class="tkrkpi" style="--k:#15803D"><div class="tkrkn">'+full.length+'</div><div class="tkrkl">งานที่เสร็จ</div><div class="tkrks">'+esc(_tkrPerLabel())+'</div></div>'
-   +'<div class="tkrkpi" style="--k:#0E5C52"><div class="tkrkn">'+onT+'</div><div class="tkrkl">เสร็จตรงเวลา</div><div class="tkrks">'+(pct==null?'ไม่มีงานที่กำหนดวันส่ง':(pct+'% ของงานที่มีกำหนดส่ง'))+'</div></div>'
-   +'<div class="tkrkpi" style="--k:#B42318"><div class="tkrkn">'+late+'</div><div class="tkrkl">ช้ากว่ากำหนด</div><div class="tkrks">'+noDue+' รายการไม่ได้กำหนดวันส่ง</div></div>'
-   +'<div class="tkrkpi" style="--k:#B45309"><div class="tkrkn">'+(avg==null?'—':avg)+'</div><div class="tkrkl">ใช้เวลาเฉลี่ย (วัน)</div><div class="tkrks">นับจากวันที่สร้างการ์ดถึงวันที่กดเสร็จ</div></div>'
-   +'<div class="tkrkpi" style="--k:#1D5FAE"><div class="tkrkn">'+peopleN+'</div><div class="tkrkl">ผู้รับผิดชอบ (คน)</div><div class="tkrks">ที่มีงานเสร็จในช่วงนี้</div></div>'
+   +'<div class="tkrkpi" style="--k:#15803D"><div class="tkrkl">งานที่เสร็จ</div><div class="tkrkn">'+full.length+'</div><div class="tkrks">'+esc(_tkrPerLabel())+'</div></div>'
+   +'<div class="tkrkpi" style="--k:#0E5C52"><div class="tkrkl">เสร็จตรงเวลา</div><div class="tkrkn">'+onT+'</div><div class="tkrks">'+(pct==null?'ไม่มีงานที่กำหนดวันส่ง':(pct+'% ของงานที่มีกำหนดส่ง'))+'</div></div>'
+   +'<div class="tkrkpi" style="--k:#B42318"><div class="tkrkl">ช้ากว่ากำหนด</div><div class="tkrkn">'+late+'</div><div class="tkrks">'+noDue+' รายการไม่ได้กำหนดวันส่ง</div></div>'
+   +'<div class="tkrkpi" style="--k:#B45309"><div class="tkrkl">ใช้เวลาเฉลี่ย (วัน)</div><div class="tkrkn">'+(avg==null?'—':avg)+'</div><div class="tkrks">นับจากวันที่สร้างการ์ดถึงวันที่กดเสร็จ</div></div>'
+   +'<div class="tkrkpi" style="--k:#1D5FAE"><div class="tkrkl">ผู้รับผิดชอบ (คน)</div><div class="tkrkn">'+peopleN+'</div><div class="tkrks">ที่มีงานเสร็จในช่วงนี้</div></div>'
    +'</div>';
 
   if(!allN){
@@ -8599,6 +8655,7 @@ function renderTkr(){
   try{if(_af&&_ae&&('selectionStart' in _ae))_ss=_ae.selectionStart;}catch(e){}
   pg.innerHTML=h;
   _tkrBind();
+  if(typeof _tkNavCount==='function')_tkNavCount();
   if(_tkrRefocus||_af==='tkrSearch'){var sb=document.getElementById('tkrSearch');
     if(sb){sb.focus();try{var p=(_ss==null?sb.value.length:_ss);sb.setSelectionRange(p,p);}catch(e){}}_tkrRefocus=false;}
 }
@@ -8616,7 +8673,6 @@ function _tkrBind(){
     if((b=cl(e,'#tkrAdopt'))){_tkrAdopt();return;}
     if((b=cl(e,'#tkrExport'))){_tkrExport();return;}
     if((b=cl(e,'#tkrPrint'))){window.print();return;}
-    if((b=cl(e,'#tkrBack'))){var tb=document.querySelector('.modtab[data-mod="tk"]');if(tb)tb.click();return;}
     if((b=cl(e,'#tkrClr'))){_tkrLimit=TKR_PAGE;_tkrQ='';_tkrPer='all';_tkrFrom='';_tkrTo='';_tkrFA='';_tkrFD='';_tkrFCo='';_tkrFSt='';_tkrGrp='';_tkrSaveView();renderTkr();return;}
   });
   pg.addEventListener('input',function(e){
@@ -18760,7 +18816,7 @@ function renderHub(){var pg=document.getElementById('page-ov');if(!pg)return;
    +' </section>'
    +' </div>'
    +'</div>';
-  var _ov=document.getElementById('page-ov');if(_ov&&!_ov._tkb){_ov._tkb=1;_ov.addEventListener('click',function(e){var tg=e.target;var r=tg.closest?tg.closest('[data-tkid]'):null;if(r){var id=r.getAttribute('data-tkid');var b=document.querySelector('.modtab[data-mod="tk"]');if(b)b.click();if(typeof _tkOpen==='function')setTimeout(function(){_tkOpen(id);},60);return;}var va=tg.closest?tg.closest('#hubTkAll'):null;if(va){var b2=document.querySelector('.modtab[data-mod="tk"]');if(b2)b2.click();}});}
+  var _ov=document.getElementById('page-ov');if(_ov&&!_ov._tkb){_ov._tkb=1;_ov.addEventListener('click',function(e){var tg=e.target;var r=tg.closest?tg.closest('[data-tkid]'):null;if(r){var id=r.getAttribute('data-tkid');var b=document.querySelector('.modtab[data-mod="tk"]');if(b)b.click();if(typeof _tkPageSet==='function')_tkPageSet('board');if(typeof _tkOpen==='function')setTimeout(function(){_tkOpen(id);},60);return;}var va=tg.closest?tg.closest('#hubTkAll'):null;if(va){var b2=document.querySelector('.modtab[data-mod="tk"]');if(b2)b2.click();}});}
   if(typeof _navWarnUpd==='function')_navWarnUpd();
 }
 
@@ -18939,7 +18995,10 @@ function _slSetPrompt(){var need=_slLocked();
   else doSet();}
 function _slRemovePrompt(){if(!_slLocked())return;_slAsk({title:'🔓 ปิดล็อกหน้าจอ',msg:'ใส่รหัสปัจจุบันเพื่อปิดล็อก',errText:'รหัสไม่ถูกต้อง',onOk:function(code){if(_slHash(code)===(SECLOCK&&SECLOCK.h)){SECLOCK=null;if(typeof saveSecLock==='function')saveSecLock();_slUnlockedUntil=0;try{renderSec();}catch(e){}try{if(typeof _mnToast==='function')_mnToast('ปิดล็อกแล้ว',3000);}catch(e){}return true;}return false;}});}
 try{window.gliLockNow=function(){try{sessionStorage.removeItem('gli_sec_unlock');}catch(_e){}try{var b=document.querySelector('.modtab[data-mod="sec"]');if(b)b.click();else if(typeof renderSec==='function')renderSec();}catch(_e2){}};}catch(_e){}
-function showMod(mod){/* v9.17: passcode gate before opening Audit Log / Security */var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].hidden=(pages[i].id!=='page-'+mod);}var tabs=document.querySelectorAll('.modtab');for(var j=0;j<tabs.length;j++){var on=tabs[j].getAttribute('data-mod')===mod;tabs[j].classList.toggle('active',on);tabs[j].setAttribute('aria-selected',on?'true':'false');}var dm=document.querySelector('.dmeta');if(dm&&MOD_META[mod]){var m=MOD_META[mod];dm.innerHTML='<div><b>'+m[0]+'</b></div>'+(m[1]?('<div>'+m[1]+'</div>'):'')+(m[2]?('<div>'+m[2]+'</div>'):'');}var _mh=document.getElementById('modHero');if(_mh){var _ht=HEROT[mod];if(_ht){_mh.hidden=false;_mh.style.setProperty('--mh',HEROC[mod]||'#0E5C52');_mh.innerHTML='<span class="mh-logo"><svg viewBox="0 0 64 64"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg></span><div><div class="mh-t">'+_ht[0]+'</div>'+(_ht[1]?'<div class="mh-s">'+_ht[1]+'</div>':'')+'</div>';}else{_mh.hidden=true;}}var _md=document.getElementById('modDesc');if(_md){var _dd=(typeof HERODESC!=='undefined'&&HERODESC)?HERODESC[mod]:'';if(_dd){_md.hidden=false;_md.innerHTML=_dd;}else{_md.hidden=true;}}/* v9.151: per-module English description banner */try{localStorage.setItem('gli_module',mod);}catch(e){}window.scrollTo(0,0);if(mod==='ov'&&typeof renderHub==='function')renderHub();if(mod==='tk'&&typeof renderTracking==='function')renderTracking();if(mod==='tkr'&&typeof renderTkr==='function')renderTkr();if(mod==='vat'&&typeof renderVat==='function')renderVat();if(mod==='up'&&typeof renderUp==='function')renderUp();if(mod==='mn'&&typeof renderMn==='function')renderMn();if(mod==='gm'&&typeof renderGm==='function')renderGm();if(mod==='gl'&&typeof renderGl==='function')renderGl();if(mod==='pt'&&typeof renderPt==='function')renderPt();if(mod==='cfb'&&typeof renderDoc==='function')renderDoc();if(mod==='sec'&&typeof renderSec==='function')renderSec();if(mod==='adv'&&typeof renderAdv==='function')renderAdv();if(mod==='pdrepjv'&&typeof renderApjv==='function')renderApjv();if(mod==='bbl'&&typeof renderBbl==='function')renderBbl();if(mod==='fs'&&typeof renderFs==='function')renderFs();if(mod==='pg'&&typeof renderProgress==='function')renderProgress();if(mod==='bp'&&typeof _bpOnShow==='function')_bpOnShow();if(mod==='line'&&typeof renderLine==='function')renderLine();if(mod==='wpb'&&typeof renderWpb==='function')renderWpb();if(mod==='cb'&&typeof renderCb==='function')renderCb();}var _mt=document.querySelectorAll('.modtab');for(var k=0;k<_mt.length;k++){_mt[k].addEventListener('click',function(){showMod(this.getAttribute('data-mod'));});}var saved='ov';try{saved=localStorage.getItem('gli_module')||'ov';}catch(e){}if(!MOD_META[saved])saved='ov';/* v9.17: don't let a locked page block initial load with a passcode modal */showMod(saved);if(typeof _authApply==='function')_authApply();if(typeof _tkUpdNotif==='function')_tkUpdNotif();if(typeof _navWarnUpd==='function')_navWarnUpd();try{document.addEventListener('click',_auditClick,true);}catch(_ae){}})();
+/* v10.53: หัวเรื่องโมดูล (dmeta + hero + คำอธิบาย) แยกเป็นฟังก์ชัน — โมดูล Tracking เรียกซ้ำเองตอนสลับระหว่างหน้า "บอร์ดงาน" กับ "Report งานที่เสร็จ" */
+function _modHero(mod){var dm=document.querySelector('.dmeta');if(dm&&MOD_META[mod]){var m=MOD_META[mod];dm.innerHTML='<div><b>'+m[0]+'</b></div>'+(m[1]?('<div>'+m[1]+'</div>'):'')+(m[2]?('<div>'+m[2]+'</div>'):'');}var _mh=document.getElementById('modHero');if(_mh){var _ht=HEROT[mod];if(_ht){_mh.hidden=false;_mh.style.setProperty('--mh',HEROC[mod]||'#0E5C52');_mh.innerHTML='<span class="mh-logo"><svg viewBox="0 0 64 64"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg></span><div><div class="mh-t">'+_ht[0]+'</div>'+(_ht[1]?'<div class="mh-s">'+_ht[1]+'</div>':'')+'</div>';}else{_mh.hidden=true;}}var _md=document.getElementById('modDesc');if(_md){var _dd=(typeof HERODESC!=='undefined'&&HERODESC)?HERODESC[mod]:'';if(_dd){_md.hidden=false;_md.innerHTML=_dd;}else{_md.hidden=true;}}}
+try{window._gliModHero=_modHero;}catch(_e){}
+function showMod(mod){/* v9.17: passcode gate before opening Audit Log / Security */var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].hidden=(pages[i].id!=='page-'+mod);}var tabs=document.querySelectorAll('.modtab');for(var j=0;j<tabs.length;j++){var on=tabs[j].getAttribute('data-mod')===mod;tabs[j].classList.toggle('active',on);tabs[j].setAttribute('aria-selected',on?'true':'false');}_modHero(mod);/* v9.151: per-module English description banner */try{localStorage.setItem('gli_module',mod);}catch(e){}window.scrollTo(0,0);if(mod==='ov'&&typeof renderHub==='function')renderHub();if(mod==='tk'&&typeof _tkPageShow==='function')_tkPageShow();if(mod==='vat'&&typeof renderVat==='function')renderVat();if(mod==='up'&&typeof renderUp==='function')renderUp();if(mod==='mn'&&typeof renderMn==='function')renderMn();if(mod==='gm'&&typeof renderGm==='function')renderGm();if(mod==='gl'&&typeof renderGl==='function')renderGl();if(mod==='pt'&&typeof renderPt==='function')renderPt();if(mod==='cfb'&&typeof renderDoc==='function')renderDoc();if(mod==='sec'&&typeof renderSec==='function')renderSec();if(mod==='adv'&&typeof renderAdv==='function')renderAdv();if(mod==='pdrepjv'&&typeof renderApjv==='function')renderApjv();if(mod==='bbl'&&typeof renderBbl==='function')renderBbl();if(mod==='fs'&&typeof renderFs==='function')renderFs();if(mod==='pg'&&typeof renderProgress==='function')renderProgress();if(mod==='bp'&&typeof _bpOnShow==='function')_bpOnShow();if(mod==='line'&&typeof renderLine==='function')renderLine();if(mod==='wpb'&&typeof renderWpb==='function')renderWpb();if(mod==='cb'&&typeof renderCb==='function')renderCb();}var _mt=document.querySelectorAll('.modtab');for(var k=0;k<_mt.length;k++){_mt[k].addEventListener('click',function(){showMod(this.getAttribute('data-mod'));});}var saved='ov';try{saved=localStorage.getItem('gli_module')||'ov';}catch(e){}if(saved==='tkr'){saved='tk';try{localStorage.setItem('gli_module','tk');localStorage.setItem('gli_tkpage','report');}catch(e){}try{_tkPage='report';}catch(e){}}/* v10.53: โมดูล tkr เดิมถูกยุบเข้า Tracking แล้ว */if(!MOD_META[saved])saved='ov';/* v9.17: don't let a locked page block initial load with a passcode modal */showMod(saved);if(typeof _authApply==='function')_authApply();if(typeof _tkUpdNotif==='function')_tkUpdNotif();if(typeof _navWarnUpd==='function')_navWarnUpd();try{document.addEventListener('click',_auditClick,true);}catch(_ae){}})();
 </script>
 <!-- ===== v7.91: RESTORED MODULES grafted from GLI_Dashboard_v7_76 (FS / LINE / WPB / TFRS) — verified no missing deps, no global-var collisions ===== -->
 <script id="fsScript">
