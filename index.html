@@ -1758,6 +1758,8 @@ h1{ background:var(--g-aurora) !important;
 .tkhl1 .tkhlv{font-size:12.5px;font-weight:800;color:var(--brand-d,#0A463E);font-family:"IBM Plex Mono",monospace;letter-spacing:.01em}
 .tkhl2 .tkhlv{font-size:12px;font-weight:600;color:var(--ink2,#4A5563)}
 .tkhl3 .tkhlv{font-size:12px;font-weight:700;color:#B45309;font-family:"IBM Plex Mono",monospace}
+.tkhlp .tkhlk{font-size:11px;opacity:1;font-family:inherit}
+.tkhlp .tkhlv{font-size:12px;font-weight:700;color:var(--brand,#0E5C52)}
 .tkcardhead .tkcardttl{white-space:normal;margin-top:3px;margin-bottom:0}
 .tkltl{display:block;font-size:11px;font-weight:700;color:var(--ink2,#4A5563);line-height:1.5}
 .tkltl b{font-family:"IBM Plex Mono",monospace;color:var(--brand-d,#0A463E)}
@@ -3162,7 +3164,7 @@ body{padding-left:236px;padding-right:8px}
 /* ===================== REMOVE MONTHLY SALES BAR CHART (per request) ===================== */
 #page-vat .v30spark{display:none}
 </style>
-<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab modtab-tkr" data-mod="tkr" role="tab" aria-selected="false"><span class="sbic">✅</span><span class="sblbl">Report งานที่เสร็จ</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><button class="modtab modtab-pg" data-mod="pg" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Progress %</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">🗄️</span><span class="sblbl">Database</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Finance &amp; Reconcile</div><button class="modtab" data-mod="bbl" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Bank loan</span></button><div class="sbsec">PAYEE DATABASE</div><button class="modtab" data-mod="pdrepjv" role="tab" aria-selected="false"><span class="sbic">📑</span><span class="sblbl">Report AP JV</span></button><div class="sbsec">Database Taxation</div><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><div class="sbsec">Routine Work</div><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-gm" data-mod="gm" role="tab" aria-selected="false"><span class="sbic">📧</span><span class="sblbl">Gmail Inbox</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-cb" data-mod="cb" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Confirm Bank</span></button><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><div class="sbsec">Security &amp; Data</div><button class="modtab modtab-sec" data-mod="sec" role="tab" aria-selected="false"><span class="sbic">🛡️</span><span class="sblbl">Security</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — auto-refreshes every open device when a newer build is deployed (v9.19+)">V10.51</span></div></nav>
+<nav class="modnav sidebar" role="tablist" aria-label="Modules"><div class="sbbrand"><svg class="sblogo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0F766E"></rect><rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5"></rect><path d="M14 42 L26 28 L34 36 L46 20" stroke="#5EEAD4" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="46" cy="20" r="4.6" fill="#FBBF24"></circle></svg><div class="sbname"><span class="sbn1">Grandline</span><span class="sbn2">Accounting Suite</span></div></div><button class="curuser" id="curUserChip" type="button" title="Current user on this device — click to manage" hidden="">👤</button><div class="sbmenu"><div class="sbsec">Workspace</div><button class="modtab modtab-ov" data-mod="ov" role="tab" aria-selected="false"><span class="sbic">🏠</span><span class="sblbl">Overall</span></button><button class="modtab modtab-tk" data-mod="tk" role="tab" aria-selected="false"><span class="sbic">📋</span><span class="sblbl">Tracking</span></button><button class="modtab modtab-tkr" data-mod="tkr" role="tab" aria-selected="false"><span class="sbic">✅</span><span class="sblbl">Report งานที่เสร็จ</span></button><button class="modtab active" data-mod="bp" role="tab" aria-selected="true"><span class="sbic">📈</span><span class="sblbl">Business Performance</span></button><button class="modtab modtab-pg" data-mod="pg" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Progress %</span></button><div class="sbsec">Accounting &amp; Tax</div><button class="modtab modtab-gl" data-mod="gl" role="tab" aria-selected="false"><span class="sbic">🗄️</span><span class="sblbl">Database</span></button><button class="modtab modtab-fs" data-mod="fs" role="tab" aria-selected="false"><span class="sbic">📊</span><span class="sblbl">Financial Statements</span></button><button class="modtab" data-mod="wpb" role="tab" aria-selected="false"><span class="sbic">⚖️</span><span class="sblbl">Working Paper · Balance</span></button><button class="modtab modtab-doc" data-mod="cfb" role="tab" aria-selected="false"><span class="sbic">📁</span><span class="sblbl">Document Vault</span></button><div class="sbsec">Finance &amp; Reconcile</div><button class="modtab" data-mod="bbl" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Bank loan</span></button><div class="sbsec">PAYEE DATABASE</div><button class="modtab" data-mod="pdrepjv" role="tab" aria-selected="false"><span class="sbic">📑</span><span class="sblbl">Report AP JV</span></button><div class="sbsec">Database Taxation</div><button class="modtab" data-mod="wht" role="tab" aria-selected="false"><span class="sbic">✂️</span><span class="sblbl">Withholding Tax</span></button><button class="modtab" data-mod="vat" role="tab" aria-selected="false"><span class="sbic">🔢</span><span class="sblbl">Value Added Tax</span></button><div class="sbsec">Routine Work</div><button class="modtab modtab-mn" data-mod="mn" role="tab" aria-selected="false"><span class="sbic">💻</span><span class="sblbl">Monitor</span></button><button class="modtab modtab-gm" data-mod="gm" role="tab" aria-selected="false"><span class="sbic">📧</span><span class="sblbl">Gmail Inbox</span></button><div class="sbsec">Compliance &amp; Admin</div><button class="modtab modtab-cb" data-mod="cb" role="tab" aria-selected="false"><span class="sbic">🏦</span><span class="sblbl">Confirm Bank</span></button><button class="modtab modtab-up" data-mod="up" role="tab" aria-selected="false"><span class="sbic">🔑</span><span class="sblbl">E-Filing &amp; DBD Credentials</span></button><button class="modtab modtab-pt" data-mod="pt" role="tab" aria-selected="false"><span class="sbic">👥</span><span class="sblbl">User Directory</span></button><div class="sbsec">Security &amp; Data</div><button class="modtab modtab-sec" data-mod="sec" role="tab" aria-selected="false"><span class="sbic">🛡️</span><span class="sblbl">Security</span></button></div><div class="sbfoot"><div class="sbfrow"><button class="navwarn" id="navWarn" type="button" hidden="">!<span class="navwarnn">0</span></button><button class="tknotif" id="tkNotif" type="button" hidden="">🔔<span class="tknotifn">0</span></button><button class="safeshield" id="safeShield" type="button" title="ความปลอดภัยข้อมูล" hidden="">🛡️<span class="safedot"></span></button><button class="authout" id="authLogoutBtn" type="button" title="ออกจากระบบ" hidden="">⎋ ออก</button></div><span class="appver" title="Build version — auto-refreshes every open device when a newer build is deployed (v9.19+)">V10.52</span></div></nav>
 <header>
 <div class="letter"><svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="15" fill="#0E5C52"></rect><path d="M15 43 L27 31 L35 37 L49 21" fill="none" stroke="#D9A441" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="49" cy="21" r="3.7" fill="#D9A441"></circle><text x="32" y="55" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#9FCFC4" letter-spacing="2.5">GLI</text></svg>
 <div class="brand"><div class="brandL"><div class="th">GRANDLINE INNOVATION <span class="th-co">COMPANY LIMITED</span></div><span class="ho">Head Office</span></div><div class="brandR"><div class="addr">333 Soi Lat Phrao 64 Yaek 12, Lat Phrao Road, Wang Thong Lang Sub-District, Wang Thong Lang District, Bangkok 10310</div><div class="taxid">Tax ID · 0105553002230</div></div></div>
@@ -7211,6 +7213,7 @@ function _tkFullBlockHTML(t){
     +'<div class="tkmnrow"><span class="tkmnn">1</span><span class="tkmnl">รหัสโปรเจค</span><span class="tkmnf"><input class="tkmin" id="tkmProj" list="tkmProjList" value="'+_eatt(t.proj||'')+'" placeholder="พิมพ์รหัส แล้วบรรทัด 2 และ 4 จะดึงจาก PM Report ให้" autocomplete="off" spellcheck="false"><datalist id="tkmProjList">'+_tkProjCodeList()+'</datalist></span><button class="tkmnpull" id="tkmPmPull" type="button" title="ดึงชื่อผู้ว่าจ้างและชื่อโครงการจาก PM Report — ทับค่าที่มีอยู่">↻ ดึงจาก PM Report</button></div>'
     +'<div class="tkmnhint" id="tkmProjHint"></div>'
     +'<div class="tkmnrow"><span class="tkmnn">2</span><span class="tkmnl">ชื่อผู้ว่าจ้าง</span><span class="tkmnf"><input class="tkmin" id="tkmOwner" value="'+_eatt(t.owner||'')+'" placeholder="เช่น กิจการร่วมค้า GLR · การไฟฟ้าส่วนภูมิภาค" autocomplete="off"></span></div>'
+    +_tkContactRowHTML(t)
     +'<div class="tkmnrow"><span class="tkmnn">3</span><span class="tkmnl">รหัสเอกสาร</span><span class="tkmnf"><input class="tkmin" id="tkmDocNo" value="'+_eatt(t.docno||'')+'" placeholder="เช่น RV2026080004 · PV2569-0881" autocomplete="off" spellcheck="false"></span></div>'
     +'<div class="tkmnrow"><span class="tkmnn">4</span><span class="tkmnl">คำอธิบาย</span><span class="tkmnf"><input class="tkmin" id="tkmTitle" value="'+_eatt(t.title||'')+'" placeholder="เรื่องที่ต้องทำ เช่น Settlement-ใบกำกับภาษี/ใบเสร็จรับเงิน ระยะ 7 (งวด 21)" autocomplete="off"></span></div>'
     +_tkDocRowHTML(t);
@@ -7234,7 +7237,11 @@ function _tkSimpleBlockHTML(t){
   return _tkCoRowHTML(t)
     +'<div class="tkmnrow"><span class="tkmnn">1</span><span class="tkmnl">หัวข้อ</span><span class="tkmnf"><input class="tkmin" id="tkmTitle" value="'+_eatt(t.title||'')+'" placeholder="เรื่องที่ต้องทำ — พิมพ์สั้นๆ ได้เลย" autocomplete="off"></span></div>'
     +'<div class="tkmnrow top"><span class="tkmnn">2</span><span class="tkmnl">คำอธิบาย</span><span class="tkmnf"><textarea class="tkmnta" id="tkmDesc" rows="3" placeholder="รายละเอียดเพิ่มเติม — เว้นว่างได้">'+esc(t.desc||'')+'</textarea></span></div>'
-    +_tkDocRowHTML(t);
+    +_tkContactRowHTML(t)+_tkDocRowHTML(t);
+}
+/* v10.75: ชื่อผู้ติดต่อ — คนที่ติดต่อประสานงานเรื่องนี้ · ใช้ได้ทั้ง 3 รูปแบบฟอร์ม และโชว์บนการ์ด */
+function _tkContactRowHTML(t){
+  return '<div class="tkmnrow"><span class="tkmnn doc">👤</span><span class="tkmnl">ชื่อผู้ติดต่อ</span><span class="tkmnf"><input class="tkmin" id="tkmContact" value="'+_eatt(((t&&t.contact)||''))+'" placeholder="ชื่อผู้ประสานงาน เช่น คุณสมชาย ใจดี · ฝ่ายบัญชี" autocomplete="off"></span></div>';
 }
 function _tkDocRowHTML(t){
   return '<div class="tkmnrow"><span class="tkmnn doc">🗂</span><span class="tkmnl">ประเภทเอกสาร</span><span class="tkmnf"><select class="tkmin" id="tkmDoc"'+_tkDocSelStyle(t.doc)+'><option value="">— ไม่ระบุ —</option>'
@@ -7739,7 +7746,7 @@ function _tkClipSave(){try{if(_tkClip)localStorage.setItem('gli_tkclip',JSON.str
 function _tkClipClear(){_tkClip=null;_tkClipSave();renderTracking();}
 function _tkCopyCard(id){
   var t=_tkFind(id);if(!t)return;
-  _tkClip={title:t.title||'',desc:t.desc||'',prio:t.prio||'med',assignee:t.assignee||'',due:t.due||'',proj:t.proj||'',owner:t.owner||'',docno:t.docno||'',cat:t.cat||'',doc:t.doc||'',hl:t.hl||'',tc:t.tc||'',co:t.co||'',mode:t.mode||'full',rows:_tkRowList(t).map(function(r){return {id:_tkRowId(),vno:r.vno,co:r.co};}),grp:((t.grp||'')+'').trim(),notes:_tkNoteList(t).map(function(n){return {id:_tkNoteId(),ts:n.ts,txt:n.txt,done:!!n.done,dts:n.dts};}),att:(t.att||[]).slice()};
+  _tkClip={title:t.title||'',desc:t.desc||'',prio:t.prio||'med',assignee:t.assignee||'',due:t.due||'',proj:t.proj||'',owner:t.owner||'',contact:t.contact||'',docno:t.docno||'',cat:t.cat||'',doc:t.doc||'',hl:t.hl||'',tc:t.tc||'',co:t.co||'',mode:t.mode||'full',rows:_tkRowList(t).map(function(r){return {id:_tkRowId(),vno:r.vno,co:r.co};}),grp:((t.grp||'')+'').trim(),notes:_tkNoteList(t).map(function(n){return {id:_tkNoteId(),ts:n.ts,txt:n.txt,done:!!n.done,dts:n.dts};}),att:(t.att||[]).slice()};
   _tkClipSave();
   if(typeof gliLog==='function')gliLog('คัดลอกงาน (Tracking)',t.title||'');
   renderTracking();
@@ -7763,7 +7770,7 @@ function _tkAttClone(list,taskId,done){
 function _tkClipMake(src,st,beforeId,grp){
   var dk=_tkDoneKey(),nid=_uid(),_cIss=_tkCoNoIssuer();/* สำเนาต้องได้เลขลำดับใบใหม่ ไม่ใช้เลขเดียวกับต้นฉบับ */
   var nt={id:nid,title:src.title||'',desc:src.desc||'',status:st,prio:src.prio||'med',assignee:src.assignee||'',
-          due:src.due||'',proj:src.proj||'',owner:src.owner||'',docno:src.docno||'',cat:src.cat||'',doc:src.doc||'',hl:src.hl||'',tc:src.tc||'',co:src.co||'',
+          due:src.due||'',proj:src.proj||'',owner:src.owner||'',contact:src.contact||'',docno:src.docno||'',cat:src.cat||'',doc:src.doc||'',hl:src.hl||'',tc:src.tc||'',co:src.co||'',
           cono:((src.mode==='rows')?0:(src.co?_cIss(src.co):0)),mode:src.mode||'full',
           rows:(src.rows||[]).map(function(r){return {id:_tkRowId(),vno:r.vno,co:r.co,cono:(r.co?_cIss(r.co):0)};}),notes:(src.notes||[]).map(function(n){return {id:_tkNoteId(),ts:n.ts,txt:n.txt,done:!!n.done,dts:n.dts};}),grp:((grp!=null)?grp:(src.grp||'')),att:[],
           created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done:0,done_dt:(st===dk)?_tkToday():''};
@@ -7954,7 +7961,7 @@ function renderTracking(){
   var _openN=TRACKDATA.length-_doneN;
   var view=TRACKDATA.filter(function(t){
     if(_tkIsDone(t))return false;/* v10.72: งานที่กดเสร็จแล้วย้ายไปหน้า Report งานที่เสร็จ */
-    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.co||'')+' '+_tkCoText(t)+' '+_tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+((_tkDoc(t.doc)||[])[1]||''))).toLowerCase().indexOf(q)<0))return false;
+    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.co||'')+' '+_tkCoText(t)+' '+_tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.contact||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+((_tkDoc(t.doc)||[])[1]||''))).toLowerCase().indexOf(q)<0))return false;
     if(_tkFA&&t.assignee!==_tkFA)return false;
     if(_tkFP&&(t.prio||'med')!==_tkFP)return false;if(_tkFC&&(t.cat||'')!==_tkFC)return false;if(_tkFD&&(t.doc||'')!==_tkFD)return false;
     return true;
@@ -8002,7 +8009,7 @@ function _tkSnapModal(){
   var sg=function(k,wrap,attr){var b=m.querySelector('#'+wrap+' .tkmsb.on');if(b)_tkMS[k]=b.getAttribute(attr);
     else if(document.getElementById(wrap))_tkMS[k]=null;};
   v('title','tkmTitle');v('cknew','tkckNew');v('assign','tkmAssign');v('due','tkmDue');v('cat','tkmCat');
-  v('proj','tkmProj');v('owner','tkmOwner');v('docno','tkmDocNo');v('grp','tkmGrp');v('doc','tkmDoc');v('desc','tkmDesc');
+  v('proj','tkmProj');v('owner','tkmOwner');v('contact','tkmContact');v('docno','tkmDocNo');v('grp','tkmGrp');v('doc','tkmDoc');v('desc','tkmDesc');
   sg('st','tkmStatus','data-st');sg('pr','tkmPrio','data-pr');
   sg('hl','tkmHL','data-hl');sg('tc','tkmTC','data-tc');sg('co','tkmCo','data-co');
   var ae=document.activeElement,af=(ae&&ae.id&&m.contains(ae))?ae.id:'',ss=null,se=null;
@@ -8013,7 +8020,7 @@ function _tkSnapModal(){
 function _tkRestoreModal(s){
   if(!s)return;var m=document.getElementById('tkModal');if(!m)return;
   var set=function(id,val){if(val===undefined)return;var e=document.getElementById(id);if(e&&e.value!==val)e.value=val;};
-  set('tkmTitle',s.title);set('tkckNew',s.cknew);set('tkmDoc',s.doc);set('tkmAssign',s.assign);set('tkmDue',s.due);set('tkmCat',s.cat);set('tkmProj',s.proj);set('tkmOwner',s.owner);set('tkmDocNo',s.docno);set('tkmGrp',s.grp);set('tkmDesc',s.desc);
+  set('tkmTitle',s.title);set('tkckNew',s.cknew);set('tkmDoc',s.doc);set('tkmAssign',s.assign);set('tkmDue',s.due);set('tkmCat',s.cat);set('tkmProj',s.proj);set('tkmOwner',s.owner);set('tkmContact',s.contact);set('tkmDocNo',s.docno);set('tkmGrp',s.grp);set('tkmDesc',s.desc);
   var seg=function(wrap,attr,val){if(!val)return;var box=document.getElementById(wrap);if(!box)return;var bs=box.querySelectorAll('.tkmsb');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].getAttribute(attr)===val);};
   seg('tkmStatus','data-st',s.st);seg('tkmPrio','data-pr',s.pr);
   var segAny=function(wrap,attr,val){var box=document.getElementById(wrap);if(!box||val==null)return;var bs=box.querySelectorAll('.tkmsb');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].getAttribute(attr)===val);};
@@ -8065,7 +8072,8 @@ function _tkCard(t,pos){
   if(dc)h+='<span class="tkdocchip" style="color:'+dc[2]+';border:1.5px solid '+dc[2]+'">🗂 '+esc(dc[1])+'</span>';
   if(t.cat){var _tc=_tkCat(t.cat);if(_tc)h+='<span class="tkcat" style="background:'+_tc[3]+';color:'+_tc[2]+'">'+esc(_tc[1])+'</span>';}
   h+='</div>';
-  var _pc=((t.proj||'')+'').trim(),_ow=((t.owner||'')+'').trim(),_dn=((t.docno||'')+'').trim();
+  var _pc=((t.proj||'')+'').trim(),_ow=((t.owner||'')+'').trim(),_dn=((t.docno||'')+'').trim(),_ct=((t.contact||'')+'').trim();
+  var _ctH=_ct?('<div class="tkhl tkhlp"><span class="tkhlk" title="ชื่อผู้ติดต่อ">👤</span><span class="tkhlv" title="'+_eatt('ชื่อผู้ติดต่อ · '+_ct)+'">'+esc(_ct)+'</span></div>'):'';
   h+='<div class="tkcardhead" data-edit="'+t.id+'"'+(t.tc?(' style="color:'+tc[2]+'"'):'')+'>';
   if(t.mode==='rows'){
     var _vr=_tkRowList(t);
@@ -8074,14 +8082,17 @@ function _tkCard(t,pos){
       h+='<div class="tkcv"><span class="tkcvn">'+esc(r.vno||'')+'</span>'+(c?('<span class="tkcvco" style="background:'+c[2]+';color:#fff">'+esc(_tkCoLabel(r.co,r.cono))+'</span>'):'')+'</div>';});
     h+='</div>';
     if(((t.title||'')+'').trim())h+='<div class="tkcardttl">'+esc(t.title)+'</div>';
+    h+=_ctH;
     h+='</div>';
   }else if(t.mode==='simple'){
     h+='<div class="tkcardttl">'+esc(t.title||'(ไม่มีหัวข้อ)')+'</div>';
     if(((t.desc||'')+'').trim())h+='<div class="tkcarddesc">'+esc(t.desc).replace(/\n/g,'<br>')+'</div>';
+    h+=_ctH;
     h+='</div>';
   }else{
   if(_pc)h+='<div class="tkhl tkhl1"><span class="tkhlk">1</span><span class="tkhlv" title="'+_eatt(_tkProjName(_pc))+'">'+esc(_pc)+'</span></div>';
   if(_ow)h+='<div class="tkhl tkhl2"><span class="tkhlk">2</span><span class="tkhlv" title="'+_eatt(_ow)+'">'+esc(_ow)+'</span></div>';
+  h+=_ctH;
   if(_dn)h+='<div class="tkhl tkhl3"><span class="tkhlk">3</span><span class="tkhlv" title="'+_eatt(_dn)+'">'+esc(_dn)+'</span></div>';
   h+='<div class="tkcardttl">'+esc(t.title||'(ไม่มีคำอธิบาย)')+'</div></div>';}
   var _nl=_tkNoteList(t);
@@ -8108,9 +8119,10 @@ function _tkList(view){
   view.forEach(function(t){var pr=_tkPrio(t.prio||'med'),st=_tkStat(t.status||'todo'),d=_tkDue(t),ct=_tkCat(t.cat||'');
     var _dcl=_tkDoc(t.doc);h+='<tr data-edit="'+t.id+'"><td class="tkltitle">'+((t.mode!=='rows'&&t.co)?(_tkCoBadge(t.co,t.cono)+' '):'')
     +((t.mode==='rows')?(_tkRowList(t).map(function(r){return '<span class="tkgrpchip">'+esc(r.vno||'')+(r.co?(' · '+esc(_tkCoLabel(r.co,r.cono))):'')+'</span>';}).join(' ')+' '):'')+(_dcl?('<span class="tkdocchip" style="color:'+_dcl[2]+';border:1.5px solid '+_dcl[2]+'">'+esc(_dcl[1])+'</span> '):'')+(((t.grp||'')+'').trim()?('<span class="tkgrpchip">🗂 '+esc(((t.grp||'')+'').trim())+'</span> '):'')+(ct?('<span class="tkcat tkcatsm" style="background:'+ct[3]+';color:'+ct[2]+'">'+esc(ct[1])+'</span> '):'')+esc(t.title||'(ไม่มีคำอธิบาย)')
-    +((((t.proj||'')+'').trim()||((t.owner||'')+'').trim()||((t.docno||'')+'').trim())?('<span class="tkltl">'
+    +((((t.proj||'')+'').trim()||((t.owner||'')+'').trim()||((t.contact||'')+'').trim()||((t.docno||'')+'').trim())?('<span class="tkltl">'
       +(((t.proj||'')+'').trim()?('<b>'+esc(((t.proj||'')+'').trim())+'</b>'):'')
       +(((t.owner||'')+'').trim()?(' · '+esc(((t.owner||'')+'').trim())):'')
+      +(((t.contact||'')+'').trim()?(' · 👤 '+esc(((t.contact||'')+'').trim())):'')
       +(((t.docno||'')+'').trim()?(' · <i>'+esc(((t.docno||'')+'').trim())+'</i>'):'')+'</span>'):'')
     +(t.desc?('<span class="tkldesc">'+esc((t.desc||'').slice(0,70))+'</span>'):'')+'</td>';
     h+='<td>'+(t.proj?('<span class="tkproj">🔗 '+esc(t.proj)+'</span>'):'<span class="tkdim">—</span>')+'</td>';
@@ -8125,7 +8137,7 @@ function _tkList(view){
 function _tkModalHTML(){
   if(!_tkModalId)return '';
   var isNew=(_tkModalId==='__new__');
-  var t=isNew?{title:'',desc:'',status:_tkNewStatus||'todo',prio:'med',assignee:'',due:'',proj:'',owner:'',docno:'',cat:'',doc:'',grp:(_tkNewGrp||''),co:'',mode:'full',rows:[]}:_tkFind(_tkModalId);
+  var t=isNew?{title:'',desc:'',status:_tkNewStatus||'todo',prio:'med',assignee:'',due:'',proj:'',owner:'',contact:'',docno:'',cat:'',doc:'',grp:(_tkNewGrp||''),co:'',mode:'full',rows:[]}:_tkFind(_tkModalId);
   if(!t)return '';
   var meta='';if(!isNew&&(t.by||t.created)){meta='<div class="tkmmeta">Created by '+esc(t.by||'—')+(t.created?(' · '+_tkFmtDate(new Date(t.created).toISOString().slice(0,10))):'')+(t.done_dt?(' · Done '+_tkFmtDate(t.done_dt)):'')+'</div>';}
   var h='<div class="tkmodal" id="tkModal"><div class="tkmcard">';
@@ -8138,7 +8150,7 @@ function _tkModalHTML(){
       +'<button class="tkmodeb'+((_tkMode==='simple')?' on':'')+'" data-tkmode="simple" type="button">แบบ 3 · หัวข้อ + คำอธิบาย</button>'
     +'</div>'
     +'<div class="tkmname">'
-    +((_tkMode==='rows')?(_tkRowsBlockHTML()+_tkDocRowHTML(t)):(_tkMode==='simple')?_tkSimpleBlockHTML(t):_tkFullBlockHTML(t))
+    +((_tkMode==='rows')?(_tkRowsBlockHTML()+_tkContactRowHTML(t)+_tkDocRowHTML(t)):(_tkMode==='simple')?_tkSimpleBlockHTML(t):_tkFullBlockHTML(t))
     +'</div></div>';
   if(false){h+='<div class="tkmname">'
     +'<div class="tkmnrow"><span class="tkmnn">1</span><span class="tkmnl">รหัสโปรเจค</span><span class="tkmnf"><input class="tkmin" id="tkmProj" list="tkmProjList" value="'+_eatt(t.proj||'')+'" placeholder="พิมพ์รหัส แล้วบรรทัด 2 และ 4 จะดึงจาก PM Report ให้" autocomplete="off" spellcheck="false"><datalist id="tkmProjList">'+_tkProjCodeList()+'</datalist></span><button class="tkmnpull" id="tkmPmPull" type="button" title="ดึงชื่อผู้ว่าจ้างและชื่อโครงการจาก PM Report — ทับค่าที่มีอยู่">↻ ดึงจาก PM Report</button></div>'
@@ -8174,7 +8186,7 @@ function _tkCloseModal(){_tkAttCleanupNew();_tkMS={};_tkModalId=null;_tkNewGrp='
 function _tkAdd(st,grp){_tkAF={owner:'',title:''};_tkMS={};_tkNotes=[];_tkRows=[];_tkMode='full';_tkModalId='__new__';_tkNewStatus=st||'todo';_tkNewGrp=grp||'';_tkNewId=_uid();_tkAtt=[];renderTracking();var ti=document.getElementById('tkmTitle');if(ti)ti.focus();}
 function _tkSaveModal(){
   var g=function(id){var e=document.getElementById(id);return e?e.value:'';};
-  var title=(g('tkmTitle')||'').trim(),owner=(g('tkmOwner')||'').trim(),docno=(g('tkmDocNo')||'').trim();
+  var title=(g('tkmTitle')||'').trim(),owner=(g('tkmOwner')||'').trim(),docno=(g('tkmDocNo')||'').trim(),contact=(g('tkmContact')||'').trim();
   var coEl=document.querySelector('#tkmCo .tkmsb.on'),co=coEl?(coEl.getAttribute('data-co')||''):'';
   var mode=(_tkMode==='rows'||_tkMode==='simple')?_tkMode:'full';
   var descv=(mode==='simple')?((g('tkmDesc')||'').replace(/\s+$/,'')):'';
@@ -8201,13 +8213,13 @@ function _tkSaveModal(){
   var status=isNew?(_tkNewStatus||TK_STAT[0][0]):(((_tkFind(_tkModalId)||{}).status)||TK_STAT[0][0]);
   var notes=_tkNotes.slice();
   if(isNew){
-    var nt={id:(_tkNewId||_uid()),title:title,desc:descv,status:status,prio:prio,assignee:assignee,due:due,proj:proj,owner:owner,docno:docno,cat:cat,doc:doc,grp:grp,hl:hl,tc:tc,notes:notes,co:co,cono:_cono,mode:mode,rows:rows,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done:0,done_dt:(status===_dk)?_tkToday():''};
+    var nt={id:(_tkNewId||_uid()),title:title,desc:descv,status:status,prio:prio,assignee:assignee,due:due,proj:proj,owner:owner,contact:contact,docno:docno,cat:cat,doc:doc,grp:grp,hl:hl,tc:tc,notes:notes,co:co,cono:_cono,mode:mode,rows:rows,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done:0,done_dt:(status===_dk)?_tkToday():''};
     TRACKDATA.push(nt);
     if(typeof gliLog==='function')gliLog('Added task',title+(assignee&&_ptFind(assignee)?(' · assigned to '+_ptName(_ptFind(assignee))):''));
   }else{
     var t=_tkFind(_tkModalId);if(!t){_tkModalId=null;renderTracking();return;}
     var oldSt=t.status;
-    t.title=title;t.notes=notes;t.desc=descv;t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.owner=owner;t.docno=docno;t.cat=cat;t.doc=doc;t.grp=grp;t.hl=hl;t.tc=tc;t.co=co;t.cono=_cono;t.mode=mode;t.rows=rows;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));
+    t.title=title;t.notes=notes;t.desc=descv;t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.owner=owner;t.contact=contact;t.docno=docno;t.cat=cat;t.doc=doc;t.grp=grp;t.hl=hl;t.tc=tc;t.co=co;t.cono=_cono;t.mode=mode;t.rows=rows;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));
     /* v10.72: การ์ดที่เก็บเข้า Report งานที่เสร็จแล้ว — แก้ไขรายละเอียดได้ แต่ต้องไม่ล้างวันที่เสร็จทิ้ง
        (เดิมกฎนี้ผูกกับหัวข้อ "Done" ของบอร์ดอย่างเดียว งานที่ done แต่ค้างอยู่หัวข้ออื่นจึงโดนล้าง) */
     if(!t.done){if(status===_dk&&oldSt!==_dk)t.done_dt=_tkToday();if(status!==_dk)t.done_dt='';}
@@ -8367,7 +8379,7 @@ function _tkrRows(){
     if(_tkrFSt&&(t.status||TK_STAT[0][0])!==_tkrFSt)return false;
     if(q){
       var u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;
-      var hay=[_tkTaskName(t),t.desc,t.proj,t.owner,t.docno,t.grp,t.co,t.done_by,
+      var hay=[_tkTaskName(t),t.desc,t.proj,t.owner,t.contact,t.docno,t.grp,t.co,t.done_by,
         (u&&typeof _ptName==='function')?_ptName(u):'',_tkCoText(t),
         _tkProjName(t.proj),((_tkDoc(t.doc)||[])[1]||''),((_tkCat(t.cat)||[])[1]||''),
         ((_tkStat(t.status||TK_STAT[0][0])||[])[1]||''),
@@ -8430,7 +8442,7 @@ function _tkrCsvCell(v){v=(v==null?'':(''+v));return '"'+v.replace(/"/g,'""').re
 function _tkrExport(){
   var R=_tkrRows();
   if(!R.length){alert('ไม่มีข้อมูลในช่วงที่เลือก');return;}
-  var head=['ลำดับ','วันที่เสร็จ','เวลา','งาน','คำอธิบายเพิ่มเติม','ประเภทเอกสาร','บริษัท','หัวข้อบอร์ด','กลุ่ม','หมวดงาน','รหัสโปรเจค','ชื่อโครงการ','ชื่อผู้ว่าจ้าง','รหัสเอกสาร','ผู้รับผิดชอบ','ผู้กดเสร็จ','ผู้สร้างงาน','วันที่สร้าง','กำหนดส่ง','ตรงเวลา/ช้า (วัน)','ใช้เวลา (วัน)','Checklist เสร็จ','Checklist ทั้งหมด','ไฟล์แนบ'];
+  var head=['ลำดับ','วันที่เสร็จ','เวลา','งาน','คำอธิบายเพิ่มเติม','ประเภทเอกสาร','บริษัท','หัวข้อบอร์ด','กลุ่ม','หมวดงาน','รหัสโปรเจค','ชื่อโครงการ','ชื่อผู้ว่าจ้าง','ชื่อผู้ติดต่อ','รหัสเอกสาร','ผู้รับผิดชอบ','ผู้กดเสร็จ','ผู้สร้างงาน','วันที่สร้าง','กำหนดส่ง','ตรงเวลา/ช้า (วัน)','ใช้เวลา (วัน)','Checklist เสร็จ','Checklist ทั้งหมด','ไฟล์แนบ'];
   var lines=[head.map(_tkrCsvCell).join(',')];
   R.forEach(function(t,i){
     var u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;
@@ -8439,7 +8451,7 @@ function _tkrExport(){
     lines.push([i+1,_tkrDate(ts),_tkrTime(ts),_tkTaskName(t),(t.desc||''),
       ((_tkDoc(t.doc)||[])[1]||''),(_tkCoText(t)||(((t.co||'')+'').toUpperCase())),
       ((_tkStat(t.status||TK_STAT[0][0])||[])[1]||''),((t.grp||'')+''),((_tkCat(t.cat)||[])[1]||''),
-      (t.proj||''),(t.proj?_tkProjName(t.proj):''),(t.owner||''),(t.docno||''),
+      (t.proj||''),(t.proj?_tkProjName(t.proj):''),(t.owner||''),(t.contact||''),(t.docno||''),
       (u?_ptName(u):''),(t.done_by||''),(t.by||''),
       (t.created?_tkrDate(t.created):''),(t.due?_tkrDate(new Date(t.due+'T00:00:00').getTime()):''),
       (lt==null?'':lt),(dy==null?'':dy),nd,nl.length,((t.att&&t.att.length)||0)
@@ -8474,6 +8486,7 @@ function _tkrRowHTML(t,no){
   var sub=[];
   if(((t.proj||'')+'').trim())sub.push('<b>'+esc(((t.proj||'')+'').trim())+'</b>');
   if(((t.owner||'')+'').trim())sub.push(esc(((t.owner||'')+'').trim()));
+  if(((t.contact||'')+'').trim())sub.push('👤 '+esc(((t.contact||'')+'').trim()));
   if(((t.docno||'')+'').trim())sub.push('<i>'+esc(((t.docno||'')+'').trim())+'</i>');
   var h='<tr>';
   h+='<td class="tkrno">'+no+'</td>';
