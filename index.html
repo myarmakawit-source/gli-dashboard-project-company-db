@@ -4739,6 +4739,48 @@ body.apjv-resizing,body.apjv-resizing *{cursor:col-resize!important;user-select:
 #page-pdrepjv .apjv-cov-note b.bad{color:#C22F45}
 #page-pdrepjv .apjv-cov-note b.mid{color:#A66A10}
 
+/* ===== v9.219: Joint venture — ธีมตาราง "เส้นเต็ม + แถบสลับ" (Grid + Zebra) =====
+   รูปแบบเอกสารบัญชีคลาสสิก: มุมฉาก · เส้นตารางครบทุกช่อง · หัวตารางพื้นเข้มตัวอักษรขาว ·
+   แถวสลับสีอ่อน · แถวรวมเน้นสีประจำฝั่ง (หนี้สิน = น้ำเงิน · สินทรัพย์ = เขียว) พร้อมเส้นหนาใต้
+   ตัวอักษรและตัวเลขยังเป็นฟอนต์เดิมของธีม (Inter + IBM Plex Mono) ไม่เปลี่ยน
+   วางต่อท้ายบล็อกของโมดูลเพื่อทับกฎเดิมด้วย "ลำดับ" — ไม่ต้องแก้ 195 selector เดิม ย้อนกลับได้ด้วยการลบบล็อกนี้ */
+#page-pdrepjv .apjv-col{border:1.5px solid #BFB49C;border-radius:0;box-shadow:0 2px 12px -8px rgba(17,24,39,.25)}
+#page-pdrepjv .apjv-liab .apjv-colhd{background:#1B2A4A}
+#page-pdrepjv .apjv-asset .apjv-colhd{background:#0E5C52}
+#page-pdrepjv .apjv-sec{background:#FAF8F3}
+#page-pdrepjv .apjv-tw{border:1.5px solid #BFB49C;border-radius:0;background:#fff}
+/* --- หัวตาราง: พื้นเข้มตามฝั่ง ตัวอักษรขาว (เดิมเป็นพื้นครีม ตัวอักษรน้ำตาลอ่อน) --- */
+#page-pdrepjv .apjv-tbl th{color:#fff;border-bottom:1.5px solid #9C927C;border-right:1px solid rgba(255,255,255,.20)}
+#page-pdrepjv .apjv-tbl th:last-child{border-right:0}
+#page-pdrepjv .apjv-liab .apjv-sec:not(.apjv-sub) .apjv-tbl th{background:#22355C;color:#fff}
+#page-pdrepjv .apjv-asset .apjv-sec:not(.apjv-sub) .apjv-tbl th{background:#12554C;color:#fff}
+#page-pdrepjv .apjv-sub-routine .apjv-tbl th{background:#2E4576;color:#fff}
+#page-pdrepjv .apjv-sub-bank .apjv-tbl th{background:#17685C;color:#fff}
+/* --- ช่องข้อมูล: เส้นตารางครบทุกช่อง --- */
+#page-pdrepjv .apjv-tbl td{padding:4px 6px;border-right:1px solid #E6E0D4;border-bottom:1px solid #EDE7DA}
+#page-pdrepjv .apjv-tbl td:last-child{border-right:0}
+#page-pdrepjv .apjv-tbl tbody tr:last-child td{border-bottom:1px solid #EDE7DA}
+/* --- แถวสลับสีอ่อน (เว้นแถวกรอง แถวเพิ่มรายการ และแถวหัวกลุ่ม/ยอดกลุ่ม) --- */
+#page-pdrepjv .apjv-tbl tbody tr:nth-child(even):not(.apjv-fltr):not(.apjv-addtr):not(.apjv-grp):not(.apjv-grpsub)>td{background:#F6F3EC}
+#page-pdrepjv .apjv-tbl tbody tr.apjv-addtr>td{background:transparent;border-right:0;border-top:1px solid #E6E0D4}
+/* --- แถวกรอง --- */
+#page-pdrepjv .apjv-fltr td{border-right:1px solid #E6E0D4;border-bottom:1.5px solid #C9BFA8}
+#page-pdrepjv .apjv-liab .apjv-sec:not(.apjv-sub) .apjv-fltr td{background:#EDF1F9}
+#page-pdrepjv .apjv-asset .apjv-sec:not(.apjv-sub) .apjv-fltr td{background:#EBF5F0}
+#page-pdrepjv .apjv-sub-routine .apjv-fltr td{background:#EDF1F9}
+#page-pdrepjv .apjv-sub-bank .apjv-fltr td{background:#EBF5F0}
+/* --- แถวรวม: เน้นสีประจำฝั่ง + เส้นหนาใต้ (แทนขีดใต้คู่ของงบการเงิน) --- */
+#page-pdrepjv .apjv-tbl tfoot td{border-top:1.5px solid #9C927C;border-right:1px solid #E6E0D4}
+#page-pdrepjv .apjv-tbl tfoot td:last-child{border-right:0}
+#page-pdrepjv .apjv-liab .apjv-sec:not(.apjv-sub) tfoot td{background:#E7EDF8;border-top-color:#9FB4D8;box-shadow:inset 0 -4px 0 -2px #22355C}
+#page-pdrepjv .apjv-asset .apjv-sec:not(.apjv-sub) tfoot td{background:#E4F2EC;border-top-color:#9ED0BC;box-shadow:inset 0 -4px 0 -2px #12554C}
+#page-pdrepjv .apjv-sub-routine tfoot td{background:#EDF1F9;border-top-color:#B8C7E4;box-shadow:inset 0 -4px 0 -2px #2E4576}
+#page-pdrepjv .apjv-sub-bank tfoot td{background:#E9F3EF;border-top-color:#AFD6C6;box-shadow:inset 0 -4px 0 -2px #17685C}
+/* --- จำนวนเงิน: IBM Plex Mono หลักตรงกันทุกแถว (ฟอนต์เดิมของธีม ไม่ได้เพิ่มฟอนต์ใหม่) --- */
+#page-pdrepjv .apjv-tbl td.ra,#page-pdrepjv .apjv-tbl tfoot td.ra,#page-pdrepjv .apjv-tbl td.ra .apjvin{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+/* --- ช่องกรอก: มุมฉากให้เข้ากับตาราง --- */
+#page-pdrepjv .apjv-fin,#page-pdrepjv .apjvin{border-radius:0}
+
 /* ===== v10.00: BBL Loan — Finance & Reconcile (amortization + interest, editable) ===== */
 #page-bbl .bblwrap{--bbl-brand:var(--brand,#0E5C52);--bbl-brand-d:var(--brand-d,#0A463E);--bbl-brand-t:var(--brand-t,#E6F0EC);
   --bbl-gold:var(--gold,#A8741A);--bbl-gold-t:var(--gold-t,#F7EFDD);--bbl-line:var(--line,#E6E0D4);--bbl-line2:var(--line2,#F1ECE2);
