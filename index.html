@@ -4139,6 +4139,19 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-tk .tktool{background:#fff;border:1px solid var(--line,#E6E0D4);border-radius:14px;
   padding:9px 12px;box-shadow:0 2px 11px -5px rgba(17,24,39,.13);}
 #page-tk .tksearch,#page-tk .tkfilt{border:1px solid var(--line,#E6E0D4);border-radius:9px;}
+
+/* --- v11.3: draft file frame — a fixed-size dashed tile that sits at the end of every lane.
+   It gives each step a consistent height (an empty step used to collapse to a bare strip) and
+   marks where a file drop area will go. Inert for now, by request. --- */
+#page-tk .tkfiledrop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  box-sizing:border-box;min-height:158px;padding:14px 12px;text-align:center;
+  border:2px dashed #D8D2C4;border-radius:12px;background:#FCFCFB;color:var(--muted,#8C8676);
+  font-size:12.5px;font-weight:800;letter-spacing:.01em;user-select:none;}
+#page-tk .tkfiledrop .tkfdic{font-size:23px;line-height:1;opacity:.7;}
+#page-tk .tkfiledrop .tkfdhint{font-size:9.5px;font-weight:600;opacity:.75;letter-spacing:.02em;}
+/* in the stacked board the lanes are a card grid, so the frame is one tile the size of a card */
+#page-tk .tkboard.vert .tkcolbody .tkfiledrop{align-self:stretch;}
+#page-tk .tkboard.vert .tkcolbody{min-height:158px;}
 </style>
 <!-- ===================================================================
      v8.92 — Financial Statements: refined palette, typography & polish
@@ -7634,7 +7647,7 @@ function _tkFind(id){loadTrack();for(var i=0;i<TRACKDATA.length;i++)if(TRACKDATA
 function _tkColSeed(){return [['todo','Book keeping','#64748B','#EEF2F7'],['doing','Accounting & Tax','#1D5FAE','#E7EFF8'],['review','Remind','#A8741A','#FBF1DE'],['done','Done','#15803D','#E7F6EC']];}
 var TK_STAT=(function(){try{var s=JSON.parse(localStorage.getItem('gli_tkcols')||'null');if(Array.isArray(s)&&s.length&&s.every(function(c){return Array.isArray(c)&&c.length>=2&&c[0];}))return s;}catch(e){}return _tkColSeed();})();
 var TK_COLPAL=[['#0E7490','#E0F2FE'],['#7C3AED','#F3E8FF'],['#BE123C','#FFE4E6'],['#15803D','#DCFCE7'],['#B45309','#FEF3C7'],['#0891B2','#CFFAFE'],['#9333EA','#F5E8FF'],['#DB2777','#FCE7F3'],['#65A30D','#ECFCCB'],['#475569','#F1F5F9']];
-var _tkLayout=(function(){try{var l=localStorage.getItem('gli_tklayout');return (l==='horiz'||l==='vert')?l:'horiz';}catch(e){return 'horiz';}})();
+var _tkLayout='vert';   /* v11.3: stacked lanes only — the side-by-side pipeline left the board looking empty with this few open tasks */
 function saveTkCols(){try{localStorage.setItem('gli_tkcols',JSON.stringify(TK_STAT));}catch(e){}if(typeof _tsTouch==='function')_tsTouch('tkc');if(typeof cloudPush==='function')cloudPush();}
 function _tkSetLayout(v){_tkLayout=(v==='horiz')?'horiz':'vert';try{localStorage.setItem('gli_tklayout',_tkLayout);}catch(e){}renderTracking();}
 function _tkDoneKey(){for(var i=0;i<TK_STAT.length;i++)if(TK_STAT[i][0]==='done')return 'done';return TK_STAT.length?TK_STAT[TK_STAT.length-1][0]:'done';}
@@ -8258,7 +8271,6 @@ function renderTracking(){
   h+='<div class="tkhd"><div class="tktitle"><span class="tkic">🗂️</span> Tracking <span class="tksub">Track team tasks · Kanban + List</span></div><div class="tkhdr"><button class="tkbtn primary" id="tkAdd" type="button">+ Add Task</button></div></div>';
   h+='<div class="tktool">';
   h+='<div class="tkviews"><button class="tkvb'+(_tkView==='kanban'?' on':'')+'" data-v="kanban" type="button">▦ Kanban</button><button class="tkvb'+(_tkView==='list'?' on':'')+'" data-v="list" type="button">☰ List</button></div>';
-  if(_tkView==='kanban')h+='<div class="tkviews"><button class="tkvb'+(_tkLayout==='horiz'?' on':'')+'" data-lay="horiz" type="button" title="Pipeline — steps side by side, left to right (drag a card right to advance it)">⬌ Pipeline</button><button class="tkvb'+(_tkLayout==='vert'?' on':'')+'" data-lay="vert" type="button" title="Stacked — one full-width lane per step, top to bottom">⬍ Stacked</button></div>';
   h+='<input class="tksearch" id="tkSearch" type="text" placeholder="Search tasks…" value="'+_eatt(_tkQ)+'"'+_noAC()+'>';
   h+='<select class="tkfilt" id="tkFA"><option value="">Assignee: All</option>'+((typeof PTDATA!=='undefined'&&PTDATA)?PTDATA.map(function(u){return '<option value="'+u.id+'"'+(u.id===_tkFA?' selected':'')+'>'+esc(_ptName(u))+'</option>';}).join(''):'')+'</select>';
   h+='<select class="tkfilt" id="tkFP"><option value="">Priority: All</option>'+TK_PRIO.map(function(p){return '<option value="'+p[0]+'"'+(p[0]===_tkFP?' selected':'')+'>'+p[1]+'</option>';}).join('')+'</select>';
@@ -8341,6 +8353,9 @@ function _tkKanban(view){
       });
     }
     if(_tkClip)h+='<button class="tkpaste" data-paste="'+st[0]+'" type="button" title="Paste a copy of the copied task into this step">📋 Paste here ·<span class="tkpastenm">'+esc(_tkClip.title||'(untitled)')+'</span><span class="tkpastex" data-clipx="1" title="Clear the clipboard">✕</span></button>';
+    /* v11.3: draft placeholder — a fixed-size frame for dropping a file later. It also locks the
+       lane to a consistent height so an empty step no longer collapses into a bare strip. */
+    h+='<div class="tkfiledrop" data-fdst="'+st[0]+'" aria-hidden="true"><span class="tkfdic">🗂</span><span class="tkfdt">＋ Add file</span><span class="tkfdhint">draft — drop area coming soon</span></div>';
     h+='<button class="tkaddcol" data-st="'+st[0]+'" type="button">+ Add Task</button>';
     h+='</div></div>';
   });
