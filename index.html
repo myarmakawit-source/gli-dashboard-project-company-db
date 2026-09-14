@@ -4096,6 +4096,50 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-pg .pgtbl thead th .pghdstar{color:rgba(255,255,255,.55);text-shadow:none;animation:none;}
 #page-pg .pgtbl thead th .pgprogh-s{color:rgba(255,255,255,.62);}
 </style>
+<style id="tkPipeCss">
+/* ===== v11.2: Tracking — pipeline presentation + Database colour scheme =====
+   The board is a sequential approval pipeline (Prepare → Verify → CEO sign → Cheque),
+   so the steps read left to right and a card can be advanced without a long drag. */
+
+/* --- step headings: long Thai names wrap instead of being cut off with an ellipsis --- */
+#page-tk .tkboard .tkcolnm{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-y:hidden;}
+#page-tk .tkboard:not(.vert) .tkcolhd{align-items:flex-start;min-height:34px;flex-wrap:wrap;row-gap:4px;}
+#page-tk .tkboard:not(.vert) .tkcolnm{flex:1 1 auto;min-width:0;-webkit-line-clamp:3;}
+#page-tk .tkboard:not(.vert) .tkcolact{opacity:0;transition:opacity .12s;}
+#page-tk .tkboard:not(.vert) .tkcol:hover .tkcolact,
+#page-tk .tkboard:not(.vert) .tkcolact:focus-within{opacity:1;}
+/* the heading stays in view while a long step is scrolled */
+#page-tk .tkboard:not(.vert) .tkcol{align-self:stretch;}
+#page-tk .tkboard:not(.vert) .tkcolhd{position:sticky;top:0;z-index:2;background:inherit;padding-top:3px;}
+
+/* --- a step with no cards shrinks, but stays an obvious drop target --- */
+#page-tk .tkboard:not(.vert) .tkcol:not(:has(.tkcard)){flex:0 0 210px;min-width:210px;}
+#page-tk .tkboard:not(.vert) .tkcol:not(:has(.tkcard)) .tkcolbody{
+  border:1.5px dashed var(--line,#E6E0D4);border-radius:9px;min-height:70px;}
+
+/* --- advance one step: quiet until you reach for it --- */
+#page-tk .tkcardbot{flex-wrap:wrap;gap:5px;}
+#page-tk .tknextb{margin-left:auto;display:inline-flex;align-items:center;gap:4px;flex:none;
+  border:1px solid var(--line,#E6E0D4);background:#fff;color:var(--ink2,#4A5563);
+  border-radius:8px;padding:3px 9px;font:inherit;font-size:10.5px;font-weight:800;cursor:pointer;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .12s,border-color .12s,color .12s;}
+#page-tk .tknextb:hover{background:var(--brand,#0E5C52);border-color:var(--brand-d,#0A463E);color:#fff;}
+#page-tk .tknextb+.tkdoneb{margin-left:5px;}
+#page-tk .tkcardbot{align-items:center;}
+#page-tk .tkcardbot .tkdue,#page-tk .tkcardbot .tkdue.over{margin-right:2px;}
+
+/* --- Database colour scheme: white cards, hairline borders, one quiet hover --- */
+#page-tk .tkcard{border:1px solid var(--line,#E6E0D4);box-shadow:0 1px 2px rgba(17,24,39,.05);}
+#page-tk .tkcard:hover{box-shadow:0 7px 18px -7px rgba(14,92,82,.28);}
+#page-tk .tkcol{background:#fff;border:1px solid var(--line,#E6E0D4);
+  box-shadow:0 2px 11px -5px rgba(17,24,39,.13);}
+#page-tk .tkcolbody.dropon{background:var(--brand-t,#E6F0EC);outline:2px dashed var(--brand,#0E5C52);}
+/* toolbar reads like the Database filter row */
+#page-tk .tktool{background:#fff;border:1px solid var(--line,#E6E0D4);border-radius:14px;
+  padding:9px 12px;box-shadow:0 2px 11px -5px rgba(17,24,39,.13);}
+#page-tk .tksearch,#page-tk .tkfilt{border:1px solid var(--line,#E6E0D4);border-radius:9px;}
+</style>
 <!-- ===================================================================
      v8.92 — Financial Statements: refined palette, typography & polish
      Scoped entirely to #page-fs. Elevates colour, fonts and micro-detail
@@ -7590,7 +7634,7 @@ function _tkFind(id){loadTrack();for(var i=0;i<TRACKDATA.length;i++)if(TRACKDATA
 function _tkColSeed(){return [['todo','Book keeping','#64748B','#EEF2F7'],['doing','Accounting & Tax','#1D5FAE','#E7EFF8'],['review','Remind','#A8741A','#FBF1DE'],['done','Done','#15803D','#E7F6EC']];}
 var TK_STAT=(function(){try{var s=JSON.parse(localStorage.getItem('gli_tkcols')||'null');if(Array.isArray(s)&&s.length&&s.every(function(c){return Array.isArray(c)&&c.length>=2&&c[0];}))return s;}catch(e){}return _tkColSeed();})();
 var TK_COLPAL=[['#0E7490','#E0F2FE'],['#7C3AED','#F3E8FF'],['#BE123C','#FFE4E6'],['#15803D','#DCFCE7'],['#B45309','#FEF3C7'],['#0891B2','#CFFAFE'],['#9333EA','#F5E8FF'],['#DB2777','#FCE7F3'],['#65A30D','#ECFCCB'],['#475569','#F1F5F9']];
-var _tkLayout=(function(){try{var l=localStorage.getItem('gli_tklayout');return (l==='horiz'||l==='vert')?l:'vert';}catch(e){return 'vert';}})();
+var _tkLayout=(function(){try{var l=localStorage.getItem('gli_tklayout');return (l==='horiz'||l==='vert')?l:'horiz';}catch(e){return 'horiz';}})();
 function saveTkCols(){try{localStorage.setItem('gli_tkcols',JSON.stringify(TK_STAT));}catch(e){}if(typeof _tsTouch==='function')_tsTouch('tkc');if(typeof cloudPush==='function')cloudPush();}
 function _tkSetLayout(v){_tkLayout=(v==='horiz')?'horiz':'vert';try{localStorage.setItem('gli_tklayout',_tkLayout);}catch(e){}renderTracking();}
 function _tkDoneKey(){for(var i=0;i<TK_STAT.length;i++)if(TK_STAT[i][0]==='done')return 'done';return TK_STAT.length?TK_STAT[TK_STAT.length-1][0]:'done';}
@@ -8214,18 +8258,18 @@ function renderTracking(){
   h+='<div class="tkhd"><div class="tktitle"><span class="tkic">🗂️</span> Tracking <span class="tksub">Track team tasks · Kanban + List</span></div><div class="tkhdr"><button class="tkbtn primary" id="tkAdd" type="button">+ Add Task</button></div></div>';
   h+='<div class="tktool">';
   h+='<div class="tkviews"><button class="tkvb'+(_tkView==='kanban'?' on':'')+'" data-v="kanban" type="button">▦ Kanban</button><button class="tkvb'+(_tkView==='list'?' on':'')+'" data-v="list" type="button">☰ List</button></div>';
-  if(_tkView==='kanban')h+='<div class="tkviews"><button class="tkvb'+(_tkLayout==='vert'?' on':'')+'" data-lay="vert" type="button" title="หัวข้อเรียงแนวตั้ง (บนลงล่าง)">⬍ แนวตั้ง</button><button class="tkvb'+(_tkLayout==='horiz'?' on':'')+'" data-lay="horiz" type="button" title="หัวข้อเรียงแนวนอน (ซ้ายไปขวา)">⬌ แนวนอน</button></div>';
+  if(_tkView==='kanban')h+='<div class="tkviews"><button class="tkvb'+(_tkLayout==='horiz'?' on':'')+'" data-lay="horiz" type="button" title="Pipeline — steps side by side, left to right (drag a card right to advance it)">⬌ Pipeline</button><button class="tkvb'+(_tkLayout==='vert'?' on':'')+'" data-lay="vert" type="button" title="Stacked — one full-width lane per step, top to bottom">⬍ Stacked</button></div>';
   h+='<input class="tksearch" id="tkSearch" type="text" placeholder="Search tasks…" value="'+_eatt(_tkQ)+'"'+_noAC()+'>';
   h+='<select class="tkfilt" id="tkFA"><option value="">Assignee: All</option>'+((typeof PTDATA!=='undefined'&&PTDATA)?PTDATA.map(function(u){return '<option value="'+u.id+'"'+(u.id===_tkFA?' selected':'')+'>'+esc(_ptName(u))+'</option>';}).join(''):'')+'</select>';
   h+='<select class="tkfilt" id="tkFP"><option value="">Priority: All</option>'+TK_PRIO.map(function(p){return '<option value="'+p[0]+'"'+(p[0]===_tkFP?' selected':'')+'>'+p[1]+'</option>';}).join('')+'</select>';
   h+='<select class="tkfilt" id="tkFC"><option value="">Category: All</option>'+TK_CAT.map(function(c){return '<option value="'+c[0]+'"'+(c[0]===_tkFC?' selected':'')+'>'+c[1]+'</option>';}).join('')+'</select>';
-  h+='<select class="tkfilt" id="tkFD"><option value="">ประเภทเอกสาร: ทั้งหมด</option>'+_tkDocOptions(_tkFD)+'</select>';
-  h+='<button class="tkbtn ghost" id="tkDocCfg" type="button" title="สร้าง/แก้ไขประเภทเอกสาร">🗂 ตั้งค่าประเภทเอกสาร</button>';
+  h+='<select class="tkfilt" id="tkFD"><option value="">Doc type: All</option>'+_tkDocOptions(_tkFD)+'</select>';
+  h+='<button class="tkbtn ghost" id="tkDocCfg" type="button" title="Create / edit document types">🗂 Doc types</button>';
   if(_tkQ||_tkFA||_tkFP||_tkFC||_tkFD)h+='<button class="tkbtn ghost" id="tkClr" type="button">✕ Clear filters</button>';
-  h+='<div class="tkstat"><span class="tkpill total">Total '+view.length+'</span>'+(over?('<span class="tkpill over">⚠ Overdue '+over+'</span>'):'')+'<span class="tkpill done" id="tkDoneN" title="งานที่กด “เสร็จ” แล้ว — คลิกเพื่อเปิดหน้า Report งานที่เสร็จ">✅ เสร็จแล้ว '+_doneN+'</span></div>';
+  h+='<div class="tkstat"><span class="tkpill total">Total '+view.length+'</span>'+(over?('<span class="tkpill over">⚠ Overdue '+over+'</span>'):'')+'<span class="tkpill done" id="tkDoneN" title="Tasks marked done — click to open the Completed report">✅ Done '+_doneN+'</span></div>';
   h+='</div>';
   if(_tkDocPanel)h+=_tkDocPanelHTML();
-  if(!_openN){h+='<div class="tkempty"><div class="tkemptyic">'+(_doneN?'✅':'🗂️')+'</div><div class="tkemptyt">'+(_doneN?'ไม่มีงานค้างบนบอร์ด':'No tasks yet')+'</div><div class="tkemptys">'+(_doneN?('งานทั้งหมด '+_doneN+' รายการเสร็จแล้ว — ดูได้ที่หน้า “Report งานที่เสร็จ”'):'Click “+ Add Task” to add your first task')+'</div></div>';}
+  if(!_openN){h+='<div class="tkempty"><div class="tkemptyic">'+(_doneN?'✅':'🗂️')+'</div><div class="tkemptyt">'+(_doneN?'Nothing left on the board':'No tasks yet')+'</div><div class="tkemptys">'+(_doneN?('All '+_doneN+' task(s) are done — see them on the “Completed report” page'):'Click “+ Add Task” to add your first task')+'</div></div>';}
   else if(_tkView==='kanban'){h+=_tkKanban(view);}
   else{h+=_tkList(view);}
   h+='</div>'+_tkModalHTML();
@@ -8276,12 +8320,12 @@ function _tkKanban(view){
     var col=view.filter(function(t){return (t.status||TK_STAT[0][0])===st[0];}).sort(_tkColSort);
     h+='<div class="tkcol" data-st="'+st[0]+'" style="--c:'+st[2]+';--cb:'+(st[3]||'#EEF2F7')+'">';
     h+='<div class="tkcolhd" data-colhd="'+st[0]+'"'+_tkColHdStyle(st)+'>'
-      +'<span class="tkcolgrip" title="ลากแถบหัวข้อเพื่อย้ายไปวางตรงไหนก็ได้">⠿</span>'
-      +'<span class="tkcoldot"></span><span class="tkcolnm" data-colren="'+st[0]+'" title="คลิกเพื่อเปลี่ยนชื่อหัวข้อ">'+esc(st[1])+'</span><span class="tkcoln">'+col.length+'</span>'
+      +'<span class="tkcolgrip" title="Drag this heading to move the whole step anywhere on the board">⠿</span>'
+      +'<span class="tkcoldot"></span><span class="tkcolnm" data-colren="'+st[0]+'" title="Click to rename this step">'+esc(st[1])+'</span><span class="tkcoln">'+col.length+'</span>'
       +'<span class="tkcolact">'
-      +'<button class="tkcolsw2'+((_tkColPick===st[0])?' on':'')+'" data-colpick="'+st[0]+'" type="button" title="เปลี่ยนสีพื้นหลังหัวข้อ"><i class="tkswdot'+(st[4]?'':' none')+'"'+(st[4]?(' style="background:'+st[4]+'"'):'')+'></i>สี</button>'
-      +'<button class="tkcolb" data-colren="'+st[0]+'" type="button" title="เปลี่ยนชื่อหัวข้อ">✎</button>'
-      +'<button class="tkcolb del" data-coldel="'+st[0]+'" type="button" title="ลบหัวข้อ"'+(n<=1?' disabled':'')+'>🗑</button>'
+      +'<button class="tkcolsw2'+((_tkColPick===st[0])?' on':'')+'" data-colpick="'+st[0]+'" type="button" title="Change the background colour of this step"><i class="tkswdot'+(st[4]?'':' none')+'"'+(st[4]?(' style="background:'+st[4]+'"'):'')+'></i>สี</button>'
+      +'<button class="tkcolb" data-colren="'+st[0]+'" type="button" title="Rename step">✎</button>'
+      +'<button class="tkcolb del" data-coldel="'+st[0]+'" type="button" title="Delete step"'+(n<=1?' disabled':'')+'>🗑</button>'
       +'</span></div>';
     if(_tkColPick===st[0])h+=_tkColPickHTML(st);
     h+='<div class="tkcolbody" data-st="'+st[0]+'">';
@@ -8296,12 +8340,12 @@ function _tkKanban(view){
         if(!_tkGrpCol[_tkGrpKey(st[0],g)])_gs[g].forEach(function(t){h+=_tkCard(t);});
       });
     }
-    if(_tkClip)h+='<button class="tkpaste" data-paste="'+st[0]+'" type="button" title="วางสำเนาของงานที่คัดลอกไว้ ลงในหัวข้อนี้">📋 วางที่นี่ ·<span class="tkpastenm">'+esc(_tkClip.title||'(ไม่มีชื่อ)')+'</span><span class="tkpastex" data-clipx="1" title="ล้างสิ่งที่คัดลอกไว้">✕</span></button>';
+    if(_tkClip)h+='<button class="tkpaste" data-paste="'+st[0]+'" type="button" title="Paste a copy of the copied task into this step">📋 Paste here ·<span class="tkpastenm">'+esc(_tkClip.title||'(untitled)')+'</span><span class="tkpastex" data-clipx="1" title="Clear the clipboard">✕</span></button>';
     h+='<button class="tkaddcol" data-st="'+st[0]+'" type="button">+ Add Task</button>';
     h+='</div></div>';
   });
   h+='</div>';
-  h+='<button class="tkaddheading" id="tkAddCol" type="button">＋ เพิ่มหัวข้อ · Add column</button>';
+  h+='<button class="tkaddheading" id="tkAddCol" type="button">＋ Add step</button>';
   return h;
 }
 function _tkCard(t,pos){
@@ -8315,7 +8359,7 @@ function _tkCard(t,pos){
   if(t.cat){var _tc=_tkCat(t.cat);if(_tc)h+='<span class="tkcat" style="background:'+_tc[3]+';color:'+_tc[2]+'">'+esc(_tc[1])+'</span>';}
   h+='</div>';
   var _pc=((t.proj||'')+'').trim(),_ow=((t.owner||'')+'').trim(),_dn=((t.docno||'')+'').trim(),_ct=((t.contact||'')+'').trim();
-  var _ctH=_ct?('<div class="tkhl tkhlp"><span class="tkhlk" title="ชื่อผู้ติดต่อ">👤</span><span class="tkhlv" title="'+_eatt('ชื่อผู้ติดต่อ · '+_ct)+'">'+esc(_ct)+'</span></div>'):'';
+  var _ctH=_ct?('<div class="tkhl tkhlp"><span class="tkhlk" title="Contact name">👤</span><span class="tkhlv" title="'+_eatt('Contact · '+_ct)+'">'+esc(_ct)+'</span></div>'):'';
   h+='<div class="tkcardhead" data-edit="'+t.id+'"'+(t.tc?(' style="color:'+tc[2]+'"'):'')+'>';
   if(t.mode==='rows'){
     var _vr=_tkRowList(t);
@@ -8327,7 +8371,7 @@ function _tkCard(t,pos){
     h+=_ctH;
     h+='</div>';
   }else if(t.mode==='simple'){
-    h+='<div class="tkcardttl">'+esc(t.title||'(ไม่มีหัวข้อ)')+'</div>';
+    h+='<div class="tkcardttl">'+esc(t.title||'(no title)')+'</div>';
     if(((t.desc||'')+'').trim())h+='<div class="tkcarddesc">'+esc(t.desc).replace(/\n/g,'<br>')+'</div>';
     h+=_ctH;
     h+='</div>';
@@ -8336,22 +8380,25 @@ function _tkCard(t,pos){
   if(_ow)h+='<div class="tkhl tkhl2"><span class="tkhlk">2</span><span class="tkhlv" title="'+_eatt(_ow)+'">'+esc(_ow)+'</span></div>';
   h+=_ctH;
   if(_dn)h+='<div class="tkhl tkhl3"><span class="tkhlk">3</span><span class="tkhlv" title="'+_eatt(_dn)+'">'+esc(_dn)+'</span></div>';
-  h+='<div class="tkcardttl">'+esc(t.title||'(ไม่มีคำอธิบาย)')+'</div></div>';}
+  h+='<div class="tkcardttl">'+esc(t.title||'(no description)')+'</div></div>';}
   var _nl=_tkNoteList(t);
   if(_nl.length){
     h+='<div class="tkcardck">';
     _nl.slice(0,3).forEach(function(n){
       h+='<div class="tkcck'+(n.done?' done':'')+'">'
-        +'<button class="tkcckb" data-cnck="'+_eatt(t.id)+'|'+_eatt(n.id)+'" type="button" title="'+(n.done?'ติ๊กออก':'ติ๊กว่าเสร็จแล้ว')+'">✓</button>'
+        +'<button class="tkcckb" data-cnck="'+_eatt(t.id)+'|'+_eatt(n.id)+'" type="button" title="'+(n.done?'Untick':'Tick as done')+'">✓</button>'
         +'<span class="tkcckt">'+esc(_tkNoteStamp(n.done?(n.dts||n.ts):n.ts))+'</span>'
         +'<span class="tkcckx">'+esc(n.txt||'')+'</span></div>';
     });
-    if(_nl.length>3)h+='<div class="tkcckmore">+ อีก '+(_nl.length-3)+' รายการ</div>';
+    if(_nl.length>3)h+='<div class="tkcckmore">+ '+(_nl.length-3)+' more</div>';
     h+='</div>';
   }
-  var _na=(t.att&&t.att.length)||0;h+='<div class="tkcardbot"><span class="tkassign">'+_tkAvatar(t.assignee)+'</span>'+(d?('<span class="'+d.cls+'">'+d.txt+'</span>'):'')+(_na?('<span class="tkattcount" title="'+_na+' ไฟล์แนบ">📎 '+_na+'</span>'):'')+'<button class="tkdoneb" data-done="'+t.id+'" type="button" title="ทำเสร็จแล้ว — ย้ายการ์ดนี้ไปหน้า “Report งานที่เสร็จ” (นำกลับได้)">✓ เสร็จ</button></div>';
-  h+='<button class="tkcopy" data-copy="'+t.id+'" type="button" title="คัดลอกงานนี้ — แล้วกด “วางที่นี่” ในหัวข้อที่ต้องการ (หรือกด Alt ค้างแล้วลากการ์ด = คัดลอก)">⧉</button>';
-  h+='<div class="tkgrip" title="ลากการ์ดเพื่อย้ายคอลัมน์ หรือจัดลำดับขึ้น–ลงในคอลัมน์เดียวกัน · กด Alt ค้างขณะลาก = คัดลอก">⠿</div>';
+  var _na=(t.att&&t.att.length)||0;h+='<div class="tkcardbot"><span class="tkassign">'+_tkAvatar(t.assignee)+'</span>'+(d?('<span class="'+d.cls+'">'+d.txt+'</span>'):'')+(_na?('<span class="tkattcount" title="'+_na+' attachment(s)">📎 '+_na+'</span>'):'')+(function(){ /* v11.2: advance one step without dragging — the long drags across a multi-stage pipeline were the slow part */
+    var _ci=_tkStatIdx(t.status||'todo'), _nx=(_ci>=0&&_ci<TK_STAT.length-1)?TK_STAT[_ci+1]:null;
+    return _nx?('<button class="tknextb" data-next="'+t.id+'" type="button" title="'+_eatt('Move to the next step → '+(_nx[1]||''))+'">→ Next</button>'):'';
+  })()+'<button class="tkdoneb" data-done="'+t.id+'" type="button" title="Done — move this card to the “Completed report” page (you can bring it back)">✓ Done</button></div>';
+  h+='<button class="tkcopy" data-copy="'+t.id+'" type="button" title="Copy this task — then click “Paste here” in the step you want (or hold Alt while dragging the card to copy it)">⧉</button>';
+  h+='<div class="tkgrip" title="Drag the card to another step, or up and down to reorder it within a step · hold Alt while dragging to copy">⠿</div>';
   return h+'</div>';
 }
 function _tkList(view){
@@ -8360,7 +8407,7 @@ function _tkList(view){
   if(!view.length)h+='<tr><td colspan="7" class="tknone">No tasks match the filters</td></tr>';
   view.forEach(function(t){var pr=_tkPrio(t.prio||'med'),st=_tkStat(t.status||'todo'),d=_tkDue(t),ct=_tkCat(t.cat||'');
     var _dcl=_tkDoc(t.doc);h+='<tr data-edit="'+t.id+'"><td class="tkltitle">'+((t.mode!=='rows'&&t.co)?(_tkCoBadge(t.co,t.cono)+' '):'')
-    +((t.mode==='rows')?(_tkRowList(t).map(function(r){return '<span class="tkgrpchip">'+esc(r.vno||'')+(r.co?(' · '+esc(_tkCoLabel(r.co,r.cono))):'')+'</span>';}).join(' ')+' '):'')+(_dcl?('<span class="tkdocchip" style="color:'+_dcl[2]+';border:1.5px solid '+_dcl[2]+'">'+esc(_dcl[1])+'</span> '):'')+(((t.grp||'')+'').trim()?('<span class="tkgrpchip">🗂 '+esc(((t.grp||'')+'').trim())+'</span> '):'')+(ct?('<span class="tkcat tkcatsm" style="background:'+ct[3]+';color:'+ct[2]+'">'+esc(ct[1])+'</span> '):'')+esc(t.title||'(ไม่มีคำอธิบาย)')
+    +((t.mode==='rows')?(_tkRowList(t).map(function(r){return '<span class="tkgrpchip">'+esc(r.vno||'')+(r.co?(' · '+esc(_tkCoLabel(r.co,r.cono))):'')+'</span>';}).join(' ')+' '):'')+(_dcl?('<span class="tkdocchip" style="color:'+_dcl[2]+';border:1.5px solid '+_dcl[2]+'">'+esc(_dcl[1])+'</span> '):'')+(((t.grp||'')+'').trim()?('<span class="tkgrpchip">🗂 '+esc(((t.grp||'')+'').trim())+'</span> '):'')+(ct?('<span class="tkcat tkcatsm" style="background:'+ct[3]+';color:'+ct[2]+'">'+esc(ct[1])+'</span> '):'')+esc(t.title||'(no description)')
     +((((t.proj||'')+'').trim()||((t.owner||'')+'').trim()||((t.contact||'')+'').trim()||((t.docno||'')+'').trim())?('<span class="tkltl">'
       +(((t.proj||'')+'').trim()?('<b>'+esc(((t.proj||'')+'').trim())+'</b>'):'')
       +(((t.owner||'')+'').trim()?(' · '+esc(((t.owner||'')+'').trim())):'')
@@ -8497,6 +8544,7 @@ function _tkBind(){
     if((b=cl(e,'[data-clipx]'))){_tkClipClear();return;}
     if((b=cl(e,'[data-paste]'))){_tkPasteInto(b.getAttribute('data-paste'));return;}
     if((b=cl(e,'[data-copy]'))){_tkCopyCard(b.getAttribute('data-copy'));return;}
+    if((b=cl(e,'[data-next]'))){_tkMove(b.getAttribute('data-next'),1);return;}
     if((b=cl(e,'[data-done]'))){_tkDoneMark(b.getAttribute('data-done'));return;}
     if((b=cl(e,'#tkDoneN'))){_tkPageSet('report');return;}
     if((b=cl(e,'.tkdel'))){_tkDel(b.getAttribute('data-del'));return;}
