@@ -3976,6 +3976,30 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 .fsacc.open>.fsacchd{background:linear-gradient(180deg,var(--brand-t) 0%,#EAF4F0 100%)}
 .fsbscheck{border-radius:11px;letter-spacing:.01em}
 .fsvtot td,.fsgrptot td{background:linear-gradient(180deg,#EEF4F2 0%,#E4F1EC 100%)}
+
+/* ===== v11.0: Trial Balance command panel — same layout language as the Database module =====
+   The Export / Adjusting-entries buttons keep their delegation hooks (.fstbxlsb / .fstbpdfb /
+   .fstbcls) so every click handler still fires; these rules only neutralise the old chip skin
+   so they render as Database panel buttons (.glactb). */
+#page-fs .glacts .glactb.fstbxlsb,#page-fs .glacts .glactb.fstbpdfb,#page-fs .glacts .glactb.fstbcls{
+  display:flex;align-items:center;justify-content:flex-start;gap:8px;width:100%;box-sizing:border-box;
+  background:#fff;border:1.5px solid var(--line,#E6E0D4);border-radius:10px;padding:6px 11px;min-height:34px;
+  font-family:inherit;font-size:12px;font-weight:700;color:var(--ink,#19222E);letter-spacing:0;
+  box-shadow:0 1px 3px rgba(17,24,39,.05);transform:none;text-align:left;}
+#page-fs .glacts .glactb.fstbxlsb:hover,#page-fs .glacts .glactb.fstbpdfb:hover,#page-fs .glacts .glactb.fstbcls:hover{
+  background:var(--brand-t,#E6F0EC);border-color:var(--brand,#0E5C52);
+  box-shadow:0 7px 18px -7px rgba(14,92,82,.4);transform:translateY(-2px);}
+#page-fs .glacts .glactb.fstbcls-adj.on{
+  background:linear-gradient(135deg,var(--brand,#0E5C52),var(--brand-d,#0A463E));
+  color:#fff;border-color:var(--brand-d,#0A463E);box-shadow:0 4px 13px -4px rgba(14,92,82,.5);}
+#page-fs .glacts .glactb.fstbcls-adj.on .glactn{background:rgba(255,255,255,.22);color:#fff;}
+.glactcat.cat-flt{color:#8A5E12;}
+/* account-class chips sit in the filter card's 2-column grid, like the GL Account Class card */
+#page-fs .glactg-cls .glactfil .fstbcls{display:block;width:100%;box-sizing:border-box;margin:0;text-align:left;
+  padding:4px 9px;font-size:11.5px;min-height:27px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#page-fs .glactg-cls .glactfil .fstbcls:hover{transform:translateY(-1px);box-shadow:0 4px 10px -5px rgba(14,92,82,.35);}
+/* the TB panel replaces the old loose rows */
+.fstbclsrow,.fstbexport{display:none!important;}
 </style>
 <!-- ===================================================================
      v8.92 — Financial Statements: refined palette, typography & polish
@@ -5367,7 +5391,7 @@ body.apjv-resizing,body.apjv-resizing *{cursor:col-resize!important;user-select:
 #page-fs .fstb td.fsatt-diff.bad{color:var(--fx-neg);background:var(--fx-neg-bg)}
 #page-fs .fstb td.fsatt-none{color:#C7CFC9;font-weight:400;text-align:center}
 /* v9.95: year-based sheet lookup — no sheet for the selected year → red warning */
-#page-fs .fstb td.fsatt-amt.fsatt-nosheet,#page-fs .fstb td.fsatt-diff.fsatt-nosheet{color:#fff;background:var(--fx-neg);font-weight:800;text-align:center;letter-spacing:.01em}
+#page-fs .fstb tr td.fsatt-amt.fsatt-nosheet,#page-fs .fstb tr td.fsatt-diff.fsatt-nosheet{color:#9A3412;background:#FDF0E4;box-shadow:inset 0 0 0 1px #F1D9C1;font-weight:700;text-align:center;letter-spacing:.01em}
 #page-fs .fstb td.fsatt-amt.fsatt-nosheet{white-space:nowrap}
 .fstbsum-c.s-nosheet .fstbsum-cv,.fstbsum-cmph .fsnosheet-warn{color:var(--neg,#B42318)}
 .fstbsum-cmph .fsnosheet-warn{font-weight:800;margin-left:6px}
@@ -19466,7 +19490,7 @@ var _fsEndM=12;
 /* v9.36: สถานะการกระทบยอด TB กับไฟล์รายละเอียดประกอบงบ (reconciliation) — ทำงานเฉพาะเซสชัน + จำ mapping ลง localStorage */
 var _fsRecon=null, _fsReconWB=null;
 var _FS_TABS=[['tb','Trial Balance','🧾'],['bs','Balance Sheet','⚖️'],['pl','Income Statement','📈'],
-              ['sce','Changes in Equity','🔄'],['notes','หมายเหตุประกอบงบ','📝'],['cf','Cash Flow · Indirect','💵'],['cfd','Cash Flow · Direct','💧'],['ratio','Ratio %','📊'],['wk','Working Papers','🗂️'],['an','Anomalies','⚠️']];
+              ['sce','Changes in Equity','🔄'],['notes','Notes to FS','📝'],['cf','Cash Flow · Indirect','💵'],['cfd','Cash Flow · Direct','💧'],['ratio','Ratio %','📊'],['wk','Working Papers','🗂️'],['an','Anomalies','⚠️']];
 var _FS_WK=[['A','Assets'],['L','Liabilities'],['E','Equity'],['R','Revenue'],['X','Expenses']];
 var _FS_BS_ASSET=['Cash on hand','Cash & deposits in transit','Cash at banks',
   'Trade receivables','Less: Allowance for ECL (receivables)',
@@ -20651,20 +20675,30 @@ function _fsReconPanel(){
 /* ---------- v9.92: Trial Balance — Excel-style per-column filter + sort (in the header) ---------- */
 var _fsTbFil={}, _fsTbSort=null;
 var _fsTbCls='', _fsTbClsAnchor=null;   /* v10.94: account-class filter (first digit of code) — เหมือน Filter หมวดบัญชีใน GL */
-var _FS_TB_CLS=[['1','1','สินทรัพย์ · Assets','สินทรัพย์'],['2','2','หนี้สิน · Liabilities','หนี้สิน'],['3','3','ส่วนของผู้ถือหุ้น · Equity','ทุน'],['4','4','รายได้ · Revenue','รายได้'],['5','5','ต้นทุนขาย/บริการ · Cost','ต้นทุน'],['6','6','ค่าใช้จ่ายในการบริหาร · Admin','ค่าใช้จ่าย'],['7','7','ต้นทุนทางการเงิน · Finance','ดอกเบี้ย'],['8','8','รายการอื่น · Other','อื่นๆ']];
-function _fsTbClsRow(){
+var _FS_TB_CLS=[['1','1','Assets','Assets'],['2','2','Liabilities','Liabilities'],['3','3','Equity','Equity'],['4','4','Revenue','Revenue'],['5','5','Cost of sales / services','Cost'],['6','6','Administrative expenses','Expenses'],['7','7','Finance costs','Finance'],['8','8','Other items','Other']];
+function _fsTbClsRow(filtered){
   var TB=(typeof _fsTB!=='undefined'&&_fsTB)?_fsTB:[];
   var pres={}; for(var i=0;i<TB.length;i++){ var fc=(''+(TB[i].code==null?'':TB[i].code)).charAt(0); if(fc)pres[fc]=1; }
-  var h='<div class="fstbclsrow"><span class="fstbcls-lb">หมวดบัญชี<span>Account class</span></span>'+
-        '<button type="button" class="fstbcls'+(!_fsTbCls?' active':'')+'" data-fscls="">ทั้งหมด</button>';
+  var clsH='<button type="button" class="fstbcls'+(!_fsTbCls?' active':'')+'" data-fscls="">All</button>';
   for(var c=0;c<_FS_TB_CLS.length;c++){ var cc=_FS_TB_CLS[c]; if(!pres[cc[0]])continue;
-    h+='<button type="button" class="fstbcls'+((_fsTbCls&&_fsTbCls.indexOf(cc[0])>=0)?' active':'')+'" data-fscls="'+cc[0]+'" title="'+cc[2]+' (Class '+cc[1]+') · คลิกเพื่อกรอง · Shift+คลิก = เลือกช่วง">'+cc[1]+' '+cc[3]+'</button>';
+    clsH+='<button type="button" class="fstbcls'+((_fsTbCls&&_fsTbCls.indexOf(cc[0])>=0)?' active':'')+'" data-fscls="'+cc[0]+'" title="'+cc[2]+' (Class '+cc[1]+') \u00b7 click to filter \u00b7 Shift+click = select a range">'+cc[1]+' '+cc[3]+'</button>';
   }
-  /* v10.98: ปุ่ม «เปิดรายการปรับปรุง» ย้ายมาต่อท้ายแถวหมวดบัญชี (หลัง «7 ดอกเบี้ย») — เข้าถึงได้เสมอแม้ยุบกล่องสรุป */
+  /* v11.0: same command-panel layout as the Database module (_dbActPanel) — every class hook / id is unchanged, so the delegated handlers still fire */
   var _adjOn=(typeof _fsAdjActive==='function')&&_fsAdjActive();
-  h+='<span class="fstbcls-sp"></span><button type="button" class="fstbcls fstbcls-adj'+(_adjOn?' on':'')+'" id="fsAdjOpen" title="เปิด / แก้รายการปรับปรุง (Adjusting entries) — ไหลเข้า TB + งบการเงินทุกงบ (งบทดลองหลังปรับปรุง)">📝 เปิดรายการปรับปรุง'+(_adjOn?' <span class="fstbcls-dot"></span>':'')+'</button>';
-  return h+'</div>';
+  var groups=[
+    {t:'Trial Balance',t2:'Edit',ic:'\ud83e\uddfe',btns:[
+      {id:'fsAdjOpen',ic:'\ud83d\udcdd',l:(_adjOn?'Adjusting Entries \u00b7 ON':'Adjusting Entries'),cls:'fstbcls fstbcls-adj'+(_adjOn?' on accent':''),title:'Open / edit adjusting entries (Dr\u2013Cr) \u2014 they flow into the trial balance and every statement (adjusted trial balance)'}
+    ]},
+    {t:'Export',t2:'View',ic:'\u2913',btns:[
+      (filtered?{cat:'Follows the current filter',cc:'flt'}:null),
+      {id:'fsTbXlsBtn',ic:'\u2913',l:'Export Excel',cls:'fstbxlsb',title:'Export this trial balance to Excel (.xlsx) \u2014 formatted, with formulas and colours'},
+      {id:'fsTbPdfBtn',ic:'\ud83d\udda8',l:'Export PDF',cls:'fstbpdfb',title:'Print / save this trial balance as a formatted PDF'}
+    ]}
+  ];
+  var fils=[{t:'Account Class',t2:'Filter',ic:'\ud83d\uddc2\ufe0f',wcls:'glactg-cls',html:clsH}];
+  return _dbActPanel(groups,fils);
 }
+
 /* v9.94: per-column widths (drag-to-resize) — persisted in localStorage, keyed by column */
 var _fsTbW={}; try{_fsTbW=JSON.parse(localStorage.getItem('gli_fstbw')||'{}')||{};}catch(_twe){_fsTbW={};}
 function _fsTbWSave(){try{localStorage.setItem('gli_fstbw',JSON.stringify(_fsTbW));}catch(e){}}
@@ -20753,16 +20787,16 @@ function _fsTbOpenFilter(k,btn){ _fsTbCloseDrop(); var pg=document.getElementByI
   {
     var dd=_fsTbDistinct(k); var TMP={}; var ALL=!f||f.t!=='set';
     for(var i=0;i<dd.ord.length;i++){var v=dd.ord[i];TMP['$'+v]=ALL?1:(f.v['$'+v]?1:0);}
-    inner+='<input type="text" id="fsTbQ" placeholder="'+(isNum?'ค้นหาจำนวนเงิน… (พิมพ์ตัวเลข) แล้วติ๊กเลือก':'Search values… หรือใช้เป็นตัวกรอง «มีคำว่า»')+'" value="'+(f&&f.t==='has'?_fsE(f.q):'')+'">'+
+    inner+='<input type="text" id="fsTbQ" placeholder="'+(isNum?'Search amounts… (type a number), then tick':'Search values… or use it as a “contains” filter')+'" value="'+(f&&f.t==='has'?_fsE(f.q):'')+'">'+
       '<label style="display:flex;gap:6px;font-size:12px;margin:2px 0 4px"><input type="checkbox" id="fsTbSelAll" checked> (Select all)</label>'+
       '<div class="gldlist" id="fsTbDlist"></div>'+
-      '<div class="gldbtns"><button class="pri" id="fsTbApply" type="button">ใช้รายการที่เลือก</button>'+(isNum?'':'<button id="fsTbHas" type="button">มีคำว่า</button>')+'<button id="fsTbClr" type="button">Clear</button></div>';
+      '<div class="gldbtns"><button class="pri" id="fsTbApply" type="button">Apply selection</button>'+(isNum?'':'<button id="fsTbHas" type="button">Contains…</button>')+'<button id="fsTbClr" type="button">Clear</button></div>';
     d.innerHTML=inner; pg.appendChild(d);
     var list=d.querySelector('#fsTbDlist'), sq=d.querySelector('#fsTbQ'), sa=d.querySelector('#fsTbSelAll');
     function paint(){ var q=(sq.value||'').toLowerCase(); var sh=0,html='';
-      for(var i=0;i<dd.ord.length;i++){var v=dd.ord[i]; var disp=_fmtV(v); if(q&&v.toLowerCase().indexOf(q)<0&&disp.toLowerCase().indexOf(q)<0)continue; sh++; if(sh>400){html+='<div class="gldmore">…เพิ่มเติม — พิมพ์เพื่อค้นหา</div>';break;}
+      for(var i=0;i<dd.ord.length;i++){var v=dd.ord[i]; var disp=_fmtV(v); if(q&&v.toLowerCase().indexOf(q)<0&&disp.toLowerCase().indexOf(q)<0)continue; sh++; if(sh>400){html+='<div class="gldmore">…more — type to search</div>';break;}
         html+='<label><input type="checkbox" class="glck" data-v="'+_fsE(v)+'"'+(TMP['$'+v]?' checked':'')+'> <span'+(isNum?' style="font-variant-numeric:tabular-nums"':'')+'>'+_fsE(disp)+'</span><span class="cnt">'+dd.map[v].toLocaleString()+'</span></label>';}
-      if(!sh)html='<div class="gldmore">No values foundที่ตรงกัน</div>'; list.innerHTML=html;
+      if(!sh)html='<div class="gldmore">No matching values</div>'; list.innerHTML=html;
       var all=1; for(var k2 in TMP){if(!TMP[k2]){all=0;break;}} sa.checked=!!all; }
     paint(); sq.addEventListener('input',paint);
     sa.addEventListener('change',function(){ var q=(sq.value||'').toLowerCase();
@@ -20797,12 +20831,12 @@ function _fsRenderTB(){
     var att=_fsAttGet(_code), ec=_fsE(_code), out;
     if(att&&att.manual){   /* v9.128: ยอดกรอกเอง + ที่มา (แทนการชนไฟล์ Excel) */
       var ym=_fsAttYearAmt(att); var srcFull=att.src?('ที่มา: '+att.src):'ยังไม่ได้ระบุที่มา'; if(att.note)srcFull+=' · '+att.note;
-      var srcShort=att.src?('✎ '+(att.src.length>16?att.src.slice(0,15)+'…':att.src)):'✎ กรอกเอง';
+      var srcShort=att.src?('✎ '+(att.src.length>16?att.src.slice(0,15)+'…':att.src)):'✎ Manual';
       var manActs='<td class="fsattc fsattc-man"><button type="button" class="fsattmanedit" data-fsatt="'+ec+'" title="แก้ยอดที่กรอกเอง / ที่มา">✏️</button>'+
         '<button type="button" class="fsattrm" data-fsatt="'+ec+'" title="ลบยอดที่กรอกเอง">✕</button>'+_gtag+'</td>';
       if(!ym.ok){
         var noY='ยังไม่ได้กรอกยอดสำหรับปี '+(ym.beY||'?')+' (พ.ศ.) — คลิก ✏️ เพื่อกรอกยอดของปีนี้';
-        out=manActs+'<td class="fsm fsatt-amt fsatt-man fsatt-nosheet" title="'+_fsE(noY)+'">– ปีนี้ยังไม่ระบุ</td>'+
+        out=manActs+'<td class="fsm fsatt-amt fsatt-man fsatt-nosheet" title="'+_fsE(noY)+'">– not entered for this year</td>'+
           '<td class="fsm fsatt-diff fsatt-nosheet" title="'+_fsE(noY)+'">⚠ ปี '+(ym.beY||'?')+'</td>';
       } else {
         var dm=(+ym.amt||0)-(+_nat||0), okdm=Math.abs(dm)<0.5;
@@ -20841,7 +20875,7 @@ function _fsRenderTB(){
   function _attCtrlCell(code,rowspan,grp){
     var att=_fsAttGet(code), ec=_fsE(code);
     var rs=(rowspan>1?(' rowspan="'+rowspan+'"'):'');
-    var gtag=(rowspan>1?('<span class="fsatt-gtag" title="ไฟล์แนบชุดเดียวของกลุ่ม Index «'+_fsE(grp||'')+'» · คอลัมน์ A = จำนวนเงิน, B = รหัสบัญชี — ระบบจับยอดเข้าแต่ละรหัสให้อัตโนมัติ ('+rowspan+' บัญชี)">รวม '+rowspan+' บัญชี<span class="fsatt-gtag-s">A=ยอด · B=Code</span></span>'):'');
+    var gtag=(rowspan>1?('<span class="fsatt-gtag" title="ไฟล์แนบชุดเดียวของกลุ่ม Index «'+_fsE(grp||'')+'» · คอลัมน์ A = จำนวนเงิน, B = รหัสบัญชี — ระบบจับยอดเข้าแต่ละรหัสให้อัตโนมัติ ('+rowspan+' บัญชี)">รวม '+rowspan+' บัญชี<span class="fsatt-gtag-s">A=amount · B=code</span></span>'):'');
     if(att&&!att.manual){
       var ttl=_fsE(att.name)+' · ไฟล์กระทบยอดกลุ่ม (คอลัมน์ A = จำนวนเงิน, B = รหัสบัญชี · ชีตชื่อปี พ.ศ.) — คลิกเพื่อเปลี่ยนไฟล์';
       return '<td class="fsattc fsattc-grp"'+rs+'><label class="fsattbtn on" title="'+ttl+'"><input type="file" class="fsattfile" data-fsatt="'+ec+'" accept=".xlsx,.xls,.csv" hidden>📎</label>'+
@@ -20860,7 +20894,7 @@ function _fsRenderTB(){
       return '<td class="fsm fsatt-amt fsatt-nosheet" title="'+_fsE(noR)+'">No sheet data !</td>'+
         '<td class="fsm fsatt-diff fsatt-nosheet" title="'+_fsE(noR)+'">⚠ ปี '+_fsE(beY)+'</td>'; }
     if(!ca.found){ var nf='ไม่พบรหัส '+_fsE(code)+' ในคอลัมน์ B ของชีต “'+_fsE(ca.sheet)+'” — เพิ่มแถว (A = จำนวนเงิน, B = '+_fsE(code)+')';
-      return '<td class="fsm fsatt-amt fsatt-none" title="'+_fsE(nf)+'">– ไม่พบรหัสในไฟล์</td>'+
+      return '<td class="fsm fsatt-amt fsatt-none" title="'+_fsE(nf)+'">– code not found in file</td>'+
         '<td class="fsm fsatt-diff fsatt-none" title="'+_fsE(nf)+'">–</td>'; }
     var d=(+ca.amt||0)-(+nat||0), okd=Math.abs(d)<0.5;
     return '<td class="fsm fsatt-amt" title="ยอดจากไฟล์กลุ่ม (คอลัมน์ A) · รหัส '+_fsE(code)+' · ชีต “'+_fsE(ca.sheet)+'”">'+_fsMoney(ca.amt,true)+'</td>'+
@@ -20899,9 +20933,9 @@ function _fsRenderTB(){
     var gcol=idxVal?_fsIdxColor(idxVal):null;
     var rowStyle=gcol?(' style="--gtint:'+gcol.tint+';--gtint-h:'+gcol.tintH+';--gbg:'+gcol.bg+';--gacc:'+gcol.acc+';--gink:'+gcol.ink+'"'):'';
     var idxColBtn=idxVal?('<button type="button" class="fsidxcolbtn" data-idx="'+_fsE(idxVal)+'" title="เลือกสีไฮไลต์ของกลุ่มนี้ («'+_fsE(idxVal)+'»)" style="background:'+gcol.dot+'"></button>'):'';
-    var badges=''; if(fl.indexOf('pledged')>=0)badges+='<span class="fsfl fsfl-pl" title="ติดภาระค้ำประกัน">ค้ำประกัน</span>';
-    if(fl.indexOf('related')>=0)badges+='<span class="fsfl fsfl-rp" title="กิจการ/บุคคลที่เกี่ยวข้องกัน">เกี่ยวข้องกัน</span>';
-    if(x.isNewAdj)badges+='<span class="fsfl fsfl-adj" title="บัญชีที่เกิดจากรายการปรับปรุง (ไม่มีใน GL)">＋ปรับปรุง</span>';
+    var badges=''; if(fl.indexOf('pledged')>=0)badges+='<span class="fsfl fsfl-pl" title="Pledged as collateral">Pledged</span>';
+    if(fl.indexOf('related')>=0)badges+='<span class="fsfl fsfl-rp" title="Related party">Related</span>';
+    if(x.isNewAdj)badges+='<span class="fsfl fsfl-adj" title="Account created by an adjusting entry (not in the GL)">＋Adj</span>';
     rows+='<tr class="fscat-'+c.cat+(x.hasAdj?' fsrow-adj':'')+(idxVal?' fsrow-idx':'')+'"'+rowStyle+'>'+attHtml+'<td class="fsseq" style="text-align:center;color:#8a97a0;font-variant-numeric:tabular-nums" title="ลำดับ">'+(ri+1)+'</td>'+
       '<td class="fsidxc"><span class="fsidxwrap"><input type="text" class="fstbidx'+(idxVal?' has':'')+'" data-code="'+_fsE(x.code)+'" value="'+_fsE(idxVal)+'" maxlength="4" placeholder="–" title="ใส่ตัวอักษร/สัญลักษณ์เพื่อจับกลุ่มบรรทัดที่เกี่ยวข้อง — ค่าเดียวกันจะถูกดึงมาอยู่ติดกัน (บันทึกอัตโนมัติ)">'+idxColBtn+'</span></td>'+
       '<td class="fsc">'+_fsE(x.code)+'</td>'+
@@ -20913,30 +20947,30 @@ function _fsRenderTB(){
       '<td class="fsm'+(wpCarry&&Math.abs(_fsWpAdjNet(x.code))>0.005?' fsadj-after on':'')+'">'+_fsMoney(_fsTbSignedOpen(x),true)+'</td>'+
       '<td class="fsm">'+_fsMoney(x.yd,true)+'</td><td class="fsm">'+_fsMoney(x.yc,true)+'</td>'+
       _endCells(x)+(wpAdjOn?_fsWpTbAdjTd(x):'')+'</tr>';});
-  if(!arr.length)rows='<tr class="fstbempty"><td colspan="'+((adjActive?16:13)+(wpAdjOn?3:0))+'">— ไม่มีบัญชีที่ตรงกับตัวกรอง —</td></tr>';
-  var attHead=_fsTbTh('att_ic','📎','แนบไฟล์','fsatthd-ic')+
-    _fsTbTh('att_amt','ยอดตามไฟล์','A1 · ชีตปี '+((typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):''),'fsm fsatthd-amt')+
-    _fsTbTh('att_diff','ผลต่าง','ไฟล์ − TB','fsm fsatthd-diff');
+  if(!arr.length)rows='<tr class="fstbempty"><td colspan="'+((adjActive?16:13)+(wpAdjOn?3:0))+'">— No accounts match the current filter —</td></tr>';
+  var attHead=_fsTbTh('att_ic','📎','Attach','fsatthd-ic')+
+    _fsTbTh('att_amt','Per file','A1 · sheet '+((typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):''),'fsm fsatthd-amt')+
+    _fsTbTh('att_diff','Diff','File − TB','fsm fsatthd-diff');
   var y0BE=(+_fsY0+543), y1BE=(+_fsY1+543), isAll=(_fsYear==='ALL');
-  var openSub=isAll?'ยกมา · ทุกปี':('ต้นปี '+y0BE);
-  var movSub=isAll?'ระหว่าง · ทุกปี':(_fsIsInterim()?('ม.ค.–'+_FS_MON_TH[_fsEndM-1]+' '+y1BE):((_fsY0===_fsY1)?('ระหว่างปี '+y1BE):('ปี '+y0BE+'–'+y1BE)));
-  var endSub=isAll?'คงเหลือ · ทุกปี':(_fsIsInterim()?('ณ '+_FS_MON_TH[_fsEndM-1]+' '+y1BE):('สิ้นปี '+y1BE));
+  var openSub=isAll?'All years':('Start FY '+y0BE);
+  var movSub=isAll?'All years':(_fsIsInterim()?('Jan–'+_FS_MON_EN[_fsEndM-1]+' '+y1BE):((_fsY0===_fsY1)?('FY '+y1BE):('FY '+y0BE+'–'+y1BE)));
+  var endSub=isAll?'All years':(_fsIsInterim()?('As at '+_FS_MON_EN[_fsEndM-1]+' '+y1BE):('End FY '+y1BE));
   var endHead = adjActive
-    ? (_fsTbTh('ending','ยอดคงเหลือ','ก่อนปรับปรุง','fsm')+
-       '<th class="fsm fsadjhd fsadjhd-dr" title="เดบิตจากรายการปรับปรุง">ปรับปรุง Dr<span class="fsatthx">Adjust · เดบิต</span></th>'+
-       '<th class="fsm fsadjhd fsadjhd-cr" title="เครดิตจากรายการปรับปรุง">ปรับปรุง Cr<span class="fsatthx">Adjust · เครดิต</span></th>'+
-       '<th class="fsm fsadjhd fsadjhd-after" title="ยอดหลังปรับปรุง = ไหลเข้างบการเงิน">หลังปรับปรุง<span class="fsatthx">ยอดปรับปรุงแล้ว</span></th>')
-    : _fsTbTh('ending','ยอดคงเหลือ',endSub,'fsm');
+    ? (_fsTbTh('ending','Ending','Before adj.','fsm')+
+       '<th class="fsm fsadjhd fsadjhd-dr" title="Debit from adjusting entries">Adj. Dr<span class="fsatthx">Adjustment · debit</span></th>'+
+       '<th class="fsm fsadjhd fsadjhd-cr" title="Credit from adjusting entries">Adj. Cr<span class="fsatthx">Adjustment · credit</span></th>'+
+       '<th class="fsm fsadjhd fsadjhd-after" title="Balance after adjustment — this is what flows into the statements">After adj.<span class="fsatthx">Adjusted balance</span></th>')
+    : _fsTbTh('ending','Ending',endSub,'fsm');
   var head='<thead><tr>'+attHead+
-    '<th class="fsseqhd" style="width:40px;text-align:center" title="ลำดับ">#</th>'+
-    '<th class="fsidxhd" style="width:94px;text-align:center" title="ดัชนี — ใส่ตัวอักษร/สัญลักษณ์เพื่อจับกลุ่มบรรทัดที่เกี่ยวข้องให้มาอยู่ติดกัน · คลิกจุดสีเพื่อเลือกสีไฮไลต์กลุ่ม">ดัชนี<span class="fsidxhd-s">จัดกลุ่ม · สี</span></th>'+
-    _fsTbTh('code','รหัสบัญชี','Code','')+
-    _fsTbTh('acct','ชื่อบัญชี','Account name','')+
-    _fsTbTh('group','จัดกลุ่มงบการเงิน','บรรทัดตามงบที่ออกจริง','fsgrphd')+
-    _fsTbTh('cfgroup','จัดกลุ่มกระแสเงินสด','กลุ่ม → บรรทัดเงินสด','fsgrphd fscfgrphd')+
-    _fsTbTh('opening','ยอดยกมา',openSub,'fsm')+
-    _fsTbTh('debit','เดบิต',movSub,'fsm')+
-    _fsTbTh('credit','เครดิต',movSub,'fsm')+
+    '<th class="fsseqhd" style="width:40px;text-align:center" title="Row number">#</th>'+
+    '<th class="fsidxhd" style="width:94px;text-align:center" title="Index — type a letter or symbol to group related lines together; click the colour dot to highlight the group">Index<span class="fsidxhd-s">Group · colour</span></th>'+
+    _fsTbTh('code','Code','Account code','')+
+    _fsTbTh('acct','Account name','Per chart of accounts','')+
+    _fsTbTh('group','FS line','As presented in the issued statements','fsgrphd')+
+    _fsTbTh('cfgroup','Cash flow line','Group → cash-flow caption','fsgrphd fscfgrphd')+
+    _fsTbTh('opening','Opening',openSub,'fsm')+
+    _fsTbTh('debit','Debit',movSub,'fsm')+
+    _fsTbTh('credit','Credit',movSub,'fsm')+
     endHead+(wpAdjOn?_fsWpTbAdjTh():'')+'</tr></thead>';
   var fyd=0,fyc=0,sOpen=0,sEnd=0,nAtt=0,attSum=0,nAttMatch=0,nAttMis=0,nAttNo=0,sBefore=0,sAdjDr=0,sAdjCr=0;
   var _grpAttDone={};   /* v9.202/9.204: นับไฟล์แนบต่อกลุ่ม — file=นับรายรหัส · manual=นับครั้งเดียว(เทียบยอดรวม) */
@@ -20960,52 +20994,52 @@ function _fsRenderTB(){
   var _curBEs=_fsCurBE();
   var fdiff=fyd-fyc;
   var filtered=_fsTbHasFil(), nAll=_fsTB.length;
-  var filterBar=filtered?('<div class="fstbfbar">🔎 กำลังกรอง — แสดง <b>'+arr.length+'</b> จาก '+nAll+' บัญชี · เดบิต '+_fsMoney(fyd)+' · เครดิต '+_fsMoney(fyc)+'<button type="button" id="fsTbClearAll" class="fstbclr">✕ ล้างตัวกรองทั้งหมด</button></div>'):'';
+  var filterBar=filtered?('<div class="fstbfbar">🔎 Filtered — showing <b>'+arr.length+'</b> of '+nAll+' accounts · Debit '+_fsMoney(fyd)+' · Credit '+_fsMoney(fyc)+'<button type="button" id="fsTbClearAll" class="fstbclr">✕ Clear all filters</button></div>'):'';
   /* v9.94: ยอดรวมจำนวนเงินด้านบน (colourful column totals) + เทียบไฟล์แนบต่อบัญชี กับ TB */
   function _fsSc(th,en,val,k){ return '<div class="fstbsum-c s-'+k+'"><div class="fstbsum-cl">'+th+'<span class="fstbsum-cen">'+en+'</span></div><div class="fstbsum-cv">'+val+'</div></div>'; }
   var _balOk=Math.abs(fdiff)<0.5;
   var _sumCol=false; try{_sumCol=localStorage.getItem('gli_fstbsum_col')==='1';}catch(_sce){}
   var sumPanel='<div class="fstbsum'+(_sumCol?' collapsed':'')+'">'+
-    '<div class="fstbsum-h"><span class="fstbsum-t">ยอดรวมแต่ละคอลัมน์ <span class="fstbsum-en">งบทดลอง · '+arr.length+(filtered?(' / '+nAll):'')+' บัญชี'+(filtered?' (กรองแล้ว)':'')+'</span></span>'+
-      '<span class="fstbsum-bal '+(_balOk?'ok':'bad')+'">'+(_balOk?'⚖ เดบิต = เครดิต':'⚖ เดบิต − เครดิต = '+_fsMoney(fdiff))+'</span>'+
-      '<button type="button" class="fstbsum-tgl" id="fsTbSumTgl" title="ย่อ / ขยายกล่องสรุปยอด — ย่อไว้เพื่อให้ตัวกรองและตารางเด่นขึ้น">'+(_sumCol?'▾ ขยายสรุป':'▴ ย่อสรุป')+'</button></div>'+
+    '<div class="fstbsum-h"><span class="fstbsum-t">Column totals <span class="fstbsum-en">Trial balance · '+arr.length+(filtered?(' / '+nAll):'')+' accounts'+(filtered?' (filtered)':'')+'</span></span>'+
+      '<span class="fstbsum-bal '+(_balOk?'ok':'bad')+'">'+(_balOk?'Debit = Credit':'Debit − Credit = '+_fsMoney(fdiff))+'</span>'+
+      '<button type="button" class="fstbsum-tgl" id="fsTbSumTgl" title="Collapse / expand the totals box — collapse it to give the filters and the table more room">'+(_sumCol?'▾ Expand':'▴ Collapse')+'</button></div>'+
     '<div class="fstbsum-body">'+
     '<div class="fstbsum-grid">'+
-      _fsSc('ยอดยกมา','OPENING',_fsMoney(sOpen),'open')+
-      _fsSc('เดบิต','DEBIT',_fsMoney(fyd),'deb')+
-      _fsSc('เครดิต','CREDIT',_fsMoney(fyc),'cred')+
-      _fsSc('ยอดคงเหลือ','ENDING',_fsMoney(sEnd),'end')+
+      _fsSc('Opening','OPENING',_fsMoney(sOpen),'open')+
+      _fsSc('Debit','DEBIT',_fsMoney(fyd),'deb')+
+      _fsSc('Credit','CREDIT',_fsMoney(fyc),'cred')+
+      _fsSc('Ending','ENDING',_fsMoney(sEnd),'end')+
     '</div>';
   if(nAtt){
-    var _noWarn=nAttNo?('<span class="fsnosheet-warn">· ⚠ '+nAttNo+' บัญชี No sheet data (ไม่มีชีตปี '+(_curBEs||'?')+')</span>'):'';
-    sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-cmph">📎/✏️ เทียบยอดกับ TB — กรอกแล้ว '+nAtt+' บัญชี · จาก Excel (A1, ชีตปี '+(_curBEs||'?')+') หรือกรอกเอง'+_noWarn+'</div><div class="fstbsum-grid">'+
-      _fsSc('ยอดตามไฟล์','FILE · FY '+(_curBEs||''),_fsMoney(attSum),'tb')+
-      _fsSc('ตรงกัน','MATCHED',''+nAttMatch,'ok')+
-      _fsSc('ผลต่าง','DIFF',''+nAttMis,nAttMis?'bad':'ok')+
-      (nAttNo?_fsSc('ไม่มีชีตข้อมูล','no sheet this FY','▲ '+nAttNo,'nosheet')
-             :_fsSc('สถานะ',(nAttMis?'CHECK':'MATCHED'),(nAttMis?('▲ '+nAttMis+' ต่าง'):'✓ ตรงทั้งหมด'),nAttMis?'bad':'ok'))+
+    var _noWarn=nAttNo?('<span class="fsnosheet-warn">· ⚠ '+nAttNo+' account(s) with no sheet for FY '+(_curBEs||'?')+'</span>'):'';
+    sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-cmph">📎/✏️ Support vs TB — '+nAtt+' account(s) entered · from Excel (A1, sheet FY '+(_curBEs||'?')+') or keyed in'+_noWarn+'</div><div class="fstbsum-grid">'+
+      _fsSc('Per file','FILE · FY '+(_curBEs||''),_fsMoney(attSum),'tb')+
+      _fsSc('Matched','MATCHED',''+nAttMatch,'ok')+
+      _fsSc('Differences','DIFF',''+nAttMis,nAttMis?'bad':'ok')+
+      (nAttNo?_fsSc('No sheet','no sheet this FY','▲ '+nAttNo,'nosheet')
+             :_fsSc('Status',(nAttMis?'CHECK':'MATCHED'),(nAttMis?('▲ '+nAttMis+' differ'):'✓ all matched'),nAttMis?'bad':'ok'))+
     '</div></div>';
   } else {
-    sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-wait"><b>เทียบยอดประกอบต่อบัญชี — เลือกได้ 2 วิธี:</b> ที่คอลัมน์ซ้ายสุดของแต่ละบัญชี · <b>📎 แนบไฟล์ Excel/CSV</b> (อ่านยอดจากเซลล์ A1 มุมซ้ายบน) <b>หรือ ✏️ พิมพ์จำนวนเงิน + ที่มา</b> — ระบบจะเทียบแต่ละรายการกับยอดคงเหลือ (Ending) ให้อัตโนมัติ</div></div>';
+    sumPanel+='<div class="fstbsum-cmp"><div class="fstbsum-wait"><b>Per-account support — two ways:</b> in the left-hand columns of every account · <b>📎 attach an Excel/CSV file</b> (the amount is read from cell A1) <b>or ✏️ key the amount in and state its source</b> — each one is compared with the Ending balance automatically</div></div>';
   }
   /* v10.98: กระดาษทำการปรับปรุง — สรุปยังอยู่ในกล่อง แต่ปุ่มเปิดย้ายไปแถวหมวดบัญชี (หลัง «7 ดอกเบี้ย») แล้ว */
   var adjBtn='';
   if(adjActive){ var abal=adjT.bal&&adjT.bad===0;
-    sumPanel+='<div class="fstbsum-cmp fstbsum-adj"><div class="fstbsum-cmph">📝 กระดาษทำการปรับปรุง (Adjusting entries) · ปี '+(_curBEs||'?')+' — ไหลเข้า TB + งบการเงินทุกงบ (งบทดลองหลังปรับปรุง) '+adjBtn+'</div><div class="fstbsum-grid">'+
-      _fsSc('รวมปรับปรุง Dr','ADJ DEBIT',_fsMoney(adjT.dr),'deb')+
-      _fsSc('รวมปรับปรุง Cr','ADJ CREDIT',_fsMoney(adjT.cr),'cred')+
-      _fsSc('จำนวนรายการ','ENTRIES',''+adjT.n,'tb')+
-      _fsSc('สถานะ',(abal?'BALANCED':'CHECK'),(abal?'✓ เดบิต = เครดิต':(adjT.bad?('▲ '+adjT.bad+' รายการไม่ดุล'):('⚠ Dr−Cr '+_fsMoney(adjT.dr-adjT.cr)))),abal?'ok':'bad')+
+    sumPanel+='<div class="fstbsum-cmp fstbsum-adj"><div class="fstbsum-cmph">📝 Adjusting entries · FY '+(_curBEs||'?')+' — they flow into the TB and every statement (adjusted trial balance) '+adjBtn+'</div><div class="fstbsum-grid">'+
+      _fsSc('Total Dr','ADJ DEBIT',_fsMoney(adjT.dr),'deb')+
+      _fsSc('Total Cr','ADJ CREDIT',_fsMoney(adjT.cr),'cred')+
+      _fsSc('Entries','ENTRIES',''+adjT.n,'tb')+
+      _fsSc('Status',(abal?'BALANCED':'CHECK'),(abal?'✓ Debit = Credit':(adjT.bad?('▲ '+adjT.bad+' unbalanced entr'+(adjT.bad>1?'ies':'y')):('⚠ Dr−Cr '+_fsMoney(adjT.dr-adjT.cr)))),abal?'ok':'bad')+
     '</div></div>';
   } else { var _ab=_fsAdjBook(false); var _other=!!(_ab&&_ab.entries&&_ab.entries.length&&!_fsAdjYearEntries().length);
-    sumPanel+='<div class="fstbsum-cmp fstbsum-adj off"><div class="fstbsum-wait">📝 <b>รายการปรับปรุง (Adjusting entries):</b> สร้างรายการปรับปรุงคู่บัญชี (เดบิต/เครดิต) เพื่อแก้ยอด · ระบบจะอัปเดต <b>งบทดลองและงบการเงินทุกงบ</b> ให้อัตโนมัติ (งบทดลองหลังปรับปรุง)'+(_other?' · <b class="fsnosheet-warn">มีรายการในปีอื่น — สลับปีเพื่อดู</b>':'')+' · <b>กดปุ่ม «📝 เปิดรายการปรับปรุง» ท้ายแถวหมวดบัญชีด้านล่าง</b>'+adjBtn+'</div></div>';
+    sumPanel+='<div class="fstbsum-cmp fstbsum-adj off"><div class="fstbsum-wait">📝 <b>Adjusting entries:</b> post double-entry adjustments (debit / credit) to correct balances · the <b>trial balance and every statement</b> are updated automatically (adjusted trial balance)'+(_other?' · <b class="fsnosheet-warn">entries exist in another year — switch year to see them</b>':'')+' · <b>use «📝 Adjusting Entries» in the Trial Balance panel above</b>'+adjBtn+'</div></div>';
   }
   sumPanel+='</div></div>';
   var attFoot='<td class="fsattc"></td>'+
     '<td class="fsm">'+(nAtt?_fsMoney(attSum):'')+'</td>'+
     '<td class="fsm">'+(nAtt?(nAttNo?('<span class="fsbad">No sheet ×'+nAttNo+'</span>'):(nAttMis?('<span class="fsbad">▲ '+nAttMis+'</span>'):'<span class="fsok">✓</span>')):'')+'</td>';
   /* footer = clean column totals; the Debit=Credit balance check lives in the ⚖ chip above */
-  var totLbl='รวมทั้งหมด ('+arr.length+(filtered?(' / '+nAll):'')+' บัญชี)';
+  var totLbl='Total ('+arr.length+(filtered?(' / '+nAll):'')+' accounts)';
   var endFoot = adjActive
     ? ('<td class="fsm">'+_fsMoney(sBefore)+'</td>'+
        '<td class="fsm fsadj-drc has">'+_fsMoney(sAdjDr,true)+'</td>'+
@@ -21013,13 +21047,12 @@ function _fsRenderTB(){
        '<td class="fsm fsadj-after on">'+_fsMoney(sEnd)+'</td>')
     : '<td class="fsm">'+_fsMoney(sEnd)+'</td>';
   /* v10.99: ตามที่ผู้ใช้ขอ — เอากล่องสรุปยอดใหญ่ + ปุ่ม «กระทบยอดกับงบ» ออก แล้วดันตาราง TB ขึ้น (ยอดรวมยังอยู่ที่แถวสรุปท้ายตาราง · สถานะสมดุลอยู่ที่ชิปด้านบน) */
-  var tbExportBar='<div class="fstbexport"><span class="fstbexp-l">ส่งออกงบทดลอง'+(filtered?' (ตามตัวกรอง)':'')+'</span><button type="button" class="fstbxlsb" title="ส่งออกงบทดลองหน้านี้เป็น Excel (.xlsx) — จัดรูปสวยงาม พร้อมสูตร/สี">⬇ Excel</button><button type="button" class="fstbpdfb" title="พิมพ์ / บันทึกงบทดลองหน้านี้เป็น PDF สวยงาม">🖨 PDF</button></div>';
-  return _fsTbClsRow()+filterBar+tbExportBar+'<div class="fstbwrap"><table class="fstable fstb fstb-att'+(adjActive?' fstb-adj':'')+'">'+head+
+  return _fsTbClsRow(filtered)+filterBar+'<div class="fstbwrap"><table class="fstable fstb fstb-att'+(adjActive?' fstb-adj':'')+'">'+head+
     '<tbody>'+rows+'</tbody><tfoot><tr class="fstot">'+attFoot+'<td class="fsseq"></td><td colspan="5">'+totLbl+'</td>'+
     '<td class="fsm">'+_fsMoney(sOpen)+'</td>'+
     '<td class="fsm">'+_fsMoney(fyd)+'</td><td class="fsm">'+_fsMoney(fyc)+'</td>'+endFoot+
     (wpAdjOn?('<td class="fsm fsadj-drc has">'+_fsMoney(sWpDr,true)+'</td><td class="fsm fsadj-drc has">'+_fsMoney(sWpCr,true)+'</td><td class="fsm fsadj-after on">'+_fsMoney(sEnd+sWpNet)+'</td>'):'')+'</tr></tfoot></table></div>'+
-    '<p class="fsnote"><b>📎/✏️ เทียบยอดประกอบต่อบัญชี (เลือกได้ 2 วิธี):</b> คอลัมน์ซ้ายสุดของแต่ละบัญชี — <b>📎 ชนไฟล์ Excel/CSV</b> หรือ <b>✏️ กรอกจำนวนเงินเอง + ระบุที่มา</b> (เก็บยอดแยกต่อปี พ.ศ. · สลับปีแล้วกรอกของปีนั้นได้) · <b>ยอดตามไฟล์ = เซลล์ A1 ของชีตที่ชื่อตรงกับ “ปีที่เลือก” (พ.ศ.)</b> — เลือกปี '+(+_fsY1+543)+' ระบบจะอ่าน A1 ของชีตชื่อ “'+(+_fsY1+543)+'” · เปลี่ยนปีแล้วยอดจะสลับตามชีตของปีนั้นให้อัตโนมัติ · <b class="fsnosheet-warn">ยังไม่มีชีตของปีที่เลือก → Showing “No sheet data !” (เตือนสีแดง)</b> · ตรงกับ Ending Showing <span class="fsrctick">✓</span> · ต่างแสดงจำนวนผลต่าง (ไฟล์ − TB). · <b>ยอดยกมา/ยอดคงเหลือ แสดงแบบมีเครื่องหมาย: เดบิต = บวก · เครดิต = ติดลบ (ในวงเล็บ)</b> — ยอดรวมคอลัมน์ = ผลสุทธิเดบิต−เครดิต (การสมดุลของงบทดลองดูที่ชิป «⚖ เดบิต = เครดิต» ด้านบน). · <b>กรอง/เรียงแบบ Excel:</b> กดปุ่ม ▼ ที่หัวคอลัมน์. · <b>☁ สำรองอัตโนมัติ:</b> ไฟล์แนบทุกบัญชีถูกสำรองขึ้นคลาวด์ (แยกจากข้อมูลหลัก · ประหยัดโควตา · เปิด/กู้คืนข้ามเครื่องได้).'+(_fsIsInterim()?' <b>งบเดือน:</b> ยอดคำนวณถึงสิ้นเดือน '+_FS_MON_TH[_fsEndM-1]+' '+(+_fsY1+543)+'.':'')+'</p>';
+    '<p class="fsnote"><b>📎 / ✏️ Per-account support — two ways:</b> in the left-hand columns of every account, either <b>📎 attach an Excel/CSV file</b> (the amount is read from cell <b>A1</b> of the sheet named after the selected Buddhist-era year) or <b>✏️ key the amount in yourself and state its source</b> (kept per year — switch year and enter that year&rsquo;s figure). · <b class="fsnosheet-warn">No sheet for the selected year &rarr; “No sheet data !”</b> · a match with Ending shows <span class="fsrctick">&#10003;</span>, otherwise the difference (file &minus; TB) is shown. · <b>Opening and Ending are signed: debit = positive · credit = negative (in brackets)</b> — a column total is therefore the net debit &minus; credit; whether the trial balance balances is shown by the <b>TB balanced</b> chip above. · <b>Excel-style filter &amp; sort:</b> use the &#9660; button in any column header. · <b>&#9729; Automatic backup:</b> every attachment is backed up to the cloud, separately from the main data, and can be restored on any device.'+(_fsIsInterim()?' <b>Interim:</b> figures are calculated to the end of '+_FS_MON_EN[_fsEndM-1]+' '+(+_fsY1+543)+'.':'')+'</p>';
 }
 
 /* ===== v10.95: Trial Balance — Export Excel (ExcelJS styled · SheetJS fallback) + PDF (print) ===== */
@@ -21650,7 +21683,7 @@ function _fsRenderBS(){
   var COLS=_fsCols(pc,ana);
   var h2=pc?_fsHeadPrev():'';
   var nspan=2+1+pc+nAna;
-  var head='<thead><tr><th class="fsbsth-h">รายการ (ไทย)</th><th class="fsbsen-h">Account (EN)</th>'+
+  var head='<thead><tr><th class="fsbsth-h">Item (Thai)</th><th class="fsbsen-h">Account (EN)</th>'+
            _fsHeadCur()+h2+_fsHeadAna(ana)+'</tr></thead>';
   function totrow(lblTh,lblEn,v,pv,cls){
     return '<tr class="'+(cls||'fssub')+'"><td class="fsbsth">'+lblTh+'</td><td class="fsbsen">'+lblEn+'</td>'+
@@ -21698,7 +21731,7 @@ function _fsRenderPL(){
   var ana={on:true, hasPrev:pc, base:totRevBase, baseMon:'ฐาน = รายได้รวม'};
   var nAna=(pc?1:0)+1;
   var COLS=_fsCols(pc,ana); var h2=pc?_fsHeadPrev():''; var nspan=2+1+pc+nAna;
-  var head='<thead><tr><th class="fsbsth-h">รายการ (ไทย)</th><th class="fsbsen-h">Account (EN)</th>'+_fsHeadCur()+h2+_fsHeadAna(ana)+'</tr></thead>';
+  var head='<thead><tr><th class="fsbsth-h">Item (Thai)</th><th class="fsbsen-h">Account (EN)</th>'+_fsHeadCur()+h2+_fsHeadAna(ana)+'</tr></thead>';
   var prevByCode={}; if(_fsPrevTB)_fsPrevTB.forEach(function(x){prevByCode[x.code]=x.nat;});
   var ctx={hasPrev:pc,yC:'ปีล่าสุด',yP:pc?'ปีก่อนหน้า':'',nspan:nspan,prevByCode:prevByCode,ana:ana};
   var assigned={};
@@ -21826,7 +21859,7 @@ function _fsRenderSCE(){
   if(Math.abs(t.accProfit)>0.005)eqAccts=eqAccts.concat([{code:'—',name:'กำไร(ขาดทุน)สำหรับปี (ยังไม่ปิดเข้ากำไรสะสม)',cls:{line:'Retained earnings'},nat:t.accProfit}]);
   var _scectx={hasPrev:0,yC:'ปีล่าสุด',yP:'',nspan:3,prevByCode:{}};
   var COLS=_fsCols(0);
-  var head='<thead><tr><th class="fsbsth-h">รายการ (ไทย)</th><th class="fsbsen-h">Item (EN)</th>'+_fsHeadCur()+'</tr></thead>';
+  var head='<thead><tr><th class="fsbsth-h">Item (Thai)</th><th class="fsbsen-h">Item (EN)</th>'+_fsHeadCur()+'</tr></thead>';
   function row(th,en,v,cls){return '<tr class="'+(cls||'')+'"><td class="fsbsth">'+th+'</td><td class="fsbsen">'+en+'</td><td class="fsm">'+_fsMoney(v)+'</td></tr>';}
   var rows='';
   if(pt){ rows+=row(_fsSL('sce_begin','ยอดคงเหลือต้นปี')+' (สิ้น FY '+(+_fsPrevYear+543)+')',_fsSLen('sce_begin','Balance at beginning of year')+' (FY '+(+_fsPrevYear+543)+' end)',begin); }
@@ -21914,7 +21947,7 @@ function _fsRenderCF(){
   var hasPri=!!_fsPrevTB; var pri=hasPri?_fsCFCompute(_fsPrevTB,_fsPrevT):null;
   var pc=hasPri?1:0; var COLS=_fsCols(pc);
   var yC='ปีล่าสุด', yP=hasPri?'ปีก่อนหน้า':'';
-  var head='<thead><tr><th class="fsbsth-h">รายการ (ไทย)</th><th class="fsbsen-h">Item (EN)</th>'+
+  var head='<thead><tr><th class="fsbsth-h">Item (Thai)</th><th class="fsbsen-h">Item (EN)</th>'+
            _fsHeadCur()+(pc?_fsHeadPrev():'')+'</tr></thead>';
   var nspan=2+1+pc;
   var _cfg=_fsAgg(_fsTB); var _cfPrevMove={}; if(_fsPrevTB)_fsPrevTB.forEach(function(x){_cfPrevMove[x.code]=x.movement;});
@@ -22402,11 +22435,11 @@ function _fsRenderCFD(){
     for(var _ci=0;_ci<R.cashAccts.length;_ci++){ var _o=R.cashAccts[_ci];
       _cg+='<tr><td class="mono">'+E(_o.code)+'</td><td>'+E(_o.name)+'</td><td class="fsm">'+money(_o.begin)+'</td>'+amtCur(_o.move)+'<td class="fsm">'+money(_o.end)+'</td></tr>'; }
     _cg+='<tr class="cfdcash-tot"><td></td><td>รวม '+R.cashAccts.length+' บัญชี</td><td class="fsm">'+money(R.beginCash)+'</td>'+amtCur(R.move)+'<td class="fsm">'+money(R.endCash)+'</td></tr></tbody></table></div>';
-    var _extras='<details class="cfd-extras"><summary>▸ รายละเอียดเพิ่มเติม · กระแสเงินสดรายโครงการ · กลุ่มบัญชีเงินสด</summary>'+_cfdProjSummaryHtml()+_cg+'</details>';
+    var _extras='<details class="cfd-extras"><summary>▸ More detail · cash flow by project · cash account groups</summary>'+_cfdProjSummaryHtml()+_cg+'</details>';
     return '<div class="fsstmtwrap fscfd-wrap">'+
       '<div class="fswp-bar"><span class="fswp-bt">📘 WP FS · GLI '+((typeof _fsY1!=='undefined'&&_fsY1!=null)?(+_fsY1+543):'')+'<small>งบกระแสเงินสด · วิธีทางตรง · คำนวณสดจาก GL (voucher-by-voucher)</small></span>'+
-        '<button type="button" id="cfdExportAll" class="fswp-btn cfdxall" title="ส่งออก Excel รวมทุกบรรทัดในงบกระแสเงินสด — แต่ละบรรทัดมี Grouping (บัญชี · คู่บัญชีเงินสด/ธนาคาร · %) + GL กระทบยอด (RE/PV บวกแล้วตรงยอด)">⤓ Excel · ทุกบรรทัด</button>'+
-        '<button type="button" id="cfdLnEditToggle" class="fswp-btn" title="แก้ไข/เพิ่มบรรทัดงบกระแสเงินสด — คลิกที่ชื่อบรรทัดเพื่อพิมพ์แก้ · ➕ เพิ่มบรรทัดใหม่ในแต่ละกิจกรรม">✏️ แก้ไข / เพิ่มบรรทัด</button><span class="fswp-sp"></span></div>'+
+        '<button type="button" id="cfdExportAll" class="fswp-btn cfdxall" title="ส่งออก Excel รวมทุกบรรทัดในงบกระแสเงินสด — แต่ละบรรทัดมี Grouping (บัญชี · คู่บัญชีเงินสด/ธนาคาร · %) + GL กระทบยอด (RE/PV บวกแล้วตรงยอด)">⤓ Excel · all lines</button>'+
+        '<button type="button" id="cfdLnEditToggle" class="fswp-btn" title="Edit / add cash-flow lines — click a line caption to retype it · ➕ adds a new line to that activity">✏️ Edit / add line</button><span class="fswp-sp"></span></div>'+
       _cln+_tieC+_extras+'</div>';
   }
   var body='';
@@ -22432,7 +22465,7 @@ function _fsRenderCFD(){
     if(ed) body+='<tr class="cfdaddrow"><td colspan="'+span+'"><button type="button" class="cfdaddline" data-sec="'+sec[0]+'">➕ เพิ่มบรรทัดใน'+E(sec[1])+'</button></td></tr>';
     body+='<tr class="cfdsub"><td class="fsbsth">เงินสดสุทธิจาก'+E(sec[1])+'</td><td class="fsbsen">Net cash — '+E(sec[2])+'</td>'+amtCur(R.secTotCur[sec[0]]||0)+amtPri(R.secTotPri[sec[0]]||0)+'</tr>';
   }
-  var head='<thead><tr><th class="fsbsth-h">รายการ (ไทย)</th><th class="fsbsen-h">Item (EN)</th>'+_fsHeadCur()+(pc?_fsHeadPrev():'')+'</tr></thead>';
+  var head='<thead><tr><th class="fsbsth-h">Item (Thai)</th><th class="fsbsen-h">Item (EN)</th>'+_fsHeadCur()+(pc?_fsHeadPrev():'')+'</tr></thead>';
   var adjLine=R.hasAdjOpen?('<tr class="cfdln cfdadj" data-cfdact="line" data-cfdk="adj_open"><td class="fsbsth"><span class="cfdcar">▸</span>ปรับปรุงยอดยกมา (รายการปรับปรุงบัญชี · ไม่ใช่กระแสเงินสดจากกิจกรรม) <span class="cfdn">'+Object.keys(R.lines['adj_open'].codes).length+' บัญชี</span></td><td class="fsbsen">Effect of opening-balance restatement (non-cash adjustment)</td>'+amtCur(R.adjOpen)+amtPri(R.adjOpenPri)+'</tr><tr class="cfddetr" hidden><td class="cfddetc" colspan="'+span+'"></td></tr>'):'';
   var reconLine=(Math.abs(R.residual)>0.005||Math.abs(R.residualPri)>0.005)?('<tr class="cfdsub cfdunbal"><td class="fsbsth">ผลต่างจาก Voucher ที่เดบิต≠เครดิต (GL ไม่สมดุล)</td><td class="fsbsen">Unbalanced vouchers (Dr≠Cr) — reconciling</td>'+amtCur(R.residual)+amtPri(R.residualPri)+'</tr>'):'';
   var recon=adjLine+reconLine+
@@ -22463,7 +22496,7 @@ function _fsRenderCFD(){
     '</ol></details>';
 
   return '<div class="fsstmtwrap fscfd-wrap"><div class="fsst-h"><span class="fssth-en">STATEMENT OF CASH FLOWS — DIRECT METHOD</span><span class="fssth-th">งบกระแสเงินสด · วิธีทางตรง — '+E(_fsYL2())+'</span>'+
-    '<button type="button" id="cfdLnEditToggle" class="cfdlntbtn'+(ed?' on':'')+'" title="แก้ไข/เพิ่มบรรทัดงบกระแสเงินสด — คลิกที่ชื่อบรรทัดเพื่อพิมพ์แก้ · ➕ เพิ่มบรรทัดใหม่ในแต่ละกิจกรรม">'+(ed?'✅ กำลังแก้ไข/เพิ่มบรรทัด — คลิกเพื่อปิด':'✏️ แก้ไข / เพิ่มบรรทัดในงบ')+'</button></div>'+
+    '<button type="button" id="cfdLnEditToggle" class="cfdlntbtn'+(ed?' on':'')+'" title="Edit / add cash-flow lines — click a line caption to retype it · ➕ adds a new line to that activity">'+(ed?'✅ Editing lines — click to finish':'✏️ Edit / add lines')+'</button></div>'+
     '<p class="fsnote">สร้างจาก General Ledger รายตัว (voucher-by-voucher) · จำแนกตาม<b>คู่บัญชี</b>ด้านตรงข้ามของบัญชีเงินสด · look-through เจ้าหนี้/ลูกหนี้การค้าไปยัง<b>ขาตั้ง</b> · ครอบคลุม '+R.nVouchers.toLocaleString('en-US')+' Voucher ที่มีเงินสดในงวดนี้ · เงินสดอ้างอิงบรรทัดงบแสดงฐานะการเงิน</p>'+
     method+tie+
     (ed?'<div class="cfdedit-hint">✏️ <b>โหมดแก้ไข/เพิ่มบรรทัด</b> — คลิกที่ชื่อบรรทัด (ไทย/อังกฤษ) เพื่อพิมพ์แก้ · กด <b>➕ เพิ่มบรรทัด</b> ท้ายแต่ละกิจกรรมเพื่อเปิดบรรทัดใหม่ · 🗑 ลบเฉพาะบรรทัดที่เพิ่มเอง · บรรทัดที่เพิ่มใหม่นำบัญชีเข้าได้ด้วยปุ่ม “⇄ ย้ายกิจกรรม” ในแต่ละรหัสบัญชี · กด “✅ แก้/เพิ่มบรรทัด: เปิด” อีกครั้งเพื่อปิดโหมด</div>':'')+
@@ -22691,14 +22724,14 @@ function _cfdBankLabel(cash){ if(!cash)return ''; var arr=[]; for(var k in cash)
   /* v9.119: รหัสขึ้นก่อน (สำคัญ + เห็นเสมอ) แล้วชื่อ — ชื่อยาวตัดด้วย … · รายละเอียดเต็มดูได้ที่ tooltip */
   return '<span class="cfdcode-bank" title="'+_fsE(ttl)+'">🏦 <span class="cfdbank-c">'+_fsE(top.code)+'</span> '+_fsE(top.name||'เงินสด/ธนาคาร')+more+'</span>'; }
 /* v9.118: ตัวเลือก "ย้ายกิจกรรม" — บรรทัดในงบกระแสเงินสด จัดกลุ่มตามกิจกรรม (ดำเนินงาน/ลงทุน/จัดหาเงิน) */
-function _cfdLineOpts(cur){ var h='<option value="">— อัตโนมัติ (ระบบจำแนกให้) —</option>';
+function _cfdLineOpts(cur){ var h='<option value="">— Auto (system-classified) —</option>';
   for(var s=0;s<_CFD_SEC.length;s++){ var sec=_CFD_SEC[s]; h+='<optgroup label="'+_fsE(sec[1])+' · '+_fsE(sec[2])+'">';
     for(var i=0;i<sec[3].length;i++){ var k=sec[3][i],lbl=_CFD_LN[k]?_CFD_LN[k][0]:k; h+='<option value="'+_fsE(k)+'"'+(k===cur?' selected':'')+'>'+_fsE(lbl)+'</option>'; }
     h+='</optgroup>'; }
   return h; }
 /* v9.118/9.119: dropdown ย้ายบัญชีไปกิจกรรม/บรรทัดอื่นของงบกระแสเงินสด (คอลัมน์ของตัวเอง) — กรณีจำแนกไม่ตรงกิจกรรม */
 function _cfdMoveCtl(code){ var ov=_fsMapCfd()[_fsRcCode(code)]||'';
-  return '<select class="cfdmovesel'+(ov?' moved':'')+'" data-code="'+_fsE(code)+'" title="ย้ายบัญชีนี้ไปกิจกรรม/บรรทัดอื่นของงบกระแสเงินสด (กรณีระบบจำแนกไม่ตรงกิจกรรม) — เลือก “อัตโนมัติ” เพื่อคืนค่า">'+_cfdLineOpts(ov)+'</select>'; }
+  return '<select class="cfdmovesel'+(ov?' moved':'')+'" data-code="'+_fsE(code)+'" title="Move this account to another cash-flow activity / line when the automatic classification is not right — pick “Auto” to reset">'+_cfdLineOpts(ov)+'</select>'; }
 /* v9.119: เปิดบรรทัดที่กางอยู่กลับหลัง re-render (กัน "เด้งกลับ/หุบ" หลังกดย้ายกิจกรรม) */
 function _cfdReopenLines(keys){ if(!keys||!keys.length)return; var seen={};
   for(var i=0;i<keys.length;i++){ var k=keys[i]; if(!k||seen[k])continue; seen[k]=1;
@@ -24001,7 +24034,7 @@ function _fsWpToolbar(tab){
     '<span class="fswp-sp"></span>'+seg+
     '<button type="button" class="fswp-btn" data-wpexport="1" title="Export งบการเงิน (BS · PL · การเปลี่ยนแปลงส่วนของผู้ถือหุ้น) + กระดาษทำการ เป็น Excel">⤓ Excel</button>'+
     '<button type="button" class="fswp-btn" data-wpprint="1" title="พิมพ์ / บันทึกงบเป็น PDF">🖨 PDF</button>'+
-    '<button type="button" class="fswp-btn" data-wpmode="0" title="สลับไปดูงบที่คำนวณสดจาก GL ในแอป (เครื่องมือเดิม)">🔁 งบเดิม (GL)</button>'+
+    '<button type="button" class="fswp-btn" data-wpmode="0" title="Switch back to the statements calculated live from the GL in the app">🔁 Live from GL</button>'+
   '</div>';
 }
 function _fsWpBackBar(){
