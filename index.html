@@ -4170,6 +4170,16 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
   box-shadow:0 0 0 3px rgba(14,92,82,.12);}
 #page-tk .tkcolswb{border:1px solid rgba(16,24,40,.12);}
 #page-tk .tkcolswb.on{outline:2px solid var(--brand,#0E5C52);outline-offset:1px;}
+
+/* --- v11.6: the dashed frame is now the only way to add a task to a step (the full-width
+   "+ Add Task" bar under each lane is gone). It keeps its fixed size, so a step with no tasks
+   still holds the lane open. --- */
+#page-tk .tkboard.vert .tkcolbody .tkaddcol.tkfiledrop{grid-column:auto;align-self:stretch;margin-top:0;}
+#page-tk .tkaddcol.tkfiledrop{cursor:pointer;font-family:inherit;transition:border-color .14s,background .14s,color .14s;}
+#page-tk .tkaddcol.tkfiledrop:hover{border-color:var(--brand,#0E5C52);background:var(--brand-t,#E6F0EC);color:var(--brand-d,#0A463E);}
+#page-tk .tkaddcol.tkfiledrop .tkfdic{font-size:26px;font-weight:400;line-height:1;opacity:.55;}
+#page-tk .tkaddcol.tkfiledrop:hover .tkfdic{opacity:.9;}
+#page-tk .tkaddcol.tkfiledrop .tkfdt{font-size:13px;font-weight:800;}
 </style>
 <!-- ===================================================================
      v8.92 — Financial Statements: refined palette, typography & polish
@@ -8383,8 +8393,7 @@ function _tkKanban(view){
     if(_tkClip)h+='<button class="tkpaste" data-paste="'+st[0]+'" type="button" title="Paste a copy of the copied task into this step">📋 Paste here ·<span class="tkpastenm">'+esc(_tkClip.title||'(untitled)')+'</span><span class="tkpastex" data-clipx="1" title="Clear the clipboard">✕</span></button>';
     /* v11.3: draft placeholder — a fixed-size frame for dropping a file later. It also locks the
        lane to a consistent height so an empty step no longer collapses into a bare strip. */
-    h+='<div class="tkfiledrop" data-fdst="'+st[0]+'" aria-hidden="true"><span class="tkfdic">🗂</span><span class="tkfdt">＋ Add file</span><span class="tkfdhint">draft — drop area coming soon</span></div>';
-    h+='<button class="tkaddcol" data-st="'+st[0]+'" type="button">+ Add Task</button>';
+    h+='<button class="tkaddcol tkfiledrop" data-st="'+st[0]+'" type="button" title="Add a task to this step"><span class="tkfdic">＋</span><span class="tkfdt">Add task</span><span class="tkfdhint">or drop a file here — coming soon</span></button>';
     h+='</div></div>';
   });
   h+='</div>';
