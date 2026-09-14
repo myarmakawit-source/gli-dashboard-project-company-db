@@ -3192,7 +3192,7 @@ body{padding-left:236px;padding-right:8px}
 <div class="page" id="page-ov" hidden=""></div>
 <div class="page" id="page-wpb" hidden=""></div>
 <div class="page" id="page-cb" hidden=""></div>
-<div class="page" id="page-tk" hidden=""><div class="tknav" role="tablist" aria-label="Tracking"><button class="tknavb on" data-tkpage="board" type="button" role="tab" aria-selected="true"><span class="tknavic">📋</span><span>Task board</span><span class="tknavn" id="tkNavOpenN" hidden=""></span></button><button class="tknavb" data-tkpage="report" type="button" role="tab" aria-selected="false"><span class="tknavic">✅</span><span>Completed report</span><span class="tknavn" id="tkNavDoneN" hidden=""></span></button></div><div class="tkpane" id="tkPaneBoard"></div><div class="tkpane" id="page-tkr" hidden=""></div></div>
+<div class="page" id="page-tk" hidden=""><div class="tkpane" id="tkPaneBoard"></div></div>
 <div class="page active" id="page-bp">
 <div class="titleblock">
 <div class="tb-left">
@@ -4180,6 +4180,27 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-tk .tkaddcol.tkfiledrop .tkfdic{font-size:26px;font-weight:400;line-height:1;opacity:.55;}
 #page-tk .tkaddcol.tkfiledrop:hover .tkfdic{opacity:.9;}
 #page-tk .tkaddcol.tkfiledrop .tkfdt{font-size:13px;font-weight:800;}
+</style>
+<style id="apjvPanelCss">
+/* ===== v11.7: Report AP JV — Database-module command panel =====
+   The buttons keep their .apjv-tbtn skin classes for the delegated handlers; these rules let
+   them render as panel buttons instead, and put the company chips in the card's grid. */
+#page-pdrepjv .glacts .glactb.apjv-tbtn{
+  display:flex;align-items:center;justify-content:flex-start;gap:8px;width:100%;box-sizing:border-box;
+  background:#fff;background-image:none;border:1.5px solid var(--line,#E6E0D4);border-radius:10px;
+  padding:6px 11px;min-height:34px;font-family:inherit;font-size:12px;font-weight:700;
+  color:var(--ink,#19222E);letter-spacing:0;box-shadow:0 1px 3px rgba(17,24,39,.05);
+  transform:none;text-align:left;text-transform:none;}
+#page-pdrepjv .glacts .glactb.apjv-tbtn:hover{
+  background:var(--brand-t,#E6F0EC);border-color:var(--brand,#0E5C52);
+  box-shadow:0 7px 18px -7px rgba(14,92,82,.4);transform:translateY(-2px);}
+#page-pdrepjv .glactfil .apjv-cotab{
+  display:flex;align-items:center;gap:6px;width:100%;box-sizing:border-box;margin:0;
+  padding:4px 9px;font-size:11.5px;font-weight:800;min-height:27px;line-height:1.3;border-radius:8px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#page-pdrepjv .glactfil .apjv-cotab:hover{transform:translateY(-1px);box-shadow:0 4px 10px -5px rgba(14,92,82,.35);}
+/* the old free-standing rows are gone */
+#page-pdrepjv .apjv-tools,#page-pdrepjv .apjv-cobar{display:none!important;}
 </style>
 <!-- ===================================================================
      v8.92 — Financial Statements: refined palette, typography & polish
@@ -8448,7 +8469,7 @@ function _tkCard(t,pos){
   var _na=(t.att&&t.att.length)||0;h+='<div class="tkcardbot"><span class="tkassign">'+_tkAvatar(t.assignee)+'</span>'+(d?('<span class="'+d.cls+'">'+d.txt+'</span>'):'')+(_na?('<span class="tkattcount" title="'+_na+' attachment(s)">📎 '+_na+'</span>'):'')+(function(){ /* v11.2: advance one step without dragging — the long drags across a multi-stage pipeline were the slow part */
     var _ci=_tkStatIdx(t.status||'todo'), _nx=(_ci>=0&&_ci<TK_STAT.length-1)?TK_STAT[_ci+1]:null;
     return _nx?('<button class="tknextb" data-next="'+t.id+'" type="button" title="'+_eatt('Move to the next step → '+(_nx[1]||''))+'">→ Next</button>'):'';
-  })()+'<button class="tkdoneb" data-done="'+t.id+'" type="button" title="Done — move this card to the “Completed report” page (you can bring it back)">✓ Done</button></div>';
+  })()+'</div>';
   h+='<button class="tkcopy" data-copy="'+t.id+'" type="button" title="Copy this task — then click “Paste here” in the step you want (or hold Alt while dragging the card to copy it)">⧉</button>';
   h+='<div class="tkgrip" title="Drag the card to another step, or up and down to reorder it within a step · hold Alt while dragging to copy">⠿</div>';
   return h+'</div>';
@@ -10620,12 +10641,12 @@ function _apjvGroupedBody(side,arr){
     if(g>0)out+='<tr class="apjv-grpgap" data-grp="'+g+'"><td colspan="7"></td></tr>';   /* v10.94: spacer between Index-group blocks */
     var gk2=order[g],grp=groups[gk2],rows=_apjvSortByDate(grp.rows,'date'),isNone=(gk2===NONE);
     var sub=0;for(var j=0;j<rows.length;j++)sub+=_apjvNum(rows[j].amt);
-    var nm=isNone?'— ยังไม่ระบุ Index —':grp.label;
+    var nm=isNone?'— no Index yet —':grp.label;
     out+='<tr class="apjv-grp'+(isNone?' apjv-grp-none':'')+'" data-grp="'+g+'">'
       +'<td colspan="6"><span class="apjv-grp-nm">'+_apjvE(nm)+'</span>'
-      +'<span class="apjv-grp-ct">'+rows.length+' รายการ</span></td><td class="apjvx"></td></tr>';
+      +'<span class="apjv-grp-ct">'+rows.length+' entries</span></td><td class="apjvx"></td></tr>';
     for(var k=0;k<rows.length;k++)out+=_apjvRowMain(side,rows[k],g);
-    out+='<tr class="apjv-grpsub" data-grp="'+g+'"><td colspan="4" class="apjv-grpsub-lbl">↳ รวม '+_apjvE(isNone?'ไม่ระบุ Index':grp.label)+'</td>'
+    out+='<tr class="apjv-grpsub" data-grp="'+g+'"><td colspan="4" class="apjv-grpsub-lbl">↳ Total '+_apjvE(isNone?'no Index':grp.label)+'</td>'
       +'<td class="camt ra apjv-grpsubtot'+(sub<-0.004?' neg':'')+'" data-grp="'+g+'">'+_apjvFmtAmt(sub)+'</td><td colspan="2"></td></tr>';
   }
   return out;
@@ -10638,7 +10659,7 @@ function _apjvMainSec(side){
     ? _apjvGroupedBody(side,arr)+_apjvAddTr(side,7,'Add entry')
     : _apjvSortByDate(arr,'date').map(function(r){return _apjvRowMain(side,r);}).join('')+_apjvAddTr(side,7,'Add entry');
   return '<div class="apjv-sec">'
-    +'<div class="apjv-sechd"><span>🧾 Entries</span><button class="apjv-clrall" type="button" data-clrside="'+side+'" title="ลบข้อมูลทั้งหมดในฝั่งนี้ (บริษัท '+_apjvE(_apjvCo)+')">🗑 ลบทั้งหมด</button></div>'
+    +'<div class="apjv-sechd"><span>🧾 Entries</span><button class="apjv-clrall" type="button" data-clrside="'+side+'" title="Delete every entry on this side (company '+_apjvE(_apjvCo)+')">🗑 Clear all</button></div>'
     +'<div class="apjv-tw"><table class="apjv-tbl apjv-main" data-fside="'+side+'">'+_apjvThead(side)
     +'<tbody>'+body+'</tbody>'
     +'<tfoot><tr><td colspan="4">Total</td>'+_apjvTotCell('apjvtot','data-tot="'+side+'"',_apjvSum(arr))+'<td colspan="2"></td></tr></tfoot></table></div></div>';
@@ -10739,10 +10760,39 @@ function _apjvDashHTML(co){
 function _apjvSyncDash(){var el=document.getElementById('apjvDash');if(el){try{el.innerHTML=_apjvDashHTML(_apjvCo);}catch(_e){}}}
 /* v10.45: per-company colour — reuse the shared Advance palette so a company keeps the same hue everywhere */
 function _apjvCoColor(code){ if(typeof _advCo==='function'){var c=_advCo(code); if(c&&c.color)return c.color;} var m={GLR:'#0F766E',GLI:'#1D4ED8',ARG:'#7C3AED',GLE:'#B45309',GRW:'#BE185D',CGL:'#157F3C',ECM:'#0891B2'}; return m[code]||'#5F45B4'; }
+/* v11.7: Report AP JV command panel — built with _dbActPanel(), the Database module's own
+   builder, so the layout matches. Every button keeps its data-apjvact hook and the company
+   chips keep data-co, and both are delegated through closest(), so behaviour is unchanged. */
+function _apjvActionPanel(){
+  var co=_apjvE(_apjvCo);
+  var coChips='';var COS=_apjvCosEff();
+  for(var i=0;i<COS.length;i++){var c=COS[i];var extra=(APJV_COS.indexOf(c)<0);
+    coChips+='<button class="apjv-cotab'+(c===_apjvCo?' on':'')+(extra?' apjv-cotab-legacy':'')+'" type="button" data-co="'+c+'" style="--co:'+_apjvCoColor(c)+'" title="'+(extra?'A former company that still holds data (kept so it can be recovered)':'Show '+c)+'"><i class="apjv-codot"></i>'+c+(extra?' \u2691':'')+'</button>';}
+  var groups=[
+    {t:'Data',t2:'Manage',ic:'\ud83d\udcc1',btns:[
+      {id:'apjvImpBtn',ic:'\ud83d\udce5',l:'Import Excel',cls:'apjv-tbtn imp',title:'Import rows from an Excel file \u2014 all companies, matched by the Company column',at:'import'},
+      {id:'apjvTplBtn',ic:'\u2913',l:'Template',cls:'apjv-tbtn tpl',title:'Download a blank Excel template (Liability AP \u00b7 Routine \u00b7 Asset \u00b7 Bank)',at:'template'}
+    ]},
+    {t:'Export \u00b7 '+co,t2:'View',ic:'\u2913',btns:[
+      {id:'apjvXlsCoBtn',ic:'\u2913',l:'Excel \u00b7 '+co,cls:'apjv-tbtn xls',title:'Export ONLY '+co+' to Excel \u2014 Summary + Liability / Routine / Asset / Bank',at:'xlsxco'},
+      {id:'apjvPdfCoBtn',ic:'\ud83d\udda8',l:'PDF \u00b7 '+co,cls:'apjv-tbtn pdf',title:'Executive PDF \u2014 '+co+' only',at:'pdfco'}
+    ]},
+    {t:'Export \u00b7 All',t2:'View',ic:'\u2913',btns:[
+      {id:'apjvXlsBtn',ic:'\u2913',l:'Excel \u00b7 All',cls:'apjv-tbtn xls',title:'Export ALL companies to Excel \u2014 Summary + Liability / Routine / Asset / Bank sheets',at:'xlsx'},
+      {id:'apjvPdfBtn',ic:'\ud83d\udda8',l:'PDF \u00b7 All',cls:'apjv-tbtn pdf',title:'Executive PDF report \u2014 all companies, Liabilities vs Assets',at:'pdf'}
+    ]}
+  ];
+  var h=_dbActPanel(groups,[{t:'Company',t2:'Filter',ic:'\ud83c\udfe2',wcls:'glactg-cls',html:coChips}]);
+  /* _dbActPanel has no slot for a custom attribute, so tag the buttons afterwards by id */
+  var map={apjvImpBtn:'import',apjvTplBtn:'template',apjvXlsCoBtn:'xlsxco',apjvPdfCoBtn:'pdfco',apjvXlsBtn:'xlsx',apjvPdfBtn:'pdf'};
+  for(var k in map){ if(Object.prototype.hasOwnProperty.call(map,k))
+    h=h.replace('id="'+k+'"','id="'+k+'" data-apjvact="'+map[k]+'"'); }
+  return h;
+}
 function _apjvCoTabs(){
   var s='<div class="apjv-cobar" style="--co:'+_apjvCoColor(_apjvCo)+'"><span class="apjv-colbl">Company</span><div class="apjv-cotabs">';
   var COS=_apjvCosEff();
-  for(var i=0;i<COS.length;i++){var c=COS[i];var extra=(APJV_COS.indexOf(c)<0);s+='<button class="apjv-cotab'+(c===_apjvCo?' on':'')+(extra?' apjv-cotab-legacy':'')+'" type="button" data-co="'+c+'" style="--co:'+_apjvCoColor(c)+'" title="'+(extra?'บริษัทเดิมที่ยังมีข้อมูลค้างอยู่ (กู้คืน)':'')+'"><i class="apjv-codot"></i>'+c+(extra?' ⚑':'')+'</button>';}
+  for(var i=0;i<COS.length;i++){var c=COS[i];var extra=(APJV_COS.indexOf(c)<0);s+='<button class="apjv-cotab'+(c===_apjvCo?' on':'')+(extra?' apjv-cotab-legacy':'')+'" type="button" data-co="'+c+'" style="--co:'+_apjvCoColor(c)+'" title="'+(extra?'A former company that still holds data (kept so it can be recovered)':'')+'"><i class="apjv-codot"></i>'+c+(extra?' ⚑':'')+'</button>';}
   return s+'</div></div>';
 }
 /* ===== v10.48: Report AP JV — Excel import / export + executive PDF report ===== */
@@ -10905,18 +10955,10 @@ function renderApjv(){
   _apjvPendingRegroup=false;
   if(_apjvCosEff().indexOf(_apjvCo)<0)_apjvCo='GLR';
   var html='<datalist id="apjvIdxList"><option value="Advance"></option><option value="Operating"></option><option value="Account Payable"></option></datalist>'
-    +'<div class="apjv">'+_apjvCoTabs()
-    +'<div class="apjv-tools"><input type="file" id="apjvImportFile" accept=".xlsx,.xls,.csv" hidden>'
-      +'<button class="apjv-tbtn imp" type="button" data-apjvact="import" title="Import rows from an Excel file — all companies, matched by the Company column">📥 Import Excel</button>'
-      +'<button class="apjv-tbtn tpl" type="button" data-apjvact="template" title="Download a blank Excel template (Liability AP · Routine · Asset · Bank)">⬇ Template</button>'
-      +'<span class="apjv-tools-sp"></span>'
-      +'<button class="apjv-tbtn xls" type="button" data-apjvact="xlsxco" title="Export ONLY '+_apjvE(_apjvCo)+' to Excel — Summary + Liability / Routine / Asset / Bank">⤓ Excel · '+_apjvE(_apjvCo)+'</button>'
-      +'<button class="apjv-tbtn pdf" type="button" data-apjvact="pdfco" title="Executive PDF — '+_apjvE(_apjvCo)+' only">🖨 PDF · '+_apjvE(_apjvCo)+'</button>'
-      +'<span class="apjv-tools-sp2"></span>'
-      +'<button class="apjv-tbtn xls" type="button" data-apjvact="xlsx" title="Export ALL companies to Excel — Summary + Liability / Routine / Asset / Bank sheets">⤓ Excel · All</button>'
-      +'<button class="apjv-tbtn pdf" type="button" data-apjvact="pdf" title="Executive PDF report — all companies, Liabilities vs Assets">🖨 PDF · All</button>'
-    +'</div>'
-    +'<div id="apjvDash">'+_apjvDashHTML(_apjvCo)+'</div><div class="apjv-cols">'
+    +'<div class="apjv">'
+    +'<input type="file" id="apjvImportFile" accept=".xlsx,.xls,.csv" hidden>'
+     +_apjvActionPanel()
+     +'<div id="apjvDash">'+_apjvDashHTML(_apjvCo)+'</div><div class="apjv-cols">'
     +'<div class="apjv-col apjv-liab"><div class="apjv-colhd">💳 Liability &middot; AP <span class="apjv-cohint">'+_apjvE(_apjvCo)+'</span></div>'+_apjvMainSec('liab')+_apjvRoutineSec()+'</div>'
     +'<div class="apjv-col apjv-asset"><div class="apjv-colhd">🏦 Asset <span class="apjv-cohint">'+_apjvE(_apjvCo)+'</span></div>'+_apjvMainSec('asset')+_apjvBankSec()+'</div>'
     +'</div></div>';
