@@ -4152,6 +4152,24 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 /* in the stacked board the lanes are a card grid, so the frame is one tile the size of a card */
 #page-tk .tkboard.vert .tkcolbody .tkfiledrop{align-self:stretch;}
 #page-tk .tkboard.vert .tkcolbody{min-height:158px;}
+
+/* --- v11.4: step settings — name, order badge and pastel colour --- */
+#page-tk .tkcolseq{flex:none;min-width:19px;height:19px;padding:0 5px;border-radius:6px;
+  background:rgba(16,24,40,.07);color:inherit;font-size:10.5px;font-weight:800;line-height:19px;
+  text-align:center;opacity:.85;}
+#page-tk .tkcolpickrow{display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px;}
+#page-tk .tkcolfld{display:flex;flex-direction:column;gap:3px;min-width:0;}
+#page-tk .tkcolfld>span{font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--muted,#8C8676);}
+#page-tk .tkcolfld-nm{flex:1 1 210px;}
+#page-tk .tkcolfld-ord{flex:0 0 104px;}
+#page-tk .tkcolnmin,#page-tk .tkcolordsel{width:100%;box-sizing:border-box;font:inherit;font-size:12.5px;
+  font-weight:700;color:var(--ink,#19222E);background:#fff;border:1px solid var(--line,#E6E0D4);
+  border-radius:8px;padding:6px 9px;}
+#page-tk .tkcolnmin:focus,#page-tk .tkcolordsel:focus{outline:none;border-color:var(--brand,#0E5C52);
+  box-shadow:0 0 0 3px rgba(14,92,82,.12);}
+#page-tk .tkcolswb{border:1px solid rgba(16,24,40,.12);}
+#page-tk .tkcolswb.on{outline:2px solid var(--brand,#0E5C52);outline-offset:1px;}
 </style>
 <!-- ===================================================================
      v8.92 — Financial Statements: refined palette, typography & polish
@@ -7646,17 +7664,17 @@ function _tkFind(id){loadTrack();for(var i=0;i<TRACKDATA.length;i++)if(TRACKDATA
 /* v10.54: custom board columns (headings) — add / rename / delete / reorder, stored + synced */
 function _tkColSeed(){return [['todo','Book keeping','#64748B','#EEF2F7'],['doing','Accounting & Tax','#1D5FAE','#E7EFF8'],['review','Remind','#A8741A','#FBF1DE'],['done','Done','#15803D','#E7F6EC']];}
 var TK_STAT=(function(){try{var s=JSON.parse(localStorage.getItem('gli_tkcols')||'null');if(Array.isArray(s)&&s.length&&s.every(function(c){return Array.isArray(c)&&c.length>=2&&c[0];}))return s;}catch(e){}return _tkColSeed();})();
-var TK_COLPAL=[['#0E7490','#E0F2FE'],['#7C3AED','#F3E8FF'],['#BE123C','#FFE4E6'],['#15803D','#DCFCE7'],['#B45309','#FEF3C7'],['#0891B2','#CFFAFE'],['#9333EA','#F5E8FF'],['#DB2777','#FCE7F3'],['#65A30D','#ECFCCB'],['#475569','#F1F5F9']];
+var TK_COLPAL=[['#0F6E62','#E7F4EF'],['#1D5FAE','#E8F1FC'],['#6D4FC0','#EFEBFB'],['#B4601F','#FCEEE4'],['#8A6A16','#FBF4DC'],['#B03A5B','#FCEAEF'],['#5C7A2E','#EEF5E7'],['#14746F','#E6F5F6'],['#9A5B8A','#FBEAF3'],['#4A5568','#F1F4F8']];   /* v11.4: pastel step palette */
 var _tkLayout='vert';   /* v11.3: stacked lanes only — the side-by-side pipeline left the board looking empty with this few open tasks */
 function saveTkCols(){try{localStorage.setItem('gli_tkcols',JSON.stringify(TK_STAT));}catch(e){}if(typeof _tsTouch==='function')_tsTouch('tkc');if(typeof cloudPush==='function')cloudPush();}
 function _tkSetLayout(v){_tkLayout=(v==='horiz')?'horiz':'vert';try{localStorage.setItem('gli_tklayout',_tkLayout);}catch(e){}renderTracking();}
 function _tkDoneKey(){for(var i=0;i<TK_STAT.length;i++)if(TK_STAT[i][0]==='done')return 'done';return TK_STAT.length?TK_STAT[TK_STAT.length-1][0]:'done';}
-function _tkColAdd(){var name=prompt('ชื่อหัวข้อใหม่ · New column name');if(name==null)return;name=name.trim();if(!name)return;var key='c'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);var p=TK_COLPAL[TK_STAT.length%TK_COLPAL.length];TK_STAT.push([key,name,p[0],p[1]]);saveTkCols();if(typeof gliLog==='function')gliLog('เพิ่มหัวข้อ (Tracking)',name);renderTracking();}
-function _tkColRename(key){var c=_tkStat(key);var name=prompt('เปลี่ยนชื่อหัวข้อ · Rename column',c[1]);if(name==null)return;name=name.trim();if(!name)return;for(var i=0;i<TK_STAT.length;i++)if(TK_STAT[i][0]===key){TK_STAT[i][1]=name;break;}saveTkCols();renderTracking();}
-function _tkColDel(key){if(TK_STAT.length<=1){alert('ต้องมีอย่างน้อย 1 หัวข้อ');return;}var c=_tkStat(key);loadTrack();var n=TRACKDATA.filter(function(t){return (t.status||TK_STAT[0][0])===key;}).length;if(!confirm('ลบหัวข้อ "'+(c[1]||'')+'" ?'+(n?('\nงาน '+n+' รายการจะย้ายไปหัวข้อแรก'):'')))return;TK_STAT=TK_STAT.filter(function(x){return x[0]!==key;});var fb=TK_STAT[0][0];TRACKDATA.forEach(function(t){if((t.status||'')===key){t.status=fb;t.ord=null;}});saveTkCols();saveTrack();if(typeof gliLog==='function')gliLog('ลบหัวข้อ (Tracking)',c[1]||'');renderTracking();}
+function _tkColAdd(){var name=prompt('New step name');if(name==null)return;name=name.trim();if(!name)return;var key='c'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);var p=TK_COLPAL[TK_STAT.length%TK_COLPAL.length];TK_STAT.push([key,name,p[0],p[1]]);saveTkCols();if(typeof gliLog==='function')gliLog('Added step (Tracking)',name);renderTracking();}
+function _tkColRename(key){var c=_tkStat(key);var name=prompt('Rename step',c[1]);if(name==null)return;name=name.trim();if(!name)return;for(var i=0;i<TK_STAT.length;i++)if(TK_STAT[i][0]===key){TK_STAT[i][1]=name;break;}saveTkCols();renderTracking();}
+function _tkColDel(key){if(TK_STAT.length<=1){alert('The board needs at least one step');return;}var c=_tkStat(key);loadTrack();var n=TRACKDATA.filter(function(t){return (t.status||TK_STAT[0][0])===key;}).length;if(!confirm('Delete step "'+(c[1]||'')+'" ?'+(n?('\n'+n+' task(s) will move to the first step'):'')))return;TK_STAT=TK_STAT.filter(function(x){return x[0]!==key;});var fb=TK_STAT[0][0];TRACKDATA.forEach(function(t){if((t.status||'')===key){t.status=fb;t.ord=null;}});saveTkCols();saveTrack();if(typeof gliLog==='function')gliLog('ลบหัวข้อ (Tracking)',c[1]||'');renderTracking();}
 /* v10.55: ย้าย/สลับหัวข้อด้วยการลาก (drag & drop ที่แถบหัวข้อ) + ตั้งสีพื้นหลังหัวข้อเอง */
 var _tkCD=null,_tkColPick='',_tkColClickGuard=false;
-var TK_HDBG=['','#FFFFFF','#F8FAFC','#F1F5F9','#E2E8F0','#EEF2F7','#E7EFF8','#DBEAFE','#E0F2FE','#CFFAFE','#DCFCE7','#E7F6EC','#FEF3C7','#FBF1DE','#FCE7F3','#FFE4E6','#F3E8FF','#0E5C52','#15803D','#1D5FAE','#0E7490','#7C3AED','#BE123C','#B45309','#334155'];
+var TK_HDBG=['','#FFFFFF','#E7F4EF','#E8F1FC','#EFEBFB','#FCEEE4','#FBF4DC','#FCEAEF','#EEF5E7','#E6F5F6','#FBEAF3','#F6F1E7','#F1F4F8','#DCEFE7','#D9E8F8','#E4DCF6','#F8E2D2','#F5EBC3','#F7DBE4','#E2EFD6','#D7EDEF'];   /* v11.4: pastel heading backgrounds only */
 function _tkHexRGB(h){h=(''+(h||'')).replace('#','');if(h.length===3)h=h.charAt(0)+h.charAt(0)+h.charAt(1)+h.charAt(1)+h.charAt(2)+h.charAt(2);if(!/^[0-9a-fA-F]{6}$/.test(h))return null;var n=parseInt(h,16);return [(n>>16)&255,(n>>8)&255,n&255];}
 function _tkIsDark(h){var c=_tkHexRGB(h);if(!c)return false;return (0.299*c[0]+0.587*c[1]+0.114*c[2])<152;}
 function _tkColHdStyle(st){var hb=(st[4]||'');if(!hb)return '';return ' style="--hb:'+hb+(_tkIsDark(hb)?';--ht:#fff':'')+'"';}
@@ -7668,23 +7686,40 @@ function _tkColReset(key){var seed=_tkColSeed();for(var i=0;i<seed.length;i++){i
   var p=TK_COLPAL[_tkStatIdx(key)%TK_COLPAL.length];_tkColApply(key,{fg:p[0],cb:p[1],hb:''});}
 function _tkColPickToggle(key){_tkColPick=(_tkColPick===key)?'':key;renderTracking();}
 function _tkColPickHTML(st){
-  var hb=(st[4]||''),k=st[0],h='<div class="tkcolpick">';
-  h+='<div class="tkcolpickhd">🎨 สีหัวข้อ · Heading colour<button class="tkcolpickx" data-colpick="'+k+'" type="button" title="ปิด">✕</button></div>';
-  h+='<div class="tkcolpicklb">พื้นหลังหัวข้อ · Heading background</div><div class="tkcolsw">';
+  /* v11.4: one panel per step — set its name, its position in the sequence, and its pastel colour */
+  var hb=(st[4]||''),k=st[0],pos=_tkStatIdx(k)+1,n=TK_STAT.length,h='<div class="tkcolpick">';
+  h+='<div class="tkcolpickhd">🎨 Step settings<button class="tkcolpickx" data-colpick="'+k+'" type="button" title="Close">✕</button></div>';
+  h+='<div class="tkcolpickrow">';
+  h+='<label class="tkcolfld tkcolfld-nm"><span>Name</span><input type="text" class="tkcolnmin" data-colnm="'+k+'" value="'+_eatt(st[1]||'')+'" placeholder="Step name" spellcheck="false"></label>';
+  h+='<label class="tkcolfld tkcolfld-ord"><span>Order</span><select class="tkcolordsel" data-colord="'+k+'">';
+  for(var i=1;i<=n;i++)h+='<option value="'+i+'"'+(i===pos?' selected':'')+'>'+i+' / '+n+'</option>';
+  h+='</select></label>';
+  h+='</div>';
+  h+='<div class="tkcolpicklb">Heading colour · pastel</div><div class="tkcolsw">';
   TK_HDBG.forEach(function(c){
-    h+='<button class="tkcolswb'+((c||'').toUpperCase()===hb.toUpperCase()?' on':'')+'" data-colhb="'+k+'|'+c+'" type="button" style="background:'+(c||'#fff')+'" title="'+(c||'ไม่มีสีพื้นหลัง')+'">'+(c?'':'✕')+'</button>';
+    h+='<button class="tkcolswb'+((c||'').toUpperCase()===hb.toUpperCase()?' on':'')+'" data-colhb="'+k+'|'+c+'" type="button" style="background:'+(c||'#fff')+'" title="'+(c||'No background')+'">'+(c?'':'✕')+'</button>';
   });
-  h+='<label class="tkcolcf" title="เลือกสีเอง">✎<input type="color" data-colcolor="hb|'+k+'" value="'+(hb||'#ffffff')+'"></label>';
+  h+='<label class="tkcolcf" title="Pick your own colour">✎<input type="color" data-colcolor="hb|'+k+'" value="'+(hb||'#ffffff')+'"></label>';
   h+='</div>';
-  h+='<div class="tkcolpicklb">พื้นหลังคอลัมน์ · Column background</div><div class="tkcolsw">';
-  TK_COLPAL.forEach(function(p,i){h+='<button class="tkcolswb'+((p[1].toUpperCase()===(st[3]||'').toUpperCase())?' on':'')+'" data-colpal="'+k+'|'+i+'" type="button" style="background:'+p[1]+';color:'+p[0]+'" title="ชุดสี">A</button>';});
-  h+='<label class="tkcolcf" title="เลือกสีเอง">✎<input type="color" data-colcolor="cb|'+k+'" value="'+(st[3]||'#eef2f7')+'"></label>';
+  h+='<div class="tkcolpicklb">Lane background · pastel</div><div class="tkcolsw">';
+  TK_COLPAL.forEach(function(p,i){h+='<button class="tkcolswb'+((p[1].toUpperCase()===(st[3]||'').toUpperCase())?' on':'')+'" data-colpal="'+k+'|'+i+'" type="button" style="background:'+p[1]+';color:'+p[0]+'" title="Pastel set">A</button>';});
+  h+='<label class="tkcolcf" title="Pick your own colour">✎<input type="color" data-colcolor="cb|'+k+'" value="'+(st[3]||'#eef2f7')+'"></label>';
   h+='</div>';
-  h+='<div class="tkcolcust"><label class="tkcolcf">สีตัวอักษร <input type="color" data-colcolor="fg|'+k+'" value="'+(st[2]||'#475569')+'"></label>';
-  h+='<button class="tkcolclr" data-colhb="'+k+'|" type="button">ล้างพื้นหลังหัวข้อ</button>';
-  h+='<button class="tkcolclr" data-colrst="'+k+'" type="button">คืนค่าเริ่มต้น</button></div>';
+  h+='<div class="tkcolcust"><label class="tkcolcf">Text <input type="color" data-colcolor="fg|'+k+'" value="'+(st[2]||'#475569')+'"></label>';
+  h+='<button class="tkcolclr" data-colhb="'+k+'|" type="button">Clear heading colour</button>';
+  h+='<button class="tkcolclr" data-colrst="'+k+'" type="button">Reset</button></div>';
   return h+'</div>';
 }
+/* v11.4: set a step's name / position from the settings panel */
+function _tkColSetName(key,name){name=(''+(name||'')).trim();if(!name)return;for(var i=0;i<TK_STAT.length;i++)if(TK_STAT[i][0]===key){if(TK_STAT[i][1]===name)return;TK_STAT[i][1]=name;break;}saveTkCols();renderTracking();}
+function _tkColSetPos(key,pos){
+  var from=_tkStatIdx(key);if(from<0)return;
+  pos=Math.max(1,Math.min(TK_STAT.length,+pos||1));
+  var to=pos-1;if(to===from)return;
+  var row=TK_STAT.splice(from,1)[0];TK_STAT.splice(to,0,row);
+  saveTkCols();if(typeof gliLog==='function')gliLog('Reordered step (Tracking)',(row[1]||'')+' → '+pos);renderTracking();
+}
+
 /* ลากหัวข้ออิสระ (pointer drag) — ใช้ได้ทั้งเมาส์และนิ้ว, ไม่มีปุ่มลูกศรแล้ว:
    กดค้างที่แถบหัวข้อแล้วลากไปวางตรงไหนก็ได้ · เส้นสีบอกตำแหน่งที่จะวาง · ปล่อยเพื่อจัดลำดับใหม่ · Esc ยกเลิก */
 function _tkColBoardCols(){
@@ -8333,9 +8368,10 @@ function _tkKanban(view){
     h+='<div class="tkcol" data-st="'+st[0]+'" style="--c:'+st[2]+';--cb:'+(st[3]||'#EEF2F7')+'">';
     h+='<div class="tkcolhd" data-colhd="'+st[0]+'"'+_tkColHdStyle(st)+'>'
       +'<span class="tkcolgrip" title="Drag this heading to move the whole step anywhere on the board">⠿</span>'
+      +'<span class="tkcolseq" title="Step '+(_tkStatIdx(st[0])+1)+' of '+n+'">'+(_tkStatIdx(st[0])+1)+'</span>'
       +'<span class="tkcoldot"></span><span class="tkcolnm" data-colren="'+st[0]+'" title="Click to rename this step">'+esc(st[1])+'</span><span class="tkcoln">'+col.length+'</span>'
       +'<span class="tkcolact">'
-      +'<button class="tkcolsw2'+((_tkColPick===st[0])?' on':'')+'" data-colpick="'+st[0]+'" type="button" title="Change the background colour of this step"><i class="tkswdot'+(st[4]?'':' none')+'"'+(st[4]?(' style="background:'+st[4]+'"'):'')+'></i>สี</button>'
+      +'<button class="tkcolsw2'+((_tkColPick===st[0])?' on':'')+'" data-colpick="'+st[0]+'" type="button" title="Step settings — name, order and pastel colour"><i class="tkswdot'+(st[4]?'':' none')+'"'+(st[4]?(' style="background:'+st[4]+'"'):'')+'></i>Edit</button>'
       +'<button class="tkcolb" data-colren="'+st[0]+'" type="button" title="Rename step">✎</button>'
       +'<button class="tkcolb del" data-coldel="'+st[0]+'" type="button" title="Delete step"'+(n<=1?' disabled':'')+'>🗑</button>'
       +'</span></div>';
@@ -8617,7 +8653,9 @@ function _tkBind(){
     var _dc2=(el.getAttribute&&el.getAttribute('data-doccol'))||'';
     if(_dc2){var _dp=_dc2.split('|');_tkDocSet(_dp[1],(_dp[0]==='bg')?3:2,el.value);return;}
     if(el.id==='tkFD'){_tkFD=el.value;renderTracking();return;}
-var _ca=(el.getAttribute&&el.getAttribute('data-colcolor'))||'';if(_ca){var _cc=_ca.split('|'),_co={};if(_cc[0]==='hb')_co.hb=el.value;else if(_cc[0]==='cb')_co.cb=el.value;else _co.fg=el.value;_tkColApply(_cc[1],_co);return;}if(el.id==='tkmAttFile'){var _fl=el.files?[].slice.call(el.files):[];el.value='';if(_fl.length)_tkAttAddFiles(_fl);return;}if(el.id==='tkFA'){_tkFA=el.value;renderTracking();}else if(el.id==='tkFP'){_tkFP=el.value;renderTracking();}else if(el.id==='tkFC'){_tkFC=el.value;renderTracking();}});
+var _cn=(el.getAttribute&&el.getAttribute('data-colnm'))||'';if(_cn){_tkColSetName(_cn,el.value);return;}
+    var _cod=(el.getAttribute&&el.getAttribute('data-colord'))||'';if(_cod){_tkColSetPos(_cod,el.value);return;}
+    var _ca=(el.getAttribute&&el.getAttribute('data-colcolor'))||'';if(_ca){var _cc=_ca.split('|'),_co={};if(_cc[0]==='hb')_co.hb=el.value;else if(_cc[0]==='cb')_co.cb=el.value;else _co.fg=el.value;_tkColApply(_cc[1],_co);return;}if(el.id==='tkmAttFile'){var _fl=el.files?[].slice.call(el.files):[];el.value='';if(_fl.length)_tkAttAddFiles(_fl);return;}if(el.id==='tkFA'){_tkFA=el.value;renderTracking();}else if(el.id==='tkFP'){_tkFP=el.value;renderTracking();}else if(el.id==='tkFC'){_tkFC=el.value;renderTracking();}});
   pg.addEventListener('pointerdown',function(e){_tkColClickGuard=false;var _hd=e.target&&e.target.closest?e.target.closest('.tkcolhd'):null;if(_hd&&!_tkCD)_tkColDown(_hd,e);});
   pg.addEventListener('dragstart',function(e){var c=e.target&&e.target.closest?e.target.closest('.tkcard'):null;if(c){_tkDragId=c.getAttribute('data-id');c.classList.add('dragging');try{e.dataTransfer.effectAllowed='copyMove';/* ต้องอนุญาต copy ด้วย ไม่งั้นตอนกด Alt ค้างเบราว์เซอร์จะไม่ยอมให้วางเลย */e.dataTransfer.setData('text/plain',_tkDragId);}catch(_e){}}});
   pg.addEventListener('dragend',function(e){var c=e.target&&e.target.closest?e.target.closest('.tkcard'):null;if(c)c.classList.remove('dragging');_tkClearDrop();_tkDragId=null;});
