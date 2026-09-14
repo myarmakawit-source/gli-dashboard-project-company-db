@@ -4049,6 +4049,52 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-pg .pgtbl tbody tr.pgrow.pgrow-glred td:first-child{box-shadow:inset 3px 0 0 0 #D6558F;}
 #page-pg .pgtbl tbody tr.pgrow.pgrow-man td{background:#FDFAEE;}
 #page-pg .pgtbl tbody tr.pgrow.pgrow-man td:first-child{box-shadow:inset 3px 0 0 0 #D9A62B;}
+
+/* ===== v11.1: Progress % table — Database colour scheme and height =====
+   The GL table (.gltbl) is the reference: one flat dark-teal header band with hairline
+   white separators, plain neutral cell borders, a barely-there zebra and a soft hover.
+   The revenue / cost grouping still reads, but through a thin underline instead of
+   gold-and-mint gradients. */
+#page-pg .pgtblwrap{max-height:72vh;}
+#page-pg .pgtbl thead th,
+#page-pg .pgtbl thead th.pgprogh,#page-pg .pgtbl thead th.pgstath,
+#page-pg .pgtbl thead th.pgprojh,#page-pg .pgtbl thead th.pgseq,
+#page-pg .pgtbl thead th.pgsub-rev,#page-pg .pgtbl thead th.pgsub-cost,
+#page-pg .pgtbl .pggh{
+  background:#0F3D37;background-image:none;color:#fff;
+  border:none;border-right:1px solid rgba(255,255,255,.12);border-bottom:1px solid rgba(255,255,255,.12);}
+#page-pg .pgtbl thead{background:#0F3D37;}
+/* the two column groups keep a quiet underline so Revenue vs Cost is still readable */
+#page-pg .pgtbl .pggh.gh-rev{border-bottom:2px solid rgba(255,255,255,.34);color:#fff;}
+#page-pg .pgtbl .pggh.gh-cost{border-bottom:2px solid rgba(255,255,255,.34);color:#fff;}
+#page-pg .pgtbl thead th.pgsub-rev,#page-pg .pgtbl thead th.pgsub-cost{border-bottom:1px solid rgba(255,255,255,.12);}
+#page-pg .pgtbl thead th.pgsub-rev:hover,#page-pg .pgtbl thead th.pgsub-cost:hover{background:#14514A;}
+#page-pg .pgtbl thead th.pgsub-rev.on,#page-pg .pgtbl thead th.pgsub-cost.on{background:#0A2E29;}
+#page-pg .pgtbl thead th .pgfbtn,#page-pg .pgtbl thead th.pgsub-cost .pgfbtn{background:rgba(255,255,255,.17);color:#fff;}
+#page-pg .pgtbl thead th .pgfbtn:hover,#page-pg .pgtbl thead th.pgsub-cost .pgfbtn:hover{background:rgba(255,255,255,.32);}
+/* body: neutral hairlines, no per-group colour, Database zebra + hover */
+#page-pg .pgtbl tbody td,
+#page-pg .pgtbl tbody td.pgrev,#page-pg .pgtbl tbody td.pgearn,#page-pg .pgtbl tbody td.pgaccr,
+#page-pg .pgtbl tbody td.pgadv,#page-pg .pgtbl tbody td.pgdiff,
+#page-pg .pgtbl tbody td.pgcost,#page-pg .pgtbl tbody td.pgbud,#page-pg .pgtbl tbody td.paccrx,
+#page-pg .pgtbl tbody td.pgprogc,#page-pg .pgtbl tbody td.pgseq,
+#page-pg .pgtbl tbody td.pgproj,#page-pg .pgtbl tbody td.pgstatc{
+  background:#fff;border:none;border-bottom:1px solid var(--line2,#F1ECE2);border-right:1px solid #F1EDE3;}
+#page-pg .pgtbl tbody tr.pgrow-alt td{background:rgba(16,24,40,.014);}
+#page-pg .pgtbl tbody tr.pgrow:hover td,#page-pg .pgtbl tbody tr:hover td{background:rgba(14,92,82,.05);}
+/* totals row picks up the same flat band as the header */
+#page-pg .pgtbl tfoot tr.pgtot td,
+#page-pg .pgtbl tfoot tr.pgtot td.pgbud,#page-pg .pgtbl tfoot tr.pgtot td.pgearn,
+#page-pg .pgtbl tfoot tr.pgtot td.pgaccr,#page-pg .pgtbl tfoot tr.pgtot td.pgdiff,
+#page-pg .pgtbl tfoot tr.pgtot td.pgadv,#page-pg .pgtbl tfoot tr.pgtot td.paccrx{
+  background:#0F3D37;background-image:none;color:#fff;
+  border:none;border-right:1px solid rgba(255,255,255,.12);border-top:2px solid #0B302B;}
+
+/* header sub-labels: quiet translucent white, no glow or animation (Database has none) */
+#page-pg .pgtbl thead th .pgth span{color:rgba(255,255,255,.62);}
+#page-pg .pgtbl thead th .pghdac{color:rgba(255,255,255,.66)!important;text-shadow:none;animation:none;background:none;font-weight:700;}
+#page-pg .pgtbl thead th .pghdstar{color:rgba(255,255,255,.55);text-shadow:none;animation:none;}
+#page-pg .pgtbl thead th .pgprogh-s{color:rgba(255,255,255,.62);}
 </style>
 <!-- ===================================================================
      v8.92 — Financial Statements: refined palette, typography & polish
@@ -13382,7 +13428,7 @@ function renderProgress(){ var w=document.getElementById('pgWrap'); if(!w)return
 function _pgStickyHead(w){ try{ var t=w.querySelector('.pgtbl'); var wrap=w.querySelector('.pgtblwrap');
   if(t){ try{ t.style.zoom=''; }catch(_z0){} }   /* v9.159: reset zoom first so the measurements below are the natural (unzoomed) sizes */
   var gr=w.querySelector('.pgtbl thead tr.pggrp'); if(t&&gr){ var rc=(gr.getBoundingClientRect&&gr.getBoundingClientRect().height)||0; var h=rc||gr.offsetHeight||0; if(h>0)t.style.setProperty('--pggrph',(Math.round(h*100)/100)+'px'); }   /* v9.155: exact fractional group-row height (in the table's own CSS space) */
-  if(wrap){ var top=wrap.getBoundingClientRect().top; if(top>0&&top<window.innerHeight){ var mh=Math.max(320,Math.round(window.innerHeight-top-20)); wrap.style.maxHeight=mh+'px'; } }
+  if(wrap){ var top=wrap.getBoundingClientRect().top; if(top>0&&top<window.innerHeight){ var mh=Math.max(Math.round(window.innerHeight*0.72),Math.round(window.innerHeight-top-20)); wrap.style.maxHeight=mh+'px'; } }
   /* v9.159: FIT-TO-PAGE — the Progress% table is wider than most screens (13 full-amount columns). Scale it down (CSS zoom) so it fits the available width on notebooks AND monitors with no horizontal scroll. Never enlarge; gentle 0.5 floor keeps text legible. Sticky header/footer + the dark backdrop scale with it, so they stay aligned. */
   if(t&&wrap){ var natural=t.scrollWidth||0, avail=wrap.clientWidth||0;
     if(natural>2&&avail>2&&natural>avail+1){ var z=avail/natural; if(z<0.5)z=0.5; t.style.zoom=(Math.floor(z*1000)/1000); } } }catch(e){} }
