@@ -13720,8 +13720,8 @@ function _pgStickyHead(w){ try{ var t=w.querySelector('.pgtbl'); var wrap=w.quer
   var gr=w.querySelector('.pgtbl thead tr.pggrp'); if(t&&gr){ var rc=(gr.getBoundingClientRect&&gr.getBoundingClientRect().height)||0; var h=rc||gr.offsetHeight||0; if(h>0)t.style.setProperty('--pggrph',(Math.round(h*100)/100)+'px'); }   /* v9.155: exact fractional group-row height (in the table's own CSS space) */
   if(wrap){ var top=wrap.getBoundingClientRect().top; if(top>0&&top<window.innerHeight){ var mh=Math.max(Math.round(window.innerHeight*0.72),Math.round(window.innerHeight-top-20)); wrap.style.maxHeight=mh+'px'; } }
   /* v9.159: FIT-TO-PAGE — the Progress% table is wider than most screens (13 full-amount columns). Scale it down (CSS zoom) so it fits the available width on notebooks AND monitors with no horizontal scroll. Never enlarge; gentle 0.5 floor keeps text legible. Sticky header/footer + the dark backdrop scale with it, so they stay aligned. */
-  if(t&&wrap){ var natural=t.scrollWidth||0, avail=wrap.clientWidth||0;
-    if(natural>2&&avail>2&&natural>avail+1){ var z=avail/natural; if(z<0.5)z=0.5; t.style.zoom=(Math.floor(z*1000)/1000); } } }catch(e){} }
+  /* v11.2: no fit-to-page zoom — the table keeps the same 12px type as the Database module
+     and scrolls horizontally, instead of being scaled down to ~80% (which rendered at ~9px). */ }catch(e){} }
 /* ===== v9.161: GLOBAL fit-to-page — shrink ANY wide data table (Business Performance · Database/GL · WHT · VAT · Monitor · …) so it fits its horizontally-scrolling box on notebooks AND monitors, with no horizontal scroll. Generic: finds every table inside a scroll container on the visible page and scales it (CSS zoom) to the available width. Never enlarges; 0.5 floor keeps text legible. Progress% keeps its own handler (_pgStickyHead). ===== */
 function _fitWideTables(){ try{
   var pages=document.querySelectorAll('.page');
@@ -31009,5 +31009,36 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 #page-vat .vupzone{border:1px dashed #D7DEE8!important;border-radius:12px!important;background:#FBFCFD!important;box-shadow:none!important}
 #page-vat .vupzone:hover,#page-vat .vupzone.dzon,#page-vat .vupzone.drag{border-color:#0E5C52!important;background:#F5FAF8!important}
 #page-vat .vupicon{color:#0E5C52!important}
+</style>
+<style id="pgUniformPanel">
+/* v11.2: Progress % — every command-panel card the same size with its controls stacked in
+   one column, and the page put on the Database module's 12px type scale.
+   Last block in the document -> wins the cascade. Fully revertible (delete this block). */
+
+/* ---------- 1) one grid: equal card width, equal row height ---------- */
+#page-pg .glacts{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(214px,1fr))!important;
+  align-items:stretch!important;gap:12px!important;margin:8px 0 8px!important;
+  grid-auto-rows:1fr!important}/* every row the same height, so a wrapped card matches the rest */
+#page-pg .glacts>.glactg{width:auto!important;min-width:0!important}
+#page-pg .glacts>.glactg.glactg-act,#page-pg .glacts>.glactg.glactg-cls,
+#page-pg .glacts>.glactg.glactg-yr,#page-pg .glacts>.glactg.glactg-mo{width:auto!important}
+
+/* ---------- 2) controls stacked vertically inside every card ---------- */
+#page-pg .glacts .glactfil,#page-pg .glacts .glactfil-yr,#page-pg .glacts .glactfil-mo{
+  grid-template-columns:1fr!important;gap:5px!important}
+#page-pg .glacts .glactfil .pgychip,#page-pg .glacts .glactfil .pgstchip,
+#page-pg .glacts .glactfil .pghlchip,#page-pg .glacts .glactfil .pgcatchip{
+  text-align:left!important;font-size:12px!important;min-height:29px!important}
+#page-pg .glacts .glactb{font-size:12px!important;min-height:34px!important}
+
+/* ---------- 3) Database type scale (12px base, like .gltbl and .glpill) ---------- */
+#page-pg .pgkpi-l{font-size:12px!important;font-weight:700!important;line-height:1.2!important}
+#page-pg .pgkpi-l>span{font-size:10px!important;font-weight:700!important;letter-spacing:.04em!important}
+#page-pg .pgkpi-v{font-size:15.5px!important;font-weight:800!important}
+#page-pg .pgkpi-s,#page-pg .pgkpired-line{font-size:11px!important}
+#page-pg .pgkpi-ic{font-size:14px!important}
+#page-pg .pgtbl{font-size:12px!important}
+#page-pg .pgtbl thead th,#page-pg .pgtbl tbody td{font-size:12px!important}
+#page-pg .pgtbl .pggh{font-size:11px!important}
 </style>
 </body></html>
