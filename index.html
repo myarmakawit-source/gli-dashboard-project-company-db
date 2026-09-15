@@ -15879,6 +15879,43 @@ function _arVJMissing(code){
    สร้าง HTML สำหรับพิมพ์ขึ้นใหม่จาก _arVJLast (ไม่ได้ก๊อป innerHTML ของ modal มาทั้งก้อน)
    คำนวณยอดด้วยสูตรชุดเดียวกับการ์ดบนจอ ตัวเลขในไฟล์ PDF จึงตรงกับที่เห็นทุกบรรทัด
    หัวกระดาษใช้สไตล์เดียวกับ Export PDF ของ GL (หัวเขียว A4 · ฟอนต์ไทย) */
+/* v11.7: the exported PDF carries the journal entries too, not just the statement.
+   Print-shaped copy of _apVJGlMini — same GL columns, classes the print sheet styles. */
+function _arVJJnPDF(vch){
+  function e2(x){return (''+(x==null?'':x)).replace(/[&<>]/g,function(c){return c==='&'?'&amp;':c==='<'?'&lt;':'&gt;';});}
+  function m2(v){v=+v||0;return v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+  vch=(''+(vch==null?'':vch)).trim();
+  if(!vch)return '';
+  if(typeof GLROWS==='undefined'||!GLROWS||!GLROWS.length||typeof _glVJIndex!=='function')
+    return '<div class="jnnone">\u2014 \u0e15\u0e49\u0e2d\u0e07\u0e40\u0e1b\u0e34\u0e14\u0e44\u0e1f\u0e25\u0e4c GL \u0e01\u0e48\u0e2d\u0e19 \u0e08\u0e36\u0e07\u0e08\u0e30\u0e41\u0e2a\u0e14\u0e07\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e1a\u0e31\u0e0d\u0e0a\u0e35\u0e44\u0e14\u0e49 \u2014</div>';
+  var rows=_glVJIndex()[vch.toUpperCase()];
+  if(!rows||!rows.length)return '<div class="jnnone">\u2014 \u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e1a\u0e31\u0e0d\u0e0a\u0e35\u0e02\u0e2d\u0e07 '+e2(vch)+' \u0e43\u0e19 GL \u2014</div>';
+  var d=0,c=0,body='';
+  for(var j=0;j<rows.length;j++){var r=rows[j];var dv=+r[16]||0,cv=+r[17]||0;d+=dv;c+=cv;
+    var de=(''+(r[8]||'')).trim(),rm=(''+(r[15]||'')).trim();
+    var narr=(de&&rm&&de!==rm)?(de+' \u00b7 '+rm):(de||rm||'');
+    body+='<tr><td class="ac"><b>'+e2(''+(r[0]||''))+'</b> '+e2(''+(r[1]||''))+'</td>'
+      +'<td class="nr">'+e2(narr)+'</td><td class="n dr">'+(dv?m2(dv):'')+'</td><td class="n cr">'+(cv?m2(cv):'')+'</td></tr>';}
+  var diff=d-c,ok=Math.abs(diff)<0.005;
+  return '<table class="jn"><thead><tr><th>Account (A/C)</th><th>Description</th><th class="n">Debit</th><th class="n">Credit</th></tr></thead>'
+    +'<tbody>'+body+'</tbody><tfoot>'
+    +'<tr class="tot"><td colspan="2">Total</td><td class="n dr">'+m2(d)+'</td><td class="n cr">'+m2(c)+'</td></tr>'
+    +'<tr class="bal '+(ok?'ok':'bad')+'"><td colspan="4">'+(ok?'\u2713 Debit = Credit':'\u26a0 Diff \u0e3f'+m2(diff))+'</td></tr>'
+    +'</tfoot></table>';
+}
+/* the journal-entry block printed under a card: one side once, the other side per voucher */
+function _arVJJnBlock(leftLbl,leftVch,rightLbl,rightVchs){
+  function e2(x){return (''+(x==null?'':x)).replace(/[&<>]/g,function(c){return c==='&'?'&amp;':c==='<'?'&lt;':'&gt;';});}
+  var seen={},right='',i,v;
+  for(i=0;i<rightVchs.length;i++){v=(''+(rightVchs[i]||'')).trim();
+    if(!v||seen[v.toUpperCase()])continue;seen[v.toUpperCase()]=1;
+    right+='<div class="jnlab re">'+e2(rightLbl)+' '+e2(v)+'</div>'+_arVJJnPDF(v);}
+  if(!right)right='<div class="jnnone">\u2014 \u0e44\u0e21\u0e48\u0e21\u0e35\u0e43\u0e1a\u0e2a\u0e33\u0e04\u0e31\u0e0d\u0e2d\u0e35\u0e01\u0e1d\u0e31\u0e48\u0e07 \u2014</div>';
+  return '<div class="jnwrap"><div class="jnh">\ud83d\udcd2 \u0e01\u0e32\u0e23\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e1a\u0e31\u0e0d\u0e0a\u0e35 \u00b7 Journal entries</div>'
+    +'<div class="jnsplit"><div class="jnhalf">'
+    +'<div class="jnlab ar">'+e2(leftLbl)+' '+e2(leftVch||'\u2014')+'</div>'+(leftVch?_arVJJnPDF(leftVch):'<div class="jnnone">\u2014</div>')
+    +'</div><div class="jnhalf">'+right+'</div></div></div>';
+}
 function _arVJExportPDF(){
   if(!_arVJLast||!_arVJLast.items.length){alert('ยังไม่มีผลลัพธ์ให้ส่งออก — วางเลข AR / RE ในช่องด้านบนก่อน');return;}
   function e2(s){return (''+(s==null?'':s)).replace(/[&<>]/g,function(c){return c==='&'?'&amp;':c==='<'?'&lt;':'&gt;';});}
@@ -15895,7 +15932,9 @@ function _arVJExportPDF(){
       var re=rows.slice().sort(function(a,b){return _apVJDateKey(a[22])-_apVJDateKey(b[22]);});
       var total=0,totRec=0,lastBal=0;
       for(i=0;i<re.length;i++)total+=_apVJNum(re[i][15]);
+      var reVchs=[];
       for(i=0;i<re.length;i++){r=re[i];var t=_apVJNum(r[15]),rec=_apVJNum(r[19]),bal=_apVJNum(r[20]);totRec+=rec;lastBal=bal;
+        reVchs.push(_arVJReDisp(r));
         tb+='<tr><td class="ap">'+(i===0?e2(it.code):'')+'</td><td class="ap">'+e2(''+(r[4]||r[1]||''))+'</td><td class="n ap">'+m2(t)+'</td>'
           +'<td class="sep">'+e2(_arVJReDisp(r))+'</td><td>'+e2(''+(r[22]||''))+'</td><td class="n rc">'+m2(rec)+'</td>'
           +'<td class="n'+(Math.abs(bal)<0.005?' zero':(bal<0?' neg':''))+'">'+m2(bal)+'</td></tr>';}
@@ -15910,14 +15949,18 @@ function _arVJExportPDF(){
         +'<td class="n'+(cleared?' zero':'')+'">'+m2(lastBal)+'</td></tr>'
         +'<tr class="note '+(cleared?'ok':'open')+'"><td colspan="7">'
         +(cleared?'✓ รับชำระครบ (fully received)':'คงเหลือ ฿'+m2(lastBal)+(lastBal>0?' — ยังรับไม่ครบ (เช่น เงินประกันผลงาน / ภาษีหัก ณ ที่จ่าย)':''))
-        +'</td></tr></tfoot></table></div>';
+        +'</td></tr></tfoot></table>'
+        +_arVJJnBlock('\u0e15\u0e31\u0e49\u0e07\u0e25\u0e39\u0e01\u0e2b\u0e19\u0e35\u0e49 \u00b7 AR',it.code,'\u0e23\u0e31\u0e1a\u0e0a\u0e33\u0e23\u0e30 \u00b7 RE',reVchs)
+        +'</div>';
     }else{
       nRE++;
       var recdate='';
       for(i=0;i<rows.length;i++){if(!recdate&&rows[i][22])recdate=''+rows[i][22];}
       var ar=rows.slice().sort(function(a,b){return _apVJDateKey(a[1])-_apVJDateKey(b[1]);});
       var rTot=0;
+      var arVchs=[];
       for(i=0;i<ar.length;i++){r=ar[i];var arc=''+(r[2]||''),t2=_apVJNum(r[15]),rec2=_apVJNum(r[19]),bal2=_apVJNum(r[20]);rTot+=rec2;
+        arVchs.push(arc);
         tb+='<tr><td class="ap">'+e2(arc)+(r[0]?'<div class="sm">'+e2(''+r[0])+'</div>':'')+'</td><td class="ap">'+e2(''+(r[4]||r[1]||''))+'</td>'
           +'<td class="n ap">'+m2(t2)+'</td><td class="sep">'+e2(_arVJReDisp(r))+'</td><td>'+e2(''+(r[22]||''))+'</td>'
           +'<td class="n rc">'+m2(rec2)+'</td><td class="n'+(Math.abs(bal2)<0.005?' zero':(bal2<0?' neg':''))+'">'+m2(bal2)+'</td></tr>';}
@@ -15927,7 +15970,9 @@ function _arVJExportPDF(){
         +'<span class="amt">รับรวม ฿'+m2(rTot)+' · '+ar.length+' ใบลูกหนี้</span></div>'
         +'<table>'+TH('คงเหลือ (ของ AR)')+'<tbody>'+tb+'</tbody>'
         +'<tfoot><tr class="tot"><td colspan="3">'+ar.length+' ใบลูกหนี้</td><td class="sep">รวมรับด้วย '+e2(it.code)+'</td><td></td>'
-        +'<td class="n">'+m2(rTot)+'</td><td></td></tr></tfoot></table></div>';
+        +'<td class="n">'+m2(rTot)+'</td><td></td></tr></tfoot></table>'
+        +_arVJJnBlock('\u0e23\u0e31\u0e1a\u0e0a\u0e33\u0e23\u0e30 \u00b7 RE',it.code,'\u0e15\u0e31\u0e49\u0e07\u0e25\u0e39\u0e01\u0e2b\u0e19\u0e35\u0e49 \u00b7 AR',arVchs)
+        +'</div>';
     }
   });
   var miss=(_arVJLast.miss||[]);
@@ -15977,7 +16022,26 @@ function _arVJExportPDF(){
     +'.gi{flex:1 1 140px;padding:7px 10px;border-right:1px solid #EEF3F1}.gi:last-child{border-right:none}'
     +'.gk{font-size:8.5px;color:#667;font-weight:700}.gv{font-size:12.5px;font-weight:800;color:#0A463E;margin-top:1px;font-variant-numeric:tabular-nums}'
     +'.gv.pos{color:#15803D}.gv.neg{color:#B42318}'
-    +'.gtn{font-size:8.5px;color:#667;padding:5px 10px;border-top:1px solid #EEF3F1;background:#FBFCFB}';
+    +'.gtn{font-size:8.5px;color:#667;padding:5px 10px;border-top:1px solid #EEF3F1;background:#FBFCFB}'
+    +'.jnwrap{border-top:1px solid #CBE0D8;background:#FBFCFB}'
+    +'.jnh{font-size:9.5px;font-weight:800;color:#0A463E;padding:4px 9px;background:#EAF3EF;border-bottom:1px solid #DCEAE4}'
+    +'.jnsplit{display:flex;gap:0}'
+    +'.jnhalf{flex:1 1 50%;min-width:0;padding:6px 9px 8px}'
+    +'.jnhalf+.jnhalf{border-left:1px solid #DCEAE4}'
+    +'.jnlab{font-size:9px;font-weight:800;padding:2px 7px;border-radius:9px;display:inline-block;margin:4px 0 3px}'
+    +'.jnlab.ar{background:#EAF3EF;color:#0A463E}.jnlab.re{background:#E7EFF8;color:#0B4F8A}'
+    +'.jnhalf>.jnlab:first-child{margin-top:0}'
+    +'table.jn{font-size:8.5px;margin-bottom:2px}'
+    +'table.jn thead th{background:#F3F7F5;padding:3px 5px;font-size:8px}'
+    +'table.jn tbody td{padding:2px 5px;border-bottom:1px solid #F1F5F3}'
+    +'table.jn td.ac{white-space:normal}table.jn td.ac b{color:#0A463E}'
+    +'table.jn td.nr{color:#556;white-space:normal;word-break:break-word}'
+    +'table.jn td.dr{color:#0A463E}table.jn td.cr{color:#0B4F8A}'
+    +'table.jn tfoot .tot td{background:#F3F7F5;font-weight:800;padding:3px 5px;border-top:1px solid #CBE0D8}'
+    +'table.jn tfoot .bal td{font-size:8px;font-weight:700;padding:2px 5px;text-align:right}'
+    +'table.jn tfoot .bal.ok td{background:#E7F6EC;color:#15803D}'
+    +'table.jn tfoot .bal.bad td{background:#FDECEA;color:#B42318}'
+    +'.jnnone{font-size:8.5px;color:#889;padding:4px 2px}';
   w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+e2(title)+'</title><style>'+css+'</style></head><body>'
     +'<div class="hd"><div class="co">บริษัท แกรนด์ไลน์ อินโนเวชั่น จำกัด</div><div class="tt">'+e2(title)+'</div><div class="mt">'+e2(meta)+'</div></div>'
     +cards+sumb+'</body></html>');
