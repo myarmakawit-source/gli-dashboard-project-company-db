@@ -11337,6 +11337,7 @@ function _bblState(){
   if(BBLLOAN.showgrace==null)BBLLOAN.showgrace=true; if(!BBLLOAN.active)BBLLOAN.active='A200';
   return BBLLOAN;
 }
+var _bblEditOpen=false;/* v11.8: the page is read-only until Edit settings is pressed */
 var _bblSaveT=null;
 function _bblSaveState(){ if(typeof saveBbl==='function'){ if(_bblSaveT)clearTimeout(_bblSaveT); _bblSaveT=setTimeout(function(){try{saveBbl();}catch(e){}},350); }
   else { try{localStorage.setItem('gli_bblloan',JSON.stringify(BBLLOAN));}catch(e){} } }
@@ -11376,13 +11377,16 @@ function _bblActionPanel(active){
       {id:'bblXlsBtn',ic:'\u2913',l:'Excel',cls:'bbl-b bbl-xls',title:'Export this repayment schedule to an Excel workbook',off:isOV},
       {id:'bblPdfBtn',ic:'\ud83d\udda8\ufe0f',l:'PDF',cls:'bbl-b bbl-pdf',title:'Print or save this repayment schedule as a PDF',off:isOV}
     ]},
+    {t:'Settings',t2:'Edit',ic:'\ud83d\udd12',btns:[
+      {id:'bblEditBtn',ic:(_bblEditOpen?'\ud83d\udd13':'\ud83d\udd12'),l:(_bblEditOpen?'Lock settings':'Edit settings'),cls:'bbl-b bbl-edit'+(_bblEditOpen?' on':''),title:'The whole page is read-only. Unlock this to change the account / project codes and the calculation rate, then lock it again.',off:isOV}
+    ]},
     {t:'View',t2:'Display',ic:'\ud83d\udc41\ufe0f',btns:[
       {id:'bblGrcBtn',ic:(st.showgrace?'\u25be':'\u25b8'),l:(st.showgrace?'Hide grace period':'Show grace period'),cls:'bbl-b bbl-view',title:'Show or hide the interest paid before principal repayment began',off:isOV}
     ]}
   ];
   var h=_dbActPanel(groups,[{t:'Contract',t2:'Select',ic:'\ud83c\udfe6',wcls:'glactg-cls',filCls:'bblcontracts',html:chips}]);
   /* _dbActPanel has no slot for custom attributes, so tag the buttons afterwards by id */
-  var map={bblGlBtn:'data-glrefresh="'+active+'"',bblXlsBtn:'data-xlsx="'+active+'"',bblPdfBtn:'data-pdf="'+active+'"',bblGrcBtn:'data-gracetoggle="1"'};
+  var map={bblGlBtn:'data-glrefresh="'+active+'"',bblXlsBtn:'data-xlsx="'+active+'"',bblPdfBtn:'data-pdf="'+active+'"',bblGrcBtn:'data-gracetoggle="1"',bblEditBtn:'data-bbledit="1"'};
   for(var k in map){ if(Object.prototype.hasOwnProperty.call(map,k)) h=h.replace('id="'+k+'"','id="'+k+'" '+map[k]); }
   return h;
 }
@@ -11401,28 +11405,31 @@ function renderBbl(){
       'Read-only figures pulled live from the <b>Database GL</b> by the account and project codes set below \u2014 refreshed when the page opens, or with <b>Update from GL</b>. '+
       'Vouchers dated in the same month are treated as one instalment and settled <b>FIFO</b>: an overpayment rolls into the next instalment, a short payment waits for the following month, '+
       'and every remaining instalment is recalculated from the real closing balance. Click a voucher number to open its journal entry. '+
-      'Only the account / project codes and the calculation rate can be edited.</span></div>'+
+      'The page is read-only \u2014 unlock <b>Edit settings</b> in the panel to change the account / project codes or the calculation rate.</span></div>'+
     body+'</div>';
   _bblBind(wrap);
 }
-function _bblKpi(th,en,val,c,bg,sub){ return '<div class="bblkpi" style="--k:'+c+';--kbg:'+bg+'"><div class="bblkpi-l"><span class="bblkpi-th">'+th+'</span><span class="bblkpi-en">'+en+'</span></div><div class="bblkpi-v">'+val+(sub?' <small>'+sub+'</small>':'')+'</div></div>'; }
+function _bblKpi(th,en,val,c,bg,sub,ic){ return '<div class="bblkpi" style="--k:'+c+';--kbg:'+bg+'">'
+  +'<div class="bblkpi-h"><span class="bblkpi-ic">'+(ic||'')+'</span><div class="bblkpi-l"><span class="bblkpi-th">'+th+'</span><span class="bblkpi-en">'+en+'</span></div></div>'
+  +'<div class="bblkpi-v">'+val+(sub?' <small>'+sub+'</small>':'')+'</div></div>'; }
 function _bblDashPanel(title,tiles){ return '<div class="bbldashp"><div class="bbldashp-h"><span class="bblic bblic-dash">📊</span>'+title+'</div><div class="bblkpis">'+tiles+'</div></div>'; }
 
 function _bblRenderLoan(lk){
   var c=_bblCalc(lk), L=c.L, mt=L.meta, t=c.tot, st=_bblState();
   var kpis=_bblDashPanel(_bblEsc(mt.short)+' — Loan Dashboard',
-    _bblKpi('Credit Facility','',_bblFmt(mt.facility),'var(--bbl-brand)','var(--bbl-brand-t)')+
-    _bblKpi('Drawn','',_bblFmt(t.drawn),'var(--bbl-blue)','var(--bbl-blue-bg)')+
-    _bblKpi('Outstanding','',_bblFmt(t.outstanding),'#0b6b4f','#e2f3ea')+
-    _bblKpi('Principal Paid','',_bblFmt(t.prinPaid),'var(--bbl-pos)','var(--bbl-pos-bg)')+
-    _bblKpi('Interest Paid','',_bblFmt(t.intPaid),'var(--bbl-gold-d,#8A5E12)','var(--bbl-gold-t)')+
-    _bblKpi('Instalments','paid / total',''+t.nPaid,'var(--bbl-brand-d)','var(--bbl-brand-t)','/ '+t.nInst));
+    _bblKpi('Credit Facility','',_bblFmt(mt.facility),'var(--bbl-brand)','var(--bbl-brand-t)','','🏦')+
+    _bblKpi('Drawn','',_bblFmt(t.drawn),'var(--bbl-blue)','var(--bbl-blue-bg)','','📤')+
+    _bblKpi('Outstanding','',_bblFmt(t.outstanding),'#B45309','#FCF1E4','','📊')+
+    _bblKpi('Principal Paid','',_bblFmt(t.prinPaid),'var(--bbl-pos)','var(--bbl-pos-bg)','','✅')+
+    _bblKpi('Interest Paid','',_bblFmt(t.intPaid),'var(--bbl-gold-d,#8A5E12)','var(--bbl-gold-t)','','💰')+
+    _bblKpi('Instalments','paid / total',''+t.nPaid,'#6A34C4','#EFEBFB','/ '+t.nInst,'📅'));
   /* GL setup (only editable part) */
-  function gfld(lbl,f,val,ph){ return '<div class="bblfld"><label>'+lbl+'</label><input class="bblin bblcode" data-lk="'+lk+'" data-meta="'+f+'" value="'+_bblEsc(val)+'" placeholder="'+(ph||'')+'" spellcheck="false" autocomplete="off"></div>'; }
+  var _ro=_bblEditOpen?'':' readonly';
+  function gfld(lbl,f,val,ph){ return '<div class="bblfld"><label>'+lbl+'</label><input class="bblin bblcode'+(_bblEditOpen?'':' locked')+'" data-lk="'+lk+'" data-meta="'+f+'" value="'+_bblEsc(val)+'" placeholder="'+(ph||'')+'" spellcheck="false" autocomplete="off"'+_ro+'></div>'; }
   var glmsg=L._glMsg?('<div class="bblglmsg'+(/^✅/.test(L._glMsg)?' ok':(/^⚠/.test(L._glMsg)?' bad':''))+'">'+_bblEsc(L._glMsg)+'</div>'):'';
-  var glcard='<div class="bblcard bblglcard"><div class="bblcard-h"><div class="bblcard-t"><span class="bblic bblic-gl">⚙️</span>GL data source <span class="bblchip bblchip-gl">Database GL</span></div></div>'+
+  var glcard='<div class="bblcard bblglcard"><div class="bblcard-h"><div class="bblcard-t"><span class="bblic bblic-gl">⚙️</span>GL data source <span class="bblchip bblchip-gl">Database GL</span><span class="bblchip '+(_bblEditOpen?'bblchip-edit':'bblchip-lock')+'">'+(_bblEditOpen?'\u270e Editing':'\ud83d\udd12 Read-only')+'</span></div></div>'+
     '<div class="bblctr">'+ gfld('Loan / Principal A/C code','glPrinCode',mt.glPrinCode,'e.g. 2220400')+ gfld('Interest Expense A/C code','glIntCode',mt.glIntCode,'e.g. 7100200')+ gfld('Project (Ref.) code','glProj',mt.glProj,'e.g. '+mt.proj)+
-      '<div class="bblfld"><label>Calc. Interest Rate (%/yr)</label><input class="bblin bblnum bblrate" data-lk="'+lk+'" data-meta="rate" value="'+_bblEsc(mt.rate)+'" spellcheck="false" autocomplete="off"></div>'+
+      '<div class="bblfld"><label>Calc. Interest Rate (%/yr)</label><input class="bblin bblnum bblrate'+(_bblEditOpen?'':' locked')+'" data-lk="'+lk+'" data-meta="rate" value="'+_bblEsc(mt.rate)+'" spellcheck="false" autocomplete="off"'+_ro+'></div>'+
     '</div></div>';
   /* contract (read-only) */
   function dfld(lbl,val){ return '<div class="bblfld"><label>'+lbl+'</label><div class="bblfval">'+_bblEsc(val)+'</div></div>'; }
@@ -11474,12 +11481,12 @@ function _bblRenderOverview(){
   var A=_bblCalc('A200'),B=_bblCalc('B100');
   var fac=A.tot.fac+B.tot.fac, drawn=A.tot.drawn+B.tot.drawn, prin=A.tot.prinPaid+B.tot.prinPaid, out=A.tot.outstanding+B.tot.outstanding, intr=A.tot.intPaid+B.tot.intPaid;
   var kpis=_bblDashPanel('Portfolio Dashboard — Both Contracts',
-    _bblKpi('Total Facility','',_bblFmt(fac),'var(--bbl-brand)','var(--bbl-brand-t)')+
-    _bblKpi('Drawn','',_bblFmt(drawn),'var(--bbl-blue)','var(--bbl-blue-bg)')+
-    _bblKpi('Outstanding','',_bblFmt(out),'#0b6b4f','#e2f3ea')+
-    _bblKpi('Principal Paid','',_bblFmt(prin),'var(--bbl-pos)','var(--bbl-pos-bg)')+
-    _bblKpi('Interest Paid','',_bblFmt(intr),'var(--bbl-gold-d,#8A5E12)','var(--bbl-gold-t)')+
-    _bblKpi('Instalments (A/B)','paid',A.tot.nPaid+' / '+B.tot.nPaid,'var(--bbl-brand-d)','var(--bbl-brand-t)'));
+    _bblKpi('Total Facility','',_bblFmt(fac),'var(--bbl-brand)','var(--bbl-brand-t)','','🏦')+
+    _bblKpi('Drawn','',_bblFmt(drawn),'var(--bbl-blue)','var(--bbl-blue-bg)','','📤')+
+    _bblKpi('Outstanding','',_bblFmt(out),'#B45309','#FCF1E4','','📊')+
+    _bblKpi('Principal Paid','',_bblFmt(prin),'var(--bbl-pos)','var(--bbl-pos-bg)','','✅')+
+    _bblKpi('Interest Paid','',_bblFmt(intr),'var(--bbl-gold-d,#8A5E12)','var(--bbl-gold-t)','','💰')+
+    _bblKpi('Instalments (A/B)','paid',A.tot.nPaid+' / '+B.tot.nPaid,'#6A34C4','#EFEBFB','','📅'));
   function row(lb,a,b,tt){ return '<tr><td class="l">'+lb+'</td><td>'+a+'</td><td>'+b+'</td><td>'+(tt||'')+'</td></tr>'; }
   var cmp='<div class="bblcard"><div class="bblcard-h"><div class="bblcard-t"><span class="bblic bblic-cmp">Σ</span>Two-contract comparison</div></div>'+
     '<div style="overflow-x:auto"><table class="bblcmp"><thead><tr><th class="l">Item</th><th>'+A.L.meta.emoji+' '+_bblEsc(A.L.meta.short)+' (200MB)</th><th>'+B.L.meta.emoji+' '+_bblEsc(B.L.meta.short)+' (100MB)</th><th>Total</th></tr></thead><tbody>'+
@@ -11495,12 +11502,15 @@ function _bblRenderOverview(){
 function _bblBind(wrap){
   var w=wrap.querySelector('.bblwrap'); if(!w)return;
   w.addEventListener('input',function(e){ var el=e.target; if(!el.classList)return;
+    if(!_bblEditOpen)return;/* locked: nothing on this page edits the data */
     if(el.classList.contains('bblcode')){ var lk=el.getAttribute('data-lk'),mf=el.getAttribute('data-meta'); var L=_bblState().loans[lk]; if(L)L.meta[mf]=el.value; }
     else if(el.classList.contains('bblrate')){ var lk2=el.getAttribute('data-lk'); var L2=_bblState().loans[lk2]; if(L2)L2.meta.rate=_bblN(el.value); } });
   w.addEventListener('change',function(e){ var el=e.target; if(!el.classList)return;
+    if(!_bblEditOpen)return;
     if(el.classList.contains('bblcode')){ var lk=el.getAttribute('data-lk'); var L=_bblState().loans[lk]; if(L){ L._glSig=''; _bblSaveState(); renderBbl(); } }
     else if(el.classList.contains('bblrate')){ _bblSaveState(); renderBbl(); } });
-  w.addEventListener('click',function(e){ var el=e.target.closest?e.target.closest('[data-tab],[data-gracetoggle],[data-glrefresh],[data-xlsx],[data-pdf],[data-vch]'):null; if(!el)return; var S=_bblState();
+  w.addEventListener('click',function(e){ var el=e.target.closest?e.target.closest('[data-tab],[data-gracetoggle],[data-glrefresh],[data-xlsx],[data-pdf],[data-vch],[data-bbledit]'):null; if(!el)return; var S=_bblState();
+    if(el.hasAttribute('data-bbledit')){ _bblEditOpen=!_bblEditOpen; renderBbl(); return; }
     if(el.hasAttribute('data-vch')){ _bblShowVoucher(el.getAttribute('data-vch')); }
     else if(el.hasAttribute('data-tab')){ S.active=el.getAttribute('data-tab'); _bblSaveState(); renderBbl(); }
     else if(el.hasAttribute('data-gracetoggle')){ S.showgrace=!S.showgrace; _bblSaveState(); renderBbl(); }
@@ -31225,5 +31235,45 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 #page-vat .vsop{font-size:15px!important}
 #page-vat .v30hp-big small,#page-bbl .bblkpi-v small{font-size:11px!important}
 #page-vat .vcon{font-size:15px!important}
+</style>
+<style id="bblPanelKpi">
+/* v11.8: Bank loan — equal panel cards, a pastel dashboard block per figure, and a page
+   that is read-only until the settings are deliberately unlocked.
+   Last block in the document -> wins the cascade. */
+
+/* ---------- 1) one grid: equal card width and height ---------- */
+#page-bbl .glacts{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(214px,1fr))!important;
+  align-items:stretch!important;grid-auto-rows:1fr!important;gap:12px!important;margin:6px 0 12px!important}
+#page-bbl .glacts>.glactg{width:auto!important;min-width:0!important}
+#page-bbl .glacts>.glactg.glactg-act,#page-bbl .glacts>.glactg.glactg-cls,
+#page-bbl .glacts>.glactg.glactg-yr,#page-bbl .glacts>.glactg.glactg-mo{width:auto!important}
+#page-bbl .glactb.bbl-edit .glacti{color:#8A5E12}
+#page-bbl .glactb.bbl-edit.on{background:#FBF4DC!important;border-color:#D8BE7E!important;color:#8A5E12!important}
+
+/* ---------- 2) the dashboard: an icon and a pastel ground per block ---------- */
+#page-bbl .bblkpi{background:var(--kbg,#F7F9FA)!important;border:1px solid transparent!important;
+  border-radius:12px!important;box-shadow:none!important;padding:10px 12px!important;
+  display:flex!important;flex-direction:column;gap:7px;justify-content:flex-start}
+#page-bbl .bbldashp .bblkpi{background:var(--kbg,#F7F9FA)!important}
+#page-bbl .bblkpi::before{display:none!important}
+#page-bbl .bblkpi-h{display:flex;align-items:center;gap:8px;min-width:0}
+#page-bbl .bblkpi-ic{flex:none;display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:8px;background:rgba(255,255,255,.72);font-size:13px;line-height:1}
+#page-bbl .bblkpi-l{display:flex!important;flex-direction:column;gap:1px;min-width:0;flex:1}
+#page-bbl .bblkpi-th{font-size:11.5px!important;font-weight:700!important;color:var(--k)!important;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#page-bbl .bblkpi-en{font-size:9.5px!important;font-weight:700!important;color:var(--k)!important;opacity:.62}
+#page-bbl .bblkpi-v{font-size:16px!important;font-weight:800!important;color:#101828!important;margin:0!important}
+#page-bbl .bblkpi-v small{color:#667085!important}
+#page-bbl .bbldashp{background:#fff!important;border:1px solid #E7EBF3!important}
+#page-bbl .bblkpis{gap:10px!important}
+
+/* ---------- 3) read-only: the settings look locked until they are unlocked ---------- */
+#page-bbl input.bblin.locked{background:#F7F9FA!important;border-color:#EDF0F4!important;color:#475467!important;
+  cursor:default!important;box-shadow:none!important}
+#page-bbl input.bblin.locked:focus{outline:none!important;border-color:#EDF0F4!important;box-shadow:none!important}
+#page-bbl input.bblin.bblcode.locked{color:#475467!important}
+#page-bbl .bblchip-lock{background:#F2F4F7!important;color:#667085!important;border-color:#E7EBF3!important}
+#page-bbl .bblchip-edit{background:#FBF4DC!important;color:#8A5E12!important;border-color:#D8BE7E!important}
 </style>
 </body></html>
