@@ -4063,12 +4063,16 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-pg .pgtbl thead th.pgsub-rev,#page-pg .pgtbl thead th.pgsub-cost,
 #page-pg .pgtbl .pggh{
   background:#0F3D37;background-image:none;color:#fff;
-  border:none;}
+  border:none;border-right:1px solid rgba(255,255,255,.26);}
+#page-pg .pgtbl thead th:last-child,#page-pg .pgtbl .pggh:last-child{border-right:0;}
 #page-pg .pgtbl thead{background:#0F3D37;}
 /* the two column groups keep a quiet underline so Revenue vs Cost is still readable */
-#page-pg .pgtbl .pggh.gh-rev{border:none;color:#fff;}
-#page-pg .pgtbl .pggh.gh-cost{border:none;color:#fff;}
-#page-pg .pgtbl thead th.pgsub-rev,#page-pg .pgtbl thead th.pgsub-cost{border:none;}
+#page-pg .pgtbl .pggh.gh-rev,#page-pg .pgtbl .pggh.gh-cost{
+  color:#fff;border-right:1px solid rgba(255,255,255,.26);border-bottom:1px solid rgba(255,255,255,.26);}
+#page-pg .pgtbl thead th.pgsub-rev,#page-pg .pgtbl thead th.pgsub-cost{
+  border-right:1px solid rgba(255,255,255,.26);}
+/* and one hairline under the whole header, against the first data row */
+#page-pg .pgtbl thead tr:last-child th{border-bottom:1px solid rgba(255,255,255,.26);}
 #page-pg .pgtbl thead th.pgsub-rev:hover,#page-pg .pgtbl thead th.pgsub-cost:hover{background:#14514A;}
 #page-pg .pgtbl thead th.pgsub-rev.on,#page-pg .pgtbl thead th.pgsub-cost.on{background:#0A2E29;}
 #page-pg .pgtbl thead th .pgfbtn,#page-pg .pgtbl thead th.pgsub-cost .pgfbtn{background:rgba(255,255,255,.17);color:#fff;}
@@ -31275,5 +31279,20 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 #page-bbl input.bblin.bblcode.locked{color:#475467!important}
 #page-bbl .bblchip-lock{background:#F2F4F7!important;color:#667085!important;border-color:#E7EBF3!important}
 #page-bbl .bblchip-edit{background:#FBF4DC!important;color:#8A5E12!important;border-color:#D8BE7E!important}
+</style>
+<style id="pgHeadRules">
+/* v11.9: white hairlines back in the Progress % header — one between every column, one
+   between the group row and the sub-header row, and one under the header. An earlier
+   pgCss rule zeroes these borders with !important, so these have to match it. */
+#page-pg .pgtbl thead th,#page-pg .pgtbl .pggh,
+#page-pg .pgtbl .pggh.gh-rev,#page-pg .pgtbl .pggh.gh-cost,
+#page-pg .pgtbl thead th.pgsub-rev,#page-pg .pgtbl thead th.pgsub-cost,
+#page-pg .pgtbl thead th.pgprogh,#page-pg .pgtbl thead th.pgstath,
+#page-pg .pgtbl thead th.pgprojh,#page-pg .pgtbl thead th.pgseq{
+  border-right:1px solid rgba(255,255,255,.26)!important}
+#page-pg .pgtbl thead tr>th:last-child,#page-pg .pgtbl thead tr>.pggh:last-child{border-right:0!important}
+#page-pg .pgtbl .pggh,#page-pg .pgtbl .pggh.gh-rev,#page-pg .pgtbl .pggh.gh-cost{
+  border-bottom:1px solid rgba(255,255,255,.26)!important}
+#page-pg .pgtbl thead tr:last-child th{border-bottom:1px solid rgba(255,255,255,.26)!important}
 </style>
 </body></html>
