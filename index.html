@@ -3298,10 +3298,11 @@ NEW-001	4200000"></textarea>
 </div>
 <div class="page" id="page-wht" hidden="">
 <div class="sechead"><span class="secnum">WHT</span><h2>Withholding Tax — Deduction Register &amp; 50 bis Certificate</h2></div>
-<div class="secsub">Select a payer (withholding agent) from the row above → record and view the deduction register by year · month · P.N.D. form with totals → issue the 50 bis certificate, or export the P.N.D.3 / 53 e-Filing text file.</div>
+<div class="secsub">Pick a payer (withholding agent) in the panel above → record and view the deduction register by year · month · P.N.D. form with totals → issue the 50 bis certificate, or export the P.N.D.3 / 53 e-Filing text file.</div>
 <div class="whtviewbar" id="whtViewBar"></div>
+<div id="whtPdfStatus" class="whtupst"></div>
+<div id="whtUpList" class="whtuplist"></div>
 <div class="whtwrap">
-<aside class="whtside"><div class="whtpayhd whtpayhd-side">Payer · withholding agent</div><div class="whtpayrow" id="whtPayerRow"></div><div class="whthd">Upload P.N.D. file (PDF)</div><div id="whtPdfZone" class="whtupzone"><div class="whtupicon">⬆</div><div class="whtupbig">Attach a P.N.D. file (PDF)</div><div class="whtupsmall">Reads the RD “P.N.D.3 / 53 attachment sheet” produced by the e-Filing program</div><input id="whtPdfInput" type="file" accept="application/pdf,image/*,.pdf,.jpg,.jpeg,.png" hidden=""></div><div id="whtPdfStatus" class="whtupst"></div><div id="whtUpList" class="whtuplist"></div></aside>
 <section class="whtmain" id="whtDetail"></section>
 </div>
 <div id="whtModal" class="whtmodal" hidden=""><div class="whtmodalbox"><div id="whtModalBody"></div></div></div>
@@ -4062,12 +4063,12 @@ tr.fsmnone td,.fsmtag.fsmnone{background-color:#F3EEFB}
 #page-pg .pgtbl thead th.pgsub-rev,#page-pg .pgtbl thead th.pgsub-cost,
 #page-pg .pgtbl .pggh{
   background:#0F3D37;background-image:none;color:#fff;
-  border:none;border-right:1px solid rgba(255,255,255,.12);border-bottom:1px solid rgba(255,255,255,.12);}
+  border:none;}
 #page-pg .pgtbl thead{background:#0F3D37;}
 /* the two column groups keep a quiet underline so Revenue vs Cost is still readable */
-#page-pg .pgtbl .pggh.gh-rev{border-bottom:2px solid rgba(255,255,255,.34);color:#fff;}
-#page-pg .pgtbl .pggh.gh-cost{border-bottom:2px solid rgba(255,255,255,.34);color:#fff;}
-#page-pg .pgtbl thead th.pgsub-rev,#page-pg .pgtbl thead th.pgsub-cost{border-bottom:1px solid rgba(255,255,255,.12);}
+#page-pg .pgtbl .pggh.gh-rev{border:none;color:#fff;}
+#page-pg .pgtbl .pggh.gh-cost{border:none;color:#fff;}
+#page-pg .pgtbl thead th.pgsub-rev,#page-pg .pgtbl thead th.pgsub-cost{border:none;}
 #page-pg .pgtbl thead th.pgsub-rev:hover,#page-pg .pgtbl thead th.pgsub-cost:hover{background:#14514A;}
 #page-pg .pgtbl thead th.pgsub-rev.on,#page-pg .pgtbl thead th.pgsub-cost.on{background:#0A2E29;}
 #page-pg .pgtbl thead th .pgfbtn,#page-pg .pgtbl thead th.pgsub-cost .pgfbtn{background:rgba(255,255,255,.17);color:#fff;}
@@ -7107,12 +7108,9 @@ function _vatActionPanel(){
   var vchips='<button class="vviewb'+(pp?'':' on')+'" data-vview="reg" type="button" title="Input–Output VAT register — every sales and purchase invoice of the period"><i class="vvdot"></i><span>Register</span></button>'
             +'<button class="vviewb'+(pp?' on':'')+'" data-vview="pp30" type="button" title="P.P.30 summary — every company’s filings by tax year"><i class="vvdot"></i><span>P.P.30 summary</span>'+(n?'<span class="vviewct">'+n+'</span>':'')+'</button>';
   var groups=[
-    {t:'Entry',t2:'Add · import',ic:'✍️',btns:[
-      {cat:'Record by hand',cc:'v'},
+    {t:'Entry',t2:'Add',ic:'✍️',btns:[
       {id:'vAddSellBtn',ic:'▲',l:'Add sales entry',cls:'vat-b vat-sell vaddbtn',title:'Record an output-VAT (sales) invoice in this period',off:pp},
       {id:'vAddBuyBtn',ic:'▼',l:'Add purchase entry',cls:'vat-b vat-buy vaddbtn',title:'Record an input-VAT (purchase) invoice in this period',off:pp},
-      {cat:'Import from a PDF',cc:'a'},
-      {id:'vPickPdfBtn',ic:'⬆',l:'Attach VAT report',cls:'vat-b vat-imp vpickpdf',title:'Read a purchase / sales VAT report PDF — classified automatically, matched to a business by tax ID, and reconciled against the file'}
     ]},
     {t:'Business',t2:'Manage',ic:'🏢',btns:[
       {id:'vCoAdd',ic:'＋',l:'Add business',cls:'vat-b vat-co',title:'Add another VAT-registered business'},
@@ -7120,7 +7118,9 @@ function _vatActionPanel(){
       {id:'vCoEditT',ic:'✎',l:'Edit details',cls:'vat-b vat-edit',title:'Edit the name, tax ID, branch and address of the selected business',off:(pp||!co)}
     ]}
   ];
-  var fils=[{t:'View',t2:'Mode',ic:'👁️',wcls:'glactg-act vatg-vw',filCls:'vviewtg',html:vchips}];
+  var fils=[{t:'Business',t2:'Select',ic:'🏢',wcls:'glactg-cls vatg-co',filCls:'vatcos',
+      html:'<div class="v30colist vcouni">'+_coUniListHTML(_vCo,'data-vco',function(c){return VATDATA.filter(function(t){return t.co===c.id;}).length;})+'</div>'},
+    {t:'View',t2:'Mode',ic:'👁️',wcls:'glactg-act vatg-vw',filCls:'vviewtg',html:vchips}];
   if(!pp){
     var yopts='';for(var y=_vYear+1;y>=2018;y--)yopts+='<option value="'+y+'"'+(y===_vYear?' selected':'')+'>'+y+' / '+(y+543)+'</option>';
     var mt='<div class="vyrow"><select id="vYear" class="vyear vsel">'+yopts+'</select></div>';
@@ -7129,9 +7129,14 @@ function _vatActionPanel(){
     var sh=[['both','Both'],['sell','Sales'],['buy','Purchases']].map(function(o){return '<button class="vshowb'+(o[0]==='sell'?' sell':(o[0]==='buy'?' buy':''))+(_vShow===o[0]?' on':'')+'" data-show="'+o[0]+'" type="button">'+o[1]+'</button>';}).join('');
     fils.push({t:'Rows',t2:'Filter',ic:'🔎',wcls:'glactg-cls',filCls:'vrowflt',
       html:'<span class="vfl">Show</span><div class="vshow">'+sh+'</div>'
-          +'<span class="vfl">Search</span><div class="vfltsearch"><span class="vflticon">🔍</span><input id="vSearch" type="text" placeholder="Counterparty / invoice no. / tax ID…" value="'+_eatt(_vQ)+'"'+_noAC()+'></div>'
+          +'<span class="vfl">Search</span><div class="vfltsearch"><span class="vflticon">🔍</span><input id="vSearch" type="text" placeholder="Counterparty / invoice / tax ID" value="'+_eatt(_vQ)+'"'+_noAC()+'></div>'
           +(((_vQ&&_vQ.trim())||_vShow!=='both')?'<button class="vbtn ghost mini vclrb" id="vClr" type="button">✕ Clear filters</button>':'')});
   }
+  fils.push({t:'Import',t2:'PDF',ic:'⤓',wcls:'glactg-act vatg-imp',filCls:'vatimp',
+    html:'<div id="vatPdfZone" class="vupzone"><div class="vupicon">↑</div><div class="vuptext">'
+        +'<div class="vupbig">Attach a VAT report (PDF)</div>'
+        +'<div class="vupsmall">Read, classified purchase / sales, matched by tax ID</div></div>'
+        +'<input id="vatPdfInput" type="file" accept="application/pdf,image/*,.pdf,.jpg,.jpeg,.png" hidden></div>'});
   var h=_dbActPanel(groups,fils);
   /* _dbActPanel has no slot for custom attributes, so tag the two Add buttons by id */
   h=h.replace('id="vAddSellBtn"','id="vAddSellBtn" data-k="sell"').replace('id="vAddBuyBtn"','id="vAddBuyBtn" data-k="buy"');
@@ -7152,11 +7157,7 @@ function renderVat(){
   h+=_vatActionPanel();_vBindViewToggle();
   if(_vView==='pp30'){h+=_vPP30View();h+='</div>';el.innerHTML=h;_vBind();_vPP30BindView();return;}
   // entity bar
-  h+='<div class="vlayout"><div class="vcocol"><div class="vcohd">Business (VAT Registrant)</div>';
-  h+='<div class="v30colist vcouni">'+_coUniListHTML(_vCo,'data-vco',function(c){return VATDATA.filter(function(t){return t.co===c.id;}).length;})+'</div>';
-
-  h+='<div class="vcoleftact"><div class="vupwrap"><div id="vatPdfZone" class="vupzone"><div class="vupicon">⬆</div><div class="vuptext"><div class="vupbig">Attach Purchase / Sales VAT report (PDF)</div><div class="vupsmall">Auto-read · classify (purchase/sales) · match business by tax ID · import entries + reconcile with the PDF · re-uploading the same period replaces it</div></div><input id="vatPdfInput" type="file" accept="application/pdf,image/*,.pdf,.jpg,.jpeg,.png" hidden></div></div></div></div>';
-  // period tabs + attach moved into header (top-right cluster)
+  h+='<div class="vlayout">';
   h+='<div class="vmaincol"><div class="vcobar vcoinfobar"><div class="vcoinfo"><div class="vcoinfoL"><div class="vcon">'+esc(co?co.name:'-')+'</div><div class="vcom">Tax ID '+esc(co?co.taxid:'-')+' · '+_vBranchTxt(co?co.branch:'')+'</div><div class="vcoa">'+esc(co?co.addr:'')+'</div></div>';
   h+='</div>';
   if(_vCoEditOpen)h+=_vCoEditHTML(co);
@@ -12096,10 +12097,11 @@ function _whtToggleSub(){if(!_canApprove()){alert(_APPR_MSG);return;}
   rows.forEach(function(t){t.fs=nv;});
   saveWtx();renderWhtReg();
 }
-function renderWht(){renderPayerRow();renderWhtUpload();if(_wView==='sum')renderWhtSummary();else renderWhtReg();_whtRenderBar();}
+function renderWht(){renderWhtUpload();if(_wView==='sum')renderWhtSummary();else renderWhtReg();_whtRenderBar();}
 function _whtTabsHTML(){return _whtActionPanel();}
 /* ---------- v10.61: one Database-style command panel for the whole module ---------- */
-function _whtRenderBar(){var vb=document.getElementById('whtViewBar');if(!vb)return;try{vb.innerHTML=_whtActionPanel();}catch(_e){}}
+function _whtRenderBar(){var vb=document.getElementById('whtViewBar');if(!vb)return;try{vb.innerHTML=_whtActionPanel();}catch(_e){}
+  try{renderPayerRow();}catch(_e2){}}
 function _whtActionPanel(){
   var sum=(_wView==='sum');
   var payer=curPayer?WHTPAYER.find(function(p){return p.id===curPayer;}):null;
@@ -12121,7 +12123,8 @@ function _whtActionPanel(){
       {id:'whtExport',ic:'⤓',l:'Excel',cls:'wht-b wht-xls',title:'Export the filtered register to an Excel workbook',off:(sum||!payer)}
     ]}
   ];
-  var fils=[{t:'View',t2:'Mode',ic:'👁️',wcls:'glactg-act whtg-vw',filCls:'whtvtabs',html:vchips}];
+  var fils=[{t:'Payer',t2:'Select',ic:'🏢',wcls:'glactg-cls whtg-payer',filCls:'whtpayers',html:'<div class="whtpayrow" id="whtPayerRow"></div>'},
+    {t:'View',t2:'Mode',ic:'👁️',wcls:'glactg-act whtg-vw',filCls:'whtvtabs',html:vchips}];
   if(sum){
     var MOE=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     var sm='<div class="whtyrow"><button class="whtsumynav" data-d="-1" type="button" title="Previous tax year">◀</button><span class="whtyv">Tax year '+(_wYear+543)+' / '+_wYear+'</span><button class="whtsumynav" data-d="1" type="button" title="Next tax year">▶</button></div>';
@@ -12141,6 +12144,11 @@ function _whtActionPanel(){
           +'<span class="whtfl">Filing status</span><div class="whtfg wfsgrp">'+fb+'</div>'
           +'<span class="whtfl">Payee</span><select id="whtPayeeFilt" class="whtpayeefilt whtsel">'+payOpts+'</select>'});
   }
+  fils.push({t:'Import',t2:'PDF',ic:'⤓',wcls:'glactg-act whtg-imp',filCls:'whtimp',
+    html:'<div id="whtPdfZone" class="whtupzone"><div class="whtupicon">↑</div>'
+        +'<div class="whtupbig">Attach a P.N.D. file (PDF)</div>'
+        +'<div class="whtupsmall">Reads the RD “P.N.D.3 / 53 attachment sheet”</div>'
+        +'<input id="whtPdfInput" type="file" accept="application/pdf,image/*,.pdf,.jpg,.jpeg,.png" hidden></div>'});
   return _dbActPanel(groups,fils);
 }
 /* v9.32: สรุป WHT — ตรวจจับ "รายการประจำ" (บริษัทผู้รับเงิน × ประเภทเงินได้ × ผู้จ่าย) ที่มีเกือบทุกเดือน แล้วเตือนว่าเดือนที่เลือกมี/ขาดรายการไหน ครบไหม */
@@ -31040,5 +31048,77 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 #page-pg .pgtbl{font-size:12px!important}
 #page-pg .pgtbl thead th,#page-pg .pgtbl tbody td{font-size:12px!important}
 #page-pg .pgtbl .pggh{font-size:11px!important}
+</style>
+<style id="whtVatPanelUniform">
+/* v11.5: Withholding Tax + VAT — the payer / business picker and the PDF drop zone move out of
+   the left sidebar into the command panel, every panel card is the same size with its controls
+   stacked in one column, and the register gets the full page width.
+   Last block in the document -> wins the cascade. */
+
+/* ---------- 1) single column: the table takes the whole width ---------- */
+#page-wht .whtwrap{display:block!important}
+#page-wht .whtmain{width:auto!important;max-width:none!important;flex:none!important}
+#page-vat .vlayout{display:block!important;grid-template-columns:none!important}
+#page-vat .vmaincol{width:auto!important;max-width:none!important;flex:none!important}
+#page-wht .whtupst:empty,#page-wht .whtuplist:empty{display:none}
+
+/* ---------- 2) one grid: equal card width, equal row height ---------- */
+#page-wht .glacts,#page-vat .glacts{display:grid!important;
+  grid-template-columns:repeat(auto-fit,minmax(214px,1fr))!important;
+  align-items:stretch!important;grid-auto-rows:1fr!important;gap:12px!important;margin:6px 0 12px!important}
+#page-wht .glacts>.glactg,#page-vat .glacts>.glactg{width:auto!important;min-width:0!important}
+#page-wht .glacts>.glactg.glactg-act,#page-wht .glacts>.glactg.glactg-cls,
+#page-wht .glacts>.glactg.glactg-yr,#page-wht .glacts>.glactg.glactg-mo,
+#page-vat .glacts>.glactg.glactg-act,#page-vat .glacts>.glactg.glactg-cls,
+#page-vat .glacts>.glactg.glactg-yr,#page-vat .glacts>.glactg.glactg-mo{width:auto!important}
+
+/* ---------- 3) the payer / business picker inside its card ---------- */
+#page-wht .whtpayers,#page-vat .vatcos{display:block!important;grid-template-columns:none!important}
+#page-wht .whtpayers .whtpayrow,#page-vat .vatcos .v30colist{
+  display:flex!important;flex-direction:column!important;gap:5px!important;
+  max-height:168px!important;overflow:auto!important;padding-right:3px;margin:0!important}
+#page-wht .whtpayers .v30coitem,#page-vat .vatcos .v30coitem{margin:0!important;flex:none!important}
+/* one line with an ellipsis: compact, and it avoids the line-clamp box losing its text
+   when another rule overrides `display` on the same element */
+#page-wht .whtpayers .v30coitem-nm,#page-vat .vatcos .v30coitem-nm{
+  display:block!important;-webkit-line-clamp:none!important;white-space:nowrap!important;
+  overflow:hidden!important;text-overflow:ellipsis!important;font-size:11.5px!important;line-height:1.35!important}
+#page-wht .whtpayers .v30coitem-main,#page-vat .vatcos .v30coitem-main{padding:6px 9px!important}
+/* the drop-zone card already explains the upload, so the empty list state is noise */
+#page-wht .whtuplist .whtupempty{display:none}
+/* the Rows card is narrower now — keep its controls inside it */
+#page-vat .vrowflt>*{min-width:0!important;max-width:100%!important}
+#page-vat .vrowflt .vshow{min-width:0!important;width:100%!important;max-width:100%!important;overflow:hidden}
+#page-vat .vrowflt .vshowb{font-size:10px!important;padding:4px 2px!important;min-width:0!important;
+  overflow:hidden;text-overflow:ellipsis}
+#page-vat .vrowflt .vfltsearch{padding:0 6px;min-width:0!important;width:100%!important;max-width:100%!important;
+  box-sizing:border-box;position:relative!important;flex:none!important}
+#page-vat .vrowflt .vflticon{position:static!important;top:auto!important;left:auto!important;transform:none!important}
+#page-vat .vrowflt #vSearch{font-size:10.5px!important;min-width:0!important;width:100%!important;box-sizing:border-box}
+/* a touch of room under the picker list so the scrolled item is not cut by the card edge */
+#page-wht .whtpayers .whtpayrow,#page-vat .vatcos .v30colist{max-height:152px!important}
+#page-wht .whtpayers .v30coitem-meta,#page-vat .vatcos .v30coitem-meta{font-size:10px!important}
+#page-wht .whtpayers .whtpay.add,#page-vat .vatcos .vcochip{flex:none}
+
+/* ---------- 4) the PDF drop zone inside its card ---------- */
+#page-wht .whtimp,#page-vat .vatimp{display:block!important;grid-template-columns:none!important;height:100%}
+#page-wht .whtimp .whtupzone,#page-vat .vatimp .vupzone{
+  display:flex!important;flex-direction:column!important;align-items:center;justify-content:center;gap:5px;
+  width:100%;box-sizing:border-box;min-height:104px;height:100%;margin:0!important;text-align:center;
+  border:1px dashed #C9D3E0!important;border-radius:10px!important;background:#FBFCFD!important;box-shadow:none!important;cursor:pointer}
+#page-wht .whtimp .whtupzone:hover,#page-wht .whtimp .whtupzone.drag,
+#page-vat .vatimp .vupzone:hover,#page-vat .vatimp .vupzone.dzon,#page-vat .vatimp .vupzone.drag{
+  border-color:#0E5C52!important;background:#F5FAF8!important}
+/* the icon tile is a solid teal square — tinting the glyph teal made it vanish, so drop the tile */
+#page-wht .whtimp .whtupicon,#page-vat .vatimp .vupicon{
+  width:auto!important;height:auto!important;background:none!important;border-radius:0!important;
+  font-size:19px!important;line-height:1!important;color:#0E5C52!important;font-weight:700!important;margin:0!important}
+#page-wht .whtimp .whtupbig,#page-vat .vatimp .vupbig{font-size:11.5px!important;font-weight:700!important;color:#101828!important}
+#page-wht .whtimp .whtupsmall,#page-vat .vatimp .vupsmall{font-size:10px!important;color:#98A2B3!important;line-height:1.45!important}
+#page-vat .vatimp .vuptext{display:block}
+
+/* ---------- 5) the uploaded-file card now sits above the register, full width ---------- */
+#page-wht .whtuplist{margin:0 0 10px}
+#page-wht .whtuplist .whtupcard{max-width:none}
 </style>
 </body></html>
