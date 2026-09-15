@@ -31121,4 +31121,45 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 #page-wht .whtuplist{margin:0 0 10px}
 #page-wht .whtuplist .whtupcard{max-width:none}
 </style>
+<style id="systemScaleUniform">
+/* v11.6: one density and one headline size for the whole suite.
+   Reference = Database -> GL: 12px cell text in a 6px/8px cell, ~31px row.
+   Every dashboard figure is 16px, so no module's numbers shout over another's.
+   Last block in the document -> wins the cascade. Fully revertible (delete this block). */
+
+/* ---------- 1) table rows as compact as the GL table ---------- */
+#page-wht .wrtbl tbody td,#page-wht .whtsum-tbl tbody td,
+#page-vat .vtbl tbody td,
+#page-pg .pgtbl tbody td{padding:6px 8px!important;font-size:12px!important;line-height:1.35!important}
+#page-wht .wrtbl thead th,#page-wht .whtsum-tbl thead th,
+#page-vat .vtbl thead th,
+#page-pg .pgtbl thead th{padding:7px 9px!important}
+#page-wht .wrtbl tfoot td,#page-wht .whtsum-tbl tfoot td,
+#page-vat .vtbl tfoot td,#page-pg .pgtbl tfoot td{padding:7px 8px!important;font-size:12px!important}
+#page-vat .vtbl,#page-vat .vtbl .vmono{font-size:12px!important}
+#page-wht .wrtbl input.wtxin,#page-wht .wrtbl select,
+#page-vat .vtbl input,#page-vat .vtbl select{font-size:12px!important;padding:2px 5px!important}
+/* the row controls follow the tighter row */
+#page-wht .wtxft,#page-wht .wtxfs,#page-wht .wht50,#page-wht .wtxdel{padding:2px 8px!important;line-height:1.3!important}
+/* the inline controls drove the row height well past the GL row — size them to the text */
+#page-wht .wrtbl select,#page-wht .wrtbl input.wtxin,#page-wht .wrtbl input[type=date]{
+  height:21px!important;min-height:0!important;line-height:19px!important;padding:0 5px!important}
+#page-vat .vtbl .vedit,#page-vat .vtbl .vdel,#page-vat .vtbl button{
+  height:21px!important;min-height:0!important;padding:0 6px!important;line-height:19px!important}
+#page-vat .vtbl input,#page-vat .vtbl select{height:21px!important;min-height:0!important;line-height:19px!important}
+/* the drop-zone arrow is an icon, not a headline */
+#page-wht .whtimp .whtupicon,#page-vat .vatimp .vupicon{font-size:16px!important}
+
+/* ---------- 2) one dashboard figure size across every module ---------- */
+#page-ov .hubkpiv,
+#page-bp .val,#page-bp .bpn,
+#page-vat .vsv,#page-vat .v30hn-v,#page-vat .v30hp-big,#page-vat .v30dc-v,
+#page-wht .whtsum-kpi-v,
+#page-bbl .bblkpi-v,#page-bbl .bbldashp .bblkpi-v,
+#page-pg .pgkpi-v,#page-pg .pgdashp .pgkpi-v{
+  font-size:16px!important;line-height:1.2!important;letter-spacing:-.01em!important}
+#page-vat .vsop{font-size:15px!important}
+#page-vat .v30hp-big small,#page-bbl .bblkpi-v small{font-size:11px!important}
+#page-vat .vcon{font-size:15px!important}
+</style>
 </body></html>
