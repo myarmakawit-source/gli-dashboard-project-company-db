@@ -7406,7 +7406,10 @@ function _vBind(){
    ทั้งสองหน้าอยู่ใน #page-tk เดียวกัน สลับด้วยแถบ .tknav ไม่ใช่เมนูซ้ายอีกต่อไป
    #tkPaneBoard = บอร์ด (renderTracking) · #page-tkr = รายงาน (renderTkr) — คง id เดิมไว้
    หน้าที่เปิดล่าสุดจำไว้ที่เครื่อง เปิดโมดูลครั้งหน้าจะกลับมาหน้าเดิม */
-var _tkPage='board';try{if(localStorage.getItem('gli_tkpage')==='report')_tkPage='report';}catch(e){}
+/* v10.63: the Completed-report page was removed on request, but devices that were last on it
+   still had 'report' saved here and opened Tracking to an empty page (board hidden, nothing to
+   render). Pin the module to the board and clear the stale key. */
+var _tkPage='board';try{localStorage.removeItem('gli_tkpage');}catch(e){}
 function _tkPageApply(){
   var bd=document.getElementById('tkPaneBoard'),rp=document.getElementById('page-tkr');
   if(bd)bd.hidden=(_tkPage!=='board');
@@ -7415,20 +7418,18 @@ function _tkPageApply(){
   for(i=0;i<bs.length;i++){on=(bs[i].getAttribute('data-tkpage')===_tkPage);
     bs[i].classList.toggle('on',on);bs[i].setAttribute('aria-selected',on?'true':'false');}
   /* หัวเรื่องโมดูลด้านบน (hero + คำอธิบาย) เปลี่ยนตามหน้าที่เปิดอยู่ ใช้ข้อความชุดเดิมของ tk / tkr */
-  try{if(typeof window._gliModHero==='function')window._gliModHero(_tkPage==='report'?'tkr':'tk');}catch(e){}
+  try{if(typeof window._gliModHero==='function')window._gliModHero('tk');}catch(e){}
   /* เปิดหน้ารายงานก่อนเป็นหน้าแรก บอร์ดยังไม่เคยวาด — ผูก event ให้แถบสลับหน้าใช้งานได้ทันที */
   try{if(typeof _tkBind==='function')_tkBind();}catch(e){}
   _tkNavCount();
 }
 function _tkPageShow(){
   _tkPageApply();
-  if(_tkPage==='report'){if(typeof renderTkr==='function')renderTkr();}
-  else if(typeof renderTracking==='function')renderTracking();
+  if(typeof renderTracking==='function')renderTracking();
 }
 function _tkPageSet(v){
-  v=(v==='report')?'report':'board';
+  v='board';/* v10.63: the board is the only Tracking page now */
   var same=(v===_tkPage);_tkPage=v;
-  try{localStorage.setItem('gli_tkpage',_tkPage);}catch(e){}
   _tkPageShow();
   if(!same){try{window.scrollTo(0,0);}catch(e){}}
 }
