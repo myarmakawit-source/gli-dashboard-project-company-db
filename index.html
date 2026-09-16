@@ -20175,7 +20175,7 @@ var _fsEndM=12;
 /* v9.36: สถานะการกระทบยอด TB กับไฟล์รายละเอียดประกอบงบ (reconciliation) — ทำงานเฉพาะเซสชัน + จำ mapping ลง localStorage */
 var _fsRecon=null, _fsReconWB=null;
 var _FS_TABS=[['tb','Trial Balance','🧾'],['bs','Balance Sheet','⚖️'],['pl','Income Statement','📈'],
-              ['sce','Changes in Equity','🔄'],['notes','Notes to FS','📝'],['cf','Cash Flow · Indirect','💵'],['cfd','Cash Flow · Direct','💧'],['ratio','Ratio %','📊'],['wk','Working Papers','🗂️'],['an','Anomalies','⚠️']];
+              ['sce','Changes in Equity','🔄'],['notes','Notes to FS','📝'],['cf','Cash Flow · Indirect','💵'],['cfd','Cash Flow · Direct','💧'],['pcf','Cash Flow · By Project','🏗️'],['ratio','Ratio %','📊'],['wk','Working Papers','🗂️'],['an','Anomalies','⚠️']];
 var _FS_WK=[['A','Assets'],['L','Liabilities'],['E','Equity'],['R','Revenue'],['X','Expenses']];
 var _FS_BS_ASSET=['Cash on hand','Cash & deposits in transit','Cash at banks',
   'Trade receivables','Less: Allowance for ECL (receivables)',
@@ -21279,7 +21279,13 @@ function _fsShell(){
   /* v10.42: grouped vertical cards (like the Database GL panel) — 3 groups per row */
   var _fsTabG=function(keys){var s='';for(var gi=0;gi<keys.length;gi++){for(var gj=0;gj<_FS_TABS.length;gj++){var d=_FS_TABS[gj];if(d[0]!==keys[gi])continue;s+='<button class="fstab'+(d[0]===_fsTab?' on':'')+'" data-fstab="'+d[0]+'"><span class="fstic">'+(d[2]||'')+'</span><span class="fstlbl">'+d[1]+'</span></button>';break;}}return s;};
   var _issOn=(typeof _fsWpStmtOn==='function'&&_fsWpStmtOn());   /* v10.86.4/.7: main Export = WP issued statements (FY2568 only) */
+  /* v13.4: the by-project cash flow owns its own Excel / PDF export */
+  var _pcfExp=(_fsTab==='pcf')
+    ? ('<button class="fsexp fspcf-x" id="fsPcfXlsx" type="button" title="Export the project cash flow to Excel">\u2913 Excel</button>'
+      +'<button class="fsexp fspcf-p" id="fsPcfPdf" type="button" title="Print / save the project cash flow as PDF">\ud83d\udda8 PDF</button>')
+    : '';
   var expBtns=(['bs','pl','cf'].indexOf(_fsTab)>=0?('<button class="fsexp man fscmd-man'+(_fsManEdit?' on':'')+'" id="fsManEditToggle" title="แก้งบเอง — คลิกที่ชื่อบรรทัด/ยอดในงบเพื่อพิมพ์ทับ (มีผลกับ PDF)">'+(_fsManEdit?'✅ แก้งบเอง: เปิด':'✏️ แก้งบเอง')+'</button>'):'')+
+    _pcfExp+
     '<details class="fscmd-dd"><summary class="fscmd-ddbtn" title="'+(_issOn?'Export งบการเงินตาม WP GLI 2025 (งบฐานะการเงิน · งบกำไรขาดทุน · งบเปลี่ยนแปลงส่วนของผู้ถือหุ้น)':'Export the four financial statements + 24 notes (statutory template)')+'">⤓ Export<i class="fscmd-car">▾</i></summary><div class="fscmd-ddm">'+
       '<button type="button" class="fscmd-ddi" id="fsExport" title="'+(_issOn?'ส่งออกงบการเงิน (WP GLI 2025) เป็น Excel — ตรงกับ FS_BS/FS_PL/FS Change':'Export the four financial statements + notes to Excel (statutory template)')+'"><b>📊 Excel workbook</b><small>'+(_issOn?'งบการเงิน WP GLI 2568 · BS · PL · การเปลี่ยนแปลงส่วนผู้ถือหุ้น':'4 statements + 24 notes · statutory template')+'</small></button>'+
       '<button type="button" class="fscmd-ddi ghost" id="fsPrint" title="'+(_issOn?'พิมพ์ / บันทึกงบการเงิน (WP GLI 2025) เป็น PDF':'Print / save the four financial statements + notes as PDF (statutory template)')+'"><b>🖨 PDF</b><small>'+(_issOn?'งบการเงิน WP GLI 2568 · พร้อมพิมพ์ (A4)':'Print-ready statutory set')+'</small></button>'+
@@ -21297,7 +21303,7 @@ function _fsShell(){
         '<span class="fscmd-chips" id="fsChips">'+chipsInner+'</span>'+
         '<span class="fscmd-exp">'+expBtns+'</span>'+
       '</div>'))+
-    '<div class="fscmd-tabs">'+_fsTabG(['tb','bs','pl','sce','notes','cf','cfd'])+'<span class="fscmd-div"></span>'+_fsTabG(['ratio','wk','an'])+'</div>'+
+    '<div class="fscmd-tabs">'+_fsTabG(['tb','bs','pl','sce','notes','cf','cfd','pcf'])+'<span class="fscmd-div"></span>'+_fsTabG(['ratio','wk','an'])+'</div>'+
   '</div>'+
   '<div id="fsBody"></div>';
 }
@@ -22872,7 +22878,17 @@ function _cfdModelFor(y0,y1,endM,allY,cashSet){
     if(_curCash){ if(!C.cash)C.cash={}; for(var _bk in _curCash){ var _bi=C.cash[_bk]||(C.cash[_bk]={name:_curCash[_bk].name,amt:0}); _bi.amt+=_curCash[_bk].amt; } }
     /* v9.120: สะสมกระแสเงินสดรายโครงการ (proj จากขาที่จำแนก) แยกตามกิจกรรม OP/INV/FIN (adj_open = ปรับปรุงยอดยกมา) */
     var _pj=((proj!=null&&proj!=='')?proj:_curProj)||''; var _pa=projAgg[_pj]||(projAgg[_pj]={op:0,inv:0,fin:0,adj:0});
-    var _sc=_CFD_LINE_SEC[line]; if(_sc==='OP')_pa.op+=amt; else if(_sc==='INV')_pa.inv+=amt; else if(_sc==='FIN')_pa.fin+=amt; else _pa.adj+=amt; }
+    var _sc=_CFD_LINE_SEC[line]; if(_sc==='OP')_pa.op+=amt; else if(_sc==='INV')_pa.inv+=amt; else if(_sc==='FIN')_pa.fin+=amt; else _pa.adj+=amt;
+    /* v13.4: per-project account/voucher detail for the by-project cash-flow drill.
+       Purely additive \u2014 it hangs off projAgg[p].d and changes no existing figure, so a
+       drill-down can never disagree with the totals above: both come from this one push(). */
+    var _dk=(_sc==='OP'||_sc==='INV'||_sc==='FIN')?_sc:'ADJ';
+    if(!_pa.d)_pa.d={};
+    var _dd=_pa.d[_dk]||(_pa.d[_dk]={});
+    var _dc=_dd[code]||(_dd[code]={name:name,amt:0,vch:{}});
+    _dc.amt+=amt; if(!_dc.name&&name)_dc.name=name;
+    var _dv=_dc.vch[v]||(_dc.vch[v]={amt:0,trace:trace||'',line:line});
+    _dv.amt+=amt; if(trace&&!_dv.trace)_dv.trace=trace; }
   function isCash(c){ return !!cashSet[(''+(c==null?'':c)).trim()]; }
   for(var v in V){ var rows=V[v]; var rp=[]; for(var i=0;i<rows.length;i++){ if(inPeriod(rows[i]))rp.push(rows[i]); }
     if(!rp.length)continue; var hasCash=false; for(var j=0;j<rp.length;j++){ if(isCash(rp[j][0])){hasCash=true;break;} }
@@ -24470,7 +24486,8 @@ function _fsRenderBody(){
   if(!_fsT){ h=_fsEmpty(); }
   else if(_fsTab==='tb')h=_fsRenderTB(); else if(_fsTab==='bs')h=_fsRenderBS();
   else if(_fsTab==='pl')h=_fsRenderPL(); else if(_fsTab==='sce')h=_fsRenderSCE();
-  else if(_fsTab==='cf')h=_fsRenderCF(); else if(_fsTab==='cfd')h=_fsRenderCFD(); else if(_fsTab==='ratio')h=_fsRenderRatio();
+  else if(_fsTab==='cf')h=_fsRenderCF(); else if(_fsTab==='cfd')h=_fsRenderCFD();
+  else if(_fsTab==='pcf')h=_fsRenderPCF(); else if(_fsTab==='ratio')h=_fsRenderRatio();
   else if(_fsTab==='wk')h=_fsRenderWk();
   else if(_fsTab==='an')h=_fsRenderAnom();
   if(_fsManEdit && (_fsTab==='bs'||_fsTab==='pl'||_fsTab==='cf')){
@@ -24502,7 +24519,7 @@ function _fsBind(w){ if(w._b)return; w._b=1;
   });
   w.addEventListener('click',function(e){var t=e.target;
     if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'))return;
-    var tab=t.closest?t.closest('[data-fstab]'):null; if(tab){var _nt=tab.getAttribute('data-fstab'),_wasWk=(_fsTab==='wk'),_isWk=(_nt==='wk');_fsTab=_nt;if(!_isWk&&_fsYear!=='ALL'&&_fsY0!==_fsY1){_fsYear=_fsY1;_fsCompute();}if(_wasWk!==_isWk){w.innerHTML=_fsShell();}_fsRenderBody();_fsSyncTabs(w);return;}
+    var tab=t.closest?t.closest('[data-fstab]'):null; if(tab){var _nt=tab.getAttribute('data-fstab'),_wasWk=(_fsTab==='wk'),_isWk=(_nt==='wk'),_wasPcf=(_fsTab==='pcf'),_isPcf=(_nt==='pcf');_fsTab=_nt;if(!_isWk&&_fsYear!=='ALL'&&_fsY0!==_fsY1){_fsYear=_fsY1;_fsCompute();}if(_wasWk!==_isWk||_wasPcf!==_isPcf){w.innerHTML=_fsShell();}_fsRenderBody();_fsSyncTabs(w);return;}
     var tbf=t.closest?t.closest('.fstbfun[data-tbc]'):null; if(tbf){_fsTbOpenFilter(tbf.getAttribute('data-tbc'),tbf);return;}
     var tbs=t.closest?t.closest('.fstbsort[data-tbc]'):null; if(tbs){var _tk=tbs.getAttribute('data-tbc'); if(!_fsTbSort||_fsTbSort.c!==_tk)_fsTbSort={c:_tk,dir:1}; else if(_fsTbSort.dir===1)_fsTbSort.dir=-1; else _fsTbSort=null; _fsRenderBody(); return;}
     var tbca=t.closest?t.closest('#fsTbClearAll'):null; if(tbca){_fsTbClearAll();return;}
@@ -32297,5 +32314,717 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 #page-vat .vsbox.net.zero{background:#EFEBFB!important}
 #page-vat .vsbox.net.zero .vsh,#page-vat .vsbox.net.zero .vsic{color:#6A34C4!important}
 #page-vat .vsbox.net.zero .vsv{color:#55299C!important}
+</style>
+<script id="pcfScript">
+/* ======================================================================
+   FS · CASH FLOW BY PROJECT  (tab key "pcf")                      v13.4
+   Brought forward / Operating / Investing / Financing / Closing, per
+   project, straight off the GL through the SAME direct-method engine the
+   "Cash Flow · Direct" statement uses (_cfdModelFor / _cfdBfProj), so the
+   two can never disagree.
+
+   Project universe = DATA.rows — the exact list Business Performance and
+   Progress % show — plus a bucket for GL project codes that are not in the
+   project master, so the statement still ties to the cash movement.
+   ====================================================================== */
+var _PCF=null, _PCF_Q='', _PCF_ST='', _PCF_SORT={c:'close',d:-1}, _PCF_ZERO=false;
+
+function _pcfE(s){ return (''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function _pcfN(v){ var n=+v; return isFinite(n)?n:0; }
+function _pcfR2(v){ return Math.round(_pcfN(v)*100)/100; }  /* a printed column must foot: sum the ROUNDED figures, never the raw ones */
+function _pcfMoney(v){ var n=_pcfN(v); var s=Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return (n<-0.004)?('('+s+')'):s; }
+function _pcfAmtTd(v,extra){ var n=_pcfN(v); var cls='pcf-n'+(n<-0.004?' neg':(n>0.004?' pos':' zero'));
+  return '<td class="'+cls+(extra?(' '+extra):'')+'">'+_pcfMoney(n)+'</td>'; }
+
+/* ---- key matching: a GL project code -> a master project code ---------- */
+function _pcfStrip(c){ return (''+(c==null?'':c)).trim().replace(/[#\-]\d+$/,''); }
+function _pcfKeyIndex(masterCodes){
+  var exact={}, lower={}, stripped={};
+  for(var i=0;i<masterCodes.length;i++){ var c=masterCodes[i]; var t=(''+c).trim();
+    if(!t)continue;
+    if(!(t in exact))exact[t]=c;
+    var lo=t.toLowerCase(); if(!(lo in lower))lower[lo]=c;
+    var st=_pcfStrip(t).toLowerCase(); if(st&&!(st in stripped))stripped[st]=c; }
+  return {exact:exact,lower:lower,stripped:stripped};
+}
+function _pcfMatch(idx,glKey){
+  var t=(''+(glKey==null?'':glKey)).trim(); if(!t)return null;
+  if(idx.exact[t]!=null)return idx.exact[t];
+  var lo=t.toLowerCase(); if(idx.lower[lo]!=null)return idx.lower[lo];
+  var st=_pcfStrip(t).toLowerCase(); if(st&&idx.stripped[st]!=null)return idx.stripped[st];
+  return null;
+}
+
+/* ---- the model -------------------------------------------------------- */
+var _PCF_STLBL={act:['Active','act'],ina:['Inactive','ina'],nd:['No PM database','nd']};
+function _pcfCompute(){
+  if(typeof GLROWS==='undefined'||!GLROWS||!GLROWS.length)return null;
+  if(typeof _cfdCashSet!=='function'||typeof _cfdModelFor!=='function')return null;
+  var cashSet=_cfdCashSet();
+  var allY=(_fsYear==='ALL'), endM=(_fsEndM>=1&&_fsEndM<=12)?_fsEndM:12;
+  var cur=_cfdModelFor(+_fsY0,+_fsY1,endM,allY,cashSet);
+  var bf=(typeof _cfdBfProj==='function')?_cfdBfProj(cashSet):{has:false,proj:{},thruBE:null,total:0};
+
+  /* master project universe — identical to Business Performance / Progress % */
+  var master=(typeof DATA!=='undefined'&&DATA&&DATA.rows)?DATA.rows:[];
+  var codes=[]; for(var i=0;i<master.length;i++){ if(master[i]&&master[i].code!=null)codes.push((''+master[i].code).trim()); }
+  var idx=_pcfKeyIndex(codes);
+
+  var rows={}, order=[];
+  function R(code){ var k=(''+code).trim(); var o=rows[k];
+    if(!o){ o=rows[k]={code:k,name:'',cust:'',st:'nd',inMaster:false,
+                       bf:0,op:0,inv:0,fin:0,adj:0,close:0,glKeys:[],nGl:0};
+      order.push(k); }
+    return o; }
+  for(var m=0;m<master.length;m++){ var r=master[m]; if(!r||r.code==null)continue;
+    var o=R(r.code); o.inMaster=true;
+    o.name=(typeof dispName==='function')?(dispName(r)||''):(r.name||'');
+    o.cust=(typeof custOf==='function')?(custOf(r)||''):'';
+    o.st=(typeof _bpStat==='function')?_bpStat(r):((r.active===false)?'ina':'act'); }
+
+  /* fold every GL project key onto its master row (or its own unmapped row) */
+  var pa=cur.projAgg||{}, unmapped=0, noProj=null;
+  function fold(glKey,f){
+    var t=(''+(glKey==null?'':glKey)).trim();
+    if(!t){ if(!noProj){ noProj=R('— no project code —'); noProj.name='GL entries carrying no Ref. Code';
+              noProj.st='nd'; noProj.inMaster=false; noProj.noCode=true; }
+            f(noProj); noProj.glKeys.push('(blank)'); return; }
+    var mc=_pcfMatch(idx,t);
+    var o;
+    if(mc!=null){ o=R(mc); }
+    else { o=R(t); if(!o.inMaster&&!o.unmapped){ o.unmapped=true; o.name=o.name||'(not in the project master)'; unmapped++; } }
+    f(o); if(o.glKeys.indexOf(t)<0)o.glKeys.push(t);
+  }
+  for(var k in pa){ if(!Object.prototype.hasOwnProperty.call(pa,k))continue; (function(kk){
+    var a=pa[kk]; fold(kk,function(o){ o.op+=_pcfN(a.op); o.inv+=_pcfN(a.inv); o.fin+=_pcfN(a.fin); o.adj+=_pcfN(a.adj); o.nGl++; }); })(k); }
+  if(bf&&bf.has&&bf.proj){ for(var b in bf.proj){ if(!Object.prototype.hasOwnProperty.call(bf.proj,b))continue; (function(bb){
+    fold(bb,function(o){ o.bf+=_pcfN(bf.proj[bb]); }); })(b); } }
+
+  var list=[], T={bf:0,op:0,inv:0,fin:0,adj:0,close:0};
+  for(var q=0;q<order.length;q++){ var o=rows[order[q]];
+    o.close=o.bf+o.op+o.inv+o.fin+o.adj;
+    o.move=o.op+o.inv+o.fin;
+    o.hasAny=(Math.abs(o.bf)>0.004||Math.abs(o.op)>0.004||Math.abs(o.inv)>0.004||Math.abs(o.fin)>0.004||Math.abs(o.adj)>0.004);
+    T.bf+=o.bf; T.op+=o.op; T.inv+=o.inv; T.fin+=o.fin; T.adj+=o.adj; T.close+=o.close;
+    list.push(o); }
+
+  /* reconcile to the cash-flow statement itself */
+  var rec=null;
+  try{ var C=(typeof _cfdCompute==='function')?_cfdCompute():null;
+    if(C){ var stmtMove=_pcfN(C.endCash)-_pcfN(C.beginCash);
+      /* Opening cash the ledger cannot attribute to any project: the entity held cash
+         before the first classified activity (capital introduced, balances brought on).
+         It is NOT a project's cash, so it is proved separately instead of being spread. */
+      var unalloc=_pcfN(C.beginCash)-T.bf;
+      rec={beginCash:_pcfN(C.beginCash), endCash:_pcfN(C.endCash), stmtMove:stmtMove,
+           unalloc:Math.round(unalloc*100)/100,
+           projClose:Math.round(T.close*100)/100,
+           closeProof:Math.round((T.close+unalloc-_pcfN(C.endCash))*100)/100,
+           projMove:T.op+T.inv+T.fin+T.adj,
+           diff:Math.round(((T.op+T.inv+T.fin+T.adj)-stmtMove)*100)/100,
+           residual:_pcfN(C.residual),
+           /* nUnbal / unbalAmt live on the model, not on _cfdCompute's return */
+           nUnbal:_pcfN(cur.nUnbal), unbalAmt:Math.round(_pcfN(cur.unbalAmt)*100)/100}; } }catch(e){}
+
+  return {rows:list, tot:T, rec:rec, bf:bf, unmapped:unmapped,
+          nMaster:master.length, nWithGl:list.filter(function(x){return x.nGl>0;}).length,
+          allY:allY, endM:endM, y0:+_fsY0, y1:+_fsY1, cur:cur};
+}
+
+/* ---- filtering / sorting ---------------------------------------------- */
+function _pcfView(){
+  var M=_PCF; if(!M)return [];
+  var q=(_PCF_Q||'').trim().toLowerCase();
+  var out=M.rows.filter(function(r){
+    if(!_PCF_ZERO && !r.hasAny)return false;
+    if(_PCF_ST && r.st!==_PCF_ST)return false;
+    if(q){ var hay=(r.code+' '+r.name+' '+r.cust).toLowerCase(); if(hay.indexOf(q)<0)return false; }
+    return true; });
+  var c=_PCF_SORT.c, d=_PCF_SORT.d;
+  out.sort(function(a,b){
+    var va,vb;
+    if(c==='code'||c==='name'||c==='cust'||c==='st'){ va=(''+(a[c]||'')).toLowerCase(); vb=(''+(b[c]||'')).toLowerCase();
+      return va<vb?-d:(va>vb?d:0); }
+    va=_pcfN(a[c]); vb=_pcfN(b[c]);
+    if(va===vb)return (''+a.code).localeCompare(''+b.code);
+    return (va<vb)?-d:d; });
+  return out;
+}
+
+/* ---- render ------------------------------------------------------------ */
+var _PCF_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">';
+var _PCF_IC={
+  bf:'<path d="M3 12a9 9 0 1 0 2.6-6.4"/><path d="M3 4v5h5"/>',
+  op:'<path d="M3 21h18"/><path d="M6 21V9M10.5 21V5M15 21v-8M19.5 21v-5"/>',
+  inv:'<path d="M12 3v7"/><path d="m8.5 6.5 3.5-3.5 3.5 3.5"/><rect x="3" y="12" width="18" height="9" rx="2"/>',
+  fin:'<path d="M3 7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"/><rect x="3" y="7" width="18" height="12" rx="2"/><circle cx="17" cy="13" r="1.4"/>',
+  close:'<path d="M6 3h12v18l-3-1.7-3 1.7-3-1.7L6 21z"/><path d="M9.5 9h5M9.5 13h5"/>',
+  proj:'<path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9.5 21v-6h5v6"/>',
+  ok:'<circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-4.5"/>',
+  warn:'<path d="M12 4 2.8 20h18.4z"/><path d="M12 10v4M12 17h.01"/>'
+};
+function _pcfPeriodLabel(M){
+  if(M.allY)return 'All years';
+  var be=(+M.y1)+543;
+  if(M.endM>=1&&M.endM<12){ var MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return 'FY '+be+' · Jan–'+MO[M.endM-1]; }
+  return 'FY '+be;
+}
+function _pcfTile(ic,lab,val,tone,sub){
+  return '<div class="pcf-tile '+tone+'"><div class="pcf-tl"><span class="pcf-ti">'+_PCF_SVG+ic+'</svg></span>'+_pcfE(lab)+'</div>'
+    +'<div class="pcf-tv">'+_pcfMoney(val)+'</div>'+(sub?('<div class="pcf-ts">'+_pcfE(sub)+'</div>'):'')+'</div>';
+}
+function _pcfTh(key,label,sub,cls){
+  var on=(_PCF_SORT.c===key), ar=on?(_PCF_SORT.d>0?' ▲':' ▼'):'';
+  return '<th class="'+(cls||'')+(on?' pcf-sorted':'')+'" data-pcfsort="'+key+'" title="Click to sort">'
+    +'<span class="pcf-thl">'+_pcfE(label)+ar+(sub?('<span class="pcf-thy">'+_pcfE(sub)+'</span>'):'')+'</span></th>';
+}
+function _fsRenderPCF(){
+  if(typeof GLROWS==='undefined'||!GLROWS||!GLROWS.length)
+    return '<div class="pcf-wrap"><div class="pcf-empty">No GL data loaded — open the <b>Database</b> module and select a GL file first. '
+      +'The project cash flow is built live from the general ledger.</div></div>';
+  var M=null; try{ M=_pcfCompute(); }catch(e){
+    return '<div class="pcf-wrap"><div class="pcf-empty">Could not build the project cash flow: '+_pcfE((e&&e.message)||e)+'</div></div>'; }
+  _PCF=M;
+  if(!M)return '<div class="pcf-wrap"><div class="pcf-empty">The cash-flow engine is not ready — open <b>Cash Flow · Direct</b> once, then come back.</div></div>';
+  var view=_pcfView(), T=M.tot, rec=M.rec;
+
+  var head='<div class="pcf-hd"><div class="pcf-hdl"><span class="pcf-hdic">'+_PCF_SVG+_PCF_IC.proj+'</svg></span>'
+    +'<span class="pcf-hdt">Cash Flow by Project'
+    +'<em>'+_pcfE(_pcfPeriodLabel(M))+' · direct method, built from the general ledger</em></span></div>'
+    +'<div class="pcf-hdr"><span class="pcf-chip">'+M.nMaster+' projects</span>'
+    +'<span class="pcf-chip alt">'+M.nWithGl+' with cash movement</span>'
+    +(M.unmapped?('<span class="pcf-chip warn">'+M.unmapped+' GL code(s) not in the master</span>'):'')+'</div></div>';
+
+  var tiles='<div class="pcf-tiles">'
+    +_pcfTile(_PCF_IC.bf,'Brought forward',T.bf,'mint',(M.bf&&M.bf.has&&M.bf.thruBE)?('Cumulative project cash flow through FY '+M.bf.thruBE):'No prior period in the ledger')
+    +_pcfTile(_PCF_IC.op,'Operating activities',T.op,'sky','Cash generated by operations')
+    +_pcfTile(_PCF_IC.inv,'Investing activities',T.inv,'lilac','Assets acquired and disposed')
+    +_pcfTile(_PCF_IC.fin,'Financing activities',T.fin,'butter','Borrowings, repayments and equity')
+    +_pcfTile(_PCF_IC.close,'Closing balance',T.close,'rose','Brought forward + net movement')
+    +'</div>';
+
+  /* reconciliation strip — the statement is only right when this ties */
+  var recHtml='';
+  if(rec){
+    var ok=Math.abs(rec.diff)<0.005;
+    recHtml='<div class="pcf-rec'+(ok?' ok':' off')+'">'
+      +'<span class="pcf-recic">'+_PCF_SVG+(ok?_PCF_IC.ok:_PCF_IC.warn)+'</svg></span>'
+      +'<span class="pcf-recl">Reconciliation to the cash flow statement</span>'
+      +'<span class="pcf-recc">Sum of projects <b>'+_pcfMoney(rec.projMove)+'</b></span>'
+      +'<span class="pcf-recc">Statement movement <b>'+_pcfMoney(rec.stmtMove)+'</b></span>'
+      +'<span class="pcf-recc'+(ok?'':' bad')+'">Difference <b>'+_pcfMoney(rec.diff)+'</b></span>'
+      +(ok?'':('<span class="pcf-recnote">'+(rec.nUnbal
+            ?('The ledger holds '+rec.nUnbal+' voucher(s) whose debits and credits do not agree'
+              +(Math.abs(rec.unbalAmt)>0.004?(' (out by '+_pcfMoney(rec.unbalAmt)+')'):'')
+              +' — the difference above is that ledger error, not a fault in the allocation. Correct those vouchers and the statement ties.')
+            :'A difference remains — check the ledger for vouchers whose debits and credits do not agree.')+'</span>'))
+      +'</div>'
+      +'<div class="pcf-rec proof">'
+      +'<span class="pcf-recl">Proof of the closing cash balance</span>'
+      +'<span class="pcf-recc">Projects, closing <b>'+_pcfMoney(rec.projClose)+'</b></span>'
+      +'<span class="pcf-recc">+ Opening cash not attributable to a project <b>'+_pcfMoney(rec.unalloc)+'</b></span>'
+      +'<span class="pcf-recc">= Closing cash per the statement <b>'+_pcfMoney(rec.endCash)+'</b></span>'
+      +'<span class="pcf-recc'+((Math.abs(rec.closeProof)<0.005||Math.abs(Math.abs(rec.closeProof)-Math.abs(rec.unbalAmt))<0.01)?'':' bad')+'">Out by <b>'+_pcfMoney(rec.closeProof)+'</b></span>'
+      +'<span class="pcf-recnote">Brought forward is the cash each project has generated or consumed in earlier periods \u2014 not the entity\'s opening bank balance. '
+      +'Cash the entity held before the ledger\'s first classified activity (capital introduced and balances brought on) belongs to no project, so it is proved here rather than spread across them. '
+      +'Opening cash per the statement is '+_pcfMoney(rec.beginCash)+'.</span>'
+      +'</div>';
+  }
+
+  var bar='<div class="pcf-bar">'
+    +'<span class="pcf-srch"><input type="text" id="pcfQ" placeholder="Search project code, name or employer" value="'+_pcfE(_PCF_Q)+'" spellcheck="false" autocomplete="off"></span>'
+    +'<span class="pcf-seg">'+['','act','ina','nd'].map(function(k){
+        var lab=k?_PCF_STLBL[k][0]:'All statuses';
+        return '<button type="button" class="pcf-sb'+(_PCF_ST===k?' on':'')+'" data-pcfst="'+k+'">'+_pcfE(lab)+'</button>';}).join('')+'</span>'
+    +'<button type="button" class="pcf-sb tog'+(_PCF_ZERO?' on':'')+'" id="pcfZero" title="Show projects with no cash movement in this period">'
+      +(_PCF_ZERO?'✓ ':'')+'Include nil-movement</button>'
+    +'<span class="pcf-count">'+view.length+' of '+M.rows.length+' rows</span></div>';
+
+  var body='';
+  for(var i=0;i<view.length;i++){ var r=view[i];
+    var st=_PCF_STLBL[r.st]||_PCF_STLBL.nd;
+    var tag=r.noCode?'<span class="pcf-tag none">no code</span>':(r.inMaster?'':'<span class="pcf-tag un">not in master</span>');
+    body+='<tr class="pcf-r" data-pcfcode="'+_pcfE(r.code)+'">'
+      +'<td class="pcf-c">'+(i+1)+'</td>'
+      +'<td class="pcf-code"><span class="pcf-codev">'+_pcfE(r.code)+'</span>'+tag+'</td>'
+      +'<td class="pcf-name" title="'+_pcfE(r.name)+'">'+_pcfE(r.name||'—')+'</td>'
+      +'<td class="pcf-cust" title="'+_pcfE(r.cust)+'">'+_pcfE(r.cust||'—')+'</td>'
+      +'<td class="pcf-c"><span class="pcf-st '+st[1]+'">'+_pcfE(st[0])+'</span></td>'
+      +_pcfAmtTd(r.bf)
+      +'<td class="pcf-n pcf-dr'+(_pcfN(r.op)<-0.004?' neg':(_pcfN(r.op)>0.004?' pos':' zero'))+'" data-pcfd="OP" title="Click to see the account codes behind this figure">'+_pcfMoney(r.op)+'</td>'
+      +'<td class="pcf-n pcf-dr'+(_pcfN(r.inv)<-0.004?' neg':(_pcfN(r.inv)>0.004?' pos':' zero'))+'" data-pcfd="INV" title="Click to see the account codes behind this figure">'+_pcfMoney(r.inv)+'</td>'
+      +'<td class="pcf-n pcf-dr'+(_pcfN(r.fin)<-0.004?' neg':(_pcfN(r.fin)>0.004?' pos':' zero'))+'" data-pcfd="FIN" title="Click to see the account codes behind this figure">'+_pcfMoney(r.fin)+'</td>'
+      +_pcfAmtTd(r.close,'pcf-close')
+      +'</tr>';
+  }
+  if(!view.length)body='<tr><td colspan="10" class="pcf-none">— No project matches the current filter —</td></tr>';
+
+  var tbl='<div class="pcf-tw"><table class="pcf-tbl"><thead><tr>'
+    +'<th class="pcf-c">#</th>'
+    +_pcfTh('code','Project Code','','pcf-c')
+    +_pcfTh('name','Project Name','per project master')
+    +_pcfTh('cust','Employer','contracting party')
+    +_pcfTh('st','Status','','pcf-c')
+    +_pcfTh('bf','Brought forward','cumulative to date','pcf-nh')
+    +_pcfTh('op','Operating','activities','pcf-nh')
+    +_pcfTh('inv','Investing','activities','pcf-nh')
+    +_pcfTh('fin','Financing','activities','pcf-nh')
+    +_pcfTh('close','Closing','balance','pcf-nh')
+    +'</tr></thead><tbody>'+body+'</tbody>'
+    +'<tfoot><tr><td colspan="5">Total · '+view.length+' project'+(view.length===1?'':'s')+'</td>'
+    +_pcfAmtTd(view.reduce(function(a,x){return a+_pcfR2(x.bf);},0))
+    +_pcfAmtTd(view.reduce(function(a,x){return a+_pcfR2(x.op);},0))
+    +_pcfAmtTd(view.reduce(function(a,x){return a+_pcfR2(x.inv);},0))
+    +_pcfAmtTd(view.reduce(function(a,x){return a+_pcfR2(x.fin);},0))
+    +_pcfAmtTd(view.reduce(function(a,x){return a+_pcfR2(x.close);},0))
+    +'</tr></tfoot></table></div>';
+
+  var note='<div class="pcf-note">Figures are cash movements: a positive number is cash in, a number in brackets is cash out. '
+    +'Click any <b>Operating</b>, <b>Investing</b> or <b>Financing</b> figure to open the account codes behind it, then an account to list its vouchers, then a voucher to read its journal entry.</div>';
+
+  setTimeout(_pcfBind,0);
+  return '<div class="pcf-wrap">'+head+tiles+recHtml+bar+tbl+note+'</div>';
+}
+
+/* ---- drill: activity -> account codes -> vouchers -> journal ----------- */
+var _PCF_ACT={OP:['Operating activities','Cash generated by, and used in, operations'],
+              INV:['Investing activities','Assets acquired and disposed of'],
+              FIN:['Financing activities','Borrowings, repayments and equity'],
+              ADJ:['Opening-balance adjustments','Restatements — not an activity of the period']};
+function _pcfdClose(){ var m=document.getElementById('pcfDrill'); if(m&&m.parentNode)m.parentNode.removeChild(m);
+  document.removeEventListener('keydown',_pcfdEsc); }
+function _pcfdEsc(e){ if(e.key==='Escape'||e.keyCode===27)_pcfdClose(); }
+
+/* every GL project key that folds onto this master row */
+function _pcfKeysFor(code){ var M=_PCF; if(!M)return [];
+  for(var i=0;i<M.rows.length;i++){ if(M.rows[i].code===code)return (M.rows[i].glKeys||[]); }
+  return []; }
+
+function _pcfDetail(code,act){
+  var M=_PCF; if(!M||!M.cur||!M.cur.projAgg)return null;
+  var keys=_pcfKeysFor(code), pa=M.cur.projAgg;
+  var accs={}, tot=0, nv=0;
+  for(var i=0;i<keys.length;i++){
+    var kk=(keys[i]==='(blank)')?'':keys[i];
+    var a=pa[kk]; if(!a||!a.d||!a.d[act])continue;
+    var dd=a.d[act];
+    for(var c in dd){ if(!Object.prototype.hasOwnProperty.call(dd,c))continue;
+      var src=dd[c], o=accs[c]||(accs[c]={code:c,name:src.name||'',amt:0,vch:{}});
+      if(!o.name&&src.name)o.name=src.name;
+      o.amt+=_pcfN(src.amt); tot+=_pcfN(src.amt);
+      for(var v in src.vch){ if(!Object.prototype.hasOwnProperty.call(src.vch,v))continue;
+        var sv=src.vch[v], ov=o.vch[v]||(o.vch[v]={v:v,amt:0,trace:sv.trace||'',line:sv.line||''});
+        ov.amt+=_pcfN(sv.amt); if(sv.trace&&!ov.trace)ov.trace=sv.trace; } } }
+  var list=Object.keys(accs).map(function(c){ var o=accs[c];
+    o.vlist=Object.keys(o.vch).map(function(v){return o.vch[v];})
+      .sort(function(x,y){return Math.abs(y.amt)-Math.abs(x.amt);});
+    nv+=o.vlist.length; return o; });
+  list.sort(function(a,b){return Math.abs(b.amt)-Math.abs(a.amt);});
+  return {rows:list,total:tot,nAcc:list.length,nVch:nv};
+}
+
+function _pcfDrill(code,act){
+  _pcfdClose();
+  var M=_PCF; if(!M)return;
+  var row=null; for(var i=0;i<M.rows.length;i++){ if(M.rows[i].code===code){row=M.rows[i];break;} }
+  var D=_pcfDetail(code,act); if(!D)return;
+  var A=_PCF_ACT[act]||[act,''];
+  var shown=row?_pcfN(row[act==='OP'?'op':(act==='INV'?'inv':(act==='FIN'?'fin':'adj'))]):0;
+  var diff=Math.round((D.total-shown)*100)/100;
+
+  var head='<div class="pcfd-hd"><div><div class="pcfd-t">'+_PCF_SVG+_PCF_IC[act==='OP'?'op':(act==='INV'?'inv':'fin')]+'</svg> '
+    +_pcfE(A[0])+' · '+_pcfE(_pcfPeriodLabel(M))+'</div>'
+    +'<div class="pcfd-sub">Project <b>'+_pcfE(code)+'</b>'+(row&&row.name?(' · '+_pcfE(row.name)):'')
+    +(row&&row.cust?(' · '+_pcfE(row.cust)):'')+' &nbsp;·&nbsp; '+_pcfE(A[1])+'</div></div>'
+    +'<button type="button" class="pcfd-x" title="Close">✕</button></div>';
+
+  var summ='<div class="pcfd-summ"><span class="pcfd-chip">Accounts <b>'+D.nAcc+'</b></span>'
+    +'<span class="pcfd-chip">Vouchers <b>'+D.nVch.toLocaleString()+'</b></span>'
+    +'<span class="pcfd-chip sum">Total <b>'+_pcfMoney(D.total)+'</b></span>'
+    +((Math.abs(diff)>=0.005)?('<span class="pcfd-chip warn">Row shows '+_pcfMoney(shown)+' · difference '+_pcfMoney(diff)+'</span>'):'')
+    +((row&&row.glKeys&&row.glKeys.length>1)?('<span class="pcfd-chip alt">GL codes: '+_pcfE(row.glKeys.join(', '))+'</span>'):'')
+    +'</div>';
+
+  var body;
+  if(!D.rows.length){ body='<div class="pcfd-empty">— No cash movement in this activity for this project and period —</div>'; }
+  else{
+    var rws='';
+    for(var a=0;a<D.rows.length;a++){ var o=D.rows[a];
+      rws+='<tr class="pcfd-ar" data-pcfacc="'+_pcfE(o.code)+'"><td class="c">'+(a+1)+'</td>'
+        +'<td><span class="pcfd-ac">'+_pcfE(o.code)+'</span></td>'
+        +'<td class="nm">'+_pcfE(o.name||'')+'</td>'
+        +'<td class="c">'+o.vlist.length+'</td>'
+        +'<td class="r '+(o.amt<-0.004?'neg':'pos')+'">'+_pcfMoney(o.amt)+'</td>'
+        +'<td class="c"><span class="pcfd-go">›</span></td></tr>';
+    }
+    body='<div class="pcfd-tw"><table class="pcfd-tbl"><thead><tr><th class="c">#</th><th>Account Code</th>'
+      +'<th>Account Name</th><th class="c">Vouchers</th><th class="r">Cash effect</th><th class="c"></th></tr></thead><tbody>'+rws
+      +'</tbody><tfoot><tr><td colspan="4" class="r"><b>'+D.nAcc+' account'+(D.nAcc===1?'':'s')+'</b></td>'
+      +'<td class="r"><b>'+_pcfMoney(D.total)+'</b></td><td></td></tr></tfoot></table></div>';
+  }
+  var foot='<div class="pcfd-ft"><span class="pcfd-note">Click an account to list its vouchers, then a voucher to read its journal entry.</span>'
+    +'<button type="button" class="pcfd-close">Close</button></div>';
+
+  var ov=document.createElement('div'); ov.id='pcfDrill'; ov.className='pcfd-ov';
+  ov.innerHTML='<div class="pcfd-card">'+head+summ+body+foot+'</div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click',function(e){ if(e.target===ov)_pcfdClose(); });
+  ov.querySelector('.pcfd-x').addEventListener('click',_pcfdClose);
+  ov.querySelector('.pcfd-close').addEventListener('click',_pcfdClose);
+
+  ov.addEventListener('click',function(e){
+    if(!e.target||!e.target.closest)return;
+    /* level 3 — a voucher opens its journal entry */
+    var vr=e.target.closest('.pcfd-vr[data-pcfv]');
+    if(vr){
+      var nx=vr.nextElementSibling;
+      if(nx&&nx.classList.contains('pcfd-jn')){ nx.parentNode.removeChild(nx); vr.classList.remove('open'); return; }
+      var jn=document.createElement('tr'); jn.className='pcfd-jn';
+      var td=document.createElement('td'); td.colSpan=6;
+      var v=vr.getAttribute('data-pcfv');
+      td.innerHTML='<div class="pcfd-jnbox"><div class="pcfd-jnlab">📒 Journal entry · '+_pcfE(v)+'</div>'
+        +((typeof _apVJGlMini==='function')?_apVJGlMini(v):'<div class="pcfd-empty">Journal view unavailable</div>')+'</div>';
+      jn.appendChild(td); vr.parentNode.insertBefore(jn,vr.nextSibling); vr.classList.add('open'); return;
+    }
+    /* level 2 — an account lists its vouchers */
+    var ar=e.target.closest('.pcfd-ar[data-pcfacc]');
+    if(ar){
+      var open=ar.classList.contains('open');
+      var sib=ar.nextElementSibling;
+      while(sib&&(sib.classList.contains('pcfd-vr')||sib.classList.contains('pcfd-jn'))){
+        var rm=sib; sib=sib.nextElementSibling; rm.parentNode.removeChild(rm); }
+      if(open){ ar.classList.remove('open'); return; }
+      var ac=ar.getAttribute('data-pcfacc'), acc=null;
+      for(var z=0;z<D.rows.length;z++){ if(D.rows[z].code===ac){acc=D.rows[z];break;} }
+      if(!acc)return;
+      var after=ar;
+      for(var q=0;q<acc.vlist.length;q++){ var vv=acc.vlist[q];
+        var tr=document.createElement('tr'); tr.className='pcfd-vr'; tr.setAttribute('data-pcfv',vv.v);
+        tr.innerHTML='<td class="c"></td><td class="c"><span class="pcfd-vlink">'+_pcfE(vv.v)+'</span></td>'
+          +'<td class="nm sm">'+_pcfE(vv.trace||'')+'</td><td class="c"></td>'
+          +'<td class="r '+(vv.amt<-0.004?'neg':'pos')+'">'+_pcfMoney(vv.amt)+'</td>'
+          +'<td class="c"><span class="pcfd-go sm">›</span></td>';
+        after.parentNode.insertBefore(tr,after.nextSibling); after=tr; }
+      ar.classList.add('open'); return;
+    }
+  });
+  document.addEventListener('keydown',_pcfdEsc);
+}
+
+/* ---- events ------------------------------------------------------------ */
+var _pcfBound=false;
+function _pcfBind(){
+  var b=document.getElementById('fsBody'); if(!b)return;
+  var q=document.getElementById('pcfQ');
+  if(q&&!q._pcfOn){ q._pcfOn=1;
+    q.addEventListener('input',function(){ _PCF_Q=this.value; var pos=this.selectionStart;
+      _fsRenderBody(); var n=document.getElementById('pcfQ');
+      if(n){ n.focus(); try{n.setSelectionRange(pos,pos);}catch(e){} } }); }
+  if(_pcfBound)return; _pcfBound=true;
+  document.addEventListener('click',function(e){
+    if(_fsTab!=='pcf')return;
+    var t=e.target; if(!t||!t.closest)return;
+    var st=t.closest('[data-pcfst]');
+    if(st){ _PCF_ST=st.getAttribute('data-pcfst')||''; _fsRenderBody(); return; }
+    if(t.closest('#pcfZero')){ _PCF_ZERO=!_PCF_ZERO; _fsRenderBody(); return; }
+    if(t.closest('#fsPcfXlsx')){ _pcfExportXlsx(); return; }
+    if(t.closest('#fsPcfPdf')){ _pcfExportPdf(); return; }
+    var so=t.closest('th[data-pcfsort]');
+    if(so){ var k=so.getAttribute('data-pcfsort');
+      if(_PCF_SORT.c===k)_PCF_SORT.d=-_PCF_SORT.d; else _PCF_SORT={c:k,d:(k==='code'||k==='name'||k==='cust'||k==='st')?1:-1};
+      _fsRenderBody(); return; }
+    var dr=t.closest('td.pcf-dr[data-pcfd]');
+    if(dr){ var tr=dr.closest('tr[data-pcfcode]'); if(!tr)return;
+      _pcfDrill(tr.getAttribute('data-pcfcode'),dr.getAttribute('data-pcfd')); return; }
+  });
+}
+
+/* ---- export: Excel ----------------------------------------------------- */
+function _pcfXn(v){ var n=+v; return (isFinite(n)&&Math.abs(n)>0.004)?Math.round(n*100)/100:0; }
+function _pcfExportXlsx(){
+  if(typeof XLSX==='undefined'){ alert('The Excel library is still loading — please try again in a moment.'); return; }
+  var M=_PCF||_pcfCompute(); if(!M){ alert('No GL data — load a general ledger first.'); return; }
+  var view=_pcfView(), T=M.tot, rec=M.rec;
+  var aoa=[];
+  aoa.push(['GLI — Cash Flow by Project (direct method, from the general ledger)']);
+  aoa.push(['Period', _pcfPeriodLabel(M)]);
+  aoa.push(['Projects', M.nMaster+' in the project master · '+M.nWithGl+' with cash movement · '+view.length+' shown']);
+  if(rec){ aoa.push(['Reconciliation','Sum of projects '+_pcfMoney(rec.projMove)
+    +'  |  Statement movement '+_pcfMoney(rec.stmtMove)+'  |  Difference '+_pcfMoney(rec.diff)
+    +(rec.nUnbal?('  |  '+rec.nUnbal+' unbalanced voucher(s) in the ledger, '+_pcfMoney(rec.unbalAmt)):'')]);
+    aoa.push(['Cash','Opening '+_pcfMoney(rec.beginCash)+'  |  Closing '+_pcfMoney(rec.endCash)]); }
+  aoa.push([]);
+  aoa.push(['#','Project Code','Project Name','Employer','Status',
+            'Brought forward','Operating activities','Investing activities','Financing activities','Closing balance']);
+  var t={bf:0,op:0,inv:0,fin:0,close:0};
+  for(var i=0;i<view.length;i++){ var r=view[i];
+    t.bf+=_pcfXn(r.bf); t.op+=_pcfXn(r.op); t.inv+=_pcfXn(r.inv); t.fin+=_pcfXn(r.fin); t.close+=_pcfXn(r.close);
+    aoa.push([ i+1, r.code, r.name||'', r.cust||'', (_PCF_STLBL[r.st]||_PCF_STLBL.nd)[0],
+      _pcfXn(r.bf), _pcfXn(r.op), _pcfXn(r.inv), _pcfXn(r.fin), _pcfXn(r.close) ]); }
+  aoa.push([]);
+  aoa.push(['','TOTAL — '+view.length+' project'+(view.length===1?'':'s'),'','','',
+    _pcfXn(t.bf), _pcfXn(t.op), _pcfXn(t.inv), _pcfXn(t.fin), _pcfXn(t.close)]);
+  aoa.push([]);
+  aoa.push(['Note','A positive figure is cash received; a negative figure is cash paid.']);
+  aoa.push(['','Brought forward + Operating + Investing + Financing = Closing balance.']);
+  var ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols']=[{wch:5},{wch:18},{wch:52},{wch:34},{wch:15},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18}];
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Cash Flow by Project');
+  XLSX.writeFile(wb,'GLI_Cash_Flow_by_Project_'+_pcfPeriodLabel(M).replace(/[^\w]+/g,'_')+'.xlsx');
+}
+
+/* ---- export: PDF (print window, same approach as the FS statements) ---- */
+function _pcfExportPdf(){
+  var M=_PCF||_pcfCompute(); if(!M){ alert('No GL data — load a general ledger first.'); return; }
+  var view=_pcfView(), rec=M.rec, E=_pcfE;
+  var co=''; try{ co=(typeof _fsCoName==='function')?_fsCoName():''; }catch(e){}
+  if(!co){ try{ co=(document.querySelector('#page-fs .fsco')||{}).textContent||''; }catch(e){} }
+  var rws='', t={bf:0,op:0,inv:0,fin:0,close:0};
+  for(var i=0;i<view.length;i++){ var r=view[i];
+    t.bf+=_pcfR2(r.bf); t.op+=_pcfR2(r.op); t.inv+=_pcfR2(r.inv); t.fin+=_pcfR2(r.fin); t.close+=_pcfR2(r.close);
+    rws+='<tr><td class="c">'+(i+1)+'</td><td class="cd">'+E(r.code)+'</td>'
+      +'<td class="nm">'+E(r.name||'')+'</td><td class="nm">'+E(r.cust||'')+'</td>'
+      +'<td class="c">'+E((_PCF_STLBL[r.st]||_PCF_STLBL.nd)[0])+'</td>'
+      +'<td class="v">'+_pcfMoney(r.bf)+'</td><td class="v">'+_pcfMoney(r.op)+'</td>'
+      +'<td class="v">'+_pcfMoney(r.inv)+'</td><td class="v">'+_pcfMoney(r.fin)+'</td>'
+      +'<td class="v tot">'+_pcfMoney(r.close)+'</td></tr>';
+  }
+  var html='<!doctype html><html><head><meta charset="utf-8"><title>Cash Flow by Project</title>'
+    +'<style>'
+    +'@page{size:A4 landscape;margin:12mm 10mm}'
+    +'*{box-sizing:border-box}'
+    +'body{font-family:"Sarabun","Leelawadee UI","TH Sarabun New",Tahoma,Arial,sans-serif;color:#101828;margin:0;font-size:11px}'
+    +'h1{font-size:16px;margin:0 0 2px}'
+    +'.sub{font-size:11px;color:#667085;margin:0 0 2px}'
+    +'.meta{font-size:10px;color:#667085;margin:0 0 10px}'
+    +'.rec{border:1px solid #D0D5DD;border-radius:6px;padding:7px 10px;margin:0 0 10px;font-size:10px;background:#F9FAFB}'
+    +'.rec b{font-variant-numeric:tabular-nums}'
+    +'.rec .bad{color:#B42318}'
+    +'table{width:100%;border-collapse:collapse}'
+    +'thead th{background:#0F3D37;color:#fff;font-size:10px;font-weight:700;padding:6px 6px;text-align:center;'
+    +'border-right:1px solid rgba(255,255,255,.18)}'
+    +'thead th:last-child{border-right:0}'
+    +'tbody td{padding:4px 6px;border-bottom:1px solid #EAECF0;font-size:10px;vertical-align:top}'
+    +'tbody tr:nth-child(even) td{background:#FAFBFC}'
+    +'td.c{text-align:center}td.v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}'
+    +'td.cd{font-weight:700;white-space:nowrap}td.nm{max-width:240px}td.tot{font-weight:700}'
+    +'tfoot td{padding:7px 6px;border-top:2px solid #0F3D37;font-weight:800;font-size:10.5px}'
+    +'tfoot td.v{text-align:right;font-variant-numeric:tabular-nums}'
+    +'.note{margin-top:9px;font-size:9.5px;color:#667085}'
+    +'thead{display:table-header-group}tr{page-break-inside:avoid}'
+    +'</style></head><body>'
+    +'<h1>Cash Flow by Project</h1>'
+    +'<div class="sub">'+E(co)+'</div>'
+    +'<div class="meta">'+E(_pcfPeriodLabel(M))+' · direct method, built from the general ledger · '
+    +M.nMaster+' projects in the master, '+view.length+' shown</div>'
+    +(rec?('<div class="rec">Reconciliation to the cash flow statement — sum of projects <b>'+_pcfMoney(rec.projMove)
+        +'</b> &nbsp;|&nbsp; statement movement <b>'+_pcfMoney(rec.stmtMove)
+        +'</b> &nbsp;|&nbsp; difference <b class="'+(Math.abs(rec.diff)<0.005?'':'bad')+'">'+_pcfMoney(rec.diff)+'</b>'
+        +' &nbsp;|&nbsp; opening cash <b>'+_pcfMoney(rec.beginCash)+'</b> &nbsp;|&nbsp; closing cash <b>'+_pcfMoney(rec.endCash)+'</b>'
+        +(rec.nUnbal?('<br>'+rec.nUnbal+' voucher(s) in the ledger have debits and credits that do not agree'
+          +(Math.abs(rec.unbalAmt)>0.004?(' (out by '+_pcfMoney(rec.unbalAmt)+')'):'')
+          +' — the difference above is that ledger error, not a fault in the allocation.'):'')
+        +'</div>'):'')
+    +'<table><thead><tr><th>#</th><th>Project Code</th><th>Project Name</th><th>Employer</th><th>Status</th>'
+    +'<th>Brought forward</th><th>Operating</th><th>Investing</th><th>Financing</th><th>Closing</th></tr></thead>'
+    +'<tbody>'+rws+'</tbody>'
+    +'<tfoot><tr><td colspan="5">TOTAL — '+view.length+' project'+(view.length===1?'':'s')+'</td>'
+    +'<td class="v">'+_pcfMoney(t.bf)+'</td><td class="v">'+_pcfMoney(t.op)+'</td>'
+    +'<td class="v">'+_pcfMoney(t.inv)+'</td><td class="v">'+_pcfMoney(t.fin)+'</td>'
+    +'<td class="v">'+_pcfMoney(t.close)+'</td></tr></tfoot></table>'
+    +'<div class="note">A positive figure is cash received; a figure in brackets is cash paid. '
+    +'Brought forward + Operating + Investing + Financing = Closing balance.</div>'
+    +'<scr'+'ipt>setTimeout(function(){try{window.print();}catch(e){}},300);</scr'+'ipt>'
+    +'</body></html>';
+  var w=window.open('','_blank');
+  if(!w){ alert('Please allow pop-ups so the PDF can be produced.'); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+}
+
+</script>
+<style id="pcfCss">
+/* v13.4: FS · Cash Flow by Project — pastel tiles, icons, Database table form.
+   Last block in the document -> wins the cascade. Fully revertible. */
+#page-fs .pcf-wrap{display:block}
+
+/* ---------- header ---------- */
+#page-fs .pcf-hd{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  background:linear-gradient(180deg,#F4FAF7,#EEF6F2);border:1px solid #DCEBE4;border-radius:14px;
+  padding:12px 15px;margin:0 0 12px}
+#page-fs .pcf-hdl{display:flex;align-items:center;gap:11px;flex:1 1 auto;min-width:0}
+#page-fs .pcf-hdic{width:32px;height:32px;flex:0 0 auto;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;background:#fff;color:#0E7A6C;box-shadow:0 0 0 1px #CFE5DC}
+#page-fs .pcf-hdic svg{width:18px;height:18px;display:block}
+#page-fs .pcf-hdt{display:flex;flex-direction:column;gap:2px;font-size:14px;font-weight:800;color:#0F3D37;line-height:1.25}
+#page-fs .pcf-hdt em{font-style:normal;font-size:11px;font-weight:600;color:#6B7688}
+#page-fs .pcf-hdr{display:flex;align-items:center;gap:7px;flex-wrap:wrap;flex:0 0 auto}
+#page-fs .pcf-chip{display:inline-flex;align-items:center;font-size:11px;font-weight:700;color:#0E5C52;
+  background:#fff;border:1px solid #DCEBE4;border-radius:999px;padding:4px 12px;font-variant-numeric:tabular-nums}
+#page-fs .pcf-chip.alt{color:#1D5FAE;border-color:#D6E5F7}
+#page-fs .pcf-chip.warn{color:#B4622A;border-color:#EBD6BE;background:#FCF1E4}
+
+/* ---------- pastel KPI tiles ---------- */
+#page-fs .pcf-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));
+  gap:10px;margin:0 0 12px}
+#page-fs .pcf-tile{border-radius:14px;padding:12px 14px 13px;border:1px solid rgba(16,24,40,.06);min-width:0}
+#page-fs .pcf-tl{display:flex;align-items:center;gap:8px;font-size:9.5px;font-weight:800;
+  letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px}
+#page-fs .pcf-ti{width:22px;height:22px;flex:0 0 auto;border-radius:7px;display:flex;align-items:center;
+  justify-content:center;background:rgba(255,255,255,.8)}
+#page-fs .pcf-ti svg{width:14px;height:14px;display:block}
+#page-fs .pcf-tv{font-size:18px;font-weight:800;line-height:1.2;font-variant-numeric:tabular-nums lining-nums}
+#page-fs .pcf-ts{margin-top:5px;font-size:10.5px;font-weight:600;color:#6B7688}
+#page-fs .pcf-tile.mint{background:#E7F4EF}
+#page-fs .pcf-tile.mint .pcf-tl,#page-fs .pcf-tile.mint .pcf-ti{color:#0E7A6C}
+#page-fs .pcf-tile.mint .pcf-tv{color:#0B5347}
+#page-fs .pcf-tile.sky{background:#E8F1FC}
+#page-fs .pcf-tile.sky .pcf-tl,#page-fs .pcf-tile.sky .pcf-ti{color:#1D5FAE}
+#page-fs .pcf-tile.sky .pcf-tv{color:#174C8C}
+#page-fs .pcf-tile.lilac{background:#EFEBFB}
+#page-fs .pcf-tile.lilac .pcf-tl,#page-fs .pcf-tile.lilac .pcf-ti{color:#6A34C4}
+#page-fs .pcf-tile.lilac .pcf-tv{color:#55299C}
+#page-fs .pcf-tile.butter{background:#FBF4DC}
+#page-fs .pcf-tile.butter .pcf-tl,#page-fs .pcf-tile.butter .pcf-ti{color:#8A5E12}
+#page-fs .pcf-tile.butter .pcf-tv{color:#6E4A0E}
+#page-fs .pcf-tile.rose{background:#FCEDF1}
+#page-fs .pcf-tile.rose .pcf-tl,#page-fs .pcf-tile.rose .pcf-ti{color:#B03A5B}
+#page-fs .pcf-tile.rose .pcf-tv{color:#96284A}
+
+/* ---------- reconciliation strip ---------- */
+#page-fs .pcf-rec{display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+  border-radius:12px;padding:9px 13px;margin:0 0 12px;font-size:11px;font-weight:600}
+#page-fs .pcf-rec.ok{background:#E9F6EC;border:1px solid #CBE6D3;color:#2F7D4F}
+#page-fs .pcf-rec.off{background:#FCF1E4;border:1px solid #EBD6BE;color:#8A5E12}
+#page-fs .pcf-recic{width:20px;height:20px;flex:0 0 auto;display:flex;align-items:center;justify-content:center}
+#page-fs .pcf-recic svg{width:16px;height:16px;display:block}
+#page-fs .pcf-recl{font-weight:800;letter-spacing:.01em}
+#page-fs .pcf-recc{background:rgba(255,255,255,.75);border-radius:999px;padding:3px 11px;color:#344054;font-weight:600}
+#page-fs .pcf-recc b{font-weight:800;font-variant-numeric:tabular-nums;color:#1C2535}
+#page-fs .pcf-recc.bad b{color:#B42318}
+#page-fs .pcf-recc.alt{color:#667085}
+#page-fs .pcf-recnote{flex:1 1 100%;font-size:10.5px;font-weight:600;opacity:.9}
+#page-fs .pcf-rec.proof{background:#E8F1FC;border:1px solid #D6E5F7;color:#1D5FAE;margin-top:-6px}
+#page-fs .pcf-rec.proof .pcf-recc b{color:#174C8C}
+
+/* ---------- filter bar ---------- */
+#page-fs .pcf-bar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0 0 9px}
+#page-fs .pcf-srch{flex:1 1 280px;min-width:0;max-width:420px}
+#page-fs .pcf-srch input{width:100%;box-sizing:border-box;font-size:12px;padding:7px 12px;
+  border:1px solid #E7EBF3;border-radius:10px;background:#fff;color:#344054;outline:none;font-family:inherit}
+#page-fs .pcf-srch input:focus{border-color:#0E5C52;box-shadow:0 0 0 3px rgba(14,92,82,.1)}
+#page-fs .pcf-seg{display:inline-flex;gap:4px;flex-wrap:wrap}
+#page-fs .pcf-sb{font-size:11.5px;font-weight:700;color:#667085;background:#fff;border:1px solid #E7EBF3;
+  border-radius:9px;padding:6px 12px;cursor:pointer;font-family:inherit;transition:.14s}
+#page-fs .pcf-sb:hover{border-color:#CBD5E1;color:#344054}
+#page-fs .pcf-sb.on{background:#E7F4EF;border-color:#9FCCC0;color:#0E5C52}
+#page-fs .pcf-count{margin-left:auto;font-size:11px;font-weight:700;color:#8A93A5;font-variant-numeric:tabular-nums}
+
+/* ---------- the table: Database form ---------- */
+#page-fs .pcf-tw{border:1px solid #E7EBF3;border-radius:12px;background:#fff;overflow:auto;max-height:64vh}
+#page-fs .pcf-tbl{width:100%;border-collapse:collapse;font-size:12px}
+#page-fs .pcf-tbl thead th{position:sticky;top:0;z-index:3;background:#0F3D37;color:#fff;
+  font-size:12px;font-weight:700;padding:8px 8px;text-align:center;
+  border-right:1px solid rgba(255,255,255,.12);white-space:nowrap;cursor:pointer;user-select:none}
+#page-fs .pcf-tbl thead th:last-child{border-right:0}
+#page-fs .pcf-tbl thead th.pcf-sorted{box-shadow:inset 0 -3px 0 #C9B98A}
+#page-fs .pcf-thl{display:block;line-height:1.25}
+#page-fs .pcf-thy{display:block;font-size:8.5px;font-weight:600;color:rgba(255,255,255,.6);
+  letter-spacing:.03em;margin-top:1px}
+#page-fs .pcf-tbl tbody td{padding:6px 8px;border-bottom:1px solid #F0F2F5;
+  border-right:1px solid #F1EDE3;vertical-align:middle;white-space:nowrap}
+#page-fs .pcf-tbl tbody td:last-child{border-right:0}
+#page-fs .pcf-tbl tbody tr:nth-child(even) td{background:rgba(16,24,40,.014)}
+#page-fs .pcf-tbl tbody tr:hover td{background:rgba(14,92,82,.05)}
+#page-fs .pcf-tbl td.pcf-c{text-align:center}
+#page-fs .pcf-codev{font-weight:800;color:#0E5C52;font-variant-numeric:tabular-nums}
+#page-fs .pcf-tbl td.pcf-name,#page-fs .pcf-tbl td.pcf-cust{max-width:300px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;color:#344054}
+#page-fs .pcf-tbl td.pcf-cust{max-width:220px;color:#667085}
+#page-fs .pcf-tbl td.pcf-n,#page-fs .pcf-tbl tfoot td{text-align:right;
+  font-variant-numeric:tabular-nums lining-nums}
+#page-fs .pcf-tbl td.pcf-n.pos{color:#0B5347}
+#page-fs .pcf-tbl td.pcf-n.neg{color:#B42318}
+#page-fs .pcf-tbl td.pcf-n.zero{color:#B0B7C3}
+#page-fs .pcf-tbl td.pcf-close{font-weight:800;background:rgba(14,92,82,.035)!important}
+#page-fs .pcf-tbl td.pcf-dr{cursor:pointer;position:relative}
+#page-fs .pcf-tbl td.pcf-dr:hover{box-shadow:inset 0 0 0 1.5px #9FCCC0;border-radius:4px}
+#page-fs .pcf-tbl td.pcf-dr:not(.zero)::after{content:'\203a';position:absolute;right:2px;top:50%;
+  transform:translateY(-50%);color:#9FCCC0;font-weight:800;opacity:0;transition:.12s}
+#page-fs .pcf-tbl td.pcf-dr:hover::after{opacity:1}
+#page-fs .pcf-st{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.03em;
+  border-radius:999px;padding:2px 9px}
+#page-fs .pcf-st.act{background:#E7F4EF;color:#0E7A6C}
+#page-fs .pcf-st.ina{background:#F1F3F8;color:#667085}
+#page-fs .pcf-st.nd{background:#FBF4DC;color:#8A5E12}
+#page-fs .pcf-tag{display:inline-block;margin-left:6px;font-size:8.5px;font-weight:800;
+  border-radius:999px;padding:1px 7px;vertical-align:middle}
+#page-fs .pcf-tag.un{background:#FCF1E4;color:#B4622A}
+#page-fs .pcf-tag.none{background:#F1F3F8;color:#8A93A5}
+#page-fs .pcf-tbl tfoot td{position:sticky;bottom:0;background:#F7F9FC;color:#1C2535;
+  font-weight:800;padding:8px;border-top:1px solid #E7EBF3;border-right:0}
+#page-fs .pcf-none{text-align:center;color:#98A2B3;padding:26px 12px;font-size:12px}
+#page-fs .pcf-note{margin-top:9px;font-size:11px;color:#6B7688;line-height:1.55}
+#page-fs .pcf-empty{text-align:center;color:#667085;font-size:12.5px;padding:40px 16px;
+  border:1px dashed #E1E6EF;border-radius:14px;background:#FAFBFE;line-height:1.6}
+
+/* ---------- drill-down modal ---------- */
+.pcfd-ov{position:fixed;inset:0;z-index:2200;background:rgba(16,24,40,.44);
+  display:flex;align-items:center;justify-content:center;padding:28px 18px}
+.pcfd-card{background:#fff;border-radius:16px;width:min(1080px,100%);max-height:88vh;
+  display:flex;flex-direction:column;overflow:hidden;box-shadow:0 26px 60px -18px rgba(16,24,40,.42)}
+.pcfd-hd{display:flex;align-items:flex-start;gap:12px;padding:14px 17px;
+  background:linear-gradient(180deg,#F4FAF7,#EEF6F2);border-bottom:1px solid #DCEBE4}
+.pcfd-t{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:#0F3D37}
+.pcfd-t svg{width:17px;height:17px;flex:0 0 auto;color:#0E7A6C}
+.pcfd-sub{margin-top:4px;font-size:11.5px;color:#6B7688;line-height:1.5}
+.pcfd-x{margin-left:auto;flex:0 0 auto;width:30px;height:30px;border:none;border-radius:9px;cursor:pointer;
+  background:#fff;color:#667085;font-size:14px;box-shadow:0 0 0 1px #DCEBE4}
+.pcfd-x:hover{background:#FCEDF1;color:#B42318}
+.pcfd-summ{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:10px 17px;border-bottom:1px solid #F0F2F5}
+.pcfd-chip{font-size:11px;font-weight:700;color:#344054;background:#F7F9FC;border:1px solid #EBEFF6;
+  border-radius:999px;padding:4px 11px}
+.pcfd-chip b{font-variant-numeric:tabular-nums;color:#1C2535}
+.pcfd-chip.sum{background:#E7F4EF;border-color:#CFE5DC;color:#0E5C52}
+.pcfd-chip.alt{background:#E8F1FC;border-color:#D6E5F7;color:#1D5FAE}
+.pcfd-chip.warn{background:#FCF1E4;border-color:#EBD6BE;color:#B4622A}
+.pcfd-tw{flex:1 1 auto;overflow:auto;min-height:0}
+.pcfd-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.pcfd-tbl thead th{position:sticky;top:0;z-index:2;background:#0F3D37;color:#fff;font-size:11.5px;
+  font-weight:700;padding:8px;text-align:center;border-right:1px solid rgba(255,255,255,.12);white-space:nowrap}
+.pcfd-tbl thead th:last-child{border-right:0}
+.pcfd-tbl tbody td{padding:6px 8px;border-bottom:1px solid #F0F2F5;vertical-align:middle}
+.pcfd-tbl td.c{text-align:center}
+.pcfd-tbl td.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pcfd-tbl td.nm{color:#475467;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcfd-tbl td.nm.sm{font-size:11px;color:#8A93A5}
+.pcfd-tbl td.r.pos{color:#0B5347}
+.pcfd-tbl td.r.neg{color:#B42318}
+.pcfd-ar{cursor:pointer}
+.pcfd-ar:hover td{background:rgba(14,92,82,.05)}
+.pcfd-ar.open td{background:#EDF6F3}
+.pcfd-ac{font-weight:800;color:#0E5C52;font-variant-numeric:tabular-nums}
+.pcfd-go{color:#9FCCC0;font-weight:800}
+.pcfd-go.sm{font-size:11px}
+.pcfd-vr{cursor:pointer;background:#FBFCFE}
+.pcfd-vr:hover td{background:rgba(29,95,174,.06)}
+.pcfd-vr.open td{background:#E8F1FC}
+.pcfd-vlink{font-weight:700;color:#1D5FAE;text-decoration:underline;text-underline-offset:2px}
+.pcfd-jn td{background:#F7F9FC!important;padding:0!important}
+.pcfd-jnbox{padding:10px 14px 14px}
+.pcfd-jnlab{font-size:11px;font-weight:800;color:#0E5C52;margin-bottom:7px}
+.pcfd-tbl tfoot td{padding:8px;background:#F7F9FC;font-weight:800;border-top:1px solid #E7EBF3}
+.pcfd-tbl tfoot td.r{text-align:right;font-variant-numeric:tabular-nums}
+.pcfd-empty{padding:34px 16px;text-align:center;color:#98A2B3;font-size:12px}
+.pcfd-ft{display:flex;align-items:center;gap:12px;padding:11px 17px;border-top:1px solid #F0F2F5;background:#FCFDFE}
+.pcfd-note{font-size:11px;color:#8A93A5;flex:1 1 auto}
+.pcfd-close{border:none;border-radius:9px;cursor:pointer;background:#0E5C52;color:#fff;
+  font-size:12px;font-weight:700;padding:7px 18px;font-family:inherit}
+.pcfd-close:hover{filter:brightness(1.08)}
+
+/* the tab's own export buttons */
+#page-fs .fsexp.fspcf-x,#page-fs .fsexp.fspcf-p{font-weight:700}
 </style>
 </body></html>
