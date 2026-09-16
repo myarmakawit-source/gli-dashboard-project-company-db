@@ -32132,4 +32132,23 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 #page-wht .wrhead{padding-left:2px!important}
 @media (max-width:900px){#page-wht .wrhead>.wrtitle{padding-left:11px!important}}
 </style>
+<style id="tblFrameOff">
+/* v13.1: the thin grey frame around the register tables is removed by request —
+   the dark sticky header and the row rules already bound the table. The wrapper
+   keeps its rounded corners and its own scrolling. */
+#page-wht .wrtblwrap,#page-wht .whtsum-tblwrap{border:0!important;box-shadow:none!important}
+#page-wht .wrtblwrap{border-radius:12px!important;overflow:auto!important}
+</style>
+<style id="vatZebraCalm">
+/* v13.1: the Purchase VAT report no longer alternates in yellow — both registers
+   use the same neutral zebra as the Database tables, so the colour in the module
+   comes from the panel and the header, not from the rows. */
+#page-vat .vtbl tbody tr:nth-child(even) td,
+#page-vat .vreg.sell .vtbl tbody tr:nth-child(even) td,
+#page-vat .vreg.buy .vtbl tbody tr:nth-child(even) td{background:rgba(16,24,40,.014)!important}
+#page-vat .vreg.sell .vtbl tbody tr:nth-child(even),
+#page-vat .vreg.buy .vtbl tbody tr:nth-child(even){background:transparent!important}
+#page-vat .vreg.sell .vtbl tbody tr:hover td,
+#page-vat .vreg.buy .vtbl tbody tr:hover td{background:rgba(14,92,82,.05)!important}
+</style>
 </body></html>
