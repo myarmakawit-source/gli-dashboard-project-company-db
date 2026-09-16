@@ -12972,7 +12972,7 @@ function _pgBar(p){ if(p==null)return '<div class="pgbar"><span class="pgbar-na"
   var w=Math.max(0,Math.min(100,p)); var cls=_pgProgCls(p);
   return '<div class="pgbar"><div class="pgbar-t"><div class="pgbar-f '+cls+'" style="width:'+w.toFixed(1)+'%"></div>'+(p>100.5?'<span class="pgbar-over">'+Math.round(p-100)+'% over</span>':'')+'</div><span class="pgbar-v '+cls+'">'+p.toFixed(2)+'%</span></div>'; }   /* v9.140: Progress % shown to 2 decimals */
 function _pgFb(col){ var on=(_pgColFilt&&_pgColFilt[col])?' on':''; return '<button type="button" class="pgfbtn'+on+'" data-fcol="'+col+'" title="Filter (Excel-style)">▾</button>'; }   /* v9.135 */
-function _pgSh(k,th,en,grp){ var on=(_pgSort.k===k); var ar=on?(_pgSort.dir<0?'▼':'▲'):''; return '<th class="pgsort r'+(grp?(' pgsub-'+grp):'')+(on?' on':'')+'" data-sk="'+k+'"><span class="pgth">'+th+'<span>'+en+'</span></span><i class="pgarr">'+ar+'</i>'+_pgFb(k)+_pgRz(k)+'</th>'; }
+function _pgSh(k,th,en,grp){ var on=(_pgSort.k===k); var ar=on?(_pgSort.dir<0?'▼':'▲'):''; return '<th class="pgsort r'+(grp?(' pgsub-'+grp):'')+(on?' on':'')+'" data-sk="'+k+'"><span class="pgth">'+th+'<span>'+en+'</span></span><i class="pgarr">'+ar+'</i>'+_pgFb(k)+'</th>'; }
 var _PG_ST={act:['Active','pg-act','Active project'],ina:['Inactive','pg-ina','Inactive project'],nd:['No database PM','pg-nd','Not registered in Project Master']};
 function _pgStatusBadge(st){ var m=_PG_ST[st]||[(st||'—'),'pg-nd','']; return '<span class="pgbadge '+m[1]+'" title="'+esc(m[2]||'')+'">'+esc(m[0])+'</span>'; }
 function _pgColVal(x,col){ if(col==='code')return (x.code+' '+(x.name||'')); if(col==='status')return (_PG_ST[x.st]?_PG_ST[x.st][0]:x.st); return x[col]; }
@@ -13033,12 +13033,12 @@ function _pgHtml(){
     '</div>';
   function _ar(k){ return (_pgSort.k===k?(_pgSort.dir<0?'▼':'▲'):''); }
   var head='<thead><tr class="pggrp">'+
-    '<th rowspan="2" class="pgseq">#'+_pgRz('seq')+'</th>'+
-    '<th rowspan="2" class="pgsort pgprojh l'+(_pgSort.k==='code'?' on':'')+'" data-sk="code">Project <i class="pgarr">'+_ar('code')+'</i>'+_pgFb('code')+_pgRz('code')+'</th>'+
-    '<th rowspan="2" class="pgsort pgstath l'+(_pgSort.k==='status'?' on':'')+'" data-sk="status">Status <i class="pgarr">'+_ar('status')+'</i><button type="button" class="pgfbtn'+((_pgStFilter&&_pgStFilter.length)?' on':'')+'" data-fcol="status" title="Filter (Excel-style)">▾</button>'+_pgRz('status')+'</th>'+
+    '<th rowspan="2" class="pgseq">#</th>'+
+    '<th rowspan="2" class="pgsort pgprojh l'+(_pgSort.k==='code'?' on':'')+'" data-sk="code">Project <i class="pgarr">'+_ar('code')+'</i>'+_pgFb('code')+'</th>'+
+    '<th rowspan="2" class="pgsort pgstath l'+(_pgSort.k==='status'?' on':'')+'" data-sk="status">Status <i class="pgarr">'+_ar('status')+'</i><button type="button" class="pgfbtn'+((_pgStFilter&&_pgStFilter.length)?' on':'')+'" data-fcol="status" title="Filter (Excel-style)">▾</button></th>'+
     '<th colspan="6" class="pggh gh-rev">Revenue</th>'+
     '<th colspan="3" class="pggh gh-cost">Cost / Expense</th>'+
-    '<th rowspan="2" class="pgsort pgprogh'+(_pgSort.k==='prog'?' on':'')+'" data-sk="prog">Progress %<span class="pgprogh-s">Cost GL ('+_pgCatLabel()+') ÷ Contract Expense</span> <i class="pgarr">'+_ar('prog')+'</i>'+_pgFb('prog')+_pgRz('prog')+'</th></tr>'+
+    '<th rowspan="2" class="pgsort pgprogh'+(_pgSort.k==='prog'?' on':'')+'" data-sk="prog">Progress %<span class="pgprogh-s">Cost GL ('+_pgCatLabel()+') ÷ Contract Expense</span> <i class="pgarr">'+_ar('prog')+'</i>'+_pgFb('prog')+'</th></tr>'+
     '<tr class="pgcols">'+_pgSh('conRev','Contract','Value','rev')+_pgSh('glRev','GL','Actual','rev')+_pgSh('earned','Earned','POC · %×Contract','rev')+_pgSh('diff','Diff','GL − Earned','rev')+_pgSh('accrued','Accrued Rev. <span class="pghdstar">★</span>','Accrued revenue · <span class="pghdac">from a/c 1170401</span>','rev')+_pgSh('advance','Advance Rev. <span class="pghdstar">★</span>','Advances received · <span class="pghdac">from a/c 2152002</span>','rev')+_pgSh('conExp','Contract Exp.','Budget','cost')+_pgSh('cost','GL','Cost','cost')+_pgSh('accrExp','Accrued Exp. <span class="pghdstar">★</span>','Accrued expense · <span class="pghdac">from a/c 2151113</span>','cost')+'</tr></thead>';
   var body=''; if(!rows.length){ body='<tr><td colspan="13" class="pgnone">— No project data (add/import data in the Business Performance module first) —</td></tr>'; }
   else if(manTot>0){   /* v9.144: split into ⭐ Pasted group (top, with subtotal) + Computed group (below) */
@@ -13073,82 +13073,7 @@ function _pgHtml(){
     '<p class="pgnote"><b>Progress %</b> compares actual <b>Cost (GL)</b> against the <b>Contract Expense</b> (budget) — under 80% = in progress · 80–100% = near budget · over 100% = <b class="pgred">over budget</b>. <b>Earned Revenue (POC)</b> = Progress % × Contract Revenue (percentage-of-completion). Projects without a contract-expense budget are not measured. Figures follow the selected database year in Business Performance.</p>'+
     '</div>';
 }
-/* ===== v12.0: drag-to-resize columns (same idea as the Database table: a colgroup plus
-   table-layout:fixed, widths kept per column in localStorage) ===== */
-var PG_COLK=['seq','code','status','conRev','glRev','earned','diff','accrued','advance','conExp','cost','accrExp','prog'];
-var _pgColW={}; try{_pgColW=JSON.parse(localStorage.getItem('gli_pgcolw')||'{}')||{};}catch(_pcw){_pgColW={};}
-if(!_pgColW||typeof _pgColW!=='object')_pgColW={};
-function _pgColwSave(){ try{localStorage.setItem('gli_pgcolw',JSON.stringify(_pgColW));}catch(e){}
-  try{if(typeof _tsTouch==='function')_tsTouch('pgcolw');}catch(e){} }
-function _pgRz(k){ return '<span class="pgrz" data-ck="'+k+'" title="Drag to resize · double-click to reset"></span>'; }
-/* the leaf header cells in visual order: the three row-spanning cells, the nine sub-columns, then Progress % */
-function _pgLeafThs(t){
-  var tr=t.querySelectorAll('thead tr'); if(tr.length<2)return [];
-  var r1=tr[0].children,r2=tr[1].children;
-  if(r1.length<6||r2.length<9)return [];
-  var out=[r1[0],r1[1],r1[2]];
-  for(var i=0;i<9;i++)out.push(r2[i]);
-  out.push(r1[5]);
-  return out;
-}
-function _pgColwApply(t){
-  var cg=t.querySelector('colgroup');
-  if(!cg){ cg=document.createElement('colgroup'); t.insertBefore(cg,t.firstChild); }
-  var h='',tot=0;
-  for(var i=0;i<PG_COLK.length;i++){ var w=+_pgColW[PG_COLK[i]]||120; tot+=w; h+='<col style="width:'+w+'px">'; }
-  cg.innerHTML=h;
-  t.style.tableLayout='fixed';
-  t.style.width=tot+'px';
-  t.style.minWidth=tot+'px';
-}
-/* first run has no saved widths: measure what the browser laid out, then freeze that */
-function _pgColwBoot(w){
-  try{
-    var t=w.querySelector('.pgtbl'); if(!t)return;
-    var have=false,i; for(i=0;i<PG_COLK.length;i++){ if(+_pgColW[PG_COLK[i]]>0){have=true;break;} }
-    if(!have){
-      var cells=_pgLeafThs(t); if(cells.length!==PG_COLK.length)return;
-      for(i=0;i<PG_COLK.length;i++){ var cw=Math.round(cells[i].getBoundingClientRect().width); _pgColW[PG_COLK[i]]=Math.max(40,cw||120); }
-      _pgColwSave();
-    }
-    _pgColwApply(t);
-  }catch(e){}
-}
-function _pgColwReset(k){ if(k)delete _pgColW[k]; else _pgColW={}; _pgColwSave();
-  try{ var t=document.querySelector('#page-pg .pgtbl'); if(t){ var cg=t.querySelector('colgroup'); if(cg&&cg.parentNode)cg.parentNode.removeChild(cg); t.style.tableLayout=''; t.style.width=''; t.style.minWidth=''; } }catch(e){}
-  if(typeof renderProgress==='function')renderProgress();
-}
-function _pgColwDrag(w){
-  w.addEventListener('pointerdown',function(e){
-    var g=e.target&&e.target.closest?e.target.closest('.pgrz'):null; if(!g)return;
-    e.preventDefault(); e.stopPropagation();
-    var k=g.getAttribute('data-ck'); var idx=PG_COLK.indexOf(k); if(idx<0)return;
-    var t=w.querySelector('.pgtbl'); if(!t)return;
-    _pgColwApply(t);/* make sure the colgroup exists before the first drag */
-    var cols=t.getElementsByTagName('col'); var col=cols[idx]; if(!col)return;
-    var startX=e.clientX,startW=+_pgColW[k]||Math.round(col.getBoundingClientRect().width)||120;
-    t.classList.add('pgresizing'); g.classList.add('drag');
-    try{g.setPointerCapture(e.pointerId);}catch(_e){}
-    function mv(ev){
-      var nw=Math.max(40,Math.min(900,Math.round(startW+(ev.clientX-startX))));
-      _pgColW[k]=nw; col.style.width=nw+'px';
-      var tot=0; for(var i=0;i<PG_COLK.length;i++)tot+=(+_pgColW[PG_COLK[i]]||120);
-      t.style.width=tot+'px'; t.style.minWidth=tot+'px';
-    }
-    function up(){
-      try{g.releasePointerCapture(e.pointerId);}catch(_e){}
-      g.removeEventListener('pointermove',mv); g.removeEventListener('pointerup',up); g.removeEventListener('pointercancel',up);
-      t.classList.remove('pgresizing'); g.classList.remove('drag'); _pgColwSave();
-    }
-    g.addEventListener('pointermove',mv); g.addEventListener('pointerup',up); g.addEventListener('pointercancel',up);
-  });
-  w.addEventListener('dblclick',function(e){
-    var g=e.target&&e.target.closest?e.target.closest('.pgrz'):null; if(!g)return;
-    e.preventDefault(); e.stopPropagation(); _pgColwReset(null);
-  });
-}
 function _pgBind(w){ if(_pgBound)return; _pgBound=true;
-  _pgColwDrag(w);
   w.addEventListener('click',function(e){ var t=e.target;
     var drc=t.closest?t.closest('.pgdrill'):null; if(drc){ if(e&&e.stopPropagation)e.stopPropagation(); _pgGLDrill(drc.getAttribute('data-dc'),drc.getAttribute('data-dk')); return; }   /* v9.174: drill a GL-sourced cell → GL entries + Export */
     var yc=t.closest?t.closest('.pgychip'):null; if(yc){ var y=yc.getAttribute('data-y'); try{if(typeof _bpSwitchYear==='function')_bpSwitchYear(y);}catch(_e){} renderProgress(); return; }
@@ -13809,7 +13734,7 @@ function _pgPasteOpen(){ _pgPasteClose(); var cnt=0; try{cnt=Object.keys(_pgManP
     try{delete _pgManDB[nm];}catch(e){} _pgManDBSave(); _pgPasteOpen(); }); }
   ov.addEventListener('mousedown',function(e){ if(e.target===ov)_pgPasteClose(); });
   ov.addEventListener('keydown',function(e){ if(e.key==='Escape')_pgPasteClose(); }); }
-function renderProgress(){ var w=document.getElementById('pgWrap'); if(!w)return; try{if(typeof _pgYearSync==='function')_pgYearSync();}catch(_pgy){} _pgEnsureCss(); _pgCloseDrop(); w.innerHTML=_pgHtml(); _pgBind(w); _pgEnsureGL(); _pgStickyHead(w); _pgColwBoot(w); }
+function renderProgress(){ var w=document.getElementById('pgWrap'); if(!w)return; try{if(typeof _pgYearSync==='function')_pgYearSync();}catch(_pgy){} _pgEnsureCss(); _pgCloseDrop(); w.innerHTML=_pgHtml(); _pgBind(w); _pgEnsureGL(); _pgStickyHead(w); }
 /* v9.149: freeze the two-row header — measure the group-row height so the sub-header row sticks exactly beneath it.
    v9.151: also size the scroll box to fill the remaining viewport so the pinned header AND the dark total footer are both always visible. */
 function _pgStickyHead(w){ try{ var t=w.querySelector('.pgtbl'); var wrap=w.querySelector('.pgtblwrap');
@@ -31369,17 +31294,6 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 #page-pg .pgtbl .pggh,#page-pg .pgtbl .pggh.gh-rev,#page-pg .pgtbl .pggh.gh-cost{
   border-bottom:1px solid rgba(255,255,255,.26)!important}
 #page-pg .pgtbl thead tr:last-child th{border-bottom:1px solid rgba(255,255,255,.26)!important}
-</style>
-<style id="pgColResize">
-/* v12.0: the drag handle on every Progress % header column */
-#page-pg .pgtbl thead th{position:relative}
-#page-pg .pgrz{position:absolute;top:0;right:0;width:9px;height:100%;cursor:col-resize;z-index:9;
-  user-select:none;touch-action:none;background:transparent}
-#page-pg .pgrz::after{content:"";position:absolute;top:18%;bottom:18%;right:3px;width:2px;border-radius:2px;
-  background:transparent;transition:background .12s}
-#page-pg .pgrz:hover::after,#page-pg .pgrz.drag::after{background:rgba(255,255,255,.75)}
-#page-pg .pgtbl.pgresizing{cursor:col-resize;user-select:none}
-#page-pg .pgtbl.pgresizing *{cursor:col-resize!important;user-select:none!important}
 </style>
 <style id="apjvCalm">
 /* v12.1: Joint Venture — tighter rows and a quieter grouping. Hairlines and a coloured left
