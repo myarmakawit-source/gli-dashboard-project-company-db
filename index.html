@@ -32628,6 +32628,36 @@ function _pcfKeysFor(code){ var M=_PCF; if(!M)return [];
   for(var i=0;i<M.rows.length;i++){ if(M.rows[i].code===code)return (M.rows[i].glKeys||[]); }
   return []; }
 
+/* v13.6: the drill groups its accounts by account class, with a subtotal per class.
+   The prefixes are the app's own (_GLCLS_DEF): 4.1 main revenue = 41, 4.2 other
+   revenue = 42/43, then 5 cost, 6 operating expense, 7 finance cost. Balance-sheet
+   classes appear too \u2014 a cash flow moves through receivables, payables and
+   equity \u2014 so they get their own groups instead of being dropped. */
+var _PCF_CLS=[
+  {k:'41', n:'4.1', lab:'Main revenue',            th:'\u0e23\u0e32\u0e22\u0e44\u0e14\u0e49\u0e2b\u0e25\u0e31\u0e01',      tone:'mint',   test:function(c){return /^41/.test(c);}},
+  {k:'42', n:'4.2', lab:'Other revenue',           th:'\u0e23\u0e32\u0e22\u0e44\u0e14\u0e49\u0e2d\u0e37\u0e48\u0e19',      tone:'mint',   test:function(c){return /^4(2|3)/.test(c);}},
+  {k:'4x', n:'4',   lab:'Revenue \u2014 other codes', th:'',                 tone:'mint',   test:function(c){return /^4/.test(c);}},
+  {k:'5',  n:'5',   lab:'Cost of work',            th:'\u0e15\u0e49\u0e19\u0e17\u0e38\u0e19',           tone:'butter', test:function(c){return /^5/.test(c);}},
+  {k:'6',  n:'6',   lab:'Operating expenses',      th:'\u0e04\u0e48\u0e32\u0e43\u0e0a\u0e49\u0e08\u0e48\u0e32\u0e22',      tone:'peach',  test:function(c){return /^6/.test(c);}},
+  {k:'7',  n:'7',   lab:'Finance costs',           th:'\u0e15\u0e49\u0e19\u0e17\u0e38\u0e19\u0e17\u0e32\u0e07\u0e01\u0e32\u0e23\u0e40\u0e07\u0e34\u0e19', tone:'rose', test:function(c){return /^7/.test(c);}},
+  {k:'1',  n:'1',   lab:'Assets \u2014 working capital',      th:'', tone:'sky',   test:function(c){return /^1/.test(c);}},
+  {k:'2',  n:'2',   lab:'Liabilities \u2014 working capital', th:'', tone:'lilac', test:function(c){return /^2/.test(c);}},
+  {k:'3',  n:'3',   lab:'Equity',                              th:'', tone:'lilac', test:function(c){return /^3/.test(c);}},
+  {k:'z',  n:'\u2014', lab:'Unclassified',                    th:'', tone:'grey',  test:function(){return true;}}
+];
+function _pcfClsOf(code){ var c=(''+(code==null?'':code)).trim();
+  for(var i=0;i<_PCF_CLS.length;i++){ if(_PCF_CLS[i].test(c))return _PCF_CLS[i]; }
+  return _PCF_CLS[_PCF_CLS.length-1]; }
+function _pcfGroup(rows){
+  var by={}, order=[];
+  for(var i=0;i<rows.length;i++){ var g=_pcfClsOf(rows[i].code);
+    if(!by[g.k]){ by[g.k]={def:g,rows:[],sum:0,nv:0}; order.push(g.k); } 
+    by[g.k].rows.push(rows[i]); by[g.k].sum+=_pcfN(rows[i].amt); by[g.k].nv+=rows[i].vlist.length; }
+  /* keep the class order of _PCF_CLS, not the order the accounts happened to arrive in */
+  var out=[];
+  for(var j=0;j<_PCF_CLS.length;j++){ var k=_PCF_CLS[j].k; if(by[k])out.push(by[k]); }
+  return out;
+}
 function _pcfDetail(code,act){
   var M=_PCF; if(!M||!M.cur||!M.cur.projAgg)return null;
   var keys=_pcfKeysFor(code), pa=M.cur.projAgg;
@@ -32676,18 +32706,31 @@ function _pcfDrill(code,act){
   var body;
   if(!D.rows.length){ body='<div class="pcfd-empty">— No cash movement in this activity for this project and period —</div>'; }
   else{
-    var rws='';
-    for(var a=0;a<D.rows.length;a++){ var o=D.rows[a];
-      rws+='<tr class="pcfd-ar" data-pcfacc="'+_pcfE(o.code)+'"><td class="c">'+(a+1)+'</td>'
-        +'<td><span class="pcfd-ac">'+_pcfE(o.code)+'</span></td>'
-        +'<td class="nm">'+_pcfE(o.name||'')+'</td>'
-        +'<td class="c">'+o.vlist.length+'</td>'
-        +'<td class="r '+(o.amt<-0.004?'neg':'pos')+'">'+_pcfMoney(o.amt)+'</td>'
-        +'<td class="c"><span class="pcfd-go">›</span></td></tr>';
+    /* v13.6: accounts grouped by class, each class carrying its own subtotal */
+    var groups=_pcfGroup(D.rows), rws='', seq=0;
+    for(var gi=0;gi<groups.length;gi++){ var G=groups[gi], gd=G.def;
+      rws+='<tr class="pcfd-gr '+gd.tone+'"><td class="c"></td>'
+        +'<td colspan="2"><span class="pcfd-gn">'+_pcfE(gd.n)+'</span>'
+        +'<span class="pcfd-gl">'+_pcfE(gd.lab)+'</span>'
+        +(gd.th?('<span class="pcfd-gt">'+gd.th+'</span>'):'')
+        +'<span class="pcfd-gc">'+G.rows.length+' account'+(G.rows.length===1?'':'s')+'</span></td>'
+        +'<td class="c">'+G.nv+'</td>'
+        +'<td class="r '+(G.sum<-0.004?'neg':'pos')+'"><b>'+_pcfMoney(G.sum)+'</b></td>'
+        +'<td class="c"></td></tr>';
+      for(var a=0;a<G.rows.length;a++){ var o=G.rows[a]; seq++;
+        rws+='<tr class="pcfd-ar" data-pcfacc="'+_pcfE(o.code)+'"><td class="c">'+seq+'</td>'
+          +'<td><span class="pcfd-ac">'+_pcfE(o.code)+'</span></td>'
+          +'<td class="nm">'+_pcfE(o.name||'')+'</td>'
+          +'<td class="c">'+o.vlist.length+'</td>'
+          +'<td class="r '+(o.amt<-0.004?'neg':'pos')+'">'+_pcfMoney(o.amt)+'</td>'
+          +'<td class="c"><span class="pcfd-go">›</span></td></tr>';
+      }
+      rws+='<tr class="pcfd-gs"><td colspan="4" class="r">Subtotal · '+_pcfE(gd.n)+' '+_pcfE(gd.lab)+'</td>'
+        +'<td class="r '+(G.sum<-0.004?'neg':'pos')+'"><b>'+_pcfMoney(G.sum)+'</b></td><td></td></tr>';
     }
     body='<div class="pcfd-tw"><table class="pcfd-tbl"><thead><tr><th class="c">#</th><th>Account Code</th>'
       +'<th>Account Name</th><th class="c">Vouchers</th><th class="r">Cash effect</th><th class="c"></th></tr></thead><tbody>'+rws
-      +'</tbody><tfoot><tr><td colspan="4" class="r"><b>'+D.nAcc+' account'+(D.nAcc===1?'':'s')+'</b></td>'
+      +'</tbody><tfoot><tr><td colspan="4" class="r"><b>'+D.nAcc+' account'+(D.nAcc===1?'':'s')+' in '+groups.length+' class'+(groups.length===1?'':'es')+'</b></td>'
       +'<td class="r"><b>'+_pcfMoney(D.total)+'</b></td><td></td></tr></tfoot></table></div>';
   }
   var foot='<div class="pcfd-ft"><span class="pcfd-note">Click an account to list its vouchers, then a voucher to read its journal entry.</span>'
@@ -32710,7 +32753,9 @@ function _pcfDrill(code,act){
       var jn=document.createElement('tr'); jn.className='pcfd-jn';
       var td=document.createElement('td'); td.colSpan=6;
       var v=vr.getAttribute('data-pcfv');
-      td.innerHTML='<div class="pcfd-jnbox"><div class="pcfd-jnlab">📒 Journal entry · '+_pcfE(v)+'</div>'
+      td.innerHTML='<div class="pcfd-jnbox"><div class="pcfd-jnlab">'
+        +_PCF_SVG+'<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H18a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6.5A1.5 1.5 0 0 1 5 17.5z"/><path d="M5 16.5h14"/><path d="M8.5 7h7M8.5 10.5h7"/></svg>'
+        +'<span>Journal entry · '+_pcfE(v)+'</span></div>'
         +((typeof _apVJGlMini==='function')?_apVJGlMini(v):'<div class="pcfd-empty">Journal view unavailable</div>')+'</div>';
       jn.appendChild(td); vr.parentNode.insertBefore(jn,vr.nextSibling); vr.classList.add('open'); return;
     }
@@ -33047,6 +33092,25 @@ function _pcfExportPdf(){
 .pcfd-tbl td.nm.sm{font-size:11px;color:#8A93A5}
 .pcfd-tbl td.r.pos{color:#0B5347}
 .pcfd-tbl td.r.neg{color:#B42318}
+.pcfd-gr td{background:#F4F6FA;border-top:1px solid #E4E8F0;border-bottom:1px solid #E4E8F0;
+  padding:6px 8px;font-size:11.5px}
+.pcfd-gr.mint td{background:#EDF6F3}
+.pcfd-gr.butter td{background:#FBF7E8}
+.pcfd-gr.peach td{background:#FCF3EA}
+.pcfd-gr.rose td{background:#FCF0F3}
+.pcfd-gr.sky td{background:#EDF3FC}
+.pcfd-gr.lilac td{background:#F2EFFB}
+.pcfd-gr.grey td{background:#F4F6FA}
+.pcfd-gn{display:inline-block;min-width:26px;font-weight:800;color:#0F3D37;
+  font-variant-numeric:tabular-nums;margin-right:8px}
+.pcfd-gl{font-weight:800;color:#1C2535}
+.pcfd-gt{margin-left:7px;color:#8A93A5;font-weight:600}
+.pcfd-gc{margin-left:9px;font-size:10px;font-weight:700;color:#98A2B3}
+.pcfd-gs td{background:#FBFCFE;border-bottom:1px solid #E4E8F0;padding:5px 8px;
+  font-size:11.5px;font-weight:700;color:#475467}
+.pcfd-gs td.r b{font-variant-numeric:tabular-nums}
+.pcfd-gs td.r.pos b{color:#0B5347}
+.pcfd-gs td.r.neg b{color:#B42318}
 .pcfd-ar{cursor:pointer}
 .pcfd-ar:hover td{background:rgba(14,92,82,.05)}
 .pcfd-ar.open td{background:#EDF6F3}
@@ -33059,7 +33123,9 @@ function _pcfExportPdf(){
 .pcfd-vlink{font-weight:700;color:#1D5FAE;text-decoration:underline;text-underline-offset:2px}
 .pcfd-jn td{background:#F7F9FC!important;padding:0!important}
 .pcfd-jnbox{padding:10px 14px 14px}
-.pcfd-jnlab{font-size:11px;font-weight:800;color:#0E5C52;margin-bottom:7px}
+.pcfd-jnlab{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;
+  color:#0E5C52;margin-bottom:7px;letter-spacing:.01em}
+.pcfd-jnlab svg{width:14px;height:14px;flex:0 0 auto;color:#0E7A6C}
 .pcfd-tbl tfoot td{padding:8px;background:#F7F9FC;font-weight:800;border-top:1px solid #E7EBF3}
 .pcfd-tbl tfoot td.r{text-align:right;font-variant-numeric:tabular-nums}
 .pcfd-empty{padding:34px 16px;text-align:center;color:#98A2B3;font-size:12px}
@@ -33069,7 +33135,118 @@ function _pcfExportPdf(){
   font-size:12px;font-weight:700;padding:7px 18px;font-family:inherit}
 .pcfd-close:hover{filter:brightness(1.08)}
 
+/* ---------- the journal entry inside the drill takes the app's table form ----
+   _apVJGlMini() ships the older cream palette (--paper / #F3EFE7 / #FBFAF7) and a
+   larger type scale. Inside this modal it is restyled to match everything else:
+   12px, flat brand-green header, hairline dividers, neutral zebra, tabular
+   numerals. Scoped to .pcfd-jn so no other caller is affected. */
+.pcfd-jn .glvj-tbl{width:100%;border-collapse:collapse;font-size:12px!important;
+  background:#fff!important;border-radius:10px;overflow:hidden;
+  box-shadow:0 0 0 1px #E7EBF3}
+.pcfd-jn .glvj-tbl thead th,
+.pcfd-jn .apvj-jn thead th{background:#0F3D37!important;color:#fff!important;
+  font-size:12px!important;font-weight:700!important;text-align:center!important;
+  letter-spacing:0!important;text-transform:none!important;
+  padding:7px 8px!important;border-bottom:0!important;
+  border-right:1px solid rgba(255,255,255,.12)!important;white-space:nowrap}
+.pcfd-jn .glvj-tbl thead th:last-child{border-right:0!important}
+.pcfd-jn .glvj-tbl thead th.n{text-align:center!important}
+.pcfd-jn .glvj-tbl td{padding:6px 8px!important;font-size:12px!important;
+  color:#344054!important;vertical-align:middle!important;
+  border-bottom:1px solid #F0F2F5!important;
+  border-right:1px solid #F1EDE3!important}
+.pcfd-jn .glvj-tbl td:last-child{border-right:0!important}
+.pcfd-jn .glvj-tbl tbody tr:nth-child(even) td{background:rgba(16,24,40,.014)!important}
+.pcfd-jn .glvj-tbl tbody tr:hover td{background:rgba(14,92,82,.05)!important}
+.pcfd-jn .glvj-tbl td.n,.pcfd-jn .glvj-tbl td.d,.pcfd-jn .glvj-tbl td.c,
+.pcfd-jn .glvj-tbl td.net{text-align:right!important;white-space:nowrap;
+  font-variant-numeric:tabular-nums lining-nums;font-weight:600!important}
+.pcfd-jn .glvj-tbl td.d{color:#0B5347!important}
+.pcfd-jn .glvj-tbl td.c{color:#B42318!important}
+.pcfd-jn .glvj-tbl td.acc{color:#344054!important}
+.pcfd-jn .glvj-tbl .glvj-ac{font-weight:800!important;color:#0E5C52!important;
+  font-variant-numeric:tabular-nums}
+.pcfd-jn .glvj-tbl td.nar{color:#667085!important;white-space:normal;max-width:420px}
+.pcfd-jn .glvj-tbl tfoot tr.tot td{background:#F7F9FC!important;color:#1C2535!important;
+  font-size:12px!important;font-weight:800!important;padding:7px 8px!important;
+  border-top:1px solid #E7EBF3!important;border-right:0!important}
+.pcfd-jn .glvj-tbl tfoot tr.tot td.d{color:#0B5347!important}
+.pcfd-jn .glvj-tbl tfoot tr.tot td.c{color:#B42318!important}
+.pcfd-jn .glvj-tbl tfoot tr.bal td{font-size:11px!important;font-weight:700!important;
+  padding:6px 9px!important;border-right:0!important}
+.pcfd-jn .glvj-tbl tfoot tr.bal.ok td{background:#E9F6EC!important;color:#2F7D4F!important}
+.pcfd-jn .glvj-tbl tfoot tr.bal.bad td{background:#FCEDF1!important;color:#B42318!important}
+.pcfd-jn .apvj-nojn{font-size:11.5px!important;color:#98A2B3!important;font-style:normal!important;
+  padding:12px 4px!important;text-align:center}
+
+/* the modal's own type, so it reads as one page with the table behind it */
+.pcfd-ov,.pcfd-card{font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif}
+.pcfd-jnlab{letter-spacing:.01em}
+
 /* the tab's own export buttons */
 #page-fs .fsexp.fspcf-x,#page-fs .fsexp.fspcf-p{font-weight:700}
+</style>
+<script id="sbFoldJs">
+/* v13.7: collapse the left rail. The sidebar is position:fixed and the page clears
+   it with body{padding-left:236px}; folding slides the rail out and drops that
+   padding, so every table gets the full window width. State is remembered.
+   Purely additive \u2014 no existing markup, class hook or handler is touched. */
+(function(){
+  var KEY='gli_sbfold';
+  var IC_IN ='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6 9 12l6 6"/><path d="M4.5 4v16"/></svg>';
+  var IC_OUT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/><path d="M19.5 4v16"/></svg>';
+  function folded(){ return document.body.classList.contains('sbfold'); }
+  function set(on,persist){
+    document.body.classList.toggle('sbfold',!!on);
+    if(persist!==false){ try{ localStorage.setItem(KEY,on?'1':'0'); }catch(e){} }
+    var b=document.getElementById('sbFoldBtn');
+    if(b){ b.innerHTML=on?IC_OUT:IC_IN;
+           b.title=(on?'Show the menu':'Hide the menu')+'  (Ctrl+\\)';
+           b.setAttribute('aria-label',b.title);
+           b.setAttribute('aria-expanded',on?'false':'true'); }
+    /* tables that size themselves on resize need to hear about the new width */
+    try{ window.dispatchEvent(new Event('resize')); }catch(e){}
+  }
+  function mount(){
+    var nav=document.querySelector('.modnav.sidebar'); if(!nav)return;
+    if(!document.getElementById('sbFoldBtn')){
+      var btn=document.createElement('button');
+      btn.id='sbFoldBtn'; btn.type='button'; btn.className='sbfold-btn';
+      document.body.appendChild(btn);
+      btn.addEventListener('click',function(e){ e.preventDefault(); set(!folded()); });
+    }
+    var on=false; try{ on=(localStorage.getItem(KEY)==='1'); }catch(e){}
+    set(on,false);
+    if(!document._sbFoldKeys){ document._sbFoldKeys=1;
+      document.addEventListener('keydown',function(e){
+        if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&!e.altKey&&(e.key==='\\'||e.keyCode===220)){
+          var t=e.target;
+          if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable))return;
+          e.preventDefault(); set(!folded()); } }); }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount); else mount();
+})();
+</script>
+<style id="sbFoldCss">
+/* the rail slides out and the page reclaims its width */
+body{transition:padding-left .2s cubic-bezier(.4,0,.2,1)}
+.modnav.sidebar{transition:transform .2s cubic-bezier(.4,0,.2,1)}
+body.sbfold{padding-left:16px!important}
+body.sbfold .modnav.sidebar{transform:translateX(-100%)}
+/* the handle: on the rail's edge when open, at the window edge when folded */
+.sbfold-btn{position:fixed;left:200px;top:13px;z-index:70;
+  width:30px;height:30px;padding:0;border:none;border-radius:9px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.14);color:#CFEDE5;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);
+  transition:left .2s cubic-bezier(.4,0,.2,1),background .14s,color .14s,transform .14s}
+.sbfold-btn:hover{background:rgba(255,255,255,.26);color:#fff}
+.sbfold-btn:active{transform:scale(.94)}
+.sbfold-btn svg{width:16px;height:16px;display:block}
+body.sbfold .sbfold-btn{left:8px;background:#0E5C52;color:#CFEDE5;
+  box-shadow:0 4px 14px -4px rgba(10,70,62,.5),inset 0 0 0 1px rgba(255,255,255,.14)}
+body.sbfold .sbfold-btn:hover{background:#0F3D37;color:#fff}
+@media (max-width:760px){.sbfold-btn{left:auto;right:10px}body.sbfold .sbfold-btn{left:8px;right:auto}}
+@media print{.sbfold-btn{display:none!important}}
 </style>
 </body></html>
