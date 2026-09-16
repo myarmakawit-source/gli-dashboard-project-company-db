@@ -32151,4 +32151,65 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 #page-vat .vreg.sell .vtbl tbody tr:hover td,
 #page-vat .vreg.buy .vtbl tbody tr:hover td{background:rgba(14,92,82,.05)!important}
 </style>
+<style id="jvDatabaseForm">
+/* v13.2: Joint Venture tables take the Database form — flat brand-green header
+   with white 12px labels and hairline dividers, 12px body rows with the same
+   vertical grid, neutral zebra and hover, quiet group bands.
+   Last block in the document -> wins the cascade. */
+
+/* ---------- wrapper ---------- */
+#page-pdrepjv .apjv-tw{border:1px solid #E7EBF3!important;border-radius:12px!important;
+  background:#fff!important;overflow:auto!important}
+
+/* ---------- header: the Database bar ---------- */
+#page-pdrepjv .apjv-tbl thead th{
+  background:#0F3D37!important;color:#fff!important;
+  font-size:12px!important;font-weight:700!important;
+  text-transform:none!important;letter-spacing:0!important;
+  padding:9px 8px!important;line-height:1.25!important;
+  border-right:1px solid rgba(255,255,255,.12)!important;border-bottom:0!important;
+  white-space:nowrap;position:sticky;top:0;z-index:3}
+#page-pdrepjv .apjv-tbl thead th:last-child{border-right:0!important}
+/* the filter row under it stays a light strip, so the inputs read */
+#page-pdrepjv .apjv-tbl thead tr+tr th{background:#F7F9FC!important;color:#667085!important;
+  padding:4px 6px!important;border-right:1px solid #EDF0F5!important;
+  border-bottom:1px solid #E7EBF3!important;position:static;font-weight:600!important}
+#page-pdrepjv .apjv-tbl thead tr+tr th input{font-size:11.5px!important;color:#344054!important}
+
+/* ---------- body: Database grid, zebra and hover ---------- */
+#page-pdrepjv .apjv-tbl tbody td{
+  padding:2px 8px!important;font-size:12px!important;
+  border-bottom:1px solid #F0F2F5!important;
+  border-right:1px solid #F1EDE3!important;vertical-align:middle!important}
+#page-pdrepjv .apjv-tbl tbody td:last-child{border-right:0!important}
+#page-pdrepjv .apjv-tbl tbody tr:nth-child(even):not(.apjv-grp):not(.apjv-grpsub):not(.apjv-addtr) td{
+  background:rgba(16,24,40,.014)!important}
+#page-pdrepjv .apjv-tbl tbody tr:not(.apjv-grp):not(.apjv-grpsub):not(.apjv-addtr):hover td{
+  background:rgba(14,92,82,.05)!important}
+
+/* ---------- group bands: quiet, the code chip carries the colour ---------- */
+#page-pdrepjv .apjv-main .apjv-grp td{background:#F4F6FA!important;
+  border-top:1px solid #E4E8F0!important;border-bottom:1px solid #E4E8F0!important;
+  border-right:0!important;padding:5px 9px!important}
+#page-pdrepjv .apjv-main .apjv-grp .apjv-grp-nm{font-size:12px!important;font-weight:800!important}
+#page-pdrepjv .apjv-main .apjv-grp .apjv-grp-ct{font-size:11px!important;font-weight:600!important;
+  color:#98A2B3!important}
+#page-pdrepjv .apjv-main .apjv-grpsub td{background:#EDF1F7!important;
+  border-top:1px solid #DDE3EC!important;border-bottom:1px solid #DDE3EC!important;
+  border-right:0!important;font-size:12px!important;font-weight:800!important;padding:5px 9px!important}
+#page-pdrepjv .apjv-asset .apjv-grp td{background:#F3F8F5!important;
+  border-top-color:#DFEBE4!important;border-bottom-color:#DFEBE4!important}
+#page-pdrepjv .apjv-asset .apjv-grpsub td{background:#E9F3ED!important;
+  border-top-color:#D3E6DB!important;border-bottom-color:#D3E6DB!important}
+
+/* ---------- totals row ---------- */
+#page-pdrepjv .apjv-tbl tfoot td{background:#F7F9FC!important;color:#1C2535!important;
+  font-size:12px!important;font-weight:800!important;padding:7px 8px!important;
+  border-top:1px solid #E7EBF3!important;border-right:0!important}
+
+/* the add-entry strip keeps out of the grid */
+#page-pdrepjv .apjv-tbl tbody tr.apjv-addtr td{border-right:0!important;border-bottom:0!important;
+  background:transparent!important;padding:0!important}
+#page-pdrepjv .apjv-main tr.apjv-grpgap td{border-right:0!important;border-bottom:0!important}
+</style>
 </body></html>
