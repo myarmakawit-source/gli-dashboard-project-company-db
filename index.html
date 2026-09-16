@@ -7197,6 +7197,20 @@ function _vatActionPanel(){
 function _vPP30Toggle(){var n=(loadVatPP30()||[]).length;return '<div class="vviewtg"><button class="vviewb'+(_vView==='reg'?' on':'')+'" data-vview="reg" type="button">📒 Input–Output VAT Register</button><button class="vviewb'+(_vView==='pp30'?' on':'')+'" data-vview="pp30" type="button">📋 P.P.30 Summary'+(n?' <span class="vviewct">'+n+'</span>':'')+'</button></div>';}
 function _vBindViewToggle(){var w=document.getElementById('vatWrap');if(w&&!w._vvtg){w._vvtg=1;w.addEventListener('click',function(e){var t=e.target.closest?e.target.closest('[data-vview]'):null;if(!t)return;var v=t.getAttribute('data-vview');if(v!==_vView){_vView=v;if(typeof renderVat==='function')renderVat();}});}}
 
+/* v13.3: VAT header — pastel KPI tiles with a line icon each, matching the
+   Bank loan dashboard. Icons are stroke=currentColor, so the tile's own colour
+   carries them. */
+var _VSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">';
+var _VIC={
+  out:'<path d="M7 17 17 7"/><path d="M8 7h9v9"/>',
+  inp:'<path d="M17 7 7 17"/><path d="M16 17H7V8"/>',
+  pay:'<path d="M6 3h12v18l-3-1.7-3 1.7-3-1.7L6 21z"/><path d="M9.5 8h5M9.5 12h5"/>',
+  ref:'<path d="M3 12a9 9 0 1 0 2.6-6.4"/><path d="M3 4v5h5"/>',
+  zero:'<circle cx="12" cy="12" r="9"/><path d="M8.5 12h7"/>',
+  co:'<path d="M3 21h18"/><rect x="4" y="6" width="9" height="15" rx="1.5"/><path d="M13 11h6a1.5 1.5 0 0 1 1.5 1.5V21"/><path d="M7 10h3M7 14h3M7 18h3M16 15h2M16 18h2"/>',
+  id:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M5.8 16.2c.5-1.4 1.8-2.2 3.2-2.2s2.7.8 3.2 2.2"/><path d="M15 10h4M15 13.5h4"/>',
+  pin:'<path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>'
+};
 function renderVat(){
   loadVat();
   var el=document.getElementById('vatWrap');if(!el)return;
@@ -7210,18 +7224,22 @@ function renderVat(){
   if(_vView==='pp30'){h+=_vPP30View();h+='</div>';el.innerHTML=h;_vBind();_vPP30BindView();return;}
   // entity bar
   h+='<div class="vlayout">';
-  h+='<div class="vmaincol"><div class="vcobar vcoinfobar"><div class="vcoinfo"><div class="vcoinfoL"><div class="vcon">'+esc(co?co.name:'-')+'</div><div class="vcom">Tax ID '+esc(co?co.taxid:'-')+' · '+_vBranchTxt(co?co.branch:'')+'</div><div class="vcoa">'+esc(co?co.addr:'')+'</div></div>';
+  h+='<div class="vmaincol"><div class="vcobar vcoinfobar"><div class="vcoinfo"><div class="vcoinfoL">'
+   +'<div class="vcon"><span class="vcoic">'+_VSVG+_VIC.co+'</svg></span>'+esc(co?co.name:'-')+'</div>'
+   +'<div class="vcom"><span class="vcoidc"><i>'+_VSVG+_VIC.id+'</svg></i>Tax ID '+esc(co?co.taxid:'-')+'</span>'
+   +'<span class="vcoidc br"><i>'+_VSVG+_VIC.pin+'</svg></i>'+_vBranchTxt(co?co.branch:'')+'</span></div>'
+   +'<div class="vcoa">'+esc(co?co.addr:'')+'</div></div>';
   h+='</div>';
   if(_vCoEditOpen)h+=_vCoEditHTML(co);
   h+='<div id="vatPdfStatus" class="vupst"></div>';
   h+='</div>';
   // comparison summary
   h+='<div class="vsum">';
-  h+='<div class="vsbox sell"><div class="vsh">Output VAT</div><div class="vsv">฿ '+_vMoney(sT)+'</div><div class="vsb">Sales ฿ '+_vMoney(sV)+' · '+sells.length+' docs</div></div>';
+  h+='<div class="vsbox sell"><div class="vsh"><span class="vsic">'+_VSVG+_VIC.out+'</svg></span>Output VAT</div><div class="vsv">฿ '+_vMoney(sT)+'</div><div class="vsb">Sales ฿ '+_vMoney(sV)+' · '+sells.length+' docs</div></div>';
   h+='<div class="vsop">−</div>';
-  h+='<div class="vsbox buy"><div class="vsh">Input VAT</div><div class="vsv">฿ '+_vMoney(bT)+'</div><div class="vsb">Purchases ฿ '+_vMoney(bV)+' · '+buys.length+' docs</div></div>';
+  h+='<div class="vsbox buy"><div class="vsh"><span class="vsic">'+_VSVG+_VIC.inp+'</svg></span>Input VAT</div><div class="vsv">฿ '+_vMoney(bT)+'</div><div class="vsb">Purchases ฿ '+_vMoney(bV)+' · '+buys.length+' docs</div></div>';
   h+='<div class="vsop">=</div>';
-  h+='<div class="vsbox net '+(net>0?'pay':(net<0?'ref':'zero'))+'"><div class="vsh">Net VAT '+(net>0?'Payable':(net<0?'Credit / Refund':'Balanced'))+'</div><div class="vsv">฿ '+_vMoney(Math.abs(net))+'</div><div class="vsb">'+(net>0?'P.P.30 Box 11 — remit':(net<0?'Carry forward as credit or claim a refund':'No tax due'))+'</div></div>';
+  h+='<div class="vsbox net '+(net>0?'pay':(net<0?'ref':'zero'))+'"><div class="vsh"><span class="vsic">'+_VSVG+(net>0?_VIC.pay:(net<0?_VIC.ref:_VIC.zero))+'</svg></span>Net VAT '+(net>0?'Payable':(net<0?'Credit / Refund':'Balanced'))+'</div><div class="vsv">฿ '+_vMoney(Math.abs(net))+'</div><div class="vsb">'+(net>0?'P.P.30 Box 11 — remit':(net<0?'Carry forward as credit or claim a refund':'No tax due'))+'</div></div>';
   h+='</div>';
   /* v8.54: export/print toolbar (ภ.พ.30 .txt / print) removed per request */
   // filter bar
@@ -32211,5 +32229,73 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 #page-pdrepjv .apjv-tbl tbody tr.apjv-addtr td{border-right:0!important;border-bottom:0!important;
   background:transparent!important;padding:0!important}
 #page-pdrepjv .apjv-main tr.apjv-grpgap td{border-right:0!important;border-bottom:0!important}
+</style>
+<style id="vatHeadPastel">
+/* v13.3: VAT header — the company card and the three VAT tiles get the same
+   pastel-and-icon treatment as the Bank loan dashboard: a tinted surface per
+   tile, a coloured line icon in front of each caption, and the identity block
+   marked with an icon tile plus Tax ID / branch chips.
+   Last block in the document -> wins the cascade. */
+
+/* ---------- company identity card ---------- */
+#page-vat .vcobar.vcoinfobar{background:linear-gradient(180deg,#F4FAF7,#EEF6F2)!important;
+  border:1px solid #DCEBE4!important;border-radius:14px!important;
+  padding:13px 16px!important;box-shadow:none!important;margin-bottom:12px!important}
+#page-vat .vcon{display:flex!important;align-items:center;gap:10px;
+  font-size:15px!important;font-weight:800!important;color:#0F3D37!important}
+#page-vat .vcoic{width:30px;height:30px;flex:0 0 auto;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;background:#fff;color:#0E7A6C;
+  box-shadow:0 0 0 1px #CFE5DC}
+#page-vat .vcoic svg{width:17px;height:17px;display:block}
+#page-vat .vcom{display:flex!important;align-items:center;gap:7px;flex-wrap:wrap;margin-top:7px!important}
+#page-vat .vcoidc{display:inline-flex;align-items:center;gap:6px;
+  background:#fff;border:1px solid #DCEBE4;border-radius:999px;padding:3px 11px 3px 6px;
+  font-size:11.5px;font-weight:700;color:#0E5C52;font-variant-numeric:tabular-nums}
+#page-vat .vcoidc i{width:18px;height:18px;flex:0 0 auto;border-radius:5px;
+  display:flex;align-items:center;justify-content:center;background:#E7F4EF;color:#0E7A6C;font-style:normal}
+#page-vat .vcoidc i svg{width:12px;height:12px;display:block}
+#page-vat .vcoidc.br{color:#1D5FAE;border-color:#D6E5F7}
+#page-vat .vcoidc.br i{background:#E8F1FC;color:#1D5FAE}
+#page-vat .vcoa{margin-top:7px!important;font-size:11.5px!important;color:#6B7688!important}
+
+/* ---------- the three VAT tiles ---------- */
+#page-vat .vsum{display:flex!important;align-items:stretch!important;gap:10px!important;
+  flex-wrap:wrap!important}
+#page-vat .vsbox{flex:1 1 240px!important;min-width:0;
+  border-radius:14px!important;padding:13px 15px 14px!important;
+  border:1px solid rgba(16,24,40,.06)!important;box-shadow:none!important}
+#page-vat .vsh{display:flex!important;align-items:center;gap:8px;
+  font-size:9.5px!important;font-weight:800!important;letter-spacing:.06em!important;
+  text-transform:uppercase!important;margin:0 0 7px!important}
+#page-vat .vsic{width:22px;height:22px;flex:0 0 auto;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.8)}
+#page-vat .vsic svg{width:14px;height:14px;display:block}
+#page-vat .vsv{font-size:20px!important;font-weight:800!important;line-height:1.2!important;
+  font-variant-numeric:tabular-nums lining-nums}
+#page-vat .vsb{margin-top:5px!important;font-size:11px!important;font-weight:600!important;
+  color:#6B7688!important}
+#page-vat .vsop{display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  font-size:17px;font-weight:700;color:#98A2B3;padding:0 2px}
+
+/* Output — mint */
+#page-vat .vsbox.sell{background:#E7F4EF!important}
+#page-vat .vsbox.sell .vsh{color:#0E7A6C!important}
+#page-vat .vsbox.sell .vsic{color:#0E7A6C}
+#page-vat .vsbox.sell .vsv{color:#0B5347!important}
+/* Input — butter */
+#page-vat .vsbox.buy{background:#FBF4DC!important}
+#page-vat .vsbox.buy .vsh{color:#8A5E12!important}
+#page-vat .vsbox.buy .vsic{color:#8A5E12}
+#page-vat .vsbox.buy .vsv{color:#6E4A0E!important}
+/* Net — rose when payable, sky when a credit, mint when balanced */
+#page-vat .vsbox.net.pay{background:#FCEDF1!important}
+#page-vat .vsbox.net.pay .vsh,#page-vat .vsbox.net.pay .vsic{color:#B03A5B!important}
+#page-vat .vsbox.net.pay .vsv{color:#96284A!important}
+#page-vat .vsbox.net.ref{background:#E8F1FC!important}
+#page-vat .vsbox.net.ref .vsh,#page-vat .vsbox.net.ref .vsic{color:#1D5FAE!important}
+#page-vat .vsbox.net.ref .vsv{color:#174C8C!important}
+#page-vat .vsbox.net.zero{background:#EFEBFB!important}
+#page-vat .vsbox.net.zero .vsh,#page-vat .vsbox.net.zero .vsic{color:#6A34C4!important}
+#page-vat .vsbox.net.zero .vsv{color:#55299C!important}
 </style>
 </body></html>
