@@ -28407,7 +28407,7 @@ function _wpbAcOpen(){
   var inp=document.getElementById('wpbAcct'),d=_wpbAcEl();if(!inp||!d)return;
   var q=(inp.value||'').trim().toLowerCase();
   var hit=[];
-  for(var i=0;i<_WPB_OPTS.length&&hit.length<80;i++){var o=_WPB_OPTS[i];
+  for(var i=0;i<_WPB_OPTS.length&&hit.length<400;i++){var o=_WPB_OPTS[i];
     if(!q||o.hay.indexOf(q)>=0)hit.push(o);}
   if(!hit.length){ d.innerHTML='<div class="wpb-acnone">No account matches “'+esc(q)+'”</div>'; d.hidden=false; _wpbAcIdx=-1; return; }
   var h='';
@@ -30894,6 +30894,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'){var dds=doc
      pdrepjv:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h5"/>',
      wht:'<circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/><path d="M8.3 7.8 20 18M8.3 16.2 20 6M9.2 9.2l5.6 5.6"/>',
      vat:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/>',
+     gm:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.6 6.6 8.4 6 8.4-6"/>',
      mn:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
      cb:'<path d="M12 3l7 2.6v5.2c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V5.6z"/><path d="M9 12l2 2 4-4"/>',
      up:'<circle cx="7.5" cy="15.5" r="4"/><path d="M10.4 12.6 21 2M16.5 6.5 19 9M13.5 9.5 16 12"/>',
@@ -31741,7 +31742,7 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 #page-wpb .wpb-acwrap{position:relative}
 #page-wpb .wpb-ac{position:absolute;left:0;right:0;top:100%;margin-top:5px;z-index:60;
   background:#fff;border:1px solid #E7EBF3;border-radius:12px;box-shadow:0 14px 34px -12px rgba(16,24,40,.28),0 2px 6px rgba(16,24,40,.06);
-  max-height:330px;overflow:auto;padding:5px}
+  max-height:min(620px,62vh);overflow:auto;padding:5px}
 #page-wpb .wpb-acr{display:flex;align-items:center;gap:9px;padding:6px 9px;border-radius:8px;cursor:pointer;
   font-size:12px;line-height:1.35;color:#344054}
 #page-wpb .wpb-acr:hover{background:#F5FAF8}
@@ -31779,5 +31780,135 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 .page table thead th .glrz,.page table thead th .pgrz,
 .page table thead th .fstbrsz,.page table thead th .apjv-rsz,
 .page table thead th .advrsz{justify-content:flex-start!important}
+</style>
+<style id="panelUniformAll">
+/* v12.8: one size for every command / filter card, in every module.
+   The panel is a single grid, so each card gets the same width and the same
+   height as the tallest card in its row — no more per-page widths.
+   Last block in the document -> wins the cascade. */
+#page-adv .glacts,
+#page-bbl .glacts,
+#page-bp .glacts,
+#page-cb .glacts,
+#page-cfb .glacts,
+#page-fs .glacts,
+#page-gl .glacts,
+#page-gm .glacts,
+#page-mn .glacts,
+#page-ov .glacts,
+#page-pdrepjv .glacts,
+#page-pg .glacts,
+#page-pt .glacts,
+#page-sec .glacts,
+#page-tk .glacts,
+#page-up .glacts,
+#page-vat .glacts,
+#page-wht .glacts,
+#page-wpb .glacts{display:grid!important;
+  grid-template-columns:repeat(auto-fill,minmax(min(236px,100%),236px))!important;
+  justify-content:start!important;
+  align-items:stretch!important;grid-auto-rows:1fr!important;
+  gap:12px!important}
+#page-adv .glacts>.glactg,
+#page-bbl .glacts>.glactg,
+#page-bp .glacts>.glactg,
+#page-cb .glacts>.glactg,
+#page-cfb .glacts>.glactg,
+#page-fs .glacts>.glactg,
+#page-gl .glacts>.glactg,
+#page-gm .glacts>.glactg,
+#page-mn .glacts>.glactg,
+#page-ov .glacts>.glactg,
+#page-pdrepjv .glacts>.glactg,
+#page-pg .glacts>.glactg,
+#page-pt .glacts>.glactg,
+#page-sec .glacts>.glactg,
+#page-tk .glacts>.glactg,
+#page-up .glacts>.glactg,
+#page-vat .glacts>.glactg,
+#page-wht .glacts>.glactg,
+#page-wpb .glacts>.glactg{width:auto!important;min-width:0!important;max-width:none!important}
+</style>
+<style id="thCenterAll2">
+/* v12.8: a heading label sits in the true centre of its column — the filter
+   button no longer pushes it off-centre, it is pinned to the column edge
+   (the resize grip is already absolutely positioned). */
+.page table thead th>.glth,
+.page table thead th>.fstbh{position:relative!important;
+  justify-content:center!important;align-items:center!important;
+  padding-left:16px!important;padding-right:16px!important}
+.page table thead th>.glth>.glsort,
+.page table thead th>.fstbh>.fstbsort{flex:1 1 auto!important;min-width:0!important;
+  text-align:center!important}
+.page table thead th>.fstbh>.fstbsort{display:block!important}
+.page table thead th .fsthy,.page table thead th .fsgrphd-en,.page table thead th .fsatthx{
+  width:auto!important;max-width:100%!important;
+  margin-left:auto!important;margin-right:auto!important;text-align:center!important}
+.page table thead th>.glth>.glfun,
+.page table thead th>.fstbh>.fstbfun{position:absolute!important;right:3px!important;
+  top:50%!important;transform:translateY(-50%)!important;
+  margin-top:0!important;align-self:auto!important}
+/* the attachment icon column: icon over label, both centred */
+#page-fs .fstb th.fsatthd-ic>.fstbh>.fstbsort{text-align:center!important}
+</style>
+<style id="sbIconColour">
+/* v12.9: the sidebar line icons carry the colour, one hue per module, so a menu
+   item is recognisable at a glance. The labels and the active pill are unchanged;
+   the SVGs are stroke="currentColor", so only `color` moves.
+   Higher specificity than the runtime sbAcmeCss rule it overrides. */
+.modnav.sidebar .modtab[data-mod="ov"] .sbic,
+.modnav.sidebar .modtab[data-mod="ov"].active .sbic,
+.modnav.sidebar .modtab[data-mod="ov"]:hover .sbic{color:#FBBF24!important}/* Overall */
+.modnav.sidebar .modtab[data-mod="tk"] .sbic,
+.modnav.sidebar .modtab[data-mod="tk"].active .sbic,
+.modnav.sidebar .modtab[data-mod="tk"]:hover .sbic{color:#7DD3FC!important}/* Tracking */
+.modnav.sidebar .modtab[data-mod="bp"] .sbic,
+.modnav.sidebar .modtab[data-mod="bp"].active .sbic,
+.modnav.sidebar .modtab[data-mod="bp"]:hover .sbic{color:#C4B5FD!important}/* Business Performance */
+.modnav.sidebar .modtab[data-mod="pg"] .sbic,
+.modnav.sidebar .modtab[data-mod="pg"].active .sbic,
+.modnav.sidebar .modtab[data-mod="pg"]:hover .sbic{color:#6EE7B7!important}/* Progress % */
+.modnav.sidebar .modtab[data-mod="gl"] .sbic,
+.modnav.sidebar .modtab[data-mod="gl"].active .sbic,
+.modnav.sidebar .modtab[data-mod="gl"]:hover .sbic{color:#5EEAD4!important}/* Database */
+.modnav.sidebar .modtab[data-mod="fs"] .sbic,
+.modnav.sidebar .modtab[data-mod="fs"].active .sbic,
+.modnav.sidebar .modtab[data-mod="fs"]:hover .sbic{color:#93C5FD!important}/* Financial Statements */
+.modnav.sidebar .modtab[data-mod="wpb"] .sbic,
+.modnav.sidebar .modtab[data-mod="wpb"].active .sbic,
+.modnav.sidebar .modtab[data-mod="wpb"]:hover .sbic{color:#BEF264!important}/* Working Paper */
+.modnav.sidebar .modtab[data-mod="cfb"] .sbic,
+.modnav.sidebar .modtab[data-mod="cfb"].active .sbic,
+.modnav.sidebar .modtab[data-mod="cfb"]:hover .sbic{color:#FDBA74!important}/* Document Vault */
+.modnav.sidebar .modtab[data-mod="bbl"] .sbic,
+.modnav.sidebar .modtab[data-mod="bbl"].active .sbic,
+.modnav.sidebar .modtab[data-mod="bbl"]:hover .sbic{color:#FDA4AF!important}/* Bank loan */
+.modnav.sidebar .modtab[data-mod="pdrepjv"] .sbic,
+.modnav.sidebar .modtab[data-mod="pdrepjv"].active .sbic,
+.modnav.sidebar .modtab[data-mod="pdrepjv"]:hover .sbic{color:#67E8F9!important}/* Joint Venture */
+.modnav.sidebar .modtab[data-mod="wht"] .sbic,
+.modnav.sidebar .modtab[data-mod="wht"].active .sbic,
+.modnav.sidebar .modtab[data-mod="wht"]:hover .sbic{color:#F9A8D4!important}/* Withholding Tax */
+.modnav.sidebar .modtab[data-mod="vat"] .sbic,
+.modnav.sidebar .modtab[data-mod="vat"].active .sbic,
+.modnav.sidebar .modtab[data-mod="vat"]:hover .sbic{color:#FDE68A!important}/* Value Added Tax */
+.modnav.sidebar .modtab[data-mod="mn"] .sbic,
+.modnav.sidebar .modtab[data-mod="mn"].active .sbic,
+.modnav.sidebar .modtab[data-mod="mn"]:hover .sbic{color:#A5B4FC!important}/* Monitor */
+.modnav.sidebar .modtab[data-mod="gm"] .sbic,
+.modnav.sidebar .modtab[data-mod="gm"].active .sbic,
+.modnav.sidebar .modtab[data-mod="gm"]:hover .sbic{color:#FCA5A5!important}/* Gmail Inbox */
+.modnav.sidebar .modtab[data-mod="cb"] .sbic,
+.modnav.sidebar .modtab[data-mod="cb"].active .sbic,
+.modnav.sidebar .modtab[data-mod="cb"]:hover .sbic{color:#86EFAC!important}/* Confirm Bank */
+.modnav.sidebar .modtab[data-mod="up"] .sbic,
+.modnav.sidebar .modtab[data-mod="up"].active .sbic,
+.modnav.sidebar .modtab[data-mod="up"]:hover .sbic{color:#D8B4FE!important}/* E-Filing & DBD */
+.modnav.sidebar .modtab[data-mod="pt"] .sbic,
+.modnav.sidebar .modtab[data-mod="pt"].active .sbic,
+.modnav.sidebar .modtab[data-mod="pt"]:hover .sbic{color:#99F6E4!important}/* User Directory */
+.modnav.sidebar .modtab[data-mod="sec"] .sbic,
+.modnav.sidebar .modtab[data-mod="sec"].active .sbic,
+.modnav.sidebar .modtab[data-mod="sec"]:hover .sbic{color:#FCD34D!important}/* Security */
 </style>
 </body></html>
