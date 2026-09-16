@@ -32367,7 +32367,27 @@ function _pcfCompute(){
   var cashSet=_cfdCashSet();
   var allY=(_fsYear==='ALL'), endM=(_fsEndM>=1&&_fsEndM<=12)?_fsEndM:12;
   var cur=_cfdModelFor(+_fsY0,+_fsY1,endM,allY,cashSet);
-  var bf=(typeof _cfdBfProj==='function')?_cfdBfProj(cashSet):{has:false,proj:{},thruBE:null,total:0};
+  /* Brought forward, computed here rather than through _cfdBfProj.
+     _cfdBfProj sums op+inv+fin only and drops adj — the opening-balance
+     restatements (ปรับปรุงยอดยกมา) that _cfdIsOpeningAdj detects. Those are
+     real prior-period cash and the engine already knows which project each one
+     belongs to, so dropping them pushed a large balance into an "unattributable"
+     bucket that never appeared on any row. Including adj makes the sum of the
+     projects' brought-forward equal the opening cash on the statement, so every
+     baht sits on a project line. _cfdBfProj itself is untouched — the Direct
+     statement keeps the behaviour it had. */
+  var bf={has:false,proj:{},thruBE:null,total:0}, _bfModel=null;
+  try{
+    var _minY=(typeof _cfdMinYear==='function')?_cfdMinYear():null, _startY=+_fsY0;
+    if(!allY && _minY!=null && !isNaN(_startY) && (_startY-1)>=_minY){
+      var _bfM=_cfdModelFor(_minY,_startY-1,12,false,cashSet), _bp={}, _bt=0;
+      _bfModel=_bfM;   /* v13.8: the drill reads per-account B/F out of this same model */
+      for(var _k in _bfM.projAgg){ if(!Object.prototype.hasOwnProperty.call(_bfM.projAgg,_k))continue;
+        var _o=_bfM.projAgg[_k], _v=_pcfN(_o.op)+_pcfN(_o.inv)+_pcfN(_o.fin)+_pcfN(_o.adj);
+        _bp[_k]=_v; _bt+=_v; }
+      bf={has:true,proj:_bp,thruBE:(_startY-1+543),total:_bt};
+    }
+  }catch(e){ bf=(typeof _cfdBfProj==='function')?_cfdBfProj(cashSet):bf; }
 
   /* master project universe — identical to Business Performance / Progress % */
   var master=(typeof DATA!=='undefined'&&DATA&&DATA.rows)?DATA.rows:[];
@@ -32439,7 +32459,8 @@ function _pcfCompute(){
            /* nUnbal / unbalAmt live on the model, not on _cfdCompute's return */
            nUnbal:_pcfN(cur.nUnbal), unbalAmt:Math.round(_pcfN(cur.unbalAmt)*100)/100}; } }catch(e){}
 
-  return {rows:list, tot:T, rec:rec, bf:bf, unmapped:unmapped,
+  return {rows:list, tot:T, rec:rec, bf:bf, bfModel:_bfModel, unmapped:unmapped,
+          hasAdj:(Math.abs(T.adj)>0.004),   /* opening-balance restatements inside the period */
           nMaster:master.length, nWithGl:list.filter(function(x){return x.nGl>0;}).length,
           allY:allY, endM:endM, y0:+_fsY0, y1:+_fsY1, cur:cur};
 }
@@ -32536,12 +32557,13 @@ function _fsRenderPCF(){
       +'<div class="pcf-rec proof">'
       +'<span class="pcf-recl">Proof of the closing cash balance</span>'
       +'<span class="pcf-recc">Projects, closing <b>'+_pcfMoney(rec.projClose)+'</b></span>'
-      +'<span class="pcf-recc">+ Opening cash not attributable to a project <b>'+_pcfMoney(rec.unalloc)+'</b></span>'
+      +(Math.abs(rec.unalloc)>0.004
+        ? ('<span class="pcf-recc bad">+ Opening cash not attributable to a project <b>'+_pcfMoney(rec.unalloc)+'</b></span>')
+        : ('<span class="pcf-recc">Brought forward ties to opening cash <b>'+_pcfMoney(rec.beginCash)+'</b></span>'))
       +'<span class="pcf-recc">= Closing cash per the statement <b>'+_pcfMoney(rec.endCash)+'</b></span>'
       +'<span class="pcf-recc'+((Math.abs(rec.closeProof)<0.005||Math.abs(Math.abs(rec.closeProof)-Math.abs(rec.unbalAmt))<0.01)?'':' bad')+'">Out by <b>'+_pcfMoney(rec.closeProof)+'</b></span>'
-      +'<span class="pcf-recnote">Brought forward is the cash each project has generated or consumed in earlier periods \u2014 not the entity\'s opening bank balance. '
-      +'Cash the entity held before the ledger\'s first classified activity (capital introduced and balances brought on) belongs to no project, so it is proved here rather than spread across them. '
-      +'Opening cash per the statement is '+_pcfMoney(rec.beginCash)+'.</span>'
+      +'<span class="pcf-recnote">Brought forward is each project\'s cash position carried in from earlier periods \u2014 its own activities plus any opening-balance restatement the ledger recorded against it. '
+      +'Summed over the projects it equals the opening cash on the statement, so every baht sits on a row above instead of in an unattributable balance.</span>'
       +'</div>'
       /* v13.5: and on to the figure the balance sheet actually reports */
       +((rec.hasBs||Math.abs(rec.pledged)>0.004)
@@ -32582,10 +32604,11 @@ function _fsRenderPCF(){
       +'<td class="pcf-n pcf-dr'+(_pcfN(r.op)<-0.004?' neg':(_pcfN(r.op)>0.004?' pos':' zero'))+'" data-pcfd="OP" title="Click to see the account codes behind this figure">'+_pcfMoney(r.op)+'</td>'
       +'<td class="pcf-n pcf-dr'+(_pcfN(r.inv)<-0.004?' neg':(_pcfN(r.inv)>0.004?' pos':' zero'))+'" data-pcfd="INV" title="Click to see the account codes behind this figure">'+_pcfMoney(r.inv)+'</td>'
       +'<td class="pcf-n pcf-dr'+(_pcfN(r.fin)<-0.004?' neg':(_pcfN(r.fin)>0.004?' pos':' zero'))+'" data-pcfd="FIN" title="Click to see the account codes behind this figure">'+_pcfMoney(r.fin)+'</td>'
+      +(M.hasAdj?('<td class="pcf-n pcf-dr'+(_pcfN(r.adj)<-0.004?' neg':(_pcfN(r.adj)>0.004?' pos':' zero'))+'" data-pcfd="ADJ" title="Opening-balance restatements \u2014 click to see the account codes behind this figure">'+_pcfMoney(r.adj)+'</td>'):'')
       +_pcfAmtTd(r.close,'pcf-close')
       +'</tr>';
   }
-  if(!view.length)body='<tr><td colspan="10" class="pcf-none">— No project matches the current filter —</td></tr>';
+  if(!view.length)body='<tr><td colspan="'+(M.hasAdj?11:10)+'" class="pcf-none">— No project matches the current filter —</td></tr>';
 
   var tbl='<div class="pcf-tw"><table class="pcf-tbl"><thead><tr>'
     +'<th class="pcf-c">#</th>'
@@ -32597,6 +32620,7 @@ function _fsRenderPCF(){
     +_pcfTh('op','Operating','activities','pcf-nh')
     +_pcfTh('inv','Investing','activities','pcf-nh')
     +_pcfTh('fin','Financing','activities','pcf-nh')
+    +(M.hasAdj?_pcfTh('adj','Adjustments','opening balance','pcf-nh'):'')
     +_pcfTh('close','Closing','balance','pcf-nh')
     +'</tr></thead><tbody>'+body+'</tbody>'
     +'<tfoot><tr><td colspan="5">Total · '+view.length+' project'+(view.length===1?'':'s')+'</td>'
@@ -32604,6 +32628,7 @@ function _fsRenderPCF(){
     +_pcfAmtTd(view.reduce(function(a,x){return a+_pcfR2(x.op);},0))
     +_pcfAmtTd(view.reduce(function(a,x){return a+_pcfR2(x.inv);},0))
     +_pcfAmtTd(view.reduce(function(a,x){return a+_pcfR2(x.fin);},0))
+    +(M.hasAdj?_pcfAmtTd(view.reduce(function(a,x){return a+_pcfR2(x.adj);},0)):'')
     +_pcfAmtTd(view.reduce(function(a,x){return a+_pcfR2(x.close);},0))
     +'</tr></tfoot></table></div>';
 
@@ -32651,8 +32676,10 @@ function _pcfClsOf(code){ var c=(''+(code==null?'':code)).trim();
 function _pcfGroup(rows){
   var by={}, order=[];
   for(var i=0;i<rows.length;i++){ var g=_pcfClsOf(rows[i].code);
-    if(!by[g.k]){ by[g.k]={def:g,rows:[],sum:0,nv:0}; order.push(g.k); } 
-    by[g.k].rows.push(rows[i]); by[g.k].sum+=_pcfN(rows[i].amt); by[g.k].nv+=rows[i].vlist.length; }
+    if(!by[g.k]){ by[g.k]={def:g,rows:[],sum:0,bf:0,bal:0,nv:0}; order.push(g.k); } 
+    by[g.k].rows.push(rows[i]); by[g.k].sum+=_pcfN(rows[i].amt);
+    by[g.k].bf+=_pcfN(rows[i].bf); by[g.k].bal+=_pcfN(rows[i].bal);
+    by[g.k].nv+=rows[i].vlist.length; }
   /* keep the class order of _PCF_CLS, not the order the accounts happened to arrive in */
   var out=[];
   for(var j=0;j<_PCF_CLS.length;j++){ var k=_PCF_CLS[j].k; if(by[k])out.push(by[k]); }
@@ -32662,23 +32689,39 @@ function _pcfDetail(code,act){
   var M=_PCF; if(!M||!M.cur||!M.cur.projAgg)return null;
   var keys=_pcfKeysFor(code), pa=M.cur.projAgg;
   var accs={}, tot=0, nv=0;
+  function bucket(c,name){ var o=accs[c]||(accs[c]={code:c,name:name||'',bf:0,amt:0,vch:{}});
+    if(!o.name&&name)o.name=name; return o; }
   for(var i=0;i<keys.length;i++){
     var kk=(keys[i]==='(blank)')?'':keys[i];
     var a=pa[kk]; if(!a||!a.d||!a.d[act])continue;
     var dd=a.d[act];
     for(var c in dd){ if(!Object.prototype.hasOwnProperty.call(dd,c))continue;
-      var src=dd[c], o=accs[c]||(accs[c]={code:c,name:src.name||'',amt:0,vch:{}});
-      if(!o.name&&src.name)o.name=src.name;
+      var src=dd[c], o=bucket(c,src.name);
       o.amt+=_pcfN(src.amt); tot+=_pcfN(src.amt);
       for(var v in src.vch){ if(!Object.prototype.hasOwnProperty.call(src.vch,v))continue;
         var sv=src.vch[v], ov=o.vch[v]||(o.vch[v]={v:v,amt:0,trace:sv.trace||'',line:sv.line||''});
         ov.amt+=_pcfN(sv.amt); if(sv.trace&&!ov.trace)ov.trace=sv.trace; } } }
+  /* v13.8: the same account's cumulative cash flow up to the prior year, read from the
+     brought-forward model \u2014 so B/F + this period = the account's running cash balance. */
+  var bfTot=0;
+  var bpa=(M.bfModel&&M.bfModel.projAgg)?M.bfModel.projAgg:null;
+  if(bpa){ for(var bi=0;bi<keys.length;bi++){
+    var bk=(keys[bi]==='(blank)')?'':keys[bi];
+    var ba=bpa[bk]; if(!ba||!ba.d||!ba.d[act])continue;
+    var bdd=ba.d[act];
+    for(var bc in bdd){ if(!Object.prototype.hasOwnProperty.call(bdd,bc))continue;
+      var bo=bucket(bc,bdd[bc].name);
+      bo.bf+=_pcfN(bdd[bc].amt); bfTot+=_pcfN(bdd[bc].amt); } } }
   var list=Object.keys(accs).map(function(c){ var o=accs[c];
+    o.bal=_pcfN(o.bf)+_pcfN(o.amt);
     o.vlist=Object.keys(o.vch).map(function(v){return o.vch[v];})
       .sort(function(x,y){return Math.abs(y.amt)-Math.abs(x.amt);});
     nv+=o.vlist.length; return o; });
-  list.sort(function(a,b){return Math.abs(b.amt)-Math.abs(a.amt);});
-  return {rows:list,total:tot,nAcc:list.length,nVch:nv};
+  list.sort(function(a,b){ var d=Math.abs(b.amt)-Math.abs(a.amt);
+    if(Math.abs(d)>0.004)return d; return Math.abs(b.bal)-Math.abs(a.bal); });
+  return {rows:list,total:tot,bfTotal:bfTot,balTotal:bfTot+tot,
+          hasBf:!!(bpa&&M.bf&&M.bf.has),bfThruBE:(M.bf&&M.bf.thruBE)||null,
+          nAcc:list.length,nVch:nv};
 }
 
 function _pcfDrill(code,act){
@@ -32708,6 +32751,8 @@ function _pcfDrill(code,act){
   else{
     /* v13.6: accounts grouped by class, each class carrying its own subtotal */
     var groups=_pcfGroup(D.rows), rws='', seq=0;
+    function amt(v,extra){ return '<td class="r '+(v<-0.004?'neg':(v>0.004?'pos':'nil'))+(extra?(' '+extra):'')+'">'+_pcfMoney(v)+'</td>'; }
+    function amtB(v,extra){ return '<td class="r '+(v<-0.004?'neg':(v>0.004?'pos':'nil'))+(extra?(' '+extra):'')+'"><b>'+_pcfMoney(v)+'</b></td>'; }
     for(var gi=0;gi<groups.length;gi++){ var G=groups[gi], gd=G.def;
       rws+='<tr class="pcfd-gr '+gd.tone+'"><td class="c"></td>'
         +'<td colspan="2"><span class="pcfd-gn">'+_pcfE(gd.n)+'</span>'
@@ -32715,23 +32760,29 @@ function _pcfDrill(code,act){
         +(gd.th?('<span class="pcfd-gt">'+gd.th+'</span>'):'')
         +'<span class="pcfd-gc">'+G.rows.length+' account'+(G.rows.length===1?'':'s')+'</span></td>'
         +'<td class="c">'+G.nv+'</td>'
-        +'<td class="r '+(G.sum<-0.004?'neg':'pos')+'"><b>'+_pcfMoney(G.sum)+'</b></td>'
+        +amtB(G.bf,'bf')+amtB(G.sum)+amtB(G.bal,'bal')
         +'<td class="c"></td></tr>';
       for(var a=0;a<G.rows.length;a++){ var o=G.rows[a]; seq++;
         rws+='<tr class="pcfd-ar" data-pcfacc="'+_pcfE(o.code)+'"><td class="c">'+seq+'</td>'
           +'<td><span class="pcfd-ac">'+_pcfE(o.code)+'</span></td>'
           +'<td class="nm">'+_pcfE(o.name||'')+'</td>'
           +'<td class="c">'+o.vlist.length+'</td>'
-          +'<td class="r '+(o.amt<-0.004?'neg':'pos')+'">'+_pcfMoney(o.amt)+'</td>'
+          +amt(o.bf,'bf')+amt(o.amt)+amt(o.bal,'bal')
           +'<td class="c"><span class="pcfd-go">›</span></td></tr>';
       }
       rws+='<tr class="pcfd-gs"><td colspan="4" class="r">Subtotal · '+_pcfE(gd.n)+' '+_pcfE(gd.lab)+'</td>'
-        +'<td class="r '+(G.sum<-0.004?'neg':'pos')+'"><b>'+_pcfMoney(G.sum)+'</b></td><td></td></tr>';
+        +amtB(G.bf,'bf')+amtB(G.sum)+amtB(G.bal,'bal')+'<td></td></tr>';
     }
+    var bfSub=(D.hasBf&&D.bfThruBE)?('cumulative through FY '+D.bfThruBE):'no prior period';
     body='<div class="pcfd-tw"><table class="pcfd-tbl"><thead><tr><th class="c">#</th><th>Account Code</th>'
-      +'<th>Account Name</th><th class="c">Vouchers</th><th class="r">Cash effect</th><th class="c"></th></tr></thead><tbody>'+rws
+      +'<th>Account Name</th><th class="c">Vouchers</th>'
+      +'<th class="r">B/F<span class="pcfd-thy">'+_pcfE(bfSub)+'</span></th>'
+      +'<th class="r">Cash effect<span class="pcfd-thy">'+_pcfE(_pcfPeriodLabel(M))+'</span></th>'
+      +'<th class="r">Cash balance<span class="pcfd-thy">B/F + this period</span></th>'
+      +'<th class="c"></th></tr></thead><tbody>'+rws
       +'</tbody><tfoot><tr><td colspan="4" class="r"><b>'+D.nAcc+' account'+(D.nAcc===1?'':'s')+' in '+groups.length+' class'+(groups.length===1?'':'es')+'</b></td>'
-      +'<td class="r"><b>'+_pcfMoney(D.total)+'</b></td><td></td></tr></tfoot></table></div>';
+      +amtB(D.bfTotal,'bf')+amtB(D.total)+amtB(D.balTotal,'bal')
+      +'<td></td></tr></tfoot></table></div>';
   }
   var foot='<div class="pcfd-ft"><span class="pcfd-note">Click an account to list its vouchers, then a voucher to read its journal entry.</span>'
     +'<button type="button" class="pcfd-close">Close</button></div>';
@@ -32751,7 +32802,7 @@ function _pcfDrill(code,act){
       var nx=vr.nextElementSibling;
       if(nx&&nx.classList.contains('pcfd-jn')){ nx.parentNode.removeChild(nx); vr.classList.remove('open'); return; }
       var jn=document.createElement('tr'); jn.className='pcfd-jn';
-      var td=document.createElement('td'); td.colSpan=6;
+      var td=document.createElement('td'); td.colSpan=8;
       var v=vr.getAttribute('data-pcfv');
       td.innerHTML='<div class="pcfd-jnbox"><div class="pcfd-jnlab">'
         +_PCF_SVG+'<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H18a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6.5A1.5 1.5 0 0 1 5 17.5z"/><path d="M5 16.5h14"/><path d="M8.5 7h7M8.5 10.5h7"/></svg>'
@@ -32775,7 +32826,9 @@ function _pcfDrill(code,act){
         var tr=document.createElement('tr'); tr.className='pcfd-vr'; tr.setAttribute('data-pcfv',vv.v);
         tr.innerHTML='<td class="c"></td><td class="c"><span class="pcfd-vlink">'+_pcfE(vv.v)+'</span></td>'
           +'<td class="nm sm">'+_pcfE(vv.trace||'')+'</td><td class="c"></td>'
+          +'<td class="r nil"></td>'
           +'<td class="r '+(vv.amt<-0.004?'neg':'pos')+'">'+_pcfMoney(vv.amt)+'</td>'
+          +'<td class="r nil"></td>'
           +'<td class="c"><span class="pcfd-go sm">›</span></td>';
         after.parentNode.insertBefore(tr,after.nextSibling); after=tr; }
       ar.classList.add('open'); return;
@@ -32835,21 +32888,27 @@ function _pcfExportXlsx(){
         +(Math.abs(rec.auditAdj)>0.004?('  '+(rec.auditAdj<0?'\u2212':'+')+'  Audited adjustment '+_pcfMoney(Math.abs(rec.auditAdj))):'')
         +(rec.hasBs?('  =  Cash & cash equivalents '+_pcfMoney(rec.bsCash)):'')]); } }
   aoa.push([]);
+  var adjOn=!!M.hasAdj;
   aoa.push(['#','Project Code','Project Name','Employer','Status',
-            'Brought forward','Operating activities','Investing activities','Financing activities','Closing balance']);
-  var t={bf:0,op:0,inv:0,fin:0,close:0};
+            'Brought forward','Operating activities','Investing activities','Financing activities']
+    .concat(adjOn?['Adjustments (opening balance)']:[]).concat(['Closing balance']));
+  var t={bf:0,op:0,inv:0,fin:0,adj:0,close:0};
   for(var i=0;i<view.length;i++){ var r=view[i];
-    t.bf+=_pcfXn(r.bf); t.op+=_pcfXn(r.op); t.inv+=_pcfXn(r.inv); t.fin+=_pcfXn(r.fin); t.close+=_pcfXn(r.close);
+    t.bf+=_pcfXn(r.bf); t.op+=_pcfXn(r.op); t.inv+=_pcfXn(r.inv); t.fin+=_pcfXn(r.fin);
+    t.adj+=_pcfXn(r.adj); t.close+=_pcfXn(r.close);
     aoa.push([ i+1, r.code, r.name||'', r.cust||'', (_PCF_STLBL[r.st]||_PCF_STLBL.nd)[0],
-      _pcfXn(r.bf), _pcfXn(r.op), _pcfXn(r.inv), _pcfXn(r.fin), _pcfXn(r.close) ]); }
+      _pcfXn(r.bf), _pcfXn(r.op), _pcfXn(r.inv), _pcfXn(r.fin) ]
+      .concat(adjOn?[_pcfXn(r.adj)]:[]).concat([_pcfXn(r.close)])); }
   aoa.push([]);
   aoa.push(['','TOTAL — '+view.length+' project'+(view.length===1?'':'s'),'','','',
-    _pcfXn(t.bf), _pcfXn(t.op), _pcfXn(t.inv), _pcfXn(t.fin), _pcfXn(t.close)]);
+    _pcfXn(t.bf), _pcfXn(t.op), _pcfXn(t.inv), _pcfXn(t.fin)]
+    .concat(adjOn?[_pcfXn(t.adj)]:[]).concat([_pcfXn(t.close)]));
   aoa.push([]);
   aoa.push(['Note','A positive figure is cash received; a negative figure is cash paid.']);
   aoa.push(['','Brought forward + Operating + Investing + Financing = Closing balance.']);
   var ws=XLSX.utils.aoa_to_sheet(aoa);
-  ws['!cols']=[{wch:5},{wch:18},{wch:52},{wch:34},{wch:15},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18}];
+  ws['!cols']=[{wch:5},{wch:18},{wch:52},{wch:34},{wch:15},{wch:18},{wch:18},{wch:18},{wch:18}]
+    .concat(adjOn?[{wch:22}]:[]).concat([{wch:18}]);
   var wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Cash Flow by Project');
   XLSX.writeFile(wb,'GLI_Cash_Flow_by_Project_'+_pcfPeriodLabel(M).replace(/[^\w]+/g,'_')+'.xlsx');
@@ -32861,14 +32920,16 @@ function _pcfExportPdf(){
   var view=_pcfView(), rec=M.rec, E=_pcfE;
   var co=''; try{ co=(typeof _fsCoName==='function')?_fsCoName():''; }catch(e){}
   if(!co){ try{ co=(document.querySelector('#page-fs .fsco')||{}).textContent||''; }catch(e){} }
-  var rws='', t={bf:0,op:0,inv:0,fin:0,close:0};
+  var adjOn=!!M.hasAdj;
+  var rws='', t={bf:0,op:0,inv:0,fin:0,adj:0,close:0};
   for(var i=0;i<view.length;i++){ var r=view[i];
-    t.bf+=_pcfR2(r.bf); t.op+=_pcfR2(r.op); t.inv+=_pcfR2(r.inv); t.fin+=_pcfR2(r.fin); t.close+=_pcfR2(r.close);
+    t.bf+=_pcfR2(r.bf); t.op+=_pcfR2(r.op); t.inv+=_pcfR2(r.inv); t.fin+=_pcfR2(r.fin); t.adj+=_pcfR2(r.adj); t.close+=_pcfR2(r.close);
     rws+='<tr><td class="c">'+(i+1)+'</td><td class="cd">'+E(r.code)+'</td>'
       +'<td class="nm">'+E(r.name||'')+'</td><td class="nm">'+E(r.cust||'')+'</td>'
       +'<td class="c">'+E((_PCF_STLBL[r.st]||_PCF_STLBL.nd)[0])+'</td>'
       +'<td class="v">'+_pcfMoney(r.bf)+'</td><td class="v">'+_pcfMoney(r.op)+'</td>'
       +'<td class="v">'+_pcfMoney(r.inv)+'</td><td class="v">'+_pcfMoney(r.fin)+'</td>'
+      +(adjOn?('<td class="v">'+_pcfMoney(r.adj)+'</td>'):'')
       +'<td class="v tot">'+_pcfMoney(r.close)+'</td></tr>';
   }
   var html='<!doctype html><html><head><meta charset="utf-8"><title>Cash Flow by Project</title>'
@@ -32916,11 +32977,13 @@ function _pcfExportPdf(){
           :'')
         +'</div>'):'')
     +'<table><thead><tr><th>#</th><th>Project Code</th><th>Project Name</th><th>Employer</th><th>Status</th>'
-    +'<th>Brought forward</th><th>Operating</th><th>Investing</th><th>Financing</th><th>Closing</th></tr></thead>'
+    +'<th>Brought forward</th><th>Operating</th><th>Investing</th><th>Financing</th>'
+    +(adjOn?'<th>Adjustments</th>':'')+'<th>Closing</th></tr></thead>'
     +'<tbody>'+rws+'</tbody>'
     +'<tfoot><tr><td colspan="5">TOTAL — '+view.length+' project'+(view.length===1?'':'s')+'</td>'
     +'<td class="v">'+_pcfMoney(t.bf)+'</td><td class="v">'+_pcfMoney(t.op)+'</td>'
     +'<td class="v">'+_pcfMoney(t.inv)+'</td><td class="v">'+_pcfMoney(t.fin)+'</td>'
+    +(adjOn?('<td class="v">'+_pcfMoney(t.adj)+'</td>'):'')
     +'<td class="v">'+_pcfMoney(t.close)+'</td></tr></tfoot></table>'
     +'<div class="note">A positive figure is cash received; a figure in brackets is cash paid. '
     +'Brought forward + Operating + Investing + Financing = Closing balance.</div>'
@@ -33092,6 +33155,14 @@ function _pcfExportPdf(){
 .pcfd-tbl td.nm.sm{font-size:11px;color:#8A93A5}
 .pcfd-tbl td.r.pos{color:#0B5347}
 .pcfd-tbl td.r.neg{color:#B42318}
+.pcfd-tbl td.r.nil{color:#B0B7C3}
+.pcfd-tbl td.r.bf{background:rgba(16,24,40,.022)}
+.pcfd-tbl td.r.bal{background:rgba(14,92,82,.045);font-weight:700}
+.pcfd-tbl thead th .pcfd-thy{display:block;font-size:8.5px;font-weight:600;
+  color:rgba(255,255,255,.6);letter-spacing:.02em;margin-top:1px;text-transform:none}
+.pcfd-gr td.r.bf,.pcfd-gs td.r.bf{background:rgba(16,24,40,.03)}
+.pcfd-gr td.r.bal,.pcfd-gs td.r.bal{background:rgba(14,92,82,.07)}
+.pcfd-tbl tfoot td.r.bal{background:rgba(14,92,82,.1)}
 .pcfd-gr td{background:#F4F6FA;border-top:1px solid #E4E8F0;border-bottom:1px solid #E4E8F0;
   padding:6px 8px;font-size:11.5px}
 .pcfd-gr.mint td{background:#EDF6F3}
