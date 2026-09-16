@@ -32328,6 +32328,10 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
    project master, so the statement still ties to the cash movement.
    ====================================================================== */
 var _PCF=null, _PCF_Q='', _PCF_ST='', _PCF_SORT={c:'close',d:-1};
+/* v14.0: the explanatory prose under the reconciliation chips is off by default —
+   the figures are the point, the wording is there when it is wanted. */
+var _PCF_NOTES=false;
+try{ _PCF_NOTES=(localStorage.getItem('gli_pcf_notes')==='1'); }catch(e){}
 /* v13.5: every project in the master is listed by default — a project with no cash
    movement in the period is still part of the portfolio and must be visible. */
 var _PCF_ZERO=true;
@@ -32606,12 +32610,16 @@ function _fsRenderPCF(){
   var recHtml='';
   if(rec){
     var ok=Math.abs(rec.diff)<0.005;
-    recHtml='<div class="pcf-rec'+(ok?' ok':' off')+'">'
+    recHtml='<div class="pcf-recs'+(_PCF_NOTES?' notes':'')+'">'
+      +'<div class="pcf-rec'+(ok?' ok':' off')+'">'
       +'<span class="pcf-recic">'+_PCF_SVG+(ok?_PCF_IC.ok:_PCF_IC.warn)+'</svg></span>'
       +'<span class="pcf-recl">Reconciliation to the cash flow statement</span>'
       +'<span class="pcf-recc">Sum of projects <b>'+_pcfMoney(rec.projMove)+'</b></span>'
       +'<span class="pcf-recc">Statement movement <b>'+_pcfMoney(rec.stmtMove)+'</b></span>'
       +'<span class="pcf-recc'+(ok?'':' bad')+'">Difference <b>'+_pcfMoney(rec.diff)+'</b></span>'
+      +'<button type="button" class="pcf-noteb" id="pcfNotes" title="'+(_PCF_NOTES?'Hide the explanatory notes':'Show what each line means')+'">'
+        +_PCF_SVG+'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg>'
+        +(_PCF_NOTES?'Hide notes':'What is this?')+'</button>'
       +(ok?'':('<span class="pcf-recnote">'+(rec.nUnbal
             ?('The ledger holds '+rec.nUnbal+' voucher(s) whose debits and credits do not agree'
               +(Math.abs(rec.unbalAmt)>0.004?(' (out by '+_pcfMoney(rec.unbalAmt)+')'):'')
@@ -32641,7 +32649,8 @@ function _fsRenderPCF(){
           +'Neither belongs to any single project, so they are walked here rather than spread across the rows. '
           +'These are the same reconciling items the Cash Flow \u00b7 Direct statement shows.</span>'
           +'</div>')
-        : '<div style="display:none"></div>')
+        : '')
+      +'</div>'
       ;
   }
 
@@ -32917,6 +32926,9 @@ function _pcfBind(){
     var st=t.closest('[data-pcfst]');
     if(st){ _PCF_ST=st.getAttribute('data-pcfst')||''; _fsRenderBody(); return; }
     if(t.closest('#pcfZero')){ _PCF_ZERO=!_PCF_ZERO; _fsRenderBody(); return; }
+    if(t.closest('#pcfNotes')){ _PCF_NOTES=!_PCF_NOTES;
+      try{ localStorage.setItem('gli_pcf_notes',_PCF_NOTES?'1':'0'); }catch(_e){}
+      _fsRenderBody(); return; }
     if(t.closest('#pcfReload')){ _PCF_SIG=''; _fsRenderBody(); return; }
     if(t.closest('#fsPcfXlsx')){ _pcfExportXlsx(); return; }
     if(t.closest('#fsPcfPdf')){ _pcfExportPdf(); return; }
@@ -33130,6 +33142,17 @@ function _pcfExportPdf(){
 #page-fs .pcf-recc.bad b{color:#B42318}
 #page-fs .pcf-recc.alt{color:#667085}
 #page-fs .pcf-recnote{flex:1 1 100%;font-size:10.5px;font-weight:600;opacity:.9}
+/* v14.0: the prose is hidden unless the block is asked to show it */
+#page-fs .pcf-recs:not(.notes) .pcf-recnote{display:none}
+#page-fs .pcf-recs:not(.notes) .pcf-rec{padding-top:8px;padding-bottom:8px}
+#page-fs .pcf-noteb{margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;
+  font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.01em;cursor:pointer;
+  border:none;border-radius:999px;padding:4px 11px 4px 8px;
+  background:rgba(255,255,255,.75);color:#667085;
+  box-shadow:inset 0 0 0 1px rgba(16,24,40,.08);transition:.14s}
+#page-fs .pcf-noteb:hover{background:#fff;color:#0E5C52;box-shadow:inset 0 0 0 1px #9FCCC0}
+#page-fs .pcf-noteb:active{transform:scale(.97)}
+#page-fs .pcf-noteb svg{width:13px;height:13px;display:block;flex:0 0 auto}
 #page-fs .pcf-rec.proof{background:#E8F1FC;border:1px solid #D6E5F7;color:#1D5FAE;margin-top:-6px}
 #page-fs .pcf-rec.bs{background:#EFEBFB;border:1px solid #DED4F5;color:#6A34C4;margin-top:-6px}
 #page-fs .pcf-rec.bs .pcf-recc b{color:#55299C}
