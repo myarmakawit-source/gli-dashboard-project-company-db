@@ -12711,16 +12711,98 @@ function renderMatrix(){
    so the pop-up shows ALL years from the GL/Invoice file — not just the ones in the frozen gl_years/inv_years lists (which capped GL·Cost at 2025 while Invoice reached 2026). */
 function _ykeys(o){ if(!o)return []; var n=Object.keys(o).filter(function(y){return /^\d{4}$/.test(y);}).sort(); return (o['ไม่ระบุปี']!==undefined)?n.concat(['ไม่ระบุปี']):n; }
 function _expYr(r){var raw=_yrOf(r,'exp')||{};var ey=_ykeys(raw);if(ey.length)return {map:raw,years:ey,alloc:false};var et=expEff(r);if(et===null||et===0)return {map:{},years:[],alloc:false};var ge=_yrOf(r,'gl')||{},ie=_yrOf(r,'inv')||{};var gy=_ykeys(ge);var iy=_ykeys(ie);var base=gy.length?gy:iy,wmap=gy.length?ge:ie;if(!base.length)return {map:{},years:[],alloc:false};if(base.length===1){var m1={};m1[base[0]]=et;return {map:m1,years:base,alloc:false};}var wt=0,i;for(i=0;i<base.length;i++)wt+=Math.abs(+wmap[base[i]]||0);var m={},acc=0;for(i=0;i<base.length;i++){var sh;if(i===base.length-1){sh=Math.round((et-acc)*100)/100;}else if(wt>0){sh=Math.round(et*Math.abs(+wmap[base[i]]||0)/wt*100)/100;}else{sh=Math.round(et/base.length*100)/100;}acc+=sh;m[base[i]]=sh;}return {map:m,years:base,alloc:true};}
+/* ===== v12.5: Business Performance — click a year tile to see the vouchers behind the
+   figure, then a voucher to see its journal entry. GL-backed blocks only (Revenue class 4
+   and Cost classes 5/6/7); the Invoice block is not in the general ledger. ===== */
+var _BPD={gl:{lab:'GL · Revenue',rule:'Revenue accounts (class 4)',norm:'cr',test:function(c){return c.charAt(0)==='4';}},
+          exp:{lab:'Cost · Expense (GL)',rule:'Cost and expense accounts (classes 5, 6 and 7)',norm:'dr',test:function(c){var f=c.charAt(0);return f==='5'||f==='6'||f==='7';}}};
+function _bpdClose(){var m=document.getElementById('bpDrillModal');if(m&&m.parentNode)m.parentNode.removeChild(m);document.removeEventListener('keydown',_bpdEsc);}
+function _bpdEsc(e){if(e&&e.key==='Escape')_bpdClose();}
+function _bpdScan(code,kind,year){
+  var def=_BPD[kind];if(!def)return null;
+  var rows=(typeof GLROWS!=='undefined'&&GLROWS)?GLROWS:null;
+  if(!rows||!rows.length)return {def:def,vch:[],n:0,sum:0,noGL:true};
+  var by={},order=[],sum=0;
+  for(var i=0;i<rows.length;i++){var r=rows[i];if(!r)continue;
+    if((''+(r[2]||''))!==(''+year))continue;
+    var pr=(''+(r[13]||'')).trim().replace(/#.*$/,'');if(pr!==code)continue;
+    var c=(''+(r[0]||'')).trim();if(!def.test(c))continue;
+    var dr=+r[16]||0,cr=+r[17]||0,val=(def.norm==='dr')?(dr-cr):(cr-dr);
+    var v=(''+(r[4]||'')).trim()||'(no voucher)';
+    if(!by[v]){by[v]={v:v,date:(''+(r[3]||'')),n:0,dr:0,cr:0,val:0,accs:{}};order.push(v);}
+    var o=by[v];o.n++;o.dr+=dr;o.cr+=cr;o.val+=val;o.accs[c]=(''+(r[1]||''));
+    if((''+(r[3]||''))<o.date)o.date=(''+(r[3]||''));
+    sum+=val;}
+  var list=order.map(function(v){var o=by[v];o.val=Math.round(o.val*100)/100;o.dr=Math.round(o.dr*100)/100;o.cr=Math.round(o.cr*100)/100;return o;});
+  list.sort(function(a,b){if(a.date!==b.date)return a.date<b.date?-1:1;return a.v<b.v?-1:1;});
+  return {def:def,vch:list,n:list.length,sum:Math.round(sum*100)/100,noGL:false};
+}
+function _bpYearDrill(code,kind,year,shown){
+  _bpdClose();
+  if(typeof GLROWS==='undefined'||!GLROWS||!GLROWS.length){ try{if(typeof _pgEnsureGL==='function')_pgEnsureGL();}catch(e){} }
+  var res=_bpdScan(code,kind,year);if(!res)return;
+  var nm='';try{nm=(typeof _pgDrillName==='function')?_pgDrillName(code):'';}catch(e){}
+  var diff=(shown!=null)?Math.round((res.sum-(+shown||0))*100)/100:0;
+  var head='<div class="bpd-hd"><div><div class="bpd-t">🔎 '+esc(res.def.lab)+' · '+esc(''+year)+'</div>'
+    +'<div class="bpd-sub">Project <b>'+esc(code)+'</b>'+(nm?(' · '+esc(nm)):'')+' &nbsp;·&nbsp; '+esc(res.def.rule)+'</div></div>'
+    +'<button type="button" class="bpd-x" title="Close">✕</button></div>';
+  var summ='<div class="bpd-summ"><span class="bpd-chip">Vouchers <b>'+res.n.toLocaleString()+'</b></span>'
+    +'<span class="bpd-chip sum">Total from GL <b>'+fmt(res.sum)+'</b></span>'
+    +(res.noGL?'<span class="bpd-chip warn">⚠ The GL is still loading — open the Database module once, then try again</span>':'')
+    +((shown!=null&&Math.abs(diff)>=1)?('<span class="bpd-chip warn">Tile shows '+fmt(shown)+' · difference '+fmt(diff)+'</span>'):'')+'</div>';
+  var body;
+  if(!res.n){ body='<div class="bpd-empty">— No GL entries for this project, year and account class —</div>'; }
+  else{
+    var rws='';
+    for(var i=0;i<res.vch.length;i++){var o=res.vch[i];
+      rws+='<tr class="bpd-vr" data-bpv="'+_eatt(o.v)+'"><td class="c">'+(i+1)+'</td>'
+        +'<td class="c">'+esc(o.date)+'</td>'
+        +'<td><span class="bpd-vlink">'+esc(o.v)+'</span></td>'
+        +'<td class="c">'+o.n+'</td>'
+        +'<td class="r">'+(o.dr?fmt(o.dr):'')+'</td><td class="r">'+(o.cr?fmt(o.cr):'')+'</td>'
+        +'<td class="r '+(o.val<0?'neg':'pos')+'">'+fmt(o.val)+'</td></tr>';}
+    body='<div class="bpd-tblwrap"><table class="bpd-tbl"><thead><tr><th>#</th><th>Date</th><th>Voucher</th><th class="c">Lines</th>'
+      +'<th class="r">Debit</th><th class="r">Credit</th><th class="r">'+(res.def.norm==='dr'?'Dr − Cr':'Cr − Dr')+'</th></tr></thead><tbody>'+rws
+      +'</tbody><tfoot><tr><td colspan="4" class="r"><b>'+res.n.toLocaleString()+' vouchers</b></td>'
+      +'<td class="r"><b>'+fmt(res.vch.reduce(function(a,x){return a+x.dr;},0))+'</b></td>'
+      +'<td class="r"><b>'+fmt(res.vch.reduce(function(a,x){return a+x.cr;},0))+'</b></td>'
+      +'<td class="r"><b>'+fmt(res.sum)+'</b></td></tr></tfoot></table></div>';
+  }
+  var foot='<div class="bpd-ft"><span class="bpd-note">Click a voucher to open its journal entry.</span>'
+    +'<button type="button" class="bpd-close">Close</button></div>';
+  var ov=document.createElement('div');ov.id='bpDrillModal';ov.className='bpd-ov';
+  ov.innerHTML='<div class="bpd-card">'+head+summ+body+foot+'</div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click',function(e){if(e.target===ov)_bpdClose();});
+  ov.querySelector('.bpd-x').addEventListener('click',_bpdClose);
+  ov.querySelector('.bpd-close').addEventListener('click',_bpdClose);
+  ov.addEventListener('click',function(e){
+    var tr=e.target&&e.target.closest?e.target.closest('.bpd-vr[data-bpv]'):null;if(!tr)return;
+    var nx=tr.nextElementSibling;
+    if(nx&&nx.classList.contains('bpd-jn')){nx.parentNode.removeChild(nx);tr.classList.remove('open');return;}
+    var jn=document.createElement('tr');jn.className='bpd-jn';
+    var td=document.createElement('td');td.colSpan=7;
+    var v=tr.getAttribute('data-bpv');
+    td.innerHTML='<div class="bpd-jnbox"><div class="bpd-jnlab">📒 Journal entry · '+esc(v)+'</div>'
+      +((typeof _apVJGlMini==='function')?_apVJGlMini(v):'')+'</div>';
+    jn.appendChild(td);tr.parentNode.insertBefore(jn,tr.nextSibling);tr.classList.add('open');
+  });
+  document.addEventListener('keydown',_bpdEsc);
+}
 function projDetailHTML(code){
   const r=DATA.rows.find(x=>x.code===code);if(!r)return '';
   const _gE=_yrOf(r,'gl')||{},_iE=_yrOf(r,'inv')||{},_eE=_yrOf(r,'exp')||{};const gY=_ykeys(_gE),iYy=_ykeys(_iE),eY=_ykeys(_eE);
-  const tiles=(ys,o)=>ys.length?ys.map(y=>'<div class="ftile"><div class="ty">'+y+'</div><div class="tv'+(o[y]<0?' neg':'')+'">'+fmt(o[y])+'</div></div>').join(''):'<div class="fnodata">— no data —</div>';
+  const tiles=(ys,o,kind)=>ys.length?ys.map(function(y){
+    var clk=(kind==='gl'||kind==='exp')&&/^\d{4}$/.test(''+y);
+    return '<div class="ftile'+(clk?' ftile-clk':'')+'"'+(clk?(' data-bpdrill="'+kind+'|'+y+'" role="button" tabindex="0" title="Show the vouchers behind this figure"'):'')
+      +'><div class="ty">'+y+(clk?'<span class="ftile-go">\u203a</span>':'')+'</div><div class="tv'+(o[y]<0?' neg':'')+'">'+fmt(o[y])+'</div></div>';
+  }).join(''):'<div class="fnodata">— no data —</div>';
   const dc=r.diff>0?'dpos':(r.diff<0?'dneg':'dzero');
   let h='<div class="focus"><div class="fhead"><div><div class="fcode">'+r.code+'</div><div class="fcust">'+esc(custOf(r))+'</div><div class="ftitle edit" contenteditable="'+(_BPLOCK?'false':'true')+'" spellcheck="false" data-code="'+r.code+'">'+esc(dispName(r))+'</div></div><span class="badge '+ST[statusEff(r)][1]+' big">'+ST[statusEff(r)][0]+'</span></div>';
   h+='<div class="fdesc">'+STL[statusEff(r)]+'</div><div class="fcols">';
-  h+='<div class="fblock"><div class="fbh"><span class="dot gl"></span>GL · General Ledger<span class="fbtot">'+(glEff(r)===null?'—':fmt(glEff(r)))+'</span></div><div class="ftiles">'+tiles(gY,_gE)+'</div></div>';
-  h+='<div class="fblock"><div class="fbh"><span class="dot inv"></span>Invoice · Issue Invoice actual<span class="fbtot">'+(invEff(r)===null?'—':fmt(invEff(r)))+'</span></div><div class="ftiles">'+tiles(iYy,_iE)+'</div></div>';
-  var _exY=_expYr(r);h+='<div class="fblock"><div class="fbh"><span class="dot exp"></span>Cost · Expense (GL)<span class="fbtot" style="color:var(--neg)">'+(expEff(r)===null?'—':fmt(expEff(r)))+'</span></div><div class="ftiles">'+tiles(_exY.years,_exY.map)+'</div>'+(_exY.alloc?'<div class="fallocnote">≈ ปันส่วนตามสัดส่วนรายได้ GL · ยังไม่มีข้อมูลต้นทุนแยกปีจริง</div>':'')+_expCatHtml(r)+'</div></div>';
+  h+='<div class="fblock"><div class="fbh"><span class="dot gl"></span>GL · General Ledger<span class="fbtot">'+(glEff(r)===null?'—':fmt(glEff(r)))+'</span></div><div class="ftiles">'+tiles(gY,_gE,'gl')+'</div></div>';
+  h+='<div class="fblock"><div class="fbh"><span class="dot inv"></span>Invoice · Issue Invoice actual<span class="fbtot">'+(invEff(r)===null?'—':fmt(invEff(r)))+'</span></div><div class="ftiles">'+tiles(iYy,_iE,'inv')+'</div></div>';
+  var _exY=_expYr(r);h+='<div class="fblock"><div class="fbh"><span class="dot exp"></span>Cost · Expense (GL)<span class="fbtot" style="color:var(--neg)">'+(expEff(r)===null?'—':fmt(expEff(r)))+'</span></div><div class="ftiles">'+tiles(_exY.years,_exY.map,'exp')+'</div>'+(_exY.alloc?'<div class="fallocnote">≈ ปันส่วนตามสัดส่วนรายได้ GL · ยังไม่มีข้อมูลต้นทุนแยกปีจริง</div>':'')+_expCatHtml(r)+'</div></div>';
   const iR=invEff(r),iX=invExpEff(r),gR=glEff(r),gX=expEff(r),cR=conEff(r),cX=conExpEff(r),pf=profitEff(r),dfx=diffEff(r);const bill=(cR&&iR!=null&&cR>0)?(iR/cR*100):null;const mg=(gR&&gR!==0)?pf/gR*100:null;
   var _fb=function(cls,lab,val,sub){return '<div class="fbox '+cls+'"><div class="bl">'+lab+'</div><div class="bv">'+(val==null?'—':fmt(val))+'</div>'+(sub||'')+'</div>';};
   h+='<div class="fpairs">';
@@ -12733,6 +12815,13 @@ function projDetailHTML(code){
   return h;
 }
 function renderProj(code){var _s=projDetailHTML(code);if(!_s){renderMatrix();return;}panel.innerHTML=_s;hint.textContent='';}
+panel.addEventListener('click',function(e){
+  var t=(e.target&&e.target.closest)?e.target.closest('.ftile-clk[data-bpdrill]'):null; if(!t)return;
+  var parts=(t.getAttribute('data-bpdrill')||'').split('|'); if(parts.length!==2)return;
+  var code=curProj; if(!code||code==='__ALL__')return;
+  var shown=null; try{ var tv=t.querySelector('.tv'); if(tv)shown=parseFloat((tv.textContent||'').replace(/[^0-9.\-]/g,'')); }catch(_e){}
+  _bpYearDrill(code,parts[0],parts[1],(isFinite(shown)?shown:null));
+});
 function view(){if(curProj==='__ALL__')renderMatrix();else renderProj(curProj);}
 
 /* ============================================================================
@@ -28246,7 +28335,7 @@ function ensureUI(){
   +'<div class="wpb-src" id="wpbSrc"><span class="dot"></span><span>Connecting to General Ledger…</span></div>'
   +'<div class="wpb-ctl">'
   +'  <div class="wpb-row">'
-  +'    <div class="wpb-f grow"><label>Account code / name</label><input type="text" id="wpbAcct" list="wpbList" autocomplete="off" placeholder="Type a code e.g. 2140003 or an account name…" disabled><datalist id="wpbList"></datalist></div>'
+  +'    <div class="wpb-f grow wpb-acwrap"><label>Account code / name</label><input type="text" id="wpbAcct" autocomplete="off" spellcheck="false" placeholder="Type a code e.g. 2140003 or an account name…" disabled><div class="wpb-ac" id="wpbAc" hidden></div></div>'
   +'    <div class="wpb-f"><label>Cut-off date</label><input type="date" id="wpbCut" disabled></div>'
   +'    <div class="wpb-f"><button class="wpb-go" id="wpbRun" disabled><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Analyze</button></div>'
   +'  </div>'
@@ -28265,7 +28354,8 @@ function ensureUI(){
   +'</div>';
   // wire controls
   document.getElementById('wpbRun').addEventListener('click',wpbRun);
-  document.getElementById('wpbAcct').addEventListener('keydown',function(e){if(e.key==='Enter')wpbRun();});
+  document.getElementById('wpbAcct').addEventListener('keydown',function(e){if(_wpbAcKey(e))return;if(e.key==='Enter')wpbRun();});
+  _wpbAcBind();
   var ms=document.getElementById('wpbMethod');
   ms.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){ms.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');MATCH.method=b.dataset.m;if(CURRENT)wpbRun();});});
   document.getElementById('wpbScope').addEventListener('change',function(e){MATCH.scope=e.target.value;if(CURRENT)wpbRun();});
@@ -28299,15 +28389,74 @@ function buildAndFill(){
   var fn=(file&&file.name)?file.name:'GL';
   var nrows=(typeof GLROWS!=='undefined'&&GLROWS)?GLROWS.length:0;
   setSrc('<span class="dot"></span><span>Connected to <b>General Ledger</b> · file <b>'+esc(fn)+'</b> · '+nrows.toLocaleString('en-US')+' rows · '+ACCTS.size+' accounts <span style="color:var(--muted)">(auto-pulled · no re-upload needed)</span></span>');
-  // datalist (balance-sheet first)
-  var dl=document.getElementById('wpbList');dl.innerHTML='';
+  /* v12.6: the account picker is our own list, so it can follow the app's theme */
   var arr=Array.from(ACCTS.values()).sort(function(a,b){return a.code<b.code?-1:1;});
-  arr.forEach(function(a){var o=document.createElement('option');o.value=a.code+' — '+a.name+'  ['+(a.cls==='cumulative'?'BS':'P&L')+']';dl.appendChild(o);});
+  _WPB_OPTS=arr.map(function(a){return {code:a.code,name:a.name,bs:(a.cls==='cumulative'),
+    hay:(a.code+' '+a.name).toLowerCase()};});
   // default cut-off = latest date in GL (or 31 Dec of latest year)
   var maxD=null;ACCTS.forEach(function(a){a.txns.forEach(function(t){if(!maxD||t.date>maxD)maxD=t.date;});});
   var cut=document.getElementById('wpbCut');
   if(maxD && !cut.value){var ye=new Date(maxD.getFullYear(),11,31);cut.value=W.ymd(maxD>ye?maxD:ye<maxD?maxD:new Date(maxD.getFullYear(),11,31));cut.value=W.ymd(new Date(maxD.getFullYear(),11,31));}
   ['wpbAcct','wpbCut','wpbRun'].forEach(function(id){document.getElementById(id).disabled=false;});
+}
+/* ===== v12.6: themed account picker for Working Paper · Balance ===== */
+var _WPB_OPTS=[],_wpbAcIdx=-1;
+function _wpbAcEl(){return document.getElementById('wpbAc');}
+function _wpbAcHide(){var d=_wpbAcEl();if(d){d.hidden=true;d.innerHTML='';}_wpbAcIdx=-1;}
+function _wpbAcOpen(){
+  var inp=document.getElementById('wpbAcct'),d=_wpbAcEl();if(!inp||!d)return;
+  var q=(inp.value||'').trim().toLowerCase();
+  var hit=[];
+  for(var i=0;i<_WPB_OPTS.length&&hit.length<80;i++){var o=_WPB_OPTS[i];
+    if(!q||o.hay.indexOf(q)>=0)hit.push(o);}
+  if(!hit.length){ d.innerHTML='<div class="wpb-acnone">No account matches “'+esc(q)+'”</div>'; d.hidden=false; _wpbAcIdx=-1; return; }
+  var h='';
+  for(var j=0;j<hit.length;j++){var a=hit[j];
+    h+='<div class="wpb-acr'+(j===0?' on':'')+'" data-acc="'+esc(a.code)+'" role="option">'
+      +'<span class="wpb-accode">'+esc(a.code)+'</span>'
+      +'<span class="wpb-acname">'+esc(a.name)+'</span>'
+      +'<span class="wpb-accls '+(a.bs?'bs':'pl')+'">'+(a.bs?'BS':'P&amp;L')+'</span></div>';}
+  d.innerHTML=h;d.hidden=false;_wpbAcIdx=0;
+}
+function _wpbAcPick(code){
+  var o=null;for(var i=0;i<_WPB_OPTS.length;i++)if(_WPB_OPTS[i].code===code){o=_WPB_OPTS[i];break;}
+  if(!o)return;
+  var inp=document.getElementById('wpbAcct');
+  if(inp){inp.value=o.code+' — '+o.name+'  ['+(o.bs?'BS':'P&L')+']';inp.focus();}
+  _wpbAcHide();
+}
+function _wpbAcMove(step){
+  var d=_wpbAcEl();if(!d||d.hidden)return;
+  var rows=d.querySelectorAll('.wpb-acr');if(!rows.length)return;
+  if(_wpbAcIdx>=0&&rows[_wpbAcIdx])rows[_wpbAcIdx].classList.remove('on');
+  _wpbAcIdx=(_wpbAcIdx+step+rows.length)%rows.length;
+  rows[_wpbAcIdx].classList.add('on');
+  try{rows[_wpbAcIdx].scrollIntoView({block:'nearest'});}catch(e){}
+}
+/* returns true when the key belongs to the picker, so Enter does not run the analysis */
+function _wpbAcKey(e){
+  var d=_wpbAcEl();var open=!!(d&&!d.hidden);
+  if(e.key==='ArrowDown'){ if(!open)_wpbAcOpen(); else _wpbAcMove(1); e.preventDefault(); return true; }
+  if(e.key==='ArrowUp'){ if(open){_wpbAcMove(-1);e.preventDefault();return true;} return false; }
+  if(e.key==='Escape'){ if(open){_wpbAcHide();e.preventDefault();return true;} return false; }
+  if(e.key==='Enter'&&open){
+    var rows=d.querySelectorAll('.wpb-acr');
+    if(_wpbAcIdx>=0&&rows[_wpbAcIdx]){ _wpbAcPick(rows[_wpbAcIdx].getAttribute('data-acc')); e.preventDefault(); return true; }
+    _wpbAcHide(); return false;
+  }
+  return false;
+}
+function _wpbAcBind(){
+  var inp=document.getElementById('wpbAcct'),d=_wpbAcEl();if(!inp||!d||inp._acb)return;inp._acb=1;
+  inp.addEventListener('input',function(){_wpbAcOpen();});
+  inp.addEventListener('focus',function(){if((inp.value||'').trim()==='')_wpbAcOpen();});
+  d.addEventListener('mousedown',function(e){
+    var r=e.target&&e.target.closest?e.target.closest('.wpb-acr[data-acc]'):null;if(!r)return;
+    e.preventDefault();_wpbAcPick(r.getAttribute('data-acc'));});
+  document.addEventListener('mousedown',function(e){
+    if(!d||d.hidden)return;
+    if(e.target===inp||(e.target.closest&&e.target.closest('#wpbAc')))return;
+    _wpbAcHide();});
 }
 function esc(s){return (''+s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];});}
 
@@ -31530,5 +31679,105 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
   background:#FCFBF7!important;border:1px solid #EDE7D8!important;border-radius:10px!important;color:#667085!important;padding:10px 13px!important}
 #page-cb .cbnote b{color:#8A5E12!important}
 #page-cb .cbnote-ic{flex:none;font-size:13px;line-height:1.4}
+</style>
+<style id="bpDrillCss">
+/* v12.5: the year-tile drill — vouchers behind a figure, then the journal entry */
+#panel .ftile-clk{cursor:pointer;transition:.12s}
+#panel .ftile-clk:hover{border-color:#0E5C52;background:#F5FAF8;transform:translateY(-1px)}
+#panel .ftile-go{margin-left:5px;font-weight:800;color:#0E5C52;opacity:.5}
+#panel .ftile-clk:hover .ftile-go{opacity:1}
+.bpd-ov{position:fixed;inset:0;background:rgba(12,28,24,.5);z-index:100000;display:flex;align-items:flex-start;
+  justify-content:center;padding:44px 16px;overflow:auto}
+.bpd-card{background:#fff;border-radius:14px;max-width:940px;width:100%;box-shadow:0 16px 48px rgba(0,0,0,.32);overflow:hidden;
+  font-family:Inter,'Noto Sans Thai',sans-serif}
+.bpd-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:13px 17px;background:#0F3D37;color:#fff}
+.bpd-t{font-size:14px;font-weight:700}
+.bpd-sub{font-size:11px;color:rgba(255,255,255,.72);margin-top:3px}
+.bpd-sub b{color:#fff}
+.bpd-x{border:none;background:rgba(255,255,255,.18);color:#fff;width:28px;height:28px;border-radius:8px;cursor:pointer;
+  font-size:13px;font-weight:700;line-height:1;flex:none}
+.bpd-x:hover{background:rgba(255,255,255,.34)}
+.bpd-summ{display:flex;flex-wrap:wrap;gap:6px;padding:10px 17px;background:#F7F9FA;border-bottom:1px solid #E7EBF3}
+.bpd-chip{font-size:11px;font-weight:600;color:#667085;background:#fff;border:1px solid #E7EBF3;border-radius:999px;padding:3px 11px}
+.bpd-chip b{color:#101828;font-weight:800;margin-left:4px}
+.bpd-chip.sum{background:#E7F4EF;border-color:#9FCCC0;color:#0E5C52}
+.bpd-chip.sum b{color:#0E5C52}
+.bpd-chip.warn{background:#FBF4DC;border-color:#D8BE7E;color:#8A5E12}
+.bpd-tblwrap{max-height:56vh;overflow:auto}
+.bpd-tbl{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+.bpd-tbl thead th{position:sticky;top:0;z-index:2;background:#0F3D37;color:#fff;font-weight:600;font-size:10.5px;
+  text-align:left;padding:8px 10px;border-right:1px solid rgba(255,255,255,.12);white-space:nowrap}
+.bpd-tbl thead th:last-child{border-right:0}
+.bpd-tbl th.r,.bpd-tbl td.r{text-align:right}.bpd-tbl th.c,.bpd-tbl td.c{text-align:center}
+.bpd-tbl tbody td{padding:6px 10px;border-bottom:1px solid #F0F2F5}
+.bpd-tbl tbody tr.bpd-vr{cursor:pointer}
+.bpd-tbl tbody tr.bpd-vr:hover td{background:rgba(14,92,82,.05)}
+.bpd-tbl tbody tr.bpd-vr.open td{background:#EDF6F3}
+.bpd-vlink{color:#1D5FAE;font-weight:700;border-bottom:1px dashed rgba(29,95,174,.45)}
+.bpd-tbl td.pos{color:#15803D;font-weight:700}.bpd-tbl td.neg{color:#B42318;font-weight:700}
+.bpd-tbl tfoot td{background:#F7F9FA;font-weight:700;padding:8px 10px;border-top:1px solid #E7EBF3;position:sticky;bottom:0}
+.bpd-jn td{background:#FBFCFD!important;padding:0!important}
+.bpd-jnbox{padding:9px 12px 12px}
+.bpd-jnlab{font-size:10.5px;font-weight:800;color:#0E5C52;background:#E7F4EF;border-radius:999px;
+  padding:2px 10px;display:inline-block;margin-bottom:6px}
+.bpd-jnbox table{width:100%;border-collapse:collapse;font-size:11.5px}
+.bpd-jnbox table th{background:#EEF2F6;color:#475467;font-weight:700;font-size:10px;text-align:left;padding:4px 8px}
+.bpd-jnbox table td{padding:3px 8px;border-bottom:1px solid #F0F2F5}
+.bpd-jnbox table .n{text-align:right;font-variant-numeric:tabular-nums}
+.bpd-jnbox table tfoot .tot td{background:#F3F7F5;font-weight:800;border-top:1px solid #E7EBF3}
+.bpd-jnbox table tfoot .bal.ok td{background:#E7F6EC;color:#15803D;font-weight:700;font-size:10px;text-align:right}
+.bpd-jnbox table tfoot .bal.bad td{background:#FDECEA;color:#B42318;font-weight:700;font-size:10px;text-align:right}
+.bpd-jnbox .apvj-nojn{font-size:11px;color:#98A2B3;padding:6px 2px}
+.bpd-empty{padding:26px 16px;text-align:center;color:#98A2B3;font-size:12px}
+.bpd-ft{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 17px;
+  background:#F7F9FA;border-top:1px solid #E7EBF3}
+.bpd-note{font-size:11px;color:#667085}
+.bpd-close{font:inherit;font-size:11.5px;font-weight:700;border:1px solid #E7EBF3;background:#fff;color:#475467;
+  border-radius:8px;padding:6px 14px;cursor:pointer}
+.bpd-close:hover{border-color:#0E5C52;color:#0F3D37}
+</style>
+<style id="wpbAcCss">
+/* v12.6: the account picker in the app's own theme (a native datalist cannot be styled) */
+#page-wpb .wpb-acwrap{position:relative}
+#page-wpb .wpb-ac{position:absolute;left:0;right:0;top:100%;margin-top:5px;z-index:60;
+  background:#fff;border:1px solid #E7EBF3;border-radius:12px;box-shadow:0 14px 34px -12px rgba(16,24,40,.28),0 2px 6px rgba(16,24,40,.06);
+  max-height:330px;overflow:auto;padding:5px}
+#page-wpb .wpb-acr{display:flex;align-items:center;gap:9px;padding:6px 9px;border-radius:8px;cursor:pointer;
+  font-size:12px;line-height:1.35;color:#344054}
+#page-wpb .wpb-acr:hover{background:#F5FAF8}
+#page-wpb .wpb-acr.on{background:#EDF6F3;box-shadow:inset 0 0 0 1px #9FCCC0}
+#page-wpb .wpb-accode{flex:none;min-width:62px;font-weight:800;color:#0E5C52;font-variant-numeric:tabular-nums}
+#page-wpb .wpb-acname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#344054}
+#page-wpb .wpb-accls{flex:none;font-size:9px;font-weight:800;letter-spacing:.04em;border-radius:999px;padding:2px 8px}
+#page-wpb .wpb-accls.bs{background:#E8F1FC;color:#1D5FAE}
+#page-wpb .wpb-accls.pl{background:#FBF4DC;color:#8A5E12}
+#page-wpb .wpb-acnone{padding:14px 10px;text-align:center;font-size:11.5px;color:#98A2B3}
+</style>
+<style id="thCenterAll">
+/* v12.7: every data-table column heading is centred in its column, in every module.
+   Body cells keep their own alignment (amounts right, text left) — only the heading
+   moves. Last block in the document -> wins the cascade. */
+.page table thead th,
+.page table thead th.l,.page table thead th.r,.page table thead th.c,
+.page table thead th.n,.page table thead th.num,.page table thead th.ra{
+  text-align:center!important}
+/* headings that lay their label and controls out with flex need centring too */
+.page table thead th>.glth,
+.page table thead th>.fstbh,
+.page table thead th>.pgth,
+.page table thead th>.wrth,
+.page table thead th>div,
+.page table thead th>span{justify-content:center!important}
+/* a two-line heading (label over sub-label) centres both lines */
+.page table thead th small,
+.page table thead th .thsub,
+.page table thead th .pgth span,
+.page table thead th .pgprogh-s{text-align:center!important;display:block}
+/* the Database heading keeps its filter button beside the centred label */
+#page-gl table thead th>.glth{gap:6px}
+/* the drag handle stays pinned to the column edge */
+.page table thead th .glrz,.page table thead th .pgrz,
+.page table thead th .fstbrsz,.page table thead th .apjv-rsz,
+.page table thead th .advrsz{justify-content:flex-start!important}
 </style>
 </body></html>
