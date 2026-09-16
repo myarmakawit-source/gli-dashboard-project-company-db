@@ -8457,12 +8457,14 @@ function renderTracking(){
   var cnt={},over=0,_dk=_tkDoneKey();TK_STAT.forEach(function(s){cnt[s[0]]=0;});
   view.forEach(function(t){var st=t.status||TK_STAT[0][0];cnt[st]=(cnt[st]||0)+1;var d=_tkDue(t);if(d&&d.cls.indexOf('over')>=0)over++;});
   var h='<div class="tkwrap">';
-  h+='<div class="tkhd"><div class="tktitle"><span class="tkic">🗂️</span> Tracking <span class="tksub">Track team tasks · Kanban + List</span></div><div class="tkhdr"><button class="tkbtn primary" id="tkAdd" type="button">+ Add Task</button></div></div>';
+  /* v13.0: the board header (title + the “+ Add Task” button) is removed by request —
+     the dashed frame inside each step is the only way to add a task, and the board
+     now starts straight under the module hero. */
   /* v11.5: the filter / search / counter bar is hidden by request — the board shows every task.
      Its state is reset below so nothing can stay silently filtered out with no control to clear it. */
   _tkView='kanban';_tkQ='';_tkFA='';_tkFP='';_tkFC='';_tkFD='';
   if(_tkDocPanel)h+=_tkDocPanelHTML();
-  if(!_openN){h+='<div class="tkempty"><div class="tkemptyic">'+(_doneN?'✅':'🗂️')+'</div><div class="tkemptyt">'+(_doneN?'Nothing left on the board':'No tasks yet')+'</div><div class="tkemptys">'+(_doneN?('All '+_doneN+' task(s) are done — see them on the “Completed report” page'):'Click “+ Add Task” to add your first task')+'</div></div>';}
+  if(!_openN){h+='<div class="tkempty"><div class="tkemptyic">'+(_doneN?'✅':'🗂️')+'</div><div class="tkemptyt">'+(_doneN?'Nothing left on the board':'No tasks yet')+'</div><div class="tkemptys">'+(_doneN?('All '+_doneN+' task(s) are done — see them on the “Completed report” page'):'Click the dashed “Add task” frame inside a step to add your first task')+'</div></div>';}
   else if(_tkView==='kanban'){h+=_tkKanban(view);}
   else{h+=_tkList(view);}
   h+='</div>'+_tkModalHTML();
@@ -11475,18 +11477,48 @@ function _bblRenderLoan(lk){
     _bblKpi('Principal Paid','',_bblFmt(t.prinPaid),'var(--bbl-pos)','var(--bbl-pos-bg)','','✅')+
     _bblKpi('Interest Paid','',_bblFmt(t.intPaid),'var(--bbl-gold-d,#8A5E12)','var(--bbl-gold-t)','','💰')+
     _bblKpi('Instalments','paid / total',''+t.nPaid,'#6A34C4','#EFEBFB','/ '+t.nInst,'📅'));
+  /* v13.0: pastel field tiles — one icon and one hue per field, so the GL setup
+     and the contract terms read like the KPI row above them. */
+  var _BBLSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">';
+  var _BBLIC={
+    bank:'<path d="M3 21h18"/><path d="M5 21V10M9.5 21V10M14.5 21V10M19 21V10"/><path d="M12 3 21 8H3z"/>',
+    pct:'<path d="M19 5 5 19"/><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/>',
+    tag:'<path d="M3 8a2 2 0 0 1 2-2h4l2 2.4h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    calc:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7h7"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/>',
+    doc:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 13h7M8.5 17h4"/>',
+    wallet:'<path d="M3 7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"/><rect x="3" y="7" width="18" height="12" rx="2"/><circle cx="17" cy="13" r="1.3"/>',
+    coins:'<ellipse cx="12" cy="6.5" rx="7" ry="3"/><path d="M5 6.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/><path d="M5 11.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/>',
+    list:'<path d="M8 6h12M8 12h12M8 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
+    cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    flag:'<path d="M5 21V4"/><path d="M5 4h11l-1.6 3.6L16 11H5z"/>'
+  };
   /* GL setup (only editable part) */
   var _ro=_bblEditOpen?'':' readonly';
-  function gfld(lbl,f,val,ph){ return '<div class="bblfld"><label>'+lbl+'</label><input class="bblin bblcode'+(_bblEditOpen?'':' locked')+'" data-lk="'+lk+'" data-meta="'+f+'" value="'+_bblEsc(val)+'" placeholder="'+(ph||'')+'" spellcheck="false" autocomplete="off"'+_ro+'></div>'; }
+  function gfld(lbl,f,val,ph,ic,cc){ return '<div class="bblfld bblfld-p" style="--bf-b:'+cc[0]+';--bf-c:'+cc[1]+'">'
+      +'<label><span class="bblfic">'+_BBLSVG+ic+'</svg></span>'+lbl+'</label>'
+      +'<input class="bblin bblcode'+(_bblEditOpen?'':' locked')+'" data-lk="'+lk+'" data-meta="'+f+'" value="'+_bblEsc(val)+'" placeholder="'+(ph||'')+'" spellcheck="false" autocomplete="off"'+_ro+'></div>'; }
   var glmsg=L._glMsg?('<div class="bblglmsg'+(/^✅/.test(L._glMsg)?' ok':(/^⚠/.test(L._glMsg)?' bad':''))+'">'+_bblEsc(L._glMsg)+'</div>'):'';
   var glcard='<div class="bblcard bblglcard"><div class="bblcard-h"><div class="bblcard-t"><span class="bblic bblic-gl">⚙️</span>GL data source <span class="bblchip bblchip-gl">Database GL</span><span class="bblchip '+(_bblEditOpen?'bblchip-edit':'bblchip-lock')+'">'+(_bblEditOpen?'\u270e Editing':'\ud83d\udd12 Read-only')+'</span></div></div>'+
-    '<div class="bblctr">'+ gfld('Loan / Principal A/C code','glPrinCode',mt.glPrinCode,'e.g. 2220400')+ gfld('Interest Expense A/C code','glIntCode',mt.glIntCode,'e.g. 7100200')+ gfld('Project (Ref.) code','glProj',mt.glProj,'e.g. '+mt.proj)+
-      '<div class="bblfld"><label>Calc. Interest Rate (%/yr)</label><input class="bblin bblnum bblrate'+(_bblEditOpen?'':' locked')+'" data-lk="'+lk+'" data-meta="rate" value="'+_bblEsc(mt.rate)+'" spellcheck="false" autocomplete="off"'+_ro+'></div>'+
+    '<div class="bblctr">'
+      + gfld('Loan / Principal A/C code','glPrinCode',mt.glPrinCode,'e.g. 2220400',_BBLIC.bank,['#E7F4EF','#0E7A6C'])
+      + gfld('Interest Expense A/C code','glIntCode',mt.glIntCode,'e.g. 7100200',_BBLIC.pct,['#FCF1E4','#B4622A'])
+      + gfld('Project (Ref.) code','glProj',mt.glProj,'e.g. '+mt.proj,_BBLIC.tag,['#E8F1FC','#1D5FAE'])
+      + '<div class="bblfld bblfld-p" style="--bf-b:#EFEBFB;--bf-c:#6A34C4"><label><span class="bblfic">'+_BBLSVG+_BBLIC.calc+'</svg></span>Calc. Interest Rate (%/yr)</label><input class="bblin bblnum bblrate'+(_bblEditOpen?'':' locked')+'" data-lk="'+lk+'" data-meta="rate" value="'+_bblEsc(mt.rate)+'" spellcheck="false" autocomplete="off"'+_ro+'></div>'+
     '</div></div>';
   /* contract (read-only) */
-  function dfld(lbl,val){ return '<div class="bblfld"><label>'+lbl+'</label><div class="bblfval">'+_bblEsc(val)+'</div></div>'; }
+  function dfld(lbl,val,ic,cc){ return '<div class="bblfld bblfld-p" style="--bf-b:'+cc[0]+';--bf-c:'+cc[1]+'">'
+      +'<label><span class="bblfic">'+_BBLSVG+ic+'</svg></span>'+lbl+'</label>'
+      +'<div class="bblfval">'+_bblEsc(val)+'</div></div>'; }
   var ctr='<div class="bblcard"><div class="bblcard-h"><div class="bblcard-t"><span class="bblic bblic-ctr">'+mt.emoji+'</span>'+_bblEsc(mt.name)+' <span class="bblchip">'+_bblEsc(mt.contract)+'</span></div></div>'+
-    '<div class="bblctr">'+ dfld('Contract No.',mt.contract)+ dfld('Interest Rate',mt.rateNote)+ dfld('Credit Facility (THB)',_bblFmt(mt.facility))+ dfld('Instalment 1–'+((+mt.nInst||54)-1),_bblFmt(mt.inst))+ dfld('No. of Instalments',mt.nInst)+ dfld('First Instalment (month)',mt.firstM)+ dfld('Maturity (months)',mt.termM)+'</div></div>';
+    '<div class="bblctr">'
+      + dfld('Contract No.',mt.contract,_BBLIC.doc,['#E8F1FC','#1D5FAE'])
+      + dfld('Interest Rate',mt.rateNote,_BBLIC.pct,['#FCF1E4','#B4622A'])
+      + dfld('Credit Facility (THB)',_bblFmt(mt.facility),_BBLIC.wallet,['#E7F4EF','#0E7A6C'])
+      + dfld('Instalment 1–'+((+mt.nInst||54)-1),_bblFmt(mt.inst),_BBLIC.coins,['#FBF4DC','#8A5E12'])
+      + dfld('No. of Instalments',mt.nInst,_BBLIC.list,['#EFEBFB','#6A34C4'])
+      + dfld('First Instalment (month)',mt.firstM,_BBLIC.cal,['#E4F4F8','#0E7490'])
+      + dfld('Maturity (months)',mt.termM,_BBLIC.flag,['#FCEDF1','#B03A5B'])
+      +'</div></div>';
   /* grace (read-only) */
   var graceRows=''; (L.grace||[]).forEach(function(g,i){ graceRows+='<tr><td class="bblseq c">'+(i+1)+'</td><td class="l">'+_bblEsc(g.date)+'</td><td class="l bblvchcell">'+_bblVchLink(g.voucher)+'</td><td>'+_bblFmt(g.interest,true)+'</td></tr>'; });
   var grace=(L.grace&&L.grace.length)?('<div class="bblcard bblgrace'+(st.showgrace?'':' collapsed')+'"><div class="bblcard-h"><div class="bblcard-t"><span class="bblic bblic-grc">💤</span>Interest before principal repayment <span class="bblchip bblchip-grc">Grace period · total '+_bblFmt(c.graceInt)+'</span></div></div>'+
@@ -12327,7 +12359,7 @@ function renderWhtReg(){
   h+='<div class="wraddwrap">';
   if(_wAddOpen)h+=_regAddFormHTML();
   h+='</div>';
-  h+='<div class="wrtblwrap"><table class="wrtbl"><thead><tr><th>#</th><th>Date</th><th>Doc No (50 bis)</th><th>Voucher</th><th>Payee</th><th>Income type</th><th>Description</th><th>Form</th><th class="num">Amount</th><th class="num">Rate</th><th class="num">Tax</th><th class="num pnh" title="Surcharge 1.5% per month (Revenue Code s.27) — a part month counts as a full month, capped at the tax withheld">Surcharge<br><span class="thsub">s.27 · 1.5%/mo</span></th><th class="num pnh" title="Criminal fine (Revenue Code s.35) — a late normal filing is THB 200 per form">Fine<br><span class="thsub">s.35</span></th><th>Cond.</th><th>Filing</th><th></th><th></th></tr></thead><tbody>';
+  h+='<div class="wrtblwrap"><table class="wrtbl"><thead><tr><th>#</th><th>Date</th><th>Doc No (50 bis)</th><th>Voucher</th><th>Payee</th><th>Income type</th><th>Description</th><th>Form</th><th class="num">Amount</th><th class="num">Rate</th><th class="num">Tax</th><th class="num pnh" title="Surcharge 1.5% per month (Revenue Code s.27) — a part month counts as a full month, capped at the tax withheld">Surcharge<br><span class="thsub">s.27 · 1.5%/mo</span></th><th class="num pnh" title="Criminal fine (Revenue Code s.35) — a late normal filing is THB 200 per form">Fine<br><span class="thsub">s.35</span></th><th>Cond.</th><th>Filing</th><th class="c" title="Issue the 50 bis withholding certificate for this entry">Certificate<br><span class="thsub">50 bis</span></th><th class="c" title="Delete the entry \u2014 locked once the form is filed">Delete<br><span class="thsub">row</span></th></tr></thead><tbody>';
   if(!rows.length)h+='<tr><td colspan="17" class="wrnone">No entries match the filter — add an entry or change year / month / form</td></tr>';
   rows.forEach(function(t,i){var co=WHTCO.find(function(c){return c.id===t.coId;});
     h+='<tr><td>'+(i+1)+'</td><td>'+_d(t.date)+'</td><td class="dn">'+esc(t.docno||'-')+'</td><td class="ed"><input class="wtxin wtx-vch" data-txid="'+t.id+'" value="'+_eatt(t.vch||'')+'" placeholder="—"'+(t.fs?' readonly':'')+'></td><td>'+esc(co?co.name:'(deleted)')+'</td>'+_whtIncCell(t)+'<td class="ed"><input class="wtxin wtx-desc" data-txid="'+t.id+'" value="'+_eatt(t.desc||'')+'" placeholder="—"'+(t.fs?' readonly':'')+'></td><td class="pn">'+esc(t.pnd)+'</td><td class="num">'+fmt(t.base)+'</td><td class="num">'+(+t.rate)+'%</td><td class="num">'+fmt(t.tax)+'</td>'+'<td class="num pen" title="'+((_whtSur(t))?('Surcharge '+_whtSurM(t)+' month(s) × 1.5%'):'')+'">'+((_whtSur(t))?fmt(_whtSur(t)):'<span class="pendash">—</span>')+'</td><td class="num pen">'+((_whtFine(t))?fmt(_whtFine(t)):'<span class="pendash">—</span>')+'</td>'+'<td class="cnd">'+_cond(t.cond)+'</td>'+'<td class="fil">'+((t.ft==='a')?'<button class="wtxft a" data-txid="'+t.id+'" type="button" title="Click to cycle: normal → normal (late) → additional #1 → additional #2">Add. #'+(t.fr||1)+'</button>':(t.ft==='l')?'<button class="wtxft l" data-txid="'+t.id+'" type="button" title="Click to cycle: normal → normal (late) → additional #1 → additional #2">Normal (late)</button>':'<button class="wtxft" data-txid="'+t.id+'" type="button" title="Click to cycle: normal → normal (late) → additional #1 → additional #2">Normal</button>')+(t.fs?'<button class="wtxfs on" data-txid="'+t.id+'" type="button" title="Click to toggle filed / not filed">✓ Filed</button>':'<button class="wtxfs" data-txid="'+t.id+'" type="button" title="Click to toggle filed / not filed">Not filed</button>')+(((t.ft==='l')||(t.ft==='a'))?'<input type="date" class="wtxin wtx-fd" data-txid="'+t.id+'" value="'+_eatt(t.fd||'')+'" title="e-Filing submission date — used to compute the surcharge"'+(t.fs?' readonly':'')+'>':'')+'</td>'+'<td class="x"><button class="wht50" data-coid="'+t.coId+'" data-pnd="'+t.pnd+'" data-ym="'+(''+t.date).slice(0,7)+'" type="button" title="Issue 50 bis certificate">50 bis</button></td><td class="x">'+(t.fs?'<span class="wtxlock" title="Filed — cannot be deleted">🔒</span>':'<button class="wtxdel" data-txid="'+t.id+'" type="button" title="Delete">✕</button>')+'</td></tr>';});
@@ -29508,13 +29540,13 @@ try{ window.loadExcelJS=loadExcelJS; window.CLR=CLR; window.exportExcel=exportEx
   function _shFiles(id){ try{ return (DOCFILES[SCO] && DOCFILES[SCO][id]) || []; }catch(e){ return []; } }
 
   function _shAdd(){
-    var list=_shList(); var s={id:_uid(), name:'ชั้นวางใหม่'}; list.push(s);
+    var list=_shList(); var s={id:_uid(), name:'New shelf'}; list.push(s);
     if(!DOCFILES[SCO][s.id]) DOCFILES[SCO][s.id]=[];
     _shSave(); renderDocShelf();
     setTimeout(function(){ var inp=document.querySelector('.shName[data-sh="'+s.id+'"]'); if(inp){ inp.focus(); inp.select(); } },30);
   }
   function _shRename(id,name){
-    var list=_shList(); for(var i=0;i<list.length;i++){ if(list[i].id===id){ list[i].name=(name||'').replace(/\s+/g,' ').trim()||'ชั้นวาง'; break; } }
+    var list=_shList(); for(var i=0;i<list.length;i++){ if(list[i].id===id){ list[i].name=(name||'').replace(/\s+/g,' ').trim()||'Shelf'; break; } }
     _shSave();
   }
   function _shDel(id){
@@ -29523,33 +29555,74 @@ try{ window.loadExcelJS=loadExcelJS; window.CLR=CLR; window.exportExcel=exportEx
       if(DOCFILES[SCO]) try{ delete DOCFILES[SCO][id]; }catch(e){}
       var list=_shList(); for(var i=0;i<list.length;i++){ if(list[i].id===id){ list.splice(i,1); break; } }
       _shSave(); renderDocShelf();
-      try{ if(typeof _mnToast==='function') _mnToast('ลบชั้นวางแล้ว ✓'); }catch(e){}
+      try{ if(typeof _mnToast==='function') _mnToast('Shelf deleted ✓'); }catch(e){}
     };
     var n=_shFiles(id).length;
-    var msg = n ? ('ลบชั้นวางนี้พร้อมไฟล์ '+n+' รายการ?') : 'ลบชั้นวางนี้?';
+    var msg = n ? ('Delete this shelf and its '+n+' file'+(n===1?'':'s')+'?') : 'Delete this shelf?';
     try{ if(typeof _uiConfirm==='function'){ _uiConfirm(msg, run); return; } }catch(e){}
     if(confirm(msg)) run();
   }
 
+  function _shAccent(i){
+    /* v13.0: one pastel accent per shelf, cycled — colour tells the shelves apart */
+    var P=[{b:'#E7F4EF',c:'#0E7A6C',l:'#9FCCC0'},
+           {b:'#E8F1FC',c:'#1D5FAE',l:'#A9C8EC'},
+           {b:'#EFEBFB',c:'#6A34C4',l:'#C0B0EC'},
+           {b:'#FBF4DC',c:'#8A5E12',l:'#DFCB92'},
+           {b:'#FCEDF1',c:'#B03A5B',l:'#EBB6C4'},
+           {b:'#FCF1E4',c:'#B4622A',l:'#E8C2A0'},
+           {b:'#E9F6EC',c:'#2F7D4F',l:'#ADD5BC'},
+           {b:'#E4F4F8',c:'#0E7490',l:'#A4D3E1'}];
+    return P[i%P.length];
+  }
+  var _SHSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">';
+  function _shShelfIcon(name){
+    /* the shelf icon follows the name, so a shelf is recognisable before it is read */
+    var n=(name||'').toLowerCase();
+    function has(){ for(var i=0;i<arguments.length;i++){ if(n.indexOf(arguments[i])>=0) return true; } return false; }
+    if(has('financial','statement','งบการเงิน','งบ'))   return '<path d="M3 3v18h18"/><path d="M8 16V9M13 16V5M18 16v-6"/>';
+    if(has('bank','confirm','ธนาคาร','ยืนยันยอด'))       return '<path d="M3 21h18"/><path d="M5 21V10M9.5 21V10M14.5 21V10M19 21V10"/><path d="M12 3 21 8H3z"/>';
+    if(has('audit','ตรวจสอบ','ผู้สอบ'))                  return '<path d="M12 3l7 2.6v5.2c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V5.6z"/><path d="M9 12l2 2 4-4"/>';
+    if(has('tax','vat','wht','ภาษี','สรรพากร'))          return '<path d="M6 3h12v18l-3-1.7-3 1.7-3-1.7L6 21z"/><path d="M9.5 8h5M9.5 12h5M9.5 16h3"/>';
+    if(has('contract','agreement','สัญญา'))              return '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 16.5c1.6-.6 2.4-2 3.2-3.4.6-1 1.3-2 2.3-2"/>';
+    if(has('support','other','อื่น','แนบ'))              return '<path d="M20.5 11.5 12 20a5 5 0 0 1-7-7l8-8a3.4 3.4 0 0 1 4.8 4.8l-8 8a1.8 1.8 0 0 1-2.6-2.6l7.3-7.3"/>';
+    if(has('invoice','receipt','ใบเสร็จ','ใบแจ้งหนี้'))  return '<path d="M5 3h14v18l-2.3-1.6L14.4 21 12 19.4 9.6 21l-2.3-1.6L5 21z"/><path d="M8.5 8h7M8.5 12h7"/>';
+    if(has('photo','image','รูป','ภาพ'))                 return '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.6"/><path d="m4 17 5-5 3.5 3.5L15 13l5 4"/>';
+    return '<path d="M3 8a2 2 0 0 1 2-2h4l2 2.4h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>';
+  }
+  var _SHTYPE={
+    pdf:{cls:'pdf',lab:'PDF',   g:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 17.5v-4h1.3a1.3 1.3 0 0 1 0 2.6H8.5"/><path d="M13 17.5v-4h1.1a2 2 0 0 1 0 4z"/>'},
+    xls:{cls:'xls',lab:'EXCEL', g:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8.6 13.5l5 5M13.6 13.5l-5 5"/>'},
+    doc:{cls:'doc',lab:'WORD',  g:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 12.5h7M8.5 15.5h7M8.5 18.5h4"/>'},
+    ppt:{cls:'ppt',lab:'SLIDES',g:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><circle cx="12" cy="15.5" r="2.6"/><path d="M12 12.9v2.6h2.6"/>'},
+    zip:{cls:'zip',lab:'ARCHIVE',g:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M10.6 3v2M12.6 5v2M10.6 7v2M12.6 9v2M10.6 11v2"/><rect x="10.2" y="14" width="3.4" height="4" rx="1"/>'},
+    img:{cls:'img',lab:'IMAGE', g:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.6"/><path d="m4 17 5-5 3.5 3.5L15 13l5 4"/>'},
+    txt:{cls:'txt',lab:'FILE',  g:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 13h7M8.5 16h7M8.5 19h4"/>'}
+  };
+  function _shKind(name){
+    var ext=((name||'').indexOf('.')>=0 ? name.split('.').pop() : '').toLowerCase();
+    var k='txt';
+    if(ext==='pdf')k='pdf';
+    else if(/^(xls|xlsx|xlsm|xlsb|csv)$/.test(ext))k='xls';
+    else if(/^(doc|docx|rtf)$/.test(ext))k='doc';
+    else if(/^(ppt|pptx)$/.test(ext))k='ppt';
+    else if(/^(zip|rar|7z|gz)$/.test(ext))k='zip';
+    else if(/^(png|jpg|jpeg|gif|webp|bmp|svg|heic)$/.test(ext))k='img';
+    return {k:k,ext:ext};
+  }
+
   function _shFileTile(id, f, i){
     var name=(f&&f.n)||'file';
-    var ext=(name.indexOf('.')>=0 ? name.split('.').pop() : '').toLowerCase();
-    var cls='txt', emo='📄';
-    if(ext==='pdf'){cls='pdf';emo='📕';}
-    else if(/^(xls|xlsx|xlsm|xlsb|csv)$/.test(ext)){cls='xls';emo='📗';}
-    else if(/^(doc|docx|rtf)$/.test(ext)){cls='doc';emo='📘';}
-    else if(/^(ppt|pptx)$/.test(ext)){cls='ppt';emo='📙';}
-    else if(/^(zip|rar|7z|gz)$/.test(ext)){cls='zip';emo='🗜️';}
-    else if(/^(png|jpg|jpeg|gif|webp|bmp|svg|heic)$/.test(ext)){cls='img';emo='🖼️';}
-    var inner=emo;
+    var kk=_shKind(name), T=_SHTYPE[kk.k], cls=T.cls, ext=kk.ext;
+    var inner=_SHSVG+T.g+'</svg>';
     try{ if(cls==='img' && typeof _fThumbSrc==='function'){ var t=_fThumbSrc(f); if(t) inner='<img src="'+t+'" alt="">'; } }catch(e){}
-    var extb = ext ? '<span class="shext">'+_esc(ext.toUpperCase().slice(0,4))+'</span>' : '';
+    var extb = '<span class="shext">'+_esc((ext?ext.toUpperCase().slice(0,4):T.lab))+'</span>';
     var canV=false; try{ canV=(typeof _fCanView==='function')?_fCanView(f):false; }catch(e){}
     var open = canV ? 'v' : 'd';
     var acts='<span class="dfacts">'
-      + (canV?'<button class="dfb" type="button" title="ดู" data-act="v" data-co="'+SCO+'" data-cat="'+id+'" data-i="'+i+'">👁</button>':'')
-      + '<button class="dfb" type="button" title="ดาวน์โหลด" data-act="d" data-co="'+SCO+'" data-cat="'+id+'" data-i="'+i+'">⬇</button>'
-      + '<button class="dfb rem" type="button" title="ลบ" data-act="r" data-co="'+SCO+'" data-cat="'+id+'" data-i="'+i+'">✕</button>'
+      + (canV?'<button class="dfb view" type="button" title="View" data-act="v" data-co="'+SCO+'" data-cat="'+id+'" data-i="'+i+'">👁</button>':'')
+      + '<button class="dfb down" type="button" title="Download" data-act="d" data-co="'+SCO+'" data-cat="'+id+'" data-i="'+i+'">⬇</button>'
+      + '<button class="dfb rem" type="button" title="Remove" data-act="r" data-co="'+SCO+'" data-cat="'+id+'" data-i="'+i+'">✕</button>'
       + '</span>';
     return '<div class="shtile">'
       + '<div class="shsq '+cls+'" role="button" title="'+_esc(name)+'" data-act="'+open+'" data-co="'+SCO+'" data-cat="'+id+'" data-i="'+i+'">'+inner+extb+'</div>'
@@ -29558,32 +29631,49 @@ try{ window.loadExcelJS=loadExcelJS; window.CLR=CLR; window.exportExcel=exportEx
       + '</div>';
   }
 
+  function _shStatHTML(list){
+    /* a coloured count per file type — the vault at a glance */
+    var n={pdf:0,xls:0,doc:0,ppt:0,zip:0,img:0,txt:0};
+    list.forEach(function(s){ _shFiles(s.id).forEach(function(f){ n[_shKind((f&&f.n)||'').k]++; }); });
+    var ORD=['pdf','xls','doc','img','ppt','zip','txt'], h='';
+    ORD.forEach(function(k){ if(!n[k])return; var T=_SHTYPE[k];
+      h+='<span class="shstat sh-'+T.cls+'"><span class="shstat-i">'+_SHSVG+T.g+'</svg></span>'
+       +  '<b>'+n[k]+'</b><i>'+T.lab+'</i></span>'; });
+    return h?('<div class="shstats">'+h+'</div>'):'';
+  }
+
   function renderDocShelf(){
     var w=document.getElementById('docWrap'); if(!w) return;
     var list=_shList();
     var total=0; list.forEach(function(s){ total += _shFiles(s.id).length; });
-    var html='<div class="shbar"><div class="shbar-t">🗄️ ชั้นวางเอกสาร <span class="shbar-c">'+total+' ไฟล์ · '+list.length+' ชั้น</span></div>'
-           + '<button class="shAddBtn" type="button">＋ เพิ่มชั้นวาง</button></div>';
-    if(!list.length){ html+='<div class="shempty">ยังไม่มีชั้นวาง — กด “＋ เพิ่มชั้นวาง” เพื่อเริ่ม</div>'; }
-    list.forEach(function(s){
+    var html='<div class="shbar">'
+           + '<div class="shbar-t"><span class="shbar-ic">'+_SHSVG+'<path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3H3z"/><path d="M3 10h18v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M10 14h4"/></svg></span>'
+           +   '<span class="shbar-tx">Document shelves'
+           +     '<em>'+total+' file'+(total===1?'':'s')+' across '+list.length+' '+(list.length===1?'shelf':'shelves')+'</em></span></div>'
+           + _shStatHTML(list)
+           + '<button class="shAddBtn" type="button">'+_SHSVG+'<path d="M12 5v14M5 12h14"/></svg> New shelf</button></div>';
+    if(!list.length){ html+='<div class="shempty">No shelves yet — press “New shelf” to start</div>'; }
+    list.forEach(function(s,si){
+      var A=_shAccent(si);
       var files=_shFiles(s.id), tiles='';
       files.forEach(function(f,i){ tiles+=_shFileTile(s.id,f,i); });
-      tiles+='<label class="shadd" title="ลากไฟล์มาวาง หรือกดเพื่อเพิ่ม">'
-           + '<span class="shaddsq"><span class="shaddic">＋</span><span class="shaddtx">เพิ่มไฟล์</span></span>'
+      tiles+='<label class="shadd" title="Drop files here, or click to add">'
+           + '<span class="shaddsq"><span class="shaddic">'+_SHSVG+'<path d="M12 5v14M5 12h14"/></svg></span>'
+           + '<span class="shaddtx">Add files</span></span>'
            + '<input type="file" multiple data-co="'+SCO+'" data-cat="'+s.id+'"></label>';
-      html+='<div class="shelf">'
+      html+='<div class="shelf" style="--sh-b:'+A.b+';--sh-c:'+A.c+';--sh-l:'+A.l+'">'
           + '<div class="shelf-hd">'
-          +   '<span class="shtag"><span class="shdot"></span>'
+          +   '<span class="shtag"><span class="shdot">'+_SHSVG+_shShelfIcon(s.name)+'</svg></span>'
           +     '<input class="shName" data-sh="'+s.id+'" value="'+_esc(s.name)+'" spellcheck="false" maxlength="60">'
-          +     '<span class="shedit">✎ คลิกเพื่อแก้ชื่อ</span></span>'
-          +   '<span class="shcount">'+files.length+' ไฟล์</span>'
-          +   '<button class="shDel" type="button" data-sh="'+s.id+'" title="ลบชั้นวาง">🗑</button>'
+          +     '<span class="shedit">Click to rename</span></span>'
+          +   '<span class="shcount">'+files.length+' file'+(files.length===1?'':'s')+'</span>'
+          +   '<button class="shDel" type="button" data-sh="'+s.id+'" title="Delete shelf">🗑</button>'
           + '</div>'
           + '<div class="shelf-body dmcell" data-co="'+SCO+'" data-cat="'+s.id+'">'+tiles+'</div>'
           + '</div>';
     });
     w.innerHTML=html;
-    try{ var hint=document.querySelector('#page-cfb .mnhint'); if(hint) hint.innerHTML='จัดเก็บเอกสารแบบ <b>ชั้นวาง</b> — สร้างและตั้งชื่อชั้นเองได้ · <b>ลากไฟล์</b> ลงชั้น หรือกดปุ่มเพิ่ม · ไฟล์ถูกฝังและ <b>ซิงก์ทุกอุปกรณ์</b> อัตโนมัติ · คลิกไฟล์เพื่อดู/ดาวน์โหลด'; var mhs=document.querySelector('#modHero .mh-s'); var _cfbOn=false;try{_cfbOn=(localStorage.getItem('gli_module')==='cfb');}catch(_e){} if(mhs&&_cfbOn) mhs.textContent='Document shelves you name yourself · drag & drop or click to add files · embedded and synced across every device'; }catch(e){}
+    try{ var hint=document.querySelector('#page-cfb .mnhint'); if(hint) hint.innerHTML='Shelf-style storage — create and name your own shelves · <b>drag files</b> onto a shelf or press Add files · every file is embedded and <b>synced across all devices</b> automatically · click a file to view or download'; var mhs=document.querySelector('#modHero .mh-s'); var _cfbOn=false;try{_cfbOn=(localStorage.getItem('gli_module')==='cfb');}catch(_e){} if(mhs&&_cfbOn) mhs.textContent='Document shelves you name yourself · drag & drop or click to add files · embedded and synced across every device'; }catch(e){}
     try{ if(typeof _docBindOnce==='function') _docBindOnce(); }catch(e){}
     _shBindOnce();
   }
@@ -31910,5 +32000,136 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 .modnav.sidebar .modtab[data-mod="sec"] .sbic,
 .modnav.sidebar .modtab[data-mod="sec"].active .sbic,
 .modnav.sidebar .modtab[data-mod="sec"]:hover .sbic{color:#FCD34D!important}/* Security */
+</style>
+<style id="vaultColourCss">
+/* v13.0: Document Vault — colour and icons carry the structure.
+   Each shelf gets its own pastel accent (set inline as --sh-b/--sh-c/--sh-l),
+   file tiles are line icons on a tinted square, and the tiles sit on a grid so
+   every row lines up. Last block in the document -> wins the cascade. */
+
+/* ---------- top bar: title tile + per-type counts + New shelf ---------- */
+#page-cfb .shbar{display:flex!important;align-items:center;gap:14px;flex-wrap:wrap;
+  margin:0 0 14px!important;padding:11px 14px;background:#fff;border:1px solid #E7EBF3;
+  border-radius:14px;box-shadow:0 2px 10px -6px rgba(17,24,39,.14)}
+#page-cfb .shbar-t{display:flex;flex:0 0 auto;align-items:center;gap:10px;font-size:13px!important;font-weight:800;color:#1C2535}
+#page-cfb .shbar-ic{width:32px;height:32px;flex:0 0 auto;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;background:#E7F4EF;color:#0E7A6C}
+#page-cfb .shbar-ic svg{width:18px;height:18px}
+#page-cfb .shbar-tx{display:flex;flex-direction:column;gap:1px;line-height:1.25}
+#page-cfb .shbar-tx em{font-style:normal;font-size:11px;font-weight:600;color:#8A93A5;letter-spacing:.01em}
+#page-cfb .shstats{display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+  flex:1 1 auto;justify-content:flex-end;margin-left:auto}
+#page-cfb .shstat{display:inline-flex;flex:0 0 auto;align-items:center;gap:6px;padding:5px 10px 5px 6px;border-radius:999px;
+  font-size:11px;font-weight:700;background:#F7F9FC;border:1px solid #EBEFF6}
+#page-cfb .shstat-i{width:19px;height:19px;border-radius:6px;display:flex;align-items:center;justify-content:center}
+#page-cfb .shstat-i svg{width:13px;height:13px}
+#page-cfb .shstat b{font-size:12px;color:#1C2535;font-variant-numeric:tabular-nums}
+#page-cfb .shstat i{font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.05em;color:#8A93A5}
+#page-cfb .shstat.sh-pdf .shstat-i{background:#FCEDF1;color:#C0392F}
+#page-cfb .shstat.sh-xls .shstat-i{background:#E9F6EC;color:#1B8A4B}
+#page-cfb .shstat.sh-doc .shstat-i{background:#E8F1FC;color:#2D6BE0}
+#page-cfb .shstat.sh-ppt .shstat-i{background:#FCF1E4;color:#C2662A}
+#page-cfb .shstat.sh-zip .shstat-i{background:#EFEBFB;color:#6A34C4}
+#page-cfb .shstat.sh-img .shstat-i{background:#E4F4F8;color:#0E7490}
+#page-cfb .shstat.sh-txt .shstat-i{background:#F1F3F8;color:#5A647C}
+#page-cfb .shAddBtn{display:inline-flex!important;flex:0 0 auto;align-items:center;gap:7px;font-size:12px!important;
+  padding:8px 14px!important;border-radius:10px!important}
+#page-cfb .shAddBtn svg{width:15px;height:15px}
+
+/* ---------- a shelf: accent rail, tinted header, icon tile ---------- */
+#page-cfb .shelf{border:1px solid #E7EBF3!important;border-left:3px solid var(--sh-c,#0E7A6C)!important;
+  border-radius:13px!important;margin-bottom:12px!important;
+  box-shadow:0 2px 10px -7px rgba(17,24,39,.16)!important}
+#page-cfb .shelf-hd{background:var(--sh-b,#F4F6FC)!important;border-bottom:1px solid #EEF0F7!important;
+  padding:9px 12px!important;gap:9px!important}
+#page-cfb .shtag .shdot{width:26px!important;height:26px!important;border-radius:8px!important;
+  background:#fff!important;color:var(--sh-c,#0E7A6C)!important;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 1px var(--sh-l,#CBD5E1)!important}
+#page-cfb .shtag .shdot svg{width:15px;height:15px}
+#page-cfb .shName{font-size:12.5px!important;color:#1C2535!important}
+#page-cfb .shName:focus{border-color:var(--sh-c,#0E7A6C)!important;box-shadow:0 0 0 3px rgba(17,24,39,.06)!important}
+#page-cfb .shedit{font-size:10px!important;color:var(--sh-c,#8A93A5)!important;opacity:0}
+#page-cfb .shelf-hd:hover .shedit{opacity:.7}
+#page-cfb .shcount{font-size:10.5px!important;font-weight:800!important;color:var(--sh-c,#7A859C)!important;
+  background:#fff!important;box-shadow:0 0 0 1px var(--sh-l,#E2E8F0);padding:3px 10px!important}
+
+/* ---------- the shelf body is a grid, so every tile lines up ---------- */
+#page-cfb .shelf-body.dmcell{display:grid!important;
+  grid-template-columns:repeat(auto-fill,94px)!important;gap:14px 12px!important;
+  justify-content:start!important;padding:14px 13px!important;min-height:0!important}
+#page-cfb .shelf-body.dmcell.drag{background:var(--sh-b,#F0FBF8)!important;
+  box-shadow:inset 0 0 0 2px var(--sh-c,#0C8B7D)!important}
+
+/* ---------- file tile: line icon on a tinted square ---------- */
+#page-cfb .shtile,#page-cfb .shadd{width:94px!important}
+#page-cfb .shsq{width:72px!important;height:72px!important;border-radius:14px!important;margin:0 auto;
+  background:#F7F9FC;border:1px solid #ECEEF6!important;box-shadow:none!important}
+#page-cfb .shsq svg{width:31px;height:31px}
+#page-cfb .shtile:hover .shsq{transform:translateY(-2px);box-shadow:0 8px 16px -8px rgba(28,37,53,.3)!important}
+#page-cfb .shsq.pdf{background:#FCEDF1!important;color:#C0392F!important}
+#page-cfb .shsq.xls{background:#E9F6EC!important;color:#1B8A4B!important}
+#page-cfb .shsq.doc{background:#E8F1FC!important;color:#2D6BE0!important}
+#page-cfb .shsq.ppt{background:#FCF1E4!important;color:#C2662A!important}
+#page-cfb .shsq.zip{background:#EFEBFB!important;color:#6A34C4!important}
+#page-cfb .shsq.img{background:#E4F4F8!important;color:#0E7490!important}
+#page-cfb .shsq.txt{background:#F1F3F8!important;color:#5A647C!important}
+#page-cfb .shext{bottom:4px!important;right:4px!important;font-size:7.5px!important;
+  background:rgba(255,255,255,.95)!important;box-shadow:0 1px 2px rgba(16,24,40,.12)!important}
+#page-cfb .shfn{font-size:10px!important;color:#475467!important;line-height:1.3!important}
+#page-cfb .shtile .dfb{width:22px;height:22px;border-radius:7px}
+#page-cfb .shtile .dfb.view:hover{background:#0E5C52;color:#fff}
+#page-cfb .shtile .dfb.down:hover{background:#1D5FAE;color:#fff}
+
+/* ---------- add tile picks up the shelf accent ---------- */
+#page-cfb .shadd .shaddsq{width:72px!important;height:72px!important;border-radius:14px!important;
+  border:1.6px dashed var(--sh-l,#CFD6E4)!important;background:#FCFDFE!important;color:var(--sh-c,#9AA4B8)!important;
+  margin:0 auto;gap:0!important}
+#page-cfb .shadd:hover .shaddsq{border-color:var(--sh-c,#0C8B7D)!important;background:var(--sh-b,#F0FBF8)!important}
+#page-cfb .shadd .shaddic{display:flex;align-items:center;justify-content:center}
+#page-cfb .shadd .shaddic svg{width:22px;height:22px}
+#page-cfb .shadd .shaddtx{font-size:9.5px!important;font-weight:700;color:#8A93A5;text-align:center;margin-top:6px}
+#page-cfb .shempty{font-size:12px!important}
+</style>
+<style id="bblFieldPastel">
+/* v13.0: Bank loan — the GL data source and contract-terms cards get the same
+   pastel-tile treatment as the KPI row: one tinted tile per field, with a
+   coloured line icon in front of the label. Colours arrive inline as
+   --bf-b (tint) / --bf-c (icon + value). Last block -> wins the cascade. */
+#page-bbl .bblctr{display:grid!important;
+  grid-template-columns:repeat(auto-fill,minmax(min(212px,100%),1fr))!important;
+  gap:10px!important;align-items:stretch!important}
+#page-bbl .bblfld.bblfld-p{background:var(--bf-b,#F7F9FC)!important;
+  border:1px solid rgba(16,24,40,.06)!important;border-radius:12px!important;
+  padding:9px 11px 10px!important;display:flex!important;flex-direction:column;gap:5px!important;
+  min-width:0}
+#page-bbl .bblfld.bblfld-p>label{display:flex!important;align-items:center;gap:7px;
+  font-size:9.5px!important;font-weight:800!important;letter-spacing:.05em!important;
+  text-transform:uppercase;color:#6B7688!important;margin:0!important}
+#page-bbl .bblfic{width:20px;height:20px;flex:0 0 auto;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.75);color:var(--bf-c,#0E5C52)}
+#page-bbl .bblfic svg{width:13px;height:13px;display:block}
+#page-bbl .bblfld.bblfld-p .bblfval{font-size:13px!important;font-weight:800!important;
+  color:#1C2535!important;line-height:1.3;word-break:break-word;
+  font-variant-numeric:tabular-nums lining-nums}
+#page-bbl .bblfld.bblfld-p .bblin{background:rgba(255,255,255,.9)!important;
+  border:1px solid rgba(16,24,40,.09)!important;border-radius:9px!important;
+  font-size:12.5px!important;font-weight:700!important;color:#1C2535!important;
+  padding:6px 9px!important;width:100%;box-sizing:border-box}
+#page-bbl .bblfld.bblfld-p .bblin.locked{background:rgba(255,255,255,.62)!important;color:#475467!important}
+#page-bbl .bblfld.bblfld-p .bblin:focus{outline:none;border-color:var(--bf-c,#0E5C52)!important;
+  box-shadow:0 0 0 3px rgba(16,24,40,.07)!important}
+/* the card head keeps its icon, now on a tinted tile like everything else */
+#page-bbl .bblcard .bblic{width:26px;height:26px;border-radius:8px;display:inline-flex;
+  align-items:center;justify-content:center;background:#E7F4EF;font-size:13px}
+#page-bbl .bblcard .bblic.bblic-gl{background:#EFEBFB}
+</style>
+<style id="whtHeadInset">
+/* v13.0: the payer block (name · Tax ID · filing badges) was sitting hard against
+   the left edge — inset it so it clears the rule, and mark it with the brand rail. */
+#page-wht .wrhead>.wrtitle{padding-left:14px!important;
+  border-left:3px solid #0E5C52!important;border-radius:2px}
+#page-wht .wrhead{padding-left:2px!important}
+@media (max-width:900px){#page-wht .wrhead>.wrtitle{padding-left:11px!important}}
 </style>
 </body></html>
