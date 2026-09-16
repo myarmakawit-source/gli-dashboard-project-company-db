@@ -32327,7 +32327,10 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
    Progress % show — plus a bucket for GL project codes that are not in the
    project master, so the statement still ties to the cash movement.
    ====================================================================== */
-var _PCF=null, _PCF_Q='', _PCF_ST='', _PCF_SORT={c:'close',d:-1}, _PCF_ZERO=false;
+var _PCF=null, _PCF_Q='', _PCF_ST='', _PCF_SORT={c:'close',d:-1};
+/* v13.5: every project in the master is listed by default — a project with no cash
+   movement in the period is still part of the portfolio and must be visible. */
+var _PCF_ZERO=true;
 
 function _pcfE(s){ return (''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function _pcfN(v){ var n=+v; return isFinite(n)?n:0; }
@@ -32417,10 +32420,19 @@ function _pcfCompute(){
          before the first classified activity (capital introduced, balances brought on).
          It is NOT a project's cash, so it is proved separately instead of being spread. */
       var unalloc=_pcfN(C.beginCash)-T.bf;
+      /* The GL cash total is not the balance-sheet cash line. Pledged deposits are presented
+         as a separate asset and the audited statements carry a restatement; both are
+         entity-level, so neither can belong to a project. They are walked here with the very
+         function the Direct cash-flow statement uses, so the two agree by construction. */
+      var cr=null; try{ cr=(typeof _cfdCashRecon==='function')?_cfdCashRecon(C):null; }catch(e){}
       rec={beginCash:_pcfN(C.beginCash), endCash:_pcfN(C.endCash), stmtMove:stmtMove,
            unalloc:Math.round(unalloc*100)/100,
            projClose:Math.round(T.close*100)/100,
            closeProof:Math.round((T.close+unalloc-_pcfN(C.endCash))*100)/100,
+           pledged:cr?Math.round(_pcfN(cr.pEndCur)*100)/100:0,
+           auditAdj:cr?Math.round(_pcfN(cr.adjCur)*100)/100:0,
+           bsCash:(cr&&cr.hasBs)?Math.round(_pcfN(cr.bsCur)*100)/100:null,
+           hasBs:!!(cr&&cr.hasBs),
            projMove:T.op+T.inv+T.fin+T.adj,
            diff:Math.round(((T.op+T.inv+T.fin+T.adj)-stmtMove)*100)/100,
            residual:_pcfN(C.residual),
@@ -32530,7 +32542,21 @@ function _fsRenderPCF(){
       +'<span class="pcf-recnote">Brought forward is the cash each project has generated or consumed in earlier periods \u2014 not the entity\'s opening bank balance. '
       +'Cash the entity held before the ledger\'s first classified activity (capital introduced and balances brought on) belongs to no project, so it is proved here rather than spread across them. '
       +'Opening cash per the statement is '+_pcfMoney(rec.beginCash)+'.</span>'
-      +'</div>';
+      +'</div>'
+      /* v13.5: and on to the figure the balance sheet actually reports */
+      +((rec.hasBs||Math.abs(rec.pledged)>0.004)
+        ? ('<div class="pcf-rec bs">'
+          +'<span class="pcf-recl">Cash per the general ledger \u2192 cash &amp; cash equivalents per the balance sheet</span>'
+          +'<span class="pcf-recc">Cash per the general ledger <b>'+_pcfMoney(rec.endCash)+'</b></span>'
+          +(Math.abs(rec.pledged)>0.004?('<span class="pcf-recc">\u2212 Pledged / restricted deposits <b>'+_pcfMoney(rec.pledged)+'</b></span>'):'')
+          +(Math.abs(rec.auditAdj)>0.004?('<span class="pcf-recc">'+(rec.auditAdj<0?'\u2212':'+')+' Audited adjustment <b>'+_pcfMoney(Math.abs(rec.auditAdj))+'</b></span>'):'')
+          +(rec.hasBs?('<span class="pcf-recc tot">= Cash &amp; cash equivalents <b>'+_pcfMoney(rec.bsCash)+'</b></span>'):'')
+          +'<span class="pcf-recnote">Deposits pledged as security are presented as a separate asset, and the audited statements carry a restatement (consolidation of joint operations and closing adjustments). '
+          +'Neither belongs to any single project, so they are walked here rather than spread across the rows. '
+          +'These are the same reconciling items the Cash Flow \u00b7 Direct statement shows.</span>'
+          +'</div>')
+        : '<div style="display:none"></div>')
+      ;
   }
 
   var bar='<div class="pcf-bar">'
@@ -32538,8 +32564,8 @@ function _fsRenderPCF(){
     +'<span class="pcf-seg">'+['','act','ina','nd'].map(function(k){
         var lab=k?_PCF_STLBL[k][0]:'All statuses';
         return '<button type="button" class="pcf-sb'+(_PCF_ST===k?' on':'')+'" data-pcfst="'+k+'">'+_pcfE(lab)+'</button>';}).join('')+'</span>'
-    +'<button type="button" class="pcf-sb tog'+(_PCF_ZERO?' on':'')+'" id="pcfZero" title="Show projects with no cash movement in this period">'
-      +(_PCF_ZERO?'✓ ':'')+'Include nil-movement</button>'
+    +'<button type="button" class="pcf-sb tog'+(_PCF_ZERO?'':' on')+'" id="pcfZero" title="Hide projects with no cash movement in this period">'
+      +(_PCF_ZERO?'':'✓ ')+'Hide nil-movement</button>'
     +'<span class="pcf-count">'+view.length+' of '+M.rows.length+' rows</span></div>';
 
   var body='';
@@ -32754,7 +32780,15 @@ function _pcfExportXlsx(){
   if(rec){ aoa.push(['Reconciliation','Sum of projects '+_pcfMoney(rec.projMove)
     +'  |  Statement movement '+_pcfMoney(rec.stmtMove)+'  |  Difference '+_pcfMoney(rec.diff)
     +(rec.nUnbal?('  |  '+rec.nUnbal+' unbalanced voucher(s) in the ledger, '+_pcfMoney(rec.unbalAmt)):'')]);
-    aoa.push(['Cash','Opening '+_pcfMoney(rec.beginCash)+'  |  Closing '+_pcfMoney(rec.endCash)]); }
+    aoa.push(['Cash','Opening '+_pcfMoney(rec.beginCash)+'  |  Closing per the general ledger '+_pcfMoney(rec.endCash)]);
+    aoa.push(['Closing proof','Projects, closing '+_pcfMoney(rec.projClose)
+      +'  +  Opening cash not attributable to a project '+_pcfMoney(rec.unalloc)
+      +'  =  '+_pcfMoney(rec.endCash)+'  (out by '+_pcfMoney(rec.closeProof)+')']);
+    if(rec.hasBs||Math.abs(rec.pledged)>0.004){
+      aoa.push(['Balance sheet','Cash per the general ledger '+_pcfMoney(rec.endCash)
+        +(Math.abs(rec.pledged)>0.004?('  \u2212  Pledged / restricted deposits '+_pcfMoney(rec.pledged)):'')
+        +(Math.abs(rec.auditAdj)>0.004?('  '+(rec.auditAdj<0?'\u2212':'+')+'  Audited adjustment '+_pcfMoney(Math.abs(rec.auditAdj))):'')
+        +(rec.hasBs?('  =  Cash & cash equivalents '+_pcfMoney(rec.bsCash)):'')]); } }
   aoa.push([]);
   aoa.push(['#','Project Code','Project Name','Employer','Status',
             'Brought forward','Operating activities','Investing activities','Financing activities','Closing balance']);
@@ -32827,6 +32861,14 @@ function _pcfExportPdf(){
         +(rec.nUnbal?('<br>'+rec.nUnbal+' voucher(s) in the ledger have debits and credits that do not agree'
           +(Math.abs(rec.unbalAmt)>0.004?(' (out by '+_pcfMoney(rec.unbalAmt)+')'):'')
           +' — the difference above is that ledger error, not a fault in the allocation.'):'')
+        +'<br>Closing proof — projects, closing <b>'+_pcfMoney(rec.projClose)+'</b> + opening cash not attributable to a project <b>'
+        +_pcfMoney(rec.unalloc)+'</b> = <b>'+_pcfMoney(rec.endCash)+'</b> (out by <b>'+_pcfMoney(rec.closeProof)+'</b>)'
+        +((rec.hasBs||Math.abs(rec.pledged)>0.004)
+          ?('<br>Cash per the general ledger <b>'+_pcfMoney(rec.endCash)+'</b>'
+            +(Math.abs(rec.pledged)>0.004?(' − pledged / restricted deposits <b>'+_pcfMoney(rec.pledged)+'</b>'):'')
+            +(Math.abs(rec.auditAdj)>0.004?(' '+(rec.auditAdj<0?'−':'+')+' audited adjustment <b>'+_pcfMoney(Math.abs(rec.auditAdj))+'</b>'):'')
+            +(rec.hasBs?(' = cash &amp; cash equivalents per the balance sheet <b>'+_pcfMoney(rec.bsCash)+'</b>'):''))
+          :'')
         +'</div>'):'')
     +'<table><thead><tr><th>#</th><th>Project Code</th><th>Project Name</th><th>Employer</th><th>Status</th>'
     +'<th>Brought forward</th><th>Operating</th><th>Investing</th><th>Financing</th><th>Closing</th></tr></thead>'
@@ -32907,6 +32949,9 @@ function _pcfExportPdf(){
 #page-fs .pcf-recc.alt{color:#667085}
 #page-fs .pcf-recnote{flex:1 1 100%;font-size:10.5px;font-weight:600;opacity:.9}
 #page-fs .pcf-rec.proof{background:#E8F1FC;border:1px solid #D6E5F7;color:#1D5FAE;margin-top:-6px}
+#page-fs .pcf-rec.bs{background:#EFEBFB;border:1px solid #DED4F5;color:#6A34C4;margin-top:-6px}
+#page-fs .pcf-rec.bs .pcf-recc b{color:#55299C}
+#page-fs .pcf-rec.bs .pcf-recc.tot{background:#fff;box-shadow:inset 0 0 0 1.5px #C0B0EC;font-weight:800}
 #page-fs .pcf-rec.proof .pcf-recc b{color:#174C8C}
 
 /* ---------- filter bar ---------- */
