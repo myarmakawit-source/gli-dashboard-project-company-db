@@ -6908,6 +6908,54 @@ function _coRefresh(){
   try{var wp=document.getElementById('page-wht');if(wp&&!wp.hidden&&typeof renderWht==='function'){renderWht();return;}}catch(e){}
   try{if(typeof renderVat==='function')renderVat();}catch(e){}
 }
+/* ===== v12.2: short company codes (GLI · GLE · ARG …) for the compact pickers =====
+   A Latin name in the company name wins (“กิจการร่วมค้า ARG” → ARG). Otherwise the brand words are
+   mapped to the letters the house already uses, longest match first. */
+var _CO_WORDS=[
+  ['แกรนด์ไลน์','GL'],['จีแอลไอ','GL'],['จีแอล','GL'],['แกรนด์','GR'],
+  ['อินโนเวชั่น','I'],['พร็อพเพอร์ตี้','P'],['พร๊อพเพอร์ตี้','P'],
+  ['เอ็นจิเนียริ่ง','E'],['ดิจิทัล','D'],['โซลูชันส์','S'],['โซลูชั่นส์','S'],
+  ['คอนสตรัคชั่น','C'],['เทรดดิ้ง','T'],['โฮลดิ้ง','H'],
+  ['อินฟินิท','I'],['เรียลเอสเตท','RE'],['สยาม','S'],['ฟาร์มาซี','P'],
+  ['กิจการร่วมค้า','']
+];
+function _coCode(name){
+  var nm=(''+(name==null?'':name)).replace(/\s+/g,' ').trim();
+  if(!nm)return '?';
+  /* a Latin word of 2-4 letters in the name is already the code */
+  var lat=nm.match(/\b[A-Za-z]{2,4}\b/g);
+  if(lat){ var skip={CO:1,LTD:1,INC:1,PCL:1,THE:1,AND:1};
+    for(var i=0;i<lat.length;i++){ var t=lat[i].toUpperCase(); if(!skip[t])return t; } }
+  var rest=nm.replace(/บริษัท|จำกัด|มหาชน|ห้างหุ้นส่วน|\(.*?\)/g,' ');
+  var out='';
+  for(var w=0;w<_CO_WORDS.length&&out.length<3;w++){
+    var k=_CO_WORDS[w][0];
+    if(rest.indexOf(k)>=0){ out+=_CO_WORDS[w][1]; rest=rest.split(k).join(' '); }
+  }
+  if(out.length>=2)return out.slice(0,3);
+  /* nothing matched — fall back to the generic abbreviation */
+  try{ return (_coAbbr(nm)||'?').slice(0,3); }catch(e){ return (out||'?').slice(0,3); }
+}
+var _CO_CHIP_TINTS=[['#0E5C52','#E7F4EF'],['#1D5FAE','#E8F1FC'],['#6A34C4','#EFEBFB'],['#B45309','#FCF1E4'],
+  ['#B4356A','#FCEDF1'],['#8A5E12','#FBF4DC'],['#2C7A4B','#E7F5EC'],['#B42318','#FCEAEA']];
+function _coChipTint(id){ var h=0,t=''+(id||''); for(var i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))>>>0;
+  return _CO_CHIP_TINTS[h%_CO_CHIP_TINTS.length]; }
+/* the compact picker: three code chips per row, full name in the tooltip */
+function _coChipsHTML(curId,selAttr,countFn){
+  return _vPP30Companies().map(function(c){
+    if(_vPP30CoEdit===c.id){
+      return '<div class="cochip-edit"><input class="v30cein" id="v30ceName" type="text" value="'+_eatt(c.name||'')+'" placeholder="ชื่อบริษัท" autocomplete="off"><input class="v30cein" id="v30ceTax" type="text" inputmode="numeric" value="'+_eatt(c.taxid||'')+'" placeholder="เลขประจำตัวผู้เสียภาษี" autocomplete="off"><div class="v30cebtns"><button class="vbtn primary mini" data-pp30cosave="'+_eatt(c.id)+'" type="button">💾 Save</button><button class="vbtn ghost mini" data-pp30cocancel="1" type="button">Cancel</button></div></div>';
+    }
+    var cnt=countFn?countFn(c):0, on=(c.id===curId), tint=_coChipTint(c.id);
+    var tip=(c.name||'')+' · '+(c.taxid||'-')+(cnt?(' · '+cnt+' entries'):'');
+    return '<div class="cochip'+(on?' on':'')+'" '+selAttr+'="'+_eatt(c.id)+'" role="button" tabindex="0" '
+      +'style="--cc:'+tint[0]+';--cb:'+tint[1]+'" title="'+_eatt(tip)+'">'
+      +'<span class="cochip-ab">'+esc(_coCode(c.name))+'</span>'
+      +(cnt?'<span class="cochip-n">'+cnt+'</span>':'')
+      +'<span class="cochip-x" data-pp30codel="'+_eatt(c.id)+'" title="'+_eatt('Remove '+(c.name||''))+'">✕</span>'
+      +'</div>';
+  }).join('');
+}
 function _coUniListHTML(curId,selAttr,countFn){
   return _vPP30Companies().map(function(c){
     if(_vPP30CoEdit===c.id){
@@ -7123,7 +7171,7 @@ function _vatActionPanel(){
     ]}
   ];
   var fils=[{t:'Business',t2:'Select',ic:'🏢',wcls:'glactg-cls vatg-co',filCls:'vatcos',
-      html:'<div class="v30colist vcouni">'+_coUniListHTML(_vCo,'data-vco',function(c){return VATDATA.filter(function(t){return t.co===c.id;}).length;})+'</div>'},
+      html:'<div class="cochips vcouni">'+_coChipsHTML(_vCo,'data-vco',function(c){return VATDATA.filter(function(t){return t.co===c.id;}).length;})+'</div>'},
     {t:'View',t2:'Mode',ic:'👁️',wcls:'glactg-act vatg-vw',filCls:'vviewtg',html:vchips}];
   if(!pp){
     var yopts='';for(var y=_vYear+1;y>=2018;y--)yopts+='<option value="'+y+'"'+(y===_vYear?' selected':'')+'>'+y+' / '+(y+543)+'</option>';
@@ -12212,7 +12260,7 @@ function _coAbbr(name){name=(''+(name||'')).trim();if(!name)return '?';
 }
 function renderPayerRow(){
   var el=document.getElementById('whtPayerRow');if(!el)return;
-  var html='<div class="v30colist whtuni">'+_coUniListHTML(curPayer,'data-pid',function(c){return WHTTX.filter(function(t){return (t.payer||'wp01')===c.id;}).length;})+'</div>';
+  var html='<div class="cochips whtuni">'+_coChipsHTML(curPayer,'data-pid',function(c){return WHTTX.filter(function(t){return (t.payer||'wp01')===c.id;}).length;})+'</div>';
   html+='<div class="whtpay add" id="whtAddPayer" title="Add payer"><div class="wpadd">+</div></div>';
   el.innerHTML=html;
 }
@@ -12722,9 +12770,9 @@ function _pgCatSave(){ try{localStorage.setItem('gli_pgcat',JSON.stringify(_pgCa
    .pghlchip / .pgcatchip) and all handlers are delegated through closest(), so only the
    surrounding markup moved. */
 function _pgActionPanel(yearChips,statChips,hlChips,manTot){
-  var catChips='<button type="button" class="pgcatchip'+(_pgCat['5']?' on':'')+'" data-cat="5">5 · Cost of sales</button>'+
-    '<button type="button" class="pgcatchip'+(_pgCat['6']?' on':'')+'" data-cat="6">6 · Expenses</button>'+
-    '<button type="button" class="pgcatchip'+(_pgCat['7']?' on':'')+'" data-cat="7">7 · Finance</button>';
+  var catChips='<button type="button" class="pgcatchip'+(_pgCat['5']?' on':'')+'" data-cat="5"><i class="pgci">\ud83e\uddfe</i>5 · Cost of sales</button>'+
+    '<button type="button" class="pgcatchip'+(_pgCat['6']?' on':'')+'" data-cat="6"><i class="pgci">\ud83d\udcc4</i>6 · Expenses</button>'+
+    '<button type="button" class="pgcatchip'+(_pgCat['7']?' on':'')+'" data-cat="7"><i class="pgci">\ud83c\udfe6</i>7 · Finance</button>';
   var nRed=0,nLock=0; try{nRed=_pgRedN();}catch(e){} try{nLock=_pgLockN();}catch(e){}
   var groups=[
     {t:'Progress %',t2:'Edit',ic:'📈',btns:[
@@ -13018,7 +13066,7 @@ function _pgHtml(){
   var overall=(tConExp!==0)?(tCost/tConExp*100):null;
   var year=(typeof BPYEAR!=='undefined'&&BPYEAR)?('FY '+BPYEAR):'Current data';
   var years=[]; try{years=_bpYearsList();}catch(e){years=[];}
-  var chips=''; if(years&&years.length){ for(var y=0;y<years.length;y++){ var yy=years[y]; chips+='<button type="button" class="pgychip'+(yy===BPYEAR?' on':'')+'" data-y="'+esc(yy)+'">'+esc(yy)+'</button>'; } }
+  var chips=''; if(years&&years.length){ for(var y=0;y<years.length;y++){ var yy=years[y]; chips+='<button type="button" class="pgychip'+(yy===BPYEAR?' on':'')+'" data-y="'+esc(yy)+'"><i class="pgci">\ud83d\udcc5</i>'+esc(yy)+'</button>'; } }
   function kpi(cls,ic,th,en,val,sub){ return '<div class="pgkpi '+cls+'"><div class="pgkpi-h"><span class="pgkpi-ic">'+ic+'</span><span class="pgkpi-l">'+th+'<span>'+en+'</span></span></div><div class="pgkpi-v">'+val+'</div>'+(sub?('<div class="pgkpi-s">'+sub+'</div>'):'')+'</div>'; }
   var ovCls=_pgProgCls(overall);
   var kpis='<div class="pgkpis">'+
@@ -13054,16 +13102,16 @@ function _pgHtml(){
   var stCnt={},nTot=0; try{ var _dr=(typeof DATA!=='undefined'&&DATA&&DATA.rows)?DATA.rows:[]; nTot=_dr.length; for(var si=0;si<_dr.length;si++){ var _s=(typeof _bpStat==='function')?_bpStat(_dr[si]):((_dr[si]&&_dr[si].active===false)?'ina':'act'); if(_s!=='act'&&_s!=='ina'&&_s!=='nd')_s='act'; stCnt[_s]=(stCnt[_s]||0)+1; } }catch(e){}
   var stOrder=['act','ina','nd'];
   var _stOn=(_pgStFilter&&_pgStFilter.length);   /* v9.144: multi-select — "All" is on when nothing is selected */
-  var statLeg='<button type="button" class="pgstchip'+(_stOn?'':' on')+'" data-st="">All <b>'+nTot+'</b></button>';
-  for(var so=0;so<stOrder.length;so++){ var sk=stOrder[so]; if(!stCnt[sk])continue; var sm=_PG_ST[sk]||[sk,'pg-nd','']; statLeg+='<button type="button" class="pgstchip '+sm[1]+((_pgStFilter&&_pgStFilter.indexOf(sk)>=0)?' on':'')+'" data-st="'+sk+'" title="'+esc(sm[2]||'')+'">'+esc(sm[0])+' <b>'+stCnt[sk]+'</b></button>'; }
+  var statLeg='<button type="button" class="pgstchip'+(_stOn?'':' on')+'" data-st=""><i class="pgci">\u25ce</i>All <b>'+nTot+'</b></button>';
+  for(var so=0;so<stOrder.length;so++){ var sk=stOrder[so]; if(!stCnt[sk])continue; var sm=_PG_ST[sk]||[sk,'pg-nd','']; statLeg+='<button type="button" class="pgstchip '+sm[1]+((_pgStFilter&&_pgStFilter.indexOf(sk)>=0)?' on':'')+'" data-st="'+sk+'" title="'+esc(sm[2]||'')+'"><i class="pgci">'+(sk==='act'?'\u25cf':(sk==='ina'?'\u25cb':'\u26a0'))+'</i>'+esc(sm[0])+' <b>'+stCnt[sk]+'</b></button>'; }
   /* v9.214: highlight-status filter — isolate rows by their row-highlight color (🔒 lock · ➖ ลด GL · ⭐ Paste %) */
   var _hlAll=[]; try{_hlAll=_pgRowsAll();}catch(_he){_hlAll=[];}
   var hlC={lock:0,red:0,man:0}; for(var _hi=0;_hi<_hlAll.length;_hi++){ var _hx=_hlAll[_hi]; if(_pgLock&&_pgLock[_hx.code])hlC.lock++; if(_hx.glRed)hlC.red++; if(_hx.manPct!=null)hlC.man++; }
   var _HL=[['lock','🔒','Locked','pghl-lock'],['red','➖','GL reduced','pghl-red'],['man','⭐','Pasted %','pghl-man']];
   var hlLeg='';
   if(hlC.lock||hlC.red||hlC.man){ var _hlOn=(_pgHlFilter&&_pgHlFilter.length);
-    hlLeg='<button type="button" class="pghlchip'+(_hlOn?'':' on')+'" data-hl="">All</button>';
-    for(var _hj=0;_hj<_HL.length;_hj++){ var _h=_HL[_hj]; if(!hlC[_h[0]])continue; hlLeg+='<button type="button" class="pghlchip '+_h[3]+((_pgHlFilter&&_pgHlFilter.indexOf(_h[0])>=0)?' on':'')+'" data-hl="'+_h[0]+'" title="Show only rows: '+esc(_h[2])+'">'+_h[1]+' '+_h[2]+' <b>'+hlC[_h[0]]+'</b></button>'; }
+    hlLeg='<button type="button" class="pghlchip'+(_hlOn?'':' on')+'" data-hl=""><i class="pgci">\u25ce</i>All</button>';
+    for(var _hj=0;_hj<_HL.length;_hj++){ var _h=_HL[_hj]; if(!hlC[_h[0]])continue; hlLeg+='<button type="button" class="pghlchip '+_h[3]+((_pgHlFilter&&_pgHlFilter.indexOf(_h[0])>=0)?' on':'')+'" data-hl="'+_h[0]+'" title="Show only rows: '+esc(_h[2])+'"><i class="pgci">'+_h[1]+'</i>'+_h[2]+' <b>'+hlC[_h[0]]+'</b></button>'; }
     }
   return '<div class="pgpage">'+
     kpis+
@@ -29956,6 +30004,35 @@ function _cbDelYear(){
   var rem=_cbYears(); CBDATA.cur=rem[rem.length-1];
   saveCb(); renderCb();
 }
+/* ---------- v12.4: Confirm Bank command panel (Database layout) ---------- */
+function _cbActionPanel(years){
+  var yrChips='';
+  (years||[]).forEach(function(y){
+    yrChips+='<button class="cbyr'+(y===CBDATA.cur?' on':'')+'" data-cbyr="'+_eatt(y)+'" type="button" title="'+_eatt('Show the '+y+' database year')+'"><i class="cbci">\ud83d\udcc5</i>'+esc(y)+'</button>';
+  });
+  var groups=[
+    {t:'Year',t2:'Manage',ic:'\ud83d\uddc2\ufe0f',btns:[
+      {id:'cbAddYear',ic:'\uff0b',l:'Add year',cls:'cb-b cb-add',title:'Start a new database year \u2014 the latest year is copied as the starting point'},
+      {id:'cbDelYear',ic:'\ud83d\uddd1',l:'Delete year',cls:'cb-b cb-del danger',title:'Delete the database year currently selected',off:!(years&&years.length>1)}
+    ]},
+    {t:'Data',t2:'Restore',ic:'\ud83d\udd04',btns:[
+      {id:'cbRecover',ic:'\ud83d\udd04',l:'Restore from file',cls:'cb-b cb-rec',title:'Recover the register from the copy embedded in this file, if there is one'}
+    ]},
+    {t:'Export',t2:'Download',ic:'\u2913',btns:[
+      {id:'cbExportAll',ic:'\u2913',l:'Excel \u00b7 all companies',cls:'cb-b cb-xls',title:'Export every company\u2019s bank accounts to one Excel workbook'}
+    ]}
+  ];
+  var fils=[{t:'Database year',t2:'Select',ic:'\ud83d\udcc5',wcls:'glactg-cls cbg-yr',filCls:'cbyrs',html:yrChips},
+    {t:'Search',t2:'Filter',ic:'\ud83d\udd0e',wcls:'glactg-cls cbg-srch',filCls:'cbsrchw',
+     html:'<div class="cbsrch"><span class="ic">\ud83d\udd0d</span><input id="cbSrch" type="text" placeholder="Company, bank, address, account no." value="'+_eatt(_cbQ)+'" autocomplete="off"></div>'
+        +'<span class="cbfl">Legend</span>'
+        +'<div class="cblegend"><span class="cbleg"><i style="background:var(--pos)"></i>Confirmed</span>'
+        +'<span class="cbleg"><i style="background:var(--gold)"></i>Pending</span>'
+        +'<span class="cbleg"><i style="background:var(--blue)"></i>Requested</span>'
+        +'<span class="cbleg"><i class="tick">\u2713</i>Fee deducted \u00b7 may send</span>'
+        +'<span class="cbleg"><i class="cross">\u2717</i>Not deducted \u00b7 do not send</span></div>'}];
+  return _dbActPanel(groups,fils);
+}
 function renderCb(){
   var w=document.getElementById('page-cb'); if(!w)return;
   loadCb(); var cos=_cbCos();
@@ -29963,21 +30040,14 @@ function renderCb(){
   cos.forEach(function(c){var a=_cbAccs(c.id);totalAcc+=a.length;a.forEach(function(x){if((x.ccy||'THB')==='THB')totalBalThb+=_cbNum(x.bal);if(x.status==='confirmed')confirmed++;if(x.verify==='ok')okCnt++;});});
   var years=_cbYears();
   var h='<div class="cbwrap">';
-  h+='<div class="cbyrbar"><span class="cbyrlbl">🗂️ ฐานข้อมูลรายปี · Database year</span><div class="cbyrpills">';
-  years.forEach(function(y){ h+='<button class="cbyr'+(y===CBDATA.cur?' on':'')+'" data-cbyr="'+_eatt(y)+'" type="button">'+esc(y)+'</button>'; });
-  h+='<button class="cbyr add" id="cbAddYear" type="button" title="เพิ่มปีใหม่ — ยกฐานข้อมูลปีล่าสุดมาเป็นตัวตั้ง">＋ เพิ่มปี</button>';
-  if(years.length>1)h+='<button class="cbyr del" id="cbDelYear" type="button" title="ลบฐานข้อมูลปีที่เลือกอยู่">🗑</button>';
-  h+='</div></div>';
+  h+=_cbActionPanel(years);
   h+='<div class="cbtop">'
-    +'<div class="cbstat"><div class="l">Companies</div><div class="v">10</div><div class="u">registered entities</div></div>'
-    +'<div class="cbstat gold"><div class="l">Bank accounts · '+esc(CBDATA.cur)+'</div><div class="v">'+totalAcc+'</div><div class="u">in this database year</div></div>'
-    +'<div class="cbstat pos"><div class="l">Total balance · THB</div><div class="v">฿'+_cbMoney(totalBalThb)+'</div><div class="u">'+confirmed+' confirmed · '+okCnt+' ✓ correct</div></div>'
+    +'<div class="cbstat"><div class="cbstat-h"><span class="cbstat-i">🏢</span><div class="l">Companies</div></div><div class="v">10</div><div class="u">registered entities</div></div>'
+    +'<div class="cbstat gold"><div class="cbstat-h"><span class="cbstat-i">🏦</span><div class="l">Bank accounts · '+esc(CBDATA.cur)+'</div></div><div class="v">'+totalAcc+'</div><div class="u">in this database year</div></div>'
+    +'<div class="cbstat pos"><div class="cbstat-h"><span class="cbstat-i">💰</span><div class="l">Total balance · THB</div></div><div class="v">฿'+_cbMoney(totalBalThb)+'</div><div class="u">'+confirmed+' confirmed · '+okCnt+' ✓ correct</div></div>'
     +'</div>';
-  h+='<div class="cbbar"><div class="cbsrch"><span class="ic">🔍</span><input id="cbSrch" type="text" placeholder="Search company, bank, address, account no…" value="'+_eatt(_cbQ)+'" autocomplete="off"></div>'
-    +'<div class="cblegend"><span class="cbleg"><i style="background:var(--pos)"></i>Confirmed</span><span class="cbleg"><i style="background:var(--gold)"></i>Pending</span><span class="cbleg"><i style="background:var(--blue)"></i>Requested</span><span class="cbleg"><i class="tick">✓</i>Deduct fee · ส่งได้</span><span class="cbleg"><i class="cross">✗</i>ไม่หัก · ห้ามส่ง</span></div>'
-    +'<span class="sp"></span><button class="cbbtn cbrecover" id="cbRecover" type="button" title="\u0e01\u0e39\u0e49\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e08\u0e32\u0e01\u0e44\u0e1f\u0e25\u0e4c\u0e2a\u0e33\u0e23\u0e2d\u0e07\u0e43\u0e19\u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07 (\u0e16\u0e49\u0e32\u0e21\u0e35)">\ud83d\udd04 \u0e01\u0e39\u0e49\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25</button><button class="cbbtn cbxls" id="cbExportAll" type="button" title="\u0e14\u0e36\u0e07\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e18\u0e19\u0e32\u0e04\u0e32\u0e23\u0e17\u0e38\u0e01\u0e1a\u0e23\u0e34\u0e29\u0e31\u0e17\u0e40\u0e1b\u0e47\u0e19 Excel">\u2913 Export \u0e17\u0e38\u0e01\u0e1a\u0e23\u0e34\u0e29\u0e31\u0e17</button></div>';
   h+='<div class="cblist">'+_cbListHTML()+'</div>';
-  h+='<div class="cbnote"><b>Confirm Bank · Bank Database</b> — ทะเบียนบัญชีธนาคารของแต่ละบริษัท แยกฐานข้อมูลตาม<b>ปี</b> (เพิ่มปีใหม่ได้ ระบบจะยกฐานข้อมูลปีล่าสุดมาให้). คลิกบริษัทเพื่อเปิด<b>หน้าต่างเต็มจอ</b> แล้วแก้ไขได้ทุกช่อง รวมถึงช่อง<b>ที่อยู่ธนาคาร</b> (วาง/Copy ได้). แต่ละบัญชีกด <b>✓ ถูก</b> เพื่ออนุญาตให้<b>ส่งหนังสือยืนยันยอดธนาคาร</b> หรือ <b>✗ ผิด</b> เพื่อห้ามส่ง. ยอดเงิน THB จะรวมให้ทั้งรายบริษัทและทั้งกลุ่ม · บันทึกอัตโนมัติบนอุปกรณ์นี้. ชื่อบริษัท &amp; เลขผู้เสียภาษีใช้ร่วมกับโมดูล <b>E-Filing &amp; DBD Credentials</b>.</div>';
+  h+='<div class="cbnote"><span class="cbnote-ic">📌</span><span class="cbnote-tx"><b>Confirm Bank · bank database.</b> A register of every company\u2019s bank accounts, kept per <b>database year</b> \u2014 adding a year copies the latest one as the starting point. Click a company to open the full-screen editor, where every field is editable, the bank address included. Mark each account <b>\u2713 correct</b> to allow the <b>bank confirmation letter</b> to be sent, or <b>\u2717 wrong</b> to block it. THB balances total per company and for the whole group, and everything saves on this device. Company names and tax IDs are shared with the <b>E-Filing &amp; DBD Credentials</b> module.</span></div>';
   h+='</div>';
   var _cbsy=(window.pageYOffset||document.documentElement.scrollTop||0); w.innerHTML=h; _cbBind(w);
   if(_cbModalCo)_cbRenderModal();
@@ -30001,10 +30071,10 @@ function _cbListHTML(){
           +(okc?'<span class="cbchip ok">\u2713 '+okc+'</span>':'')
           +(badc?'<span class="cbchip bad">\u2717 '+badc+'</span>':'')
           +(thb?'<span class="cbchip bal">\u0e3f'+_cbMoney(thb)+'</span>':'')+'</div>'
-        +'<button class="cbco-xls" data-cbexport="'+c.id+'" type="button" title="\u0e14\u0e36\u0e07 Excel \u0e40\u0e09\u0e1e\u0e32\u0e30\u0e1a\u0e23\u0e34\u0e29\u0e31\u0e17\u0e19\u0e35\u0e49">\u2913 XLS</button>'+'<div class="cbco-open">\u0e40\u0e1b\u0e34\u0e14&nbsp;\u203a</div>'
+        +'<button class="cbco-xls" data-cbexport="'+c.id+'" type="button" title="Export only this company to Excel">\u2913 XLS</button>'+'<div class="cbco-open">Open&nbsp;\u203a</div>'
       +'</div></div>';
   });
-  if(!h)h='<div class="cbempty" style="padding:28px 16px"><div class="big">\ud83d\udd0d</div><div class="t">\u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e1c\u0e25\u0e25\u0e31\u0e1e\u0e18\u0e4c</div><div class="s">No matching company or bank account.</div></div>';
+  if(!h)h='<div class="cbempty" style="padding:28px 16px"><div class="big">\ud83d\udd0d</div><div class="t">No results</div><div class="s">No company or bank account matches that search.</div></div>';
   return h;
 }
 function _cbRenderList(){ var w=document.getElementById('page-cb'); if(!w)return; var lc=w.querySelector('.cblist'); if(lc)lc.innerHTML=_cbListHTML(); }
@@ -31330,5 +31400,135 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 
 /* ---------- 5) the add-row stays a quiet affordance ---------- */
 #page-pdrepjv .apjv-addr{padding:5px 8px!important;font-size:11px!important}
+</style>
+<style id="coChips">
+/* v12.2: the company picker as short-code chips, three to a row */
+#page-vat .cochips,#page-wht .cochips{display:grid!important;grid-template-columns:repeat(3,1fr)!important;
+  gap:6px!important;max-height:none!important;overflow:visible!important;padding:0!important;margin:0!important}
+#page-vat .cochip,#page-wht .cochip{position:relative;display:flex;align-items:center;justify-content:center;
+  min-height:34px;padding:5px 4px;box-sizing:border-box;border:1px solid var(--cb);background:var(--cb);
+  border-radius:9px;cursor:pointer;transition:.12s;user-select:none}
+#page-vat .cochip:hover,#page-wht .cochip:hover{border-color:var(--cc);transform:translateY(-1px)}
+#page-vat .cochip.on,#page-wht .cochip.on{border-color:var(--cc);box-shadow:inset 0 0 0 1px var(--cc)}
+#page-vat .cochip-ab,#page-wht .cochip-ab{font-size:11.5px;font-weight:800;letter-spacing:.02em;color:var(--cc);
+  line-height:1;white-space:nowrap}
+#page-vat .cochip.on .cochip-ab,#page-wht .cochip.on .cochip-ab{font-weight:800}
+#page-vat .cochip-n,#page-wht .cochip-n{position:absolute;top:2px;right:4px;font-size:8.5px;font-weight:700;
+  color:var(--cc);opacity:.6;line-height:1}
+#page-vat .cochip-x,#page-wht .cochip-x{position:absolute;bottom:1px;right:3px;font-size:8.5px;line-height:1;
+  color:var(--cc);opacity:0;transition:opacity .12s;padding:2px;cursor:pointer}
+#page-vat .cochip:hover .cochip-x,#page-wht .cochip:hover .cochip-x{opacity:.55}
+#page-vat .cochip .cochip-x:hover,#page-wht .cochip .cochip-x:hover{opacity:1;color:#B42318}
+#page-vat .cochip-edit,#page-wht .cochip-edit{grid-column:1/-1;display:flex;flex-direction:column;gap:4px}
+#page-vat .cochip-edit .v30cein,#page-wht .cochip-edit .v30cein{font:inherit;font-size:11px;padding:4px 7px;
+  border:1px solid #E7EBF3;border-radius:7px;width:100%;box-sizing:border-box}
+#page-vat .cochip-edit .v30cebtns,#page-wht .cochip-edit .v30cebtns{display:flex;gap:5px}
+</style>
+<style id="pgChipsMonitor">
+/* v12.3: Progress % filter chips sit on white with a coloured leading icon; the selected
+   chip keeps its tint so the choice still reads. */
+#page-pg .glactfil .pgychip,#page-pg .glactfil .pgstchip,
+#page-pg .glactfil .pghlchip,#page-pg .glactfil .pgcatchip{
+  display:flex!important;align-items:center;gap:7px;
+  background:#fff!important;background-image:none!important;border:1px solid #E7EBF3!important;
+  color:#475467!important;font-weight:600!important;box-shadow:none!important}
+#page-pg .glactfil .pgychip:hover,#page-pg .glactfil .pgstchip:hover,
+#page-pg .glactfil .pghlchip:hover,#page-pg .glactfil .pgcatchip:hover{
+  border-color:#CBD5E1!important;background:#FBFCFD!important;transform:none!important;box-shadow:none!important}
+#page-pg .glactfil .pgci{flex:none;width:16px;text-align:center;font-size:11px;font-style:normal;line-height:1;opacity:.95}
+#page-pg .glactfil .pgstchip b,#page-pg .glactfil .pghlchip b{margin-left:auto;font-weight:700;color:#98A2B3}
+/* the leading icon carries the colour */
+#page-pg .glactfil .pgychip .pgci{color:#B4356A}
+#page-pg .glactfil .pgstchip.pg-act .pgci{color:#15803D}
+#page-pg .glactfil .pgstchip.pg-ina .pgci{color:#B45309}
+#page-pg .glactfil .pgstchip.pg-nd .pgci{color:#B42318}
+#page-pg .glactfil .pghlchip .pgci{color:#8A5E12}
+#page-pg .glactfil .pgcatchip .pgci{color:#0E5C52}
+/* selected: a light tint plus a matching outline, not a solid block */
+#page-pg .glactfil .pgychip.on{background:#FCEDF1!important;border-color:#E79FB6!important;color:#B4356A!important;font-weight:700!important}
+#page-pg .glactfil .pgstchip.on{background:#EDF6F3!important;border-color:#9FCCC0!important;color:#0F3D37!important;font-weight:700!important}
+#page-pg .glactfil .pghlchip.on{background:#FBF4DC!important;border-color:#D8BE7E!important;color:#8A5E12!important;font-weight:700!important}
+#page-pg .glactfil .pgcatchip.on{background:#EDF6F3!important;border-color:#9FCCC0!important;color:#0F3D37!important;font-weight:700!important}
+#page-pg .glactfil .pgstchip.on b,#page-pg .glactfil .pghlchip.on b{color:inherit}
+
+/* v12.3: Monitor — the two view cards match the panel cards everywhere else */
+/* only two cards here — fix the track width so they match the ~226px cards elsewhere
+   instead of stretching across the page */
+#page-mn .mnblocks{display:grid!important;grid-template-columns:repeat(auto-fill,226px)!important;
+  justify-content:start!important;align-items:stretch!important;grid-auto-rows:1fr!important;gap:12px!important}
+#page-mn .mnblock{width:auto!important;min-width:0!important}
+#page-mn .mnblock-i{font-size:14px!important}
+#page-mn .mntab2,#page-mn .mnsubtab{font-size:12px!important;font-weight:700!important;
+  min-height:34px!important;padding:6px 11px!important;letter-spacing:0!important}
+#page-mn .mntabs2,#page-mn .mnsubtabs{display:flex!important;flex-direction:column!important;gap:7px!important}
+</style>
+<style id="cbPanelMinimal">
+/* v12.4: Confirm Bank — equal panel cards, one 12px type scale, Database-key surfaces and
+   colour carried by the icons. Last block in the document -> wins the cascade. */
+
+/* ---------- 1) equal cards, controls stacked ---------- */
+#page-cb .glacts{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(214px,1fr))!important;
+  align-items:stretch!important;grid-auto-rows:1fr!important;gap:12px!important;margin:6px 0 12px!important}
+#page-cb .glacts>.glactg{width:auto!important;min-width:0!important}
+#page-cb .glacts>.glactg.glactg-act,#page-cb .glacts>.glactg.glactg-cls{width:auto!important}
+#page-cb .cbyrs,#page-cb .cbsrchw{display:grid!important;grid-template-columns:1fr!important;gap:5px!important}
+#page-cb .glactb.cb-add .glacti{color:#0E5C52}
+#page-cb .glactb.cb-del .glacti{color:#B42318}
+#page-cb .glactb.cb-rec .glacti{color:#6A34C4}
+#page-cb .glactb.cb-xls .glacti{color:#15803D}
+
+/* ---------- 2) year chips: white with a coloured icon, tinted when selected ---------- */
+#page-cb .cbyrs .cbyr{display:flex!important;align-items:center;gap:7px;width:100%;box-sizing:border-box;
+  text-align:left;background:#fff!important;background-image:none!important;border:1px solid #E7EBF3!important;
+  color:#475467!important;font-size:11.5px!important;font-weight:600!important;border-radius:9px!important;
+  padding:6px 10px!important;min-height:30px;box-shadow:none!important;cursor:pointer;transition:.12s}
+#page-cb .cbyrs .cbyr:hover{border-color:#CBD5E1!important;background:#FBFCFD!important}
+#page-cb .cbyrs .cbyr.on{background:#EDF6F3!important;border-color:#9FCCC0!important;color:#0F3D37!important;font-weight:700!important}
+#page-cb .cbci{flex:none;width:15px;text-align:center;font-size:11px;font-style:normal;line-height:1;color:#B4356A}
+#page-cb .cbyrs .cbyr.on .cbci{color:#0E5C52}
+
+/* ---------- 3) the search + legend card ---------- */
+#page-cb .cbsrchw .cbsrch{display:flex;align-items:center;gap:6px;width:100%;box-sizing:border-box;
+  border:1px solid #E7EBF3;border-radius:8px;background:#fff;padding:0 8px;position:relative}
+#page-cb .cbsrchw .cbsrch .ic{font-size:11px;opacity:.6}
+#page-cb .cbsrchw #cbSrch{flex:1;min-width:0;border:0;outline:none;background:transparent;font:inherit;
+  font-size:11px;padding:6px 0;color:#344054}
+#page-cb .cbfl{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#98A2B3;margin-top:4px}
+#page-cb .cbsrchw .cblegend{display:grid!important;grid-template-columns:1fr;gap:3px!important;margin:0!important}
+#page-cb .cbsrchw .cbleg{display:flex;align-items:center;gap:6px;font-size:10px!important;color:#667085!important;white-space:nowrap}
+#page-cb .cbsrchw .cbleg i{flex:none;width:8px;height:8px;border-radius:50%;font-style:normal;font-size:9px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+#page-cb .cbsrchw .cbleg i.tick{background:none;color:#15803D;font-weight:800;width:auto}
+#page-cb .cbsrchw .cbleg i.cross{background:none;color:#B42318;font-weight:800;width:auto}
+
+/* ---------- 4) the three stat tiles: pastel ground and an icon ---------- */
+#page-cb .cbtop{gap:10px!important}
+#page-cb .cbstat{border:1px solid transparent!important;border-radius:12px!important;box-shadow:none!important;
+  padding:10px 12px!important;display:flex;flex-direction:column;gap:6px;background:#E8F1FC!important}
+#page-cb .cbstat.gold{background:#FBF4DC!important}
+#page-cb .cbstat.pos{background:#E7F4EF!important}
+#page-cb .cbstat-h{display:flex;align-items:center;gap:8px;min-width:0}
+#page-cb .cbstat-i{flex:none;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;
+  border-radius:8px;background:rgba(255,255,255,.72);font-size:13px;line-height:1}
+#page-cb .cbstat .l{font-size:11px!important;font-weight:700!important;letter-spacing:.04em!important;
+  text-transform:uppercase!important;color:#1D5FAE!important;margin:0!important}
+#page-cb .cbstat.gold .l{color:#8A5E12!important}
+#page-cb .cbstat.pos .l{color:#0E5C52!important}
+#page-cb .cbstat .v{font-size:16px!important;font-weight:800!important;color:#101828!important;margin:0!important;line-height:1.2!important}
+#page-cb .cbstat .u{font-size:10.5px!important;color:#667085!important;margin:0!important}
+
+/* ---------- 5) the company list in the Database key ---------- */
+#page-cb .cbco{border:1px solid #E7EBF3!important;border-radius:12px!important;box-shadow:none!important;
+  background:#fff!important;margin-bottom:8px!important}
+#page-cb .cbco:hover{border-color:#CBD5E1!important;background:#FBFCFD!important}
+#page-cb .cbco-h{padding:9px 12px!important;gap:10px!important}
+#page-cb .cbco-nm{font-size:13px!important;font-weight:700!important;color:#101828!important}
+#page-cb .cbco-tax{font-size:10.5px!important;color:#98A2B3!important}
+#page-cb .cbco-badge{width:30px!important;height:30px!important;border-radius:9px!important;font-size:11px!important;font-weight:800!important}
+#page-cb .cbchip{font-size:10px!important;font-weight:700!important;border-radius:999px!important;padding:2px 9px!important}
+#page-cb .cbco-xls,#page-cb .cbco-open{font-size:10.5px!important;font-weight:700!important;border-radius:8px!important;padding:4px 10px!important}
+#page-cb .cbnote{display:flex;align-items:flex-start;gap:9px;font-size:11.5px!important;line-height:1.6!important;
+  background:#FCFBF7!important;border:1px solid #EDE7D8!important;border-radius:10px!important;color:#667085!important;padding:10px 13px!important}
+#page-cb .cbnote b{color:#8A5E12!important}
+#page-cb .cbnote-ic{flex:none;font-size:13px;line-height:1.4}
 </style>
 </body></html>
