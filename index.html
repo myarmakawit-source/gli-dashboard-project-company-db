@@ -11539,9 +11539,40 @@ function _bblRenderLoan(lk){
       +'</div></div>';
   /* grace (read-only) */
   var graceRows=''; (L.grace||[]).forEach(function(g,i){ graceRows+='<tr><td class="bblseq c">'+(i+1)+'</td><td class="l">'+_bblEsc(g.date)+'</td><td class="l bblvchcell">'+_bblVchLink(g.voucher)+'</td><td>'+_bblFmt(g.interest,true)+'</td></tr>'; });
-  var grace=(L.grace&&L.grace.length)?('<div class="bblcard bblgrace'+(st.showgrace?'':' collapsed')+'"><div class="bblcard-h"><div class="bblcard-t"><span class="bblic bblic-grc">💤</span>Interest before principal repayment <span class="bblchip bblchip-grc">Grace period · total '+_bblFmt(c.graceInt)+'</span></div></div>'+
-    '<div class="bblgbody"><div class="bbltblwrap"><table class="bbltbl bbltbl-grace"><thead><tr><th class="c">#</th><th class="l">Date<small>PAYMENT</small></th><th class="l">Voucher<small>NO.</small></th><th>Interest Paid<small>ACTUAL</small></th></tr></thead><tbody>'+graceRows+
-    '</tbody><tfoot><tr><td class="l" colspan="3">Total grace-period interest</td><td>'+_bblFmt(c.graceInt)+'</td></tr></tfoot></table></div></div></div>'):'';
+  /* v14.1: the grace-period table is only four narrow columns, so it sits on the
+     left at its natural width and a summary of the same rows fills the space that
+     used to be empty on the right. */
+  var _gA=(L.grace||[]), _gN=_gA.length;
+  var _gV={}, _gMin=null, _gMax=null, _gBig=0, _gBigV='';
+  for(var _gi=0;_gi<_gN;_gi++){ var _g=_gA[_gi];
+    var _gv=(''+(_g.voucher||'')).trim(); if(_gv)_gV[_gv]=1;
+    var _gd=(''+(_g.date||'')).trim();
+    if(_gd){ if(_gMin===null||_gd<_gMin)_gMin=_gd; if(_gMax===null||_gd>_gMax)_gMax=_gd; }
+    var _gm=_bblN(_g.interest); if(_gm>_gBig){_gBig=_gm;_gBigV=_gv;} }
+  var _gVn=0; for(var _gk in _gV)_gVn++;
+  var _gAvg=_gN?(_bblN(c.graceInt)/_gN):0;
+  function _gMon(a,b){ if(!a||!b)return 0;
+    var pa=(''+a).split('-'), pb=(''+b).split('-');
+    if(pa.length<2||pb.length<2)return 0;
+    return ((+pb[0]-+pa[0])*12)+(+pb[1]-+pa[1])+1; }
+  var _gMo=_gMon(_gMin,_gMax);
+  var _gPct=(_bblN(mt.facility)>0)?((_bblN(c.graceInt)/_bblN(mt.facility))*100):null;
+  var _gShare=(_bblN(t.intPaid)>0)?((_bblN(c.graceInt)/_bblN(t.intPaid))*100):null;
+  var _gStats=_bblDashPanel('Grace period \u2014 summary',
+      _bblKpi('Total interest','GRACE PERIOD',_bblFmt(c.graceInt),'#8A5E12','var(--bbl-gold-t)','','\ud83d\udcb0')
+    + _bblKpi('Payments','ENTRIES',''+_gN,'var(--bbl-brand)','var(--bbl-brand-t)',(_gVn?('/ '+_gVn+' voucher'+(_gVn===1?'':'s')):''),'\ud83e\uddfe')
+    + _bblKpi('Period','FIRST \u2192 LAST',(_gMin?_bblEsc(_gMin):'\u2014'),'var(--bbl-blue)','var(--bbl-blue-bg)',(_gMax?('\u2192 '+_bblEsc(_gMax)):''),'\ud83d\udcc5')
+    + _bblKpi('Months','IN GRACE',(_gMo?(''+_gMo):'\u2014'),'#6A34C4','#EFEBFB','months','\u23f3')
+    + _bblKpi('Average','PER PAYMENT',_bblFmt(_gAvg),'#B45309','#FCF1E4','','\u2696\ufe0f')
+    + _bblKpi('Largest','SINGLE PAYMENT',_bblFmt(_gBig),'#B03A5B','#FCEDF1',(_gBigV?_bblEsc(_gBigV):''),'\u2b06\ufe0f')
+    + _bblKpi('Of facility','GRACE \u00f7 CREDIT LINE',(_gPct==null?'\u2014':(_gPct.toFixed(2)+'%')),'var(--bbl-pos)','var(--bbl-pos-bg)','','\ud83c\udfe6')
+    + _bblKpi('Of interest paid','GRACE \u00f7 ALL INTEREST',(_gShare==null?'\u2014':(_gShare.toFixed(1)+'%')),'#0E7490','#E4F4F8','','\ud83d\udcca'));
+  var grace=(_gN)?('<div class="bblcard bblgrace'+(st.showgrace?'':' collapsed')+'"><div class="bblcard-h"><div class="bblcard-t"><span class="bblic bblic-grc">\ud83d\udca4</span>Interest before principal repayment <span class="bblchip bblchip-grc">Grace period \u00b7 total '+_bblFmt(c.graceInt)+'</span></div></div>'+
+    '<div class="bblgbody"><div class="bblgsplit">'+
+      '<div class="bblgleft"><div class="bbltblwrap"><table class="bbltbl bbltbl-grace"><thead><tr><th class="c">#</th><th class="l">Date<small>PAYMENT</small></th><th class="l">Voucher<small>NO.</small></th><th>Interest Paid<small>ACTUAL</small></th></tr></thead><tbody>'+graceRows+
+      '</tbody><tfoot><tr><td class="l" colspan="3">Total grace-period interest</td><td>'+_bblFmt(c.graceInt)+'</td></tr></tfoot></table></div></div>'+
+      '<div class="bblgright">'+_gStats+'</div>'+
+    '</div></div></div>'):'';
   /* schedule (read-only) */
   var head='<thead><tr>'+
     '<th class="c">No.<small>#</small></th><th class="l">Due Date<small>DATE</small></th>'+
@@ -32154,6 +32185,33 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 #page-bbl .bblfld.bblfld-p .bblin.locked{background:rgba(255,255,255,.62)!important;color:#475467!important}
 #page-bbl .bblfld.bblfld-p .bblin:focus{outline:none;border-color:var(--bf-c,#0E5C52)!important;
   box-shadow:0 0 0 3px rgba(16,24,40,.07)!important}
+/* v14.1: grace period — the narrow table sits left at its natural width, the
+   summary fills what used to be dead space on the right, and the whole card is
+   tightened top and bottom so it stops pushing the schedule down the page. */
+#page-bbl .bblgsplit{display:flex!important;align-items:flex-start;gap:12px;flex-wrap:wrap}
+#page-bbl .bblgleft{flex:0 1 auto;min-width:0;max-width:100%}
+#page-bbl .bblgleft .bbltblwrap{width:auto!important;display:inline-block;max-width:100%}
+#page-bbl .bbltbl-grace{width:auto!important;min-width:0!important}
+#page-bbl .bbltbl-grace th,#page-bbl .bbltbl-grace td{white-space:nowrap}
+#page-bbl .bbltbl-grace th.c,#page-bbl .bbltbl-grace td.bblseq{width:34px}
+#page-bbl .bblgright{flex:1 1 360px;min-width:0}
+#page-bbl .bblgright .bbldashp{margin:0!important}
+#page-bbl .bblgright .bblkpis{display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}
+@media (max-width:1280px){#page-bbl .bblgright .bblkpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media (max-width:620px){#page-bbl .bblgright .bblkpis{grid-template-columns:1fr!important}}
+#page-bbl .bblgright .bblkpi{padding:8px 10px 9px!important}
+#page-bbl .bblgright .bblkpi-v{font-size:14px!important}
+#page-bbl .bblgright .bblkpi-v small{font-size:10px!important;font-weight:600}
+/* tighter card: less air above and below the table */
+#page-bbl .bblgrace{margin-top:8px!important;margin-bottom:8px!important}
+#page-bbl .bblgrace .bblcard-h{padding-top:8px!important;padding-bottom:8px!important}
+#page-bbl .bblgrace .bblgbody{padding-top:0!important;padding-bottom:8px!important}
+#page-bbl .bbltbl-grace tbody td{padding-top:3px!important;padding-bottom:3px!important}
+#page-bbl .bbltbl-grace thead th{padding-top:6px!important;padding-bottom:6px!important}
+#page-bbl .bbltbl-grace tfoot td{padding-top:6px!important;padding-bottom:6px!important}
+@media (max-width:980px){#page-bbl .bblgleft,#page-bbl .bblgright{flex:1 1 100%}}
+
 /* the card head keeps its icon, now on a tinted tile like everything else */
 #page-bbl .bblcard .bblic{width:26px;height:26px;border-radius:8px;display:inline-flex;
   align-items:center;justify-content:center;background:#E7F4EF;font-size:13px}
