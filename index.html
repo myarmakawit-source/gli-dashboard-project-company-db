@@ -7732,10 +7732,40 @@ function _tkSimpleBlockHTML(t){
 function _tkContactRowHTML(t){
   return '<div class="tkmnrow"><span class="tkmnn doc">👤</span><span class="tkmnl">ชื่อผู้ติดต่อ</span><span class="tkmnf"><input class="tkmin" id="tkmContact" value="'+_eatt(((t&&t.contact)||''))+'" placeholder="ชื่อผู้ประสานงาน เช่น คุณสมชาย ใจดี · ฝ่ายบัญชี" autocomplete="off"></span></div>';
 }
+/* v14.2: several document types per card — the chosen ones show as removable chips,
+   the picker below adds another. The value is kept in a hidden field as a
+   comma-separated list so the save path is unchanged. */
 function _tkDocRowHTML(t){
-  return '<div class="tkmnrow"><span class="tkmnn doc">🗂</span><span class="tkmnl">ประเภทเอกสาร</span><span class="tkmnf"><select class="tkmin" id="tkmDoc"'+_tkDocSelStyle(t.doc)+'><option value="">— ไม่ระบุ —</option>'
-    +_tkDocOptions(t.doc)
-    +'</select></span></div>';
+  var keys=_tkDocKeys(t.doc);
+  return '<div class="tkmnrow tkmnrow-doc"><span class="tkmnn doc">🗂</span><span class="tkmnl">ประเภทเอกสาร</span>'
+    +'<span class="tkmnf tkdocmf">'
+      +'<input type="hidden" id="tkmDoc" value="'+_eatt(keys.join(','))+'">'
+      +'<span class="tkdocsel" id="tkmDocSel">'+_tkDocPickChips(keys)+'</span>'
+      +'<select class="tkmin tkdocadd2" id="tkmDocPick"><option value="">＋ เพิ่มประเภทเอกสาร…</option>'+_tkDocOptions('')+'</select>'
+    +'</span></div>';
+}
+function _tkDocPickChips(keys){
+  if(!keys||!keys.length)return '<span class="tkdocnonex">— ไม่ระบุ —</span>';
+  var h='';
+  for(var i=0;i<keys.length;i++){ var d=_tkDoc(keys[i]); if(!d)continue;
+    h+='<span class="tkdocpick" style="background:'+d[3]+';color:'+d[2]+';border-color:'+d[2]+'">'
+      +esc(d[1])
+      +'<button type="button" class="tkdocpickx" data-docrm="'+_eatt(d[0])+'" title="เอาออก">✕</button></span>'; }
+  return h||'<span class="tkdocnonex">— ไม่ระบุ —</span>';
+}
+function _tkDocPickSync(){
+  var hid=document.getElementById('tkmDoc'), box=document.getElementById('tkmDocSel');
+  if(hid&&box)box.innerHTML=_tkDocPickChips(_tkDocKeys(hid.value));
+}
+function _tkDocPickAdd(k){
+  var hid=document.getElementById('tkmDoc'); if(!hid||!k)return;
+  var keys=_tkDocKeys(hid.value);
+  if(keys.indexOf(k)<0)keys.push(k);
+  hid.value=keys.join(','); _tkDocPickSync();
+}
+function _tkDocPickRm(k){
+  var hid=document.getElementById('tkmDoc'); if(!hid)return;
+  hid.value=_tkDocKeys(hid.value).filter(function(x){return x!==k;}).join(','); _tkDocPickSync();
 }
 function _tkNoteHTML(){
   var h='<div class="tkck">';
@@ -8061,6 +8091,7 @@ function _tkDocSeed(){return [
  ['po','ใบสั่งซื้อ (PO)','#1D5FAE','#E7EFF8','ซื้อ–ขาย · เอกสารธุรกิจ'],
  ['qt','ใบเสนอราคา','#0E7490','#E0F2FE','ซื้อ–ขาย · เอกสารธุรกิจ'],
  ['con','สัญญา','#7C3AED','#F3E8FF','ซื้อ–ขาย · เอกสารธุรกิจ'],
+ ['poa','หนังสือมอบอำนาจ','#4F46E5','#E0E7FF','ซื้อ–ขาย · เอกสารธุรกิจ'],
  ['dn','ใบส่งของ','#0F766E','#D9F2EE','ซื้อ–ขาย · เอกสารธุรกิจ'],
  ['dnote','ใบเพิ่มหนี้','#DB2777','#FCE7F3','ซื้อ–ขาย · เอกสารธุรกิจ'],
  ['cnote','ใบลดหนี้','#BE185D','#FCE7F3','ซื้อ–ขาย · เอกสารธุรกิจ'],
@@ -8129,8 +8160,10 @@ var TK_DOC=(function(){
     var _sg={};for(_i=0;_i<seed.length;_i++)_sg[seed[_i][0]]=seed[_i][4]||'';
     for(_i=0;_i<cur.length;_i++){var _c=cur[_i];if(!((_c[4]||'')+'').trim()){var _g=_sg[_c[0]];if(_g){_c[4]=_g;_added++;}}}
   }
-  if(v<3){
-    try{localStorage.setItem('gli_tkdocs',JSON.stringify(cur));localStorage.setItem('gli_tkdocs_v','3');}catch(e){}
+  /* v14.2: หนังสือมอบอำนาจ — เติมครั้งเดียวเหมือนรอบก่อน ๆ */
+  if(v<4){ _mig({poa:1}); }
+  if(v<4){
+    try{localStorage.setItem('gli_tkdocs',JSON.stringify(cur));localStorage.setItem('gli_tkdocs_v','4');}catch(e){}
     /* บันทึก+ซิงค์ใน tick ถัดไป ตอนที่สคริปต์ทั้งไฟล์รันจบแล้ว (saveTkDocs พึ่ง _TS ที่ประกาศทีหลัง)
        เพื่อให้รายการที่เติมแล้วเป็นฝ่ายชนะตอนซิงค์ ไม่โดนสำเนาเก่าจากเครื่องอื่นทับ */
     if(_added)setTimeout(function(){try{saveTkDocs();}catch(e){}},0);
@@ -8140,6 +8173,20 @@ var TK_DOC=(function(){
 var _tkDocPanel=false;
 function saveTkDocs(){try{localStorage.setItem('gli_tkdocs',JSON.stringify(TK_DOC));}catch(e){}if(typeof _tsTouch==='function')_tsTouch('tkd');if(typeof cloudPush==='function')cloudPush();}
 function _tkDoc(k){k=(k||'')+'';if(!k)return null;for(var i=0;i<TK_DOC.length;i++)if(TK_DOC[i][0]===k)return TK_DOC[i];return null;}
+/* v14.2: a card may carry several document types. The field stays a string so every
+   existing card, export and sync payload keeps working — one key reads as a list of
+   one, several are comma-separated. */
+function _tkDocKeys(v){ var out=[],seen={};
+  (((v==null?'':v)+'').split(',')).forEach(function(k){ k=(k||'').trim();
+    if(k&&!seen[k]){seen[k]=1;out.push(k);} });
+  return out; }
+function _tkDocList(v){ var out=[];
+  _tkDocKeys(v).forEach(function(k){ var d=_tkDoc(k); if(d)out.push(d); });
+  return out; }
+function _tkDocFirst(v){ var l=_tkDocList(v); return l.length?l[0]:null; }
+function _tkDocNames(v,sep){ return _tkDocList(v).map(function(d){return d[1];}).join(sep||' \u00b7 '); }
+function _tkDocChips(v,cls){ return _tkDocList(v).map(function(d){
+    return '<span class="'+(cls||'tkdocchip')+'" style="color:'+d[2]+';border:1.5px solid '+d[2]+'">\ud83d\uddc2 '+esc(d[1])+'</span>'; }).join(''); }
 function _tkDocIdx(k){for(var i=0;i<TK_DOC.length;i++)if(TK_DOC[i][0]===k)return i;return -1;}
 function _tkDocAdd(){
   var key='d'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);
@@ -8467,7 +8514,7 @@ function renderTracking(){
   var _openN=TRACKDATA.length-_doneN;
   var view=TRACKDATA.filter(function(t){
     if(_tkIsDone(t))return false;/* v10.72: งานที่กดเสร็จแล้วย้ายไปหน้า Report งานที่เสร็จ */
-    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.co||'')+' '+_tkCoText(t)+' '+_tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.contact||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+((_tkDoc(t.doc)||[])[1]||''))).toLowerCase().indexOf(q)<0))return false;
+    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.co||'')+' '+_tkCoText(t)+' '+_tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.contact||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+_tkDocNames(t.doc,' '))).toLowerCase().indexOf(q)<0))return false;
     if(_tkFA&&t.assignee!==_tkFA)return false;
     if(_tkFP&&(t.prio||'med')!==_tkFP)return false;if(_tkFC&&(t.cat||'')!==_tkFC)return false;if(_tkFD&&(t.doc||'')!==_tkFD)return false;
     return true;
@@ -8566,12 +8613,12 @@ function _tkKanban(view){
 }
 function _tkCard(t,pos){
   var pr=_tkPrio(t.prio||'med'),d=_tkDue(t),si=_tkStatIdx(t.status||'todo');
-  var hl=_tkHL(t.hl),tc=_tkTC(t.tc),dc=_tkDoc(t.doc);
+  var hl=_tkHL(t.hl),tc=_tkTC(t.tc),dc=_tkDocFirst(t.doc);
   /* สีไฮไลท์ที่ตั้งเองที่การ์ด (hl) ชนะสีของประเภทเอกสารเสมอ */
   var cstyle='--p:'+pr[2]+';'+(t.hl?('background:'+hl[2]+';border-color:'+hl[3]+';'):(dc?('background:'+dc[3]+';border-color:'+dc[2]+'66;'):''));
   var h='<div class="tkcard'+((t.id===_tkFlashId)?' justadded':'')+'" draggable="true" data-id="'+t.id+'" style="'+cstyle+'">';
   h+='<div class="tkcardtop">'+((t.mode==='rows')?'':_tkCoBadge(t.co,t.cono))+'<span class="tkprio" style="background:'+pr[3]+';color:'+pr[2]+'">'+pr[1]+'</span>';
-  if(dc)h+='<span class="tkdocchip" style="color:'+dc[2]+';border:1.5px solid '+dc[2]+'">🗂 '+esc(dc[1])+'</span>';
+  h+=_tkDocChips(t.doc);
   if(t.cat){var _tc=_tkCat(t.cat);if(_tc)h+='<span class="tkcat" style="background:'+_tc[3]+';color:'+_tc[2]+'">'+esc(_tc[1])+'</span>';}
   h+='</div>';
   var _pc=((t.proj||'')+'').trim(),_ow=((t.owner||'')+'').trim(),_dn=((t.docno||'')+'').trim(),_ct=((t.contact||'')+'').trim();
@@ -8622,8 +8669,8 @@ function _tkList(view){
   var h='<div class="tklistwrap"><table class="tklist"><thead><tr><th>Task</th><th>Project</th><th>Assignee</th><th>Priority</th><th>Due</th><th>Status</th><th></th></tr></thead><tbody>';
   if(!view.length)h+='<tr><td colspan="7" class="tknone">No tasks match the filters</td></tr>';
   view.forEach(function(t){var pr=_tkPrio(t.prio||'med'),st=_tkStat(t.status||'todo'),d=_tkDue(t),ct=_tkCat(t.cat||'');
-    var _dcl=_tkDoc(t.doc);h+='<tr data-edit="'+t.id+'"><td class="tkltitle">'+((t.mode!=='rows'&&t.co)?(_tkCoBadge(t.co,t.cono)+' '):'')
-    +((t.mode==='rows')?(_tkRowList(t).map(function(r){return '<span class="tkgrpchip">'+esc(r.vno||'')+(r.co?(' · '+esc(_tkCoLabel(r.co,r.cono))):'')+'</span>';}).join(' ')+' '):'')+(_dcl?('<span class="tkdocchip" style="color:'+_dcl[2]+';border:1.5px solid '+_dcl[2]+'">'+esc(_dcl[1])+'</span> '):'')+(((t.grp||'')+'').trim()?('<span class="tkgrpchip">🗂 '+esc(((t.grp||'')+'').trim())+'</span> '):'')+(ct?('<span class="tkcat tkcatsm" style="background:'+ct[3]+';color:'+ct[2]+'">'+esc(ct[1])+'</span> '):'')+esc(t.title||'(no description)')
+    var _dcl=_tkDocFirst(t.doc);h+='<tr data-edit="'+t.id+'"><td class="tkltitle">'+((t.mode!=='rows'&&t.co)?(_tkCoBadge(t.co,t.cono)+' '):'')
+    +((t.mode==='rows')?(_tkRowList(t).map(function(r){return '<span class="tkgrpchip">'+esc(r.vno||'')+(r.co?(' · '+esc(_tkCoLabel(r.co,r.cono))):'')+'</span>';}).join(' ')+' '):'')+(_dcl?(_tkDocChips(t.doc)+' '):'')+(((t.grp||'')+'').trim()?('<span class="tkgrpchip">🗂 '+esc(((t.grp||'')+'').trim())+'</span> '):'')+(ct?('<span class="tkcat tkcatsm" style="background:'+ct[3]+';color:'+ct[2]+'">'+esc(ct[1])+'</span> '):'')+esc(t.title||'(no description)')
     +((((t.proj||'')+'').trim()||((t.owner||'')+'').trim()||((t.contact||'')+'').trim()||((t.docno||'')+'').trim())?('<span class="tkltl">'
       +(((t.proj||'')+'').trim()?('<b>'+esc(((t.proj||'')+'').trim())+'</b>'):'')
       +(((t.owner||'')+'').trim()?(' · '+esc(((t.owner||'')+'').trim())):'')
@@ -8763,6 +8810,7 @@ function _tkBind(){
     if((b=cl(e,'[data-next]'))){_tkMove(b.getAttribute('data-next'),1);return;}
     if((b=cl(e,'[data-done]'))){_tkDoneMark(b.getAttribute('data-done'));return;}
     if((b=cl(e,'#tkDoneN'))){_tkPageSet('report');return;}
+    if((b=cl(e,'[data-docrm]'))){_tkDocPickRm(b.getAttribute('data-docrm'));return;}
     if((b=cl(e,'.tkdel'))){_tkDel(b.getAttribute('data-del'));return;}
     if((b=cl(e,'#tkAdd'))){_tkAdd('todo');return;}
     if((b=cl(e,'.tkaddcol'))){_tkAdd(b.getAttribute('data-st'),'');return;}
@@ -8809,7 +8857,8 @@ function _tkBind(){
     if(el.id==='tkckNew'){e.preventDefault();_tkNoteAdd();return;}
     if(el.getAttribute&&el.getAttribute('data-ntx')){e.preventDefault();var ne=document.getElementById('tkckNew');if(ne)ne.focus();}});
   pg.addEventListener('change',function(e){if(cl(e,'#page-tkr'))return;var el=e.target;if(!el)return;
-    if(el.id==='tkmDoc'){var _d=_tkDoc(el.value);el.style.background=_d?_d[3]:'';el.style.color=_d?_d[2]:'';el.style.borderColor=_d?_d[2]:'';return;}
+    /* v14.2: the picker adds a type to the card's list, then resets itself */
+    if(el.id==='tkmDocPick'){ var _pk=(el.value||'').trim(); if(_pk)_tkDocPickAdd(_pk); el.value=''; return; }
     if(el.id==='tkmProj'){if(_tkPmT)clearTimeout(_tkPmT);_tkPmApply(false);return;}/* ออกจากช่อง/กด Enter = ค้นทันที ไม่ต้องรอ debounce */
     var _dn=(el.getAttribute&&el.getAttribute('data-docnm'))||'';
     if(_dn){_tkDocSet(_dn,1,(el.value||'').trim()||'(ไม่มีชื่อ)');return;}
@@ -8891,7 +8940,7 @@ function _tkrRows(){
       var u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;
       var hay=[_tkTaskName(t),t.desc,t.proj,t.owner,t.contact,t.docno,t.grp,t.co,t.done_by,
         (u&&typeof _ptName==='function')?_ptName(u):'',_tkCoText(t),
-        _tkProjName(t.proj),((_tkDoc(t.doc)||[])[1]||''),((_tkCat(t.cat)||[])[1]||''),
+        _tkProjName(t.proj),_tkDocNames(t.doc),((_tkCat(t.cat)||[])[1]||''),
         ((_tkStat(t.status||TK_STAT[0][0])||[])[1]||''),
         _tkNoteList(t).map(function(n){return n.txt||'';}).join(' '),
         _tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')].join(' ').toLowerCase();
@@ -8910,7 +8959,7 @@ function _tkrRows(){
 function _tkrGrpOf(t){
   var u,d,c,k;
   if(_tkrGrp==='as'){u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;return u?_ptName(u):'— ไม่ระบุผู้รับผิดชอบ —';}
-  if(_tkrGrp==='doc'){d=_tkDoc(t.doc);return d?d[1]:'— ไม่ระบุประเภทเอกสาร —';}
+  if(_tkrGrp==='doc'){d=_tkDocFirst(t.doc);return d?_tkDocNames(t.doc):'— ไม่ระบุประเภทเอกสาร —';}
   if(_tkrGrp==='mon')return _tkrMonLabel(_tkrMonKey(_tkDoneTs(t)));
   if(_tkrGrp==='co'){
     if(t.mode==='rows'){var sn={},o=[];_tkRowList(t).forEach(function(r){var k=_tkCo(r.co);if(k&&!sn[k[0]]){sn[k[0]]=1;o.push(k[1]);}});
@@ -8960,7 +9009,7 @@ function _tkrExport(){
     var nl=_tkNoteList(t),nd=0;nl.forEach(function(n){if(n.done)nd++;});
     var lt=_tkrLate(t),dy=_tkrDays(t),ts=_tkDoneTs(t);
     lines.push([i+1,_tkrDate(ts),_tkrTime(ts),_tkTaskName(t),(t.desc||''),
-      ((_tkDoc(t.doc)||[])[1]||''),(_tkCoText(t)||(((t.co||'')+'').toUpperCase())),
+      _tkDocNames(t.doc),(_tkCoText(t)||(((t.co||'')+'').toUpperCase())),
       ((_tkStat(t.status||TK_STAT[0][0])||[])[1]||''),((t.grp||'')+''),((_tkCat(t.cat)||[])[1]||''),
       (t.proj||''),(t.proj?_tkProjName(t.proj):''),(t.owner||''),(t.contact||''),(t.docno||''),
       (u?_ptName(u):''),(t.done_by||''),(t.by||''),
@@ -8990,7 +9039,7 @@ function _tkrCoCell(t){
 }
 function _tkrRowHTML(t,no){
   var u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;
-  var dc=_tkDoc(t.doc),co=_tkCo(t.co),st=_tkStat(t.status||TK_STAT[0][0]),ct=_tkCat(t.cat);
+  var dc=_tkDocFirst(t.doc),co=_tkCo(t.co),st=_tkStat(t.status||TK_STAT[0][0]),ct=_tkCat(t.cat);
   var ts=_tkDoneTs(t),lt=_tkrLate(t),dy=_tkrDays(t);
   var nl=_tkNoteList(t),nd=0;nl.forEach(function(n){if(n.done)nd++;});
   var na=(t.att&&t.att.length)||0;
@@ -32188,6 +32237,20 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
 /* v14.1: grace period — the narrow table sits left at its natural width, the
    summary fills what used to be dead space on the right, and the whole card is
    tightened top and bottom so it stops pushing the schedule down the page. */
+/* v14.2: Tracking — several document types per card */
+#page-tk .tkmnrow-doc .tkdocmf{display:flex!important;flex-direction:column;gap:6px;align-items:stretch}
+#page-tk .tkdocsel{display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-height:26px}
+#page-tk .tkdocpick{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;
+  border:1.5px solid;border-radius:999px;padding:3px 6px 3px 10px;line-height:1.3}
+#page-tk .tkdocpickx{border:none;background:rgba(255,255,255,.55);color:inherit;cursor:pointer;
+  width:16px;height:16px;border-radius:50%;font-size:9px;line-height:1;padding:0;
+  display:inline-flex;align-items:center;justify-content:center;font-family:inherit}
+#page-tk .tkdocpickx:hover{background:#fff;filter:brightness(.92)}
+#page-tk .tkdocnonex{font-size:11.5px;color:#98A2B3}
+#page-tk .tkdocadd2{font-size:12px}
+/* a card can now show more than one chip — let them wrap */
+#page-tk .tkdocchip{margin-right:4px;margin-bottom:2px}
+
 #page-bbl .bblgsplit{display:flex!important;align-items:flex-start;gap:12px;flex-wrap:wrap}
 #page-bbl .bblgleft{flex:0 1 auto;min-width:0;max-width:100%}
 #page-bbl .bblgleft .bbltblwrap{width:auto!important;display:inline-block;max-width:100%}
