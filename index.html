@@ -33927,6 +33927,17 @@ body.sbfold .sbshow-btn{display:inline-flex}
 #page-pdrepjv .apjv-cols::before{content:"";position:absolute;left:50%;top:10px;bottom:10px;
   border-left:2px dashed #D3DCE8;transform:translateX(-1px);pointer-events:none;z-index:0}
 @media (max-width:1180px){#page-pdrepjv .apjv-cols::before{display:none}}
+/* v14.7: Routine expenses takes a rose / pink theme of its own. It is still a
+   liability (the badge says so), but recurring bills are the money that leaves on
+   a clock, so the card reads red rather than sharing the AP indigo. Redefining
+   the five side variables re-colours the rail, heading, table bar, hover, totals
+   and buttons in one go. */
+#page-pdrepjv .apjv-topR{--sc:#C2415F;--scd:#8F2340;--scb:#9B2C46;--scp:#FCEBF0;--scl:#F3C8D4}
+#page-pdrepjv .apjv-topR .apjv-sub-routine .apjv-sechd{font-weight:900}
+#page-pdrepjv .apjv-topR .apjv-sechint{color:#C08096}
+/* the tick and the delete button already sit in rose — keep the row grip quiet */
+#page-pdrepjv .apjv-topR .apjv-drag{color:#D59FB0}
+#page-pdrepjv .apjv-topR .apjv-drag:hover{color:#9B2C46}
 </style>
 <script id="jvSidesJs">
 /* ===== v14.6: Joint Venture — name each side's entry table for what it holds,
