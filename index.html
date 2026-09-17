@@ -33627,4 +33627,227 @@ body.sbfold .sbshow-btn{display:inline-flex}
 #page-pg .pgtbl td.pgstatc{max-width:none!important}
 #page-pg .pgtblwrap{overflow-x:auto}
 </style>
+<style id="jvFilterCss">
+/* ===== v14.5: Joint Venture — heading caret (Excel AutoFilter) and its panel ===== */
+/* headings keep room for the caret; the label never runs under it */
+#page-pdrepjv .apjv-tbl thead th.apjv-hf{padding-right:26px!important}
+#page-pdrepjv .apjv-tbl thead th .apjv-hlbl{display:inline-block;vertical-align:middle;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+#page-pdrepjv .apjv-tbl thead th.on{background:#14514A!important}
+#page-pdrepjv .apjv-fbtn{position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  width:17px;height:17px;padding:0;border-radius:5px;cursor:pointer;z-index:5;
+  border:1px solid rgba(255,255,255,.30);background:rgba(255,255,255,.12);color:#fff;
+  font-family:'Inter',sans-serif;font-size:7.5px;line-height:1;
+  display:inline-flex;align-items:center;justify-content:center;transition:.12s}
+#page-pdrepjv .apjv-fbtn:hover{background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.55)}
+#page-pdrepjv .apjv-fbtn.on{background:#FFD166;border-color:#FFD166;color:#5A4100;box-shadow:0 0 0 2px rgba(255,209,102,.24)}
+/* the two label-only columns */
+#page-pdrepjv .apjv-tbl th.apjvx,#page-pdrepjv .apjv-tbl td.apjvx{width:66px;min-width:66px;text-align:center}
+#page-pdrepjv .apjv-routine th.apjvx,#page-pdrepjv .apjv-routine td.apjvx{width:70px;min-width:70px}
+#page-pdrepjv .apjv-tbl td.crcv,#page-pdrepjv .apjv-tbl th.crcv{width:82px;min-width:82px}
+#page-pdrepjv .apjv-routine th.apjv-grip{width:26px!important;min-width:26px!important;text-align:center;padding-left:2px!important;padding-right:2px!important}
+
+/* ---- the dropdown panel ---- */
+.apjv-fpop{position:fixed;z-index:12000;width:268px;background:#fff;border:1px solid #D9E2EC;
+  border-radius:13px;box-shadow:0 18px 44px -14px rgba(15,61,55,.38),0 2px 8px rgba(16,24,40,.08);
+  font-family:'Inter',sans-serif;overflow:hidden}
+.apjv-fpop-hd{display:flex;align-items:center;gap:8px;padding:9px 10px 9px 12px;background:#0F3D37;color:#fff}
+.apjv-fpop-hd .t{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;opacity:.82}
+.apjv-fpop-hd .c{font-size:12px;font-weight:800;margin-left:auto;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apjv-fpop-x{background:rgba(255,255,255,.14);border:0;color:#fff;width:19px;height:19px;border-radius:6px;
+  cursor:pointer;font-size:10px;line-height:1;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.apjv-fpop-x:hover{background:rgba(255,255,255,.3)}
+.apjv-fpop-s{padding:9px 10px 7px;background:#F7FAF9;border-bottom:1px solid #E7EEEC}
+.apjv-fpop-q{width:100%;box-sizing:border-box;border:1px solid #D3DEDB;border-radius:8px;padding:5px 9px;
+  font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#141C29;background:#fff}
+.apjv-fpop-q:focus{outline:none;border-color:#2F9E88;box-shadow:0 0 0 2px rgba(47,158,136,.18)}
+.apjv-fpop-list{max-height:232px;overflow-y:auto;overflow-x:hidden;padding:4px 0;scrollbar-width:thin}
+.apjv-fpop-it{display:flex;align-items:center;gap:8px;padding:4px 12px;cursor:pointer;font-size:12px;color:#243043}
+.apjv-fpop-it:hover{background:#EEF6F4}
+.apjv-fpop-it.all{font-weight:800;color:#0E7A6C;border-bottom:1px solid #EDF2F1;margin-bottom:3px;padding-bottom:6px}
+.apjv-fpop-it input{accent-color:#0E7A6C;width:13px;height:13px;flex:none;margin:0;cursor:pointer}
+.apjv-fpop-it>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apjv-fpop-it>span em{color:#98A2B3;font-style:italic}
+.apjv-fpop-it>i{flex:none;font-style:normal;font-size:10px;font-weight:700;color:#98A2B3;
+  background:#F2F4F7;border-radius:999px;padding:1px 7px;font-variant-numeric:tabular-nums}
+.apjv-fpop-none{padding:14px 12px;text-align:center;font-size:11.5px;font-weight:600;color:#98A2B3}
+.apjv-fpop-ft{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#F7FAF9;border-top:1px solid #E7EEEC}
+.apjv-fpop-clr{flex:1;border:1px solid #E7C3CB;background:#fff;color:#B03A5B;border-radius:8px;padding:5px 8px;
+  font-family:'Inter',sans-serif;font-size:11px;font-weight:800;cursor:pointer;transition:.12s}
+.apjv-fpop-clr:hover{background:#FCEDF1}
+.apjv-fpop-ok{border:0;background:#0F3D37;color:#fff;border-radius:8px;padding:5px 16px;
+  font-family:'Inter',sans-serif;font-size:11px;font-weight:800;cursor:pointer;transition:.12s}
+.apjv-fpop-ok:hover{background:#14544B}
+</style>
+<script id="jvFilterJs">
+/* ===== v14.5: Joint Venture tables — complete column headings and Excel-style
+   filter dropdowns. The old always-on filter input row is replaced by a caret
+   button in each heading; clicking it opens a panel with a search box and the
+   column's distinct values as checkboxes, exactly like AutoFilter. ===== */
+(function(){
+  if(typeof _apjvThead!=='function'||typeof _APJV_COLS==='undefined')return;
+  var SIDES=['liab','asset','routine','bank'];
+  var K='';                      /* value-key prefix, keeps __proto__ & co. out of the way */
+  window._apjvFltV=window._apjvFltV||{};   /* side -> field -> {K+value:true} ; absent = no value filter */
+
+  /* the tick column had no wording at all */
+  (function(){var c=_APJV_COLS.routine||[];for(var i=0;i<c.length;i++)if(c[i].f==='rcv')c[i].l='Received';})();
+
+  function _fvGet(s,f){var o=_apjvFltV[s];return (o&&o[f])?o[f]:null;}
+  function _fvSet(s,f,set){if(!_apjvFltV[s])_apjvFltV[s]={};if(set)_apjvFltV[s][f]=set;else delete _apjvFltV[s][f];}
+  function _fqGet(s,f){return (_apjvFlt[s]&&_apjvFlt[s][f])||'';}
+  function _fqSet(s,f,v){if(!_apjvFlt[s])_apjvFlt[s]={};if((''+v).trim()==='')delete _apjvFlt[s][f];else _apjvFlt[s][f]=v;}
+  function _fltOn(s,f){return (''+_fqGet(s,f)).trim()!==''||!!_fvGet(s,f);}
+
+  /* ---------- headings: every column says what it is ---------- */
+  _apjvThead=function(side){
+    var cols=_APJV_COLS[side]||[],widths=(APJVCOLW[side]||{});
+    var grip=(side==='routine');
+    var h='<tr>'+(grip?'<th class="apjv-grip" title="ลำดับ / Order">#</th>':'');
+    cols.forEach(function(col){
+      var w=widths[col.f],st=(w?(' style="width:'+w+'px;min-width:'+w+'px"'):'');
+      var on=_fltOn(side,col.f);
+      h+='<th class="'+col.c+(col.ra?' ra':'')+(col.nofilter?'':' apjv-hf')+(on?' on':'')+'"'+st+'>'
+        +'<span class="apjv-hlbl">'+_apjvE(col.l)+'</span>'
+        +(col.nofilter?'':'<button type="button" class="apjv-fbtn'+(on?' on':'')+'" data-fside="'+side+'" data-fcol="'+col.f+'" title="Filter — '+_apjvE(col.l)+'">▼</button>')
+        +(col.norsz?'':'<span class="apjv-rsz" data-col="'+col.f+'" title="Drag to resize"></span>')
+      +'</th>';});
+    h+='<th class="apjvx">Action</th></tr>';
+    return '<thead>'+h+'</thead>';
+  };
+
+  /* ---------- filtering: search text AND ticked values ---------- */
+  function _mark(side){
+    var w=document.getElementById('apjvWrap');if(!w)return;
+    var btns=w.querySelectorAll('table[data-fside="'+side+'"] .apjv-fbtn');
+    for(var i=0;i<btns.length;i++){var on=_fltOn(side,btns[i].getAttribute('data-fcol'));
+      btns[i].classList.toggle('on',on);var th=btns[i].closest('th');if(th)th.classList.toggle('on',on);}
+  }
+  _apjvApplyFilter=function(side){
+    var w=document.getElementById('apjvWrap');if(!w)return;
+    var tbl=w.querySelector('table[data-fside="'+side+'"]');if(!tbl)return;
+    var flt=_apjvFlt[side]||{},fv=_apjvFltV[side]||{};
+    var tk=Object.keys(flt).filter(function(k){return (''+flt[k]).trim()!=='';});
+    var vk=Object.keys(fv);
+    var any=(tk.length+vk.length)>0;
+    var rows=tbl.querySelectorAll('tbody tr[data-id]');
+    for(var i=0;i<rows.length;i++){
+      var tr=rows[i],show=true,j,el;
+      for(j=0;j<tk.length&&show;j++){
+        var q=(''+flt[tk[j]]).trim().toLowerCase().replace(/,/g,'');
+        el=tr.querySelector('[data-f="'+tk[j]+'"]');
+        if((el?(''+el.value).toLowerCase().replace(/,/g,''):'').indexOf(q)<0)show=false;
+      }
+      for(j=0;j<vk.length&&show;j++){
+        el=tr.querySelector('[data-f="'+vk[j]+'"]');
+        if(!fv[vk[j]][K+(el?(''+el.value).trim():'')])show=false;
+      }
+      tr.style.display=show?'':'none';
+    }
+    var addtr=tbl.querySelector('tbody tr.apjv-addtr');if(addtr)addtr.style.display=any?'none':'';
+    var grpRows=tbl.querySelectorAll('tbody tr.apjv-grp,tbody tr.apjv-grpsub,tbody tr.apjv-grpgap');
+    if(grpRows.length){var vis={},er=tbl.querySelectorAll('tbody tr[data-id][data-grp]');
+      for(var a=0;a<er.length;a++){if(er[a].style.display!=='none')vis[er[a].getAttribute('data-grp')]=true;}
+      for(var b=0;b<grpRows.length;b++){var g=grpRows[b].getAttribute('data-grp');
+        grpRows[b].style.display=(any&&!vis[g])?'none':'';}}
+    _mark(side);
+  };
+  _apjvRestoreFilters=function(){SIDES.forEach(function(s){_apjvApplyFilter(s);});};
+
+  /* ---------- the dropdown ---------- */
+  var _pop=null;
+  function _close(){if(_pop&&_pop.parentNode)_pop.parentNode.removeChild(_pop);_pop=null;}
+  function _vals(side,f){
+    var w=document.getElementById('apjvWrap');if(!w)return [];
+    var tbl=w.querySelector('table[data-fside="'+side+'"]');if(!tbl)return [];
+    var rows=tbl.querySelectorAll('tbody tr[data-id]'),seen={},out=[];
+    for(var i=0;i<rows.length;i++){
+      var el=rows[i].querySelector('[data-f="'+f+'"]');
+      var v=el?(''+(el.value==null?'':el.value)).trim():'';
+      if(!seen[K+v]){seen[K+v]={v:v,n:0};out.push(seen[K+v]);}
+      seen[K+v].n++;
+    }
+    out.sort(function(a,b){if(a.v==='')return 1;if(b.v==='')return -1;
+      return a.v.localeCompare(b.v,undefined,{numeric:true,sensitivity:'base'});});
+    return out;
+  }
+  function _listHTML(vals,cur,q){
+    var qq=(''+q).trim().toLowerCase();
+    var shown=vals.filter(function(v){return !qq||v.v.toLowerCase().indexOf(qq)>=0;});
+    if(!shown.length)return '<div class="apjv-fpop-none">— no matching value —</div>';
+    var allOn=true;for(var i=0;i<shown.length;i++)if(!cur[K+shown[i].v]){allOn=false;break;}
+    var h='<label class="apjv-fpop-it all"><input type="checkbox" class="apjv-ckall"'+(allOn?' checked':'')+'>'
+      +'<span>(Select all)</span><i>'+shown.length+'</i></label>';
+    shown.forEach(function(v){
+      h+='<label class="apjv-fpop-it"><input type="checkbox" class="apjv-ckv" data-v="'+_apjvE(v.v)+'"'
+        +(cur[K+v.v]?' checked':'')+'><span>'+(v.v===''?'<em>(Blanks)</em>':_apjvE(v.v))+'</span><i>'+v.n+'</i></label>';
+    });
+    return h;
+  }
+  function _open(btn){
+    var side=btn.getAttribute('data-fside'),f=btn.getAttribute('data-fcol');
+    var was=_pop&&_pop.getAttribute('data-s')===side&&_pop.getAttribute('data-f')===f;
+    _close();if(was)return;
+    var cols=_APJV_COLS[side]||[],col=null;
+    for(var i=0;i<cols.length;i++)if(cols[i].f===f)col=cols[i];
+    var vals=_vals(side,f),set=_fvGet(side,f),cur={};
+    vals.forEach(function(v){cur[K+v.v]=set?!!set[K+v.v]:true;});
+
+    var d=document.createElement('div');
+    d.className='apjv-fpop';d.setAttribute('data-s',side);d.setAttribute('data-f',f);
+    d.innerHTML='<div class="apjv-fpop-hd"><span class="t">▼ Filter</span>'
+        +'<span class="c">'+_apjvE(col?col.l:f)+'</span>'
+        +'<button type="button" class="apjv-fpop-x" title="Close">✕</button></div>'
+      +'<div class="apjv-fpop-s"><input class="apjv-fpop-q" type="text" placeholder="⌕ Search…" autocomplete="off" value="'+_apjvE(_fqGet(side,f))+'"></div>'
+      +'<div class="apjv-fpop-list">'+_listHTML(vals,cur,_fqGet(side,f))+'</div>'
+      +'<div class="apjv-fpop-ft"><button type="button" class="apjv-fpop-clr">↺ Clear filter</button>'
+        +'<button type="button" class="apjv-fpop-ok">Done</button></div>';
+    document.body.appendChild(d);_pop=d;
+
+    var r=btn.getBoundingClientRect(),pw=d.offsetWidth,ph=d.offsetHeight;
+    var left=Math.max(8,Math.min(r.right-pw+10,window.innerWidth-pw-8));
+    var top=r.bottom+6;if(top+ph>window.innerHeight-8)top=Math.max(8,r.top-ph-6);
+    d.style.left=left+'px';d.style.top=top+'px';
+
+    var list=d.querySelector('.apjv-fpop-list'),q=d.querySelector('.apjv-fpop-q');
+    function commit(){
+      var all=true;for(var k in cur)if(!cur[k]){all=false;break;}
+      _fvSet(side,f,all?null:(function(){var o={};for(var k2 in cur)if(cur[k2])o[k2]=true;return o;})());
+      _apjvApplyFilter(side);
+    }
+    function redraw(){list.innerHTML=_listHTML(vals,cur,q.value);}
+    q.addEventListener('input',function(){_fqSet(side,f,q.value);_apjvApplyFilter(side);redraw();});
+    q.addEventListener('keydown',function(e){if(e.key==='Escape'){e.stopPropagation();_close();}});
+    list.addEventListener('change',function(e){
+      var t=e.target;if(!t||!t.classList)return;
+      var qq=(''+q.value).trim().toLowerCase();
+      var shown=vals.filter(function(v){return !qq||v.v.toLowerCase().indexOf(qq)>=0;});
+      if(t.classList.contains('apjv-ckall')){shown.forEach(function(v){cur[K+v.v]=t.checked;});}
+      else if(t.classList.contains('apjv-ckv')){cur[K+t.getAttribute('data-v')]=t.checked;}
+      else return;
+      commit();redraw();
+    });
+    d.querySelector('.apjv-fpop-clr').addEventListener('click',function(){
+      _fqSet(side,f,'');_fvSet(side,f,null);q.value='';
+      vals.forEach(function(v){cur[K+v.v]=true;});
+      _apjvApplyFilter(side);redraw();});
+    d.querySelector('.apjv-fpop-ok').addEventListener('click',_close);
+    d.querySelector('.apjv-fpop-x').addEventListener('click',_close);
+    setTimeout(function(){try{q.focus();q.select();}catch(_e){}},0);
+  }
+
+  document.addEventListener('mousedown',function(e){
+    var t=e.target;if(!t||!t.closest)return;
+    if(t.closest('.apjv-fpop'))return;
+    var b=t.closest('.apjv-fbtn');
+    if(b){e.preventDefault();e.stopPropagation();_open(b);return;}
+    _close();
+  },true);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')_close();});
+  window.addEventListener('resize',_close);
+  window.addEventListener('scroll',_close,true);
+
+  /* the page may already be rendered with the old heading markup */
+  try{if(document.getElementById('apjvWrap')&&document.querySelector('#page-pdrepjv .apjv-tbl'))renderApjv();}catch(_e){}
+})();
+</script>
 </body></html>
