@@ -4789,6 +4789,20 @@ body.adv-resizing{cursor:col-resize!important;user-select:none!important}
 @media(max-width:620px){#page-pdrepjv .apjv-tools-sp{display:none;flex-basis:100%}}
 /* ---- two columns ---- */
 #page-pdrepjv .apjv-cols{display:grid;grid-template-columns:1fr;gap:18px;align-items:start}
+/* v11.12: top row — dashboard left half, Routine expenses right half */
+#page-pdrepjv .apjv-toprow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start;margin:0 0 18px}
+@media(max-width:1180px){#page-pdrepjv .apjv-toprow{grid-template-columns:1fr}}
+#page-pdrepjv .apjv-topL,#page-pdrepjv .apjv-topR{min-width:0}
+#page-pdrepjv .apjv-topL .apjv-dash{margin:0;height:100%}
+/* the dashboard now lives in half the width — make its tiles and bars fit that box */
+#page-pdrepjv .apjv-topL .apjv-kpis{grid-template-columns:repeat(2,1fr);gap:10px}
+#page-pdrepjv .apjv-topL .apjv-kpi{padding:10px 12px 11px 15px}
+#page-pdrepjv .apjv-topL .apjv-kpi-v{font-size:19px}
+#page-pdrepjv .apjv-topL .apjv-barlbl{flex:0 0 74px}
+@media(max-width:560px){#page-pdrepjv .apjv-topL .apjv-kpis{grid-template-columns:1fr}}
+/* Routine card: no column header of its own, so give the section a little breathing room */
+#page-pdrepjv .apjv-topR .apjv-sec{padding:14px 14px 15px}
+#page-pdrepjv .apjv-topR .apjv-sec+.apjv-sec{border-top:0}
 @media(max-width:1120px){#page-pdrepjv .apjv-cols{grid-template-columns:1fr}}
 #page-pdrepjv .apjv-col{border:1.5px solid #EFE7D8;border-radius:20px;background:#fff;overflow:hidden;box-shadow:0 5px 20px -12px rgba(17,24,39,.18)}
 /* main column headers (kept — the excepted Liability / Asset titles) */
@@ -11159,8 +11173,13 @@ function renderApjv(){
     +'<div class="apjv">'
     +'<input type="file" id="apjvImportFile" accept=".xlsx,.xls,.csv" hidden>'
      +_apjvActionPanel()
-     +'<div id="apjvDash">'+_apjvDashHTML(_apjvCo)+'</div><div class="apjv-cols">'
-    +'<div class="apjv-col apjv-liab"><div class="apjv-colhd"><span class="apjv-colic">💳</span><span class="apjv-coltt">Liability &middot; AP</span><span class="apjv-cohint">'+_apjvE(_apjvCo)+'</span></div>'+_apjvMainSec('liab')+_apjvRoutineSec()+'</div>'
+     /* v11.12: top row — Position Dashboard keeps the left half, Routine expenses moves
+        up beside it into the space the dashboard used to leave empty. */
+     +'<div class="apjv-toprow">'
+     +'<div id="apjvDash" class="apjv-topL">'+_apjvDashHTML(_apjvCo)+'</div>'
+     +'<div class="apjv-col apjv-liab apjv-topR">'+_apjvRoutineSec()+'</div>'
+     +'</div><div class="apjv-cols">'
+    +'<div class="apjv-col apjv-liab"><div class="apjv-colhd"><span class="apjv-colic">💳</span><span class="apjv-coltt">Liability &middot; AP</span><span class="apjv-cohint">'+_apjvE(_apjvCo)+'</span></div>'+_apjvMainSec('liab')+'</div>'
     +'<div class="apjv-col apjv-asset"><div class="apjv-colhd"><span class="apjv-colic">🏦</span><span class="apjv-coltt">Asset</span><span class="apjv-cohint">'+_apjvE(_apjvCo)+'</span></div>'+_apjvMainSec('asset')+_apjvBankSec()+'</div>'
     +'</div></div>';
   w.innerHTML=html;
