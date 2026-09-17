@@ -32367,6 +32367,17 @@ h2,h3,h4{ letter-spacing:-.006em !important; }
   border-top:1px solid #E7EBF3!important;border-right:0!important}
 
 /* the add-entry strip keeps out of the grid */
+/* v14.4: Liability on the left, Asset on the right — the markup was already two
+   columns (.apjv-cols > .apjv-col), an older rule pinned it to one. */
+#page-pdrepjv .apjv-cols{display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important;align-items:start!important}
+@media (max-width:1180px){#page-pdrepjv .apjv-cols{grid-template-columns:1fr!important}}
+#page-pdrepjv .apjv-col{min-width:0}
+/* each side keeps the Database table form and scrolls inside its own column */
+#page-pdrepjv .apjv-tw{overflow-x:auto;max-width:100%}
+#page-pdrepjv .apjv-tbl{min-width:0!important}
+#page-pdrepjv .apjv-tbl.apjv-main{min-width:620px!important}
+#page-pdrepjv .apjv-tbl:not(.apjv-main){min-width:420px!important}
 #page-pdrepjv .apjv-tbl tbody tr.apjv-addtr td{border-right:0!important;border-bottom:0!important;
   background:transparent!important;padding:0!important}
 #page-pdrepjv .apjv-main tr.apjv-grpgap td{border-right:0!important;border-bottom:0!important}
