@@ -6421,6 +6421,233 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 </script>
 
 <script>if(typeof XLSX==="undefined"){try{var _xs=document.createElement("script");_xs.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";document.head.appendChild(_xs);}catch(e){}}</script>
+<!-- v14.8: the Tracking payment helpers must be defined BEFORE the main script boots —
+     showMod() can open Tracking on load and _tkCard() calls _tkPayCardHTML() straight away. -->
+<script id="tkPayJs">
+/* ===== v14.8: Tracking — payment detail on a task =====
+   รายละเอียด · จำนวนเงิน · VAT 7% · จำนวนเงินรวม · หัก ณ ที่จ่าย · เงินประกันผลงาน · จ่ายสุทธิ
+
+   ฐานของแต่ละรายการ (ตามหลักภาษีไทย):
+   · VAT            คิดจากมูลค่าสินค้า/บริการ "ก่อนภาษี" (ป.รัษฎากร ม.79)
+   · หัก ณ ที่จ่าย   คิดจากมูลค่างาน "ก่อน VAT" ไม่ใช่ยอดรวมภาษี (คำสั่งกรมสรรพากร ท.ป.4/2528)
+   · เงินประกันผลงาน คิดจากมูลค่างาน "ก่อน VAT" ตามธรรมเนียมสัญญาก่อสร้าง — VAT และ WHT
+                    ยังคิดจากมูลค่างานเต็มจำนวนในงวดนั้น ไม่ใช่ยอดหลังหักประกันผลงาน
+   · จ่ายสุทธิ       = จำนวนเงินรวม (รวม VAT) − หัก ณ ที่จ่าย − เงินประกันผลงาน
+     ทั้งสองรายการหักจากยอดเดียวกัน ลำดับการหักจึงไม่เปลี่ยนผลลัพธ์
+
+   ทุกช่องจำนวนเงินที่คำนวณให้ แก้ทับเองได้ (สัญญาบางฉบับระบุเป็นจำนวนเงินตายตัว) กด ↺ เพื่อกลับไปใช้ค่าที่คำนวณ */
+
+var TK_VATR=[[7,'VAT 7%'],[0,'ไม่มี VAT']];
+var TK_WHTR=[[0,'ไม่หัก'],
+             [1,'1% · ค่าขนส่ง · ดอกเบี้ย (นิติบุคคลไทย) · ส่วนราชการจ่าย (ม.69 ทวิ)'],
+             [2,'2% · ค่าโฆษณา'],
+             [3,'3% · จ้างทำของ/รับเหมา · บริการ · วิชาชีพอิสระ ม.40(6)'],
+             [5,'5% · ค่าเช่า · รางวัล/ส่วนลดส่งเสริมการขาย'],
+             [10,'10% · เงินปันผล'],
+             [15,'15% · จ่ายออกต่างประเทศ (ม.70)']];
+var TK_RETR=[[0,'ไม่หัก'],[2.5,'2.5%'],[5,'5%'],[10,'10%']];
+
+function _tkPN(v){ if(v==null)return 0; var s=(''+v).replace(/[,  ]/g,'').trim();
+  var neg=false; if(/^\(.*\)$/.test(s)){neg=true;s=s.slice(1,-1);}   /* (1,234.56) = ติดลบ เหมือนช่องเงินอื่นในไฟล์นี้ */
+  if(s===''||s==='-')return 0; var n=parseFloat(s); if(!isFinite(n))return 0; return neg?-n:n; }
+function _tkPR2(n){ n=+n||0; return Math.round((n+(n<0?-1e-9:1e-9))*100)/100; }
+function _tkPM(n){ return _tkPR2(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+/* คำนวณจุดเดียว — ฟอร์ม การ์ด ลิสต์ รายงาน และ CSV เรียกตัวนี้ทั้งหมด */
+function _tkPay(t){
+  t=t||{};
+  var amt=_tkPR2(_tkPN(t.amt));
+  var vatr=(t.vatr==null||t.vatr==='')?7:_tkPN(t.vatr);
+  var whtr=_tkPN(t.whtr), retr=_tkPN(t.retr);
+  var vat=t.vatm?_tkPR2(_tkPN(t.vat)):_tkPR2(amt*vatr/100);
+  var wht=t.whtm?_tkPR2(_tkPN(t.wht)):_tkPR2(amt*whtr/100);
+  var tot=_tkPR2(amt+vat);
+  /* ฐานประกันผลงาน: ปกติคือมูลค่างานก่อน VAT · บางสัญญาหักจากยอดรวม VAT */
+  var retb=(t.retb==='g')?'g':'', ret=t.retm?_tkPR2(_tkPN(t.ret)):_tkPR2((retb==='g'?tot:amt)*retr/100);
+  var net=_tkPR2(tot-wht-ret);
+  var fdesc=((t.fdesc||'')+'').trim();
+  return {fdesc:fdesc,amt:amt,vatr:vatr,vat:vat,tot:tot,whtr:whtr,wht:wht,retr:retr,ret:ret,retb:retb,net:net,
+          vatm:!!t.vatm,whtm:!!t.whtm,retm:!!t.retm,
+          has:!!(amt||vat||wht||ret||fdesc)};
+}
+
+/* ---------- ฟอร์มในการ์ด ---------- */
+function _tkPayRateSel(id,list,cur){
+  var c=_tkPN(cur),hit=false,h='<select class="tkpayrs" id="'+id+'">';
+  for(var i=0;i<list.length;i++){var on=(_tkPN(list[i][0])===c);if(on)hit=true;
+    h+='<option value="'+list[i][0]+'"'+(on?' selected':'')+'>'+esc(list[i][1])+'</option>';}
+  if(!hit)h+='<option value="'+c+'" selected>'+esc(c+'%')+'</option>';
+  return h+'</select>';
+}
+function _tkPayBlockHTML(t){
+  var p=_tkPay(t||{});
+  /* ทุกแถวเป็นตารางเดียวกัน 5 ช่อง: ไอคอน · ชื่อรายการ · อัตรา/หมายเหตุ · จำนวนเงิน · ปุ่มคืนค่า
+     ช่องที่ไม่ได้ใช้ยังถูกวางไว้ ขอบขวาของทุกกล่องจึงตรงกันหมด */
+  var row=function(cls,ic,lbl,sub,mid,val,rst){
+    return '<div class="tkpayr'+(cls?(' '+cls):'')+'">'
+      +'<span class="tkpayic">'+ic+'</span>'
+      +'<span class="tkpaylb">'+lbl+(sub?('<span class="tkpaysub">'+sub+'</span>'):'')+'</span>'
+      +'<span class="tkpaymid">'+(mid||'')+'</span>'
+      +'<span class="tkpayval">'+(val||'')+'</span>'
+      +'<span class="tkpayrz">'+(rst||'')+'</span></div>';
+  };
+  var note=function(txt){return '<span class="tkpayrq">'+txt+'</span>';};
+  var amtIn=function(id,val,show){
+    return '<input class="tkpayin" id="'+id+'" inputmode="decimal" value="'+_eatt(show===false?'':_tkPM(val))+'" placeholder="0.00">';
+  };
+  var rstBtn=function(id,key,man){
+    return '<input type="hidden" id="'+id+'M" value="'+(man?'1':'')+'">'
+      +'<button class="tkpayrst'+(man?' on':'')+'" type="button" data-tkrst="'+key+'" title="กลับไปใช้ยอดที่คำนวณจากอัตรา">↺</button>';
+  };
+  return '<div class="tkml tkpaywrap"><div class="tkmlbl">💰 รายละเอียดจำนวนเงิน '
+      +'<span style="font-weight:500;color:var(--muted)">— เว้นว่างไว้ได้ ถ้างานนี้ไม่มีตัวเงิน · ช่องที่คำนวณให้ แก้ทับเองได้</span></div>'
+    +'<div class="tkpay" id="tkmPay">'
+      +row('desc','📝','รายละเอียด','','',
+        '<input class="tkpayin tkpaytx" id="tkmFdesc" value="'+_eatt((t&&t.fdesc)||'')+'" placeholder="รายการที่เรียกเก็บ เช่น ค่าจ้างงวดที่ 7 (งวด 21)" autocomplete="off">','')
+      +row('base','💵','จำนวนเงิน','',note('ก่อน VAT'),
+        '<input class="tkpayin" id="tkmAmt" inputmode="decimal" value="'+_eatt(p.amt?_tkPM(p.amt):'')+'" placeholder="0.00">','')
+      +row('','🧾','VAT','',_tkPayRateSel('tkmVatR',TK_VATR,p.vatr),
+        amtIn('tkmVat',p.vat),rstBtn('tkmVat','vat',t&&t.vatm))
+      +row('sum','Σ','จำนวนเงินรวม','',note('รวม VAT'),
+        '<span class="tkpayout" id="tkmTot">'+_tkPM(p.tot)+'</span>','')
+      +row('ded','✂️','หัก ณ ที่จ่าย','ฐานก่อน VAT',_tkPayRateSel('tkmWhtR',TK_WHTR,p.whtr),
+        amtIn('tkmWht',p.wht),rstBtn('tkmWht','wht',t&&t.whtm))
+      +row('ded','🛡️','เงินประกันผลงาน',
+        '<input type="hidden" id="tkmRetB" value="'+(p.retb==='g'?'g':'')+'">'
+        +'<button class="tkpaybase'+(p.retb==='g'?' on':'')+'" type="button" id="tkmRetBb" title="สลับฐานคำนวณ — สัญญาส่วนใหญ่หักจากมูลค่างานก่อน VAT บางฉบับหักจากยอดรวม VAT">'
+        +(p.retb==='g'?'ฐานรวม VAT':'ฐานก่อน VAT')+' ⇄</button>',
+        _tkPayRateSel('tkmRetR',TK_RETR,p.retr),
+        amtIn('tkmRet',p.ret),rstBtn('tkmRet','ret',t&&t.retm))
+      +row('net','✅','จ่ายสุทธิ','',note('รวม − หัก − ประกัน'),
+        '<span class="tkpayout net" id="tkmNet">'+_tkPM(p.net)+'</span>','')
+    +'</div></div>';
+}
+/* อ่านค่าจากฟอร์ม (ใช้ตอนคำนวณสด และตอนบันทึก) */
+function _tkPayForm(){
+  var g=function(id){var e=document.getElementById(id);return e?e.value:null;};
+  if(document.getElementById('tkmAmt')==null)return null;
+  return {fdesc:((g('tkmFdesc')||'')+'').trim(),
+          amt:_tkPN(g('tkmAmt')),
+          vatr:_tkPN(g('tkmVatR')),vat:_tkPN(g('tkmVat')),vatm:(g('tkmVatM')?1:0),
+          whtr:_tkPN(g('tkmWhtR')),wht:_tkPN(g('tkmWht')),whtm:(g('tkmWhtM')?1:0),
+          retr:_tkPN(g('tkmRetR')),ret:_tkPN(g('tkmRet')),retm:(g('tkmRetM')?1:0),
+          retb:((g('tkmRetB')==='g')?'g':'')};
+}
+/* คำนวณสดขณะพิมพ์ */
+function _tkPaySync(){
+  var f=_tkPayForm();if(!f)return;
+  var p=_tkPay(f),s=function(id,v){var e=document.getElementById(id);if(e&&document.activeElement!==e)e.value=_tkPM(v);};
+  s('tkmVat',p.vat);s('tkmWht',p.wht);s('tkmRet',p.ret);
+  var rb=document.querySelectorAll('.tkpayrst');
+  for(var i=0;i<rb.length;i++){var k=rb[i].getAttribute('data-tkrst');
+    var mm=document.getElementById('tkm'+k.charAt(0).toUpperCase()+k.slice(1)+'M');
+    rb[i].classList.toggle('on',!!(mm&&mm.value));}
+  var hb=document.getElementById('tkmRetB'),bb=document.getElementById('tkmRetBb');
+  if(hb&&bb){bb.textContent=((hb.value==='g')?'ฐานรวม VAT':'ฐานก่อน VAT')+' ⇄';bb.classList.toggle('on',hb.value==='g');}
+  var tot=document.getElementById('tkmTot'),net=document.getElementById('tkmNet');
+  if(tot)tot.textContent=_tkPM(p.tot);
+  if(net){net.textContent=_tkPM(p.net);net.classList.toggle('neg',p.net<-0.004);}
+}
+/* เขียนลงตัวงาน — เรียกทั้งตอนสร้างใหม่และตอนแก้ไข */
+var _TKPAY_KEYS=['fdesc','amt','vatr','vat','vatm','whtr','wht','whtm','retr','ret','retm','retb','tot','net'];
+function _tkPayApply(t){
+  var f=_tkPayForm();if(!t||!f)return t;
+  var p=_tkPay(f);
+  var had=false;for(var _i=0;_i<_TKPAY_KEYS.length;_i++)if(t[_TKPAY_KEYS[_i]]!=null){had=true;break;}
+  /* งานที่ไม่มีตัวเงินไม่ต้องแบกคีย์เปล่า — TRACKDATA ถูกอัปโหลดทั้งก้อนทุกครั้งที่บันทึก */
+  if(!p.has){ if(had)for(var _j=0;_j<_TKPAY_KEYS.length;_j++)delete t[_TKPAY_KEYS[_j]]; return t; }
+  t.fdesc=f.fdesc;t.amt=p.amt;
+  t.vatr=p.vatr;t.vat=p.vat;t.vatm=f.vatm?1:0;
+  t.whtr=p.whtr;t.wht=p.wht;t.whtm=f.whtm?1:0;
+  t.retr=p.retr;t.ret=p.ret;t.retm=f.retm?1:0;t.retb=p.retb;
+  t.tot=p.tot;t.net=p.net;
+  return t;
+}
+/* สำเนาการ์ด — ต้องยกยอดเงินไปด้วย */
+function _tkPayCopy(src,dst){
+  if(!src||!dst)return dst;
+  var k=_TKPAY_KEYS;
+  for(var i=0;i<k.length;i++)if(src[k[i]]!=null&&src[k[i]]!=='')dst[k[i]]=src[k[i]];
+  return dst;
+}
+
+/* ---------- แสดงผลบนการ์ด / ลิสต์ / รายงาน ---------- */
+function _tkPayCardHTML(t){
+  var p=_tkPay(t);if(!p.has)return '';
+  /* เครื่องหมายมาจากตัวเลขเอง ใบลดหนี้ที่ติดลบจึงไม่กลายเป็น "+-70.00" */
+  var line=function(cls,k,v,sign){var s=(sign&&v>=0)?sign:'';
+    return '<div class="tkpc '+cls+'"><span class="tkpck">'+k+'</span><span class="tkpcv'+(v<0?' neg':'')+'">'+s+_tkPM(v)+'</span></div>';};
+  var h='<div class="tkpaycard">';
+  if(p.fdesc)h+='<div class="tkpcd">'+esc(p.fdesc)+'</div>';
+  h+=line('','จำนวนเงิน',p.amt);
+  var rt=function(m,r){return m?' (กำหนดเอง)':(' '+(r||0)+'%');};
+  if(p.vat)h+=line('','VAT'+rt(p.vatm,p.vatr),p.vat,'+');
+  h+=line('sum','จำนวนเงินรวม',p.tot);
+  if(p.wht)h+=line('ded','หัก ณ ที่จ่าย'+rt(p.whtm,p.whtr),p.wht,'−');
+  if(p.ret)h+=line('ded','เงินประกันผลงาน'+rt(p.retm,p.retr),p.ret,'−');
+  h+=line('net','จ่ายสุทธิ',p.net);
+  return h+'</div>';
+}
+/* ยอดรวมของชุดงาน — ใช้ทั้งการ์ด KPI, ยอดรวมต่อกลุ่ม และแถวรวมใน CSV */
+function _tkPaySum(list){
+  var s={amt:0,vat:0,tot:0,wht:0,ret:0,net:0,n:0};
+  for(var i=0;i<(list||[]).length;i++){var p=_tkPay(list[i]);if(!p.has)continue;
+    s.amt+=p.amt;s.vat+=p.vat;s.tot+=p.tot;s.wht+=p.wht;s.ret+=p.ret;s.net+=p.net;s.n++;}
+  s.amt=_tkPR2(s.amt);s.vat=_tkPR2(s.vat);s.tot=_tkPR2(s.tot);s.wht=_tkPR2(s.wht);s.ret=_tkPR2(s.ret);s.net=_tkPR2(s.net);
+  return s;
+}
+function _tkPayLineHTML(t,cls){
+  var p=_tkPay(t);if(!p.has)return '';
+  var b=[],mm=function(pre,v){return pre+((v<0)?('('+_tkPM(-v)+')'):_tkPM(v));};
+  b.push(mm('฿',p.amt));
+  if(p.vat)b.push(mm('VAT ',p.vat));
+  b.push(mm('รวม ',p.tot));
+  if(p.wht)b.push(mm('−หัก ณ ที่จ่าย ',p.wht));
+  if(p.ret)b.push(mm('−ประกันผลงาน ',p.ret));
+  return '<span class="'+(cls||'tkldesc')+' tkpayln">'+(p.fdesc?(esc(p.fdesc)+' · '):'')+b.join(' · ')
+    +' <b>สุทธิ '+((p.net<0)?('('+_tkPM(-p.net)+')'):_tkPM(p.net))+'</b></span>';
+}
+
+/* ---------- การคำนวณสดในฟอร์ม ---------- */
+(function(){
+  var isAmt=function(el){return el&&el.id&&(el.id==='tkmAmt'||el.id==='tkmVat'||el.id==='tkmWht'||el.id==='tkmRet');};
+  document.addEventListener('input',function(e){
+    var el=e.target;if(!el||!el.closest||!el.closest('#tkmPay'))return;
+    if(el.id==='tkmVat'||el.id==='tkmWht'||el.id==='tkmRet'){
+      var m=document.getElementById(el.id+'M');if(m&&!m.value){m.value='1';
+        var b=document.querySelector('.tkpayrst[data-tkrst="'+el.id.slice(3).toLowerCase()+'"]');if(b)b.classList.add('on');}
+    }
+    _tkPaySync();
+  },true);
+  document.addEventListener('change',function(e){
+    var el=e.target;if(!el||!el.closest||!el.closest('#tkmPay'))return;_tkPaySync();
+  },true);
+  /* ช่องจำนวนเงิน: แก้แบบดิบขณะพิมพ์ ใส่ลูกน้ำให้เมื่อออกจากช่อง */
+  document.addEventListener('focusin',function(e){
+    var el=e.target;if(!isAmt(el)||!el.closest('#tkmPay'))return;
+    /* โฟกัสที่เกิดจากการกู้ฟอร์มหลัง sync ไม่ใช่ผู้ใช้กดเอง — ห้ามจัดรูปแบบทับสิ่งที่กำลังพิมพ์ (เช่น "1000.0") */
+    if(window._tkPayNoFmt)return;
+    var n=_tkPN(el.value);el.value=n?(''+n):'';
+  },true);
+  document.addEventListener('focusout',function(e){
+    var el=e.target;if(!isAmt(el)||!el.closest('#tkmPay'))return;
+    var n=_tkPN(el.value);el.value=(el.id==='tkmAmt'&&!n)?'':_tkPM(n);_tkPaySync();
+  },true);
+  document.addEventListener('click',function(e){
+    var bb=e.target&&e.target.closest?e.target.closest('.tkpaybase'):null;
+    if(bb){e.preventDefault();e.stopPropagation();
+      var hb=document.getElementById('tkmRetB');if(hb){hb.value=(hb.value==='g')?'':'g';
+        bb.firstChild&&(bb.textContent=((hb.value==='g')?'ฐานรวม VAT':'ฐานก่อน VAT')+' ⇄');
+        bb.classList.toggle('on',hb.value==='g');}
+      _tkPaySync();return;}
+    var b=e.target&&e.target.closest?e.target.closest('.tkpayrst'):null;if(!b)return;
+    e.preventDefault();e.stopPropagation();
+    var k=b.getAttribute('data-tkrst'),id='tkm'+k.charAt(0).toUpperCase()+k.slice(1);
+    var m=document.getElementById(id+'M');if(m)m.value='';
+    b.classList.remove('on');_tkPaySync();
+  },true);
+})();
+</script>
 <script>
 const _RAW_HTML=document.documentElement.outerHTML;
 const DATA={"gl_years":["2018","2019","2020","2021","2022","2023","2024","2025"],"inv_years":["2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025","2026","ไม่ระบุปี"],"rows":[{"code":"HO","name":"- - -","active":true,"gl":{"2018":54620438.03,"2019":50095018.21,"2020":4945135.31,"2021":7141779.15,"2022":4292379.52,"2023":-126243.79,"2024":2945979.24,"2025":2017649.98},"inv":{},"exp":{},"contract":null,"gl_total":125932135.65,"inv_total":null,"expense":520461394.17,"inv_exp_total":null,"con_exp":null,"diff":125932135.65,"profit":-394529258.52,"status":"gl_only"},{"code":"GLI18002","name":"จ้างระบบบริหารจัดการและจัดเก็บข้อมูลจราจรคอมพิวเตอร์ (USO Log) ภายใต้โครงการจัดการให้มีสัญญาณโทรศัพท์เคลื่อนที่และบริการอินเทอร์เน็ตความเร็วสุงในพื้นที่ชายขอบ กิจการร่วมค้า ซีจีแอล กิจการร่วมค้า ซีจีแอล","active":true,"gl":{"2018":104064570.43,"2019":792998.08,"2020":178298.62,"2021":2267766.53,"2022":15647186.25,"2023":983533.64,"2024":1209955.16,"2025":5478564.87},"inv":{"2018":82810000,"2020":6822242.99,"2022":13672897.2,"2024":12958503.01,"2025":11116770.14},"exp":{},"contract":136728971.97,"gl_total":130622873.58,"inv_total":127380413.34,"expense":108227295.82,"inv_exp_total":null,"con_exp":113286490.27,"diff":3242460.24,"profit":22395577.76,"status":"diff"},{"code":"HR","name":"Human Resouce & General Affairs บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":true,"gl":{"2018":0.2,"2019":190,"2020":290644.3,"2024":79,"2025":9.81},"inv":{},"exp":{},"contract":null,"gl_total":290923.31,"inv_total":null,"expense":26096537.54,"inv_exp_total":null,"con_exp":null,"diff":290923.31,"profit":-25805614.23,"status":"gl_only"},{"code":"AF","name":"- - -","active":true,"gl":{"2025":-9611.08},"inv":{},"exp":{},"contract":null,"gl_total":-9611.08,"inv_total":null,"expense":3354962.99,"inv_exp_total":null,"con_exp":null,"diff":-9611.08,"profit":-3364574.07,"status":"gl_only"},{"code":"GLI23005","name":"งานก่อสร้างสถานีสูบจ่ายน้ำลาดกระบังแห่งที่ 2 ถังเก็บน้ำใสขนาด 50,000 ลูกบาศก์เมตร สัญญา GES-LK-9 กิจการร่วมค้า เอ อาร์ จี กิจการร่วมค้า เอ อาร์ จี","active":true,"gl":{"2023":40257847.57,"2024":447516406.67,"2025":320687316.9},"inv":{"2023":156807785.05,"2024":136363937.39,"2025":407780420.75,"2026":136754206.55},"exp":{},"contract":1045385233.64,"gl_total":808461571.14,"inv_total":837706349.74,"expense":894553287.61,"inv_exp_total":null,"con_exp":1162155262.1,"diff":-29244778.6,"profit":-86091716.47,"status":"diff"},{"code":"GLI24009","name":"ซื้อพร้อมติดตั้งเครื่องสูบน้ำ, Speed Reduction Gear, มอเตอร์ และอุปกรณ์ที่เกี่ยวข้อง หมายเลข 11 ที่โรงสูบน้ำดิบสำแล 4 กิจการร่วมค้า จีแอลอี กิจการร่วมค้า จีแอลอี","active":true,"gl":{"2025":7770389.87},"inv":{"2025":20492370.36},"exp":{},"contract":45538600,"gl_total":7770389.87,"inv_total":20492370.36,"expense":7399691.63,"inv_exp_total":null,"con_exp":43366111.97,"diff":-12721980.49,"profit":370698.24,"status":"diff"},{"code":"IT","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":12626177.48,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-12626177.48,"status":"expense_only"},{"code":"GLI17012-1","name":"ลำปาง-โครงการปรับปรุงสถานีไฟฟ้าระบบ 22 เควี จาก Outdoor เป็น Indoor ที่สถานีไฟฟ้าลำปาง 2 จ.ลำปาง การไฟฟ้าส่วนภูมิภาค การไฟฟ้าส่วนภูมิภาค","active":true,"gl":{"2018":3319932.51,"2019":54011486.09,"2020":370171.23,"2025":5161519.95},"inv":{"2018":3319932.02,"2019":54533441.35,"2021":-998000},"exp":{},"contract":64416374.55,"gl_total":62863109.78,"inv_total":56855373.37,"expense":59504635.95,"inv_exp_total":null,"con_exp":56968532.01,"diff":6007736.41,"profit":3358473.83,"status":"diff"},{"code":"GLI17012-2","name":"มุกดาหาร-โครงการปรับปรุงสถานีไฟฟ้าระบบ 22 เควี จาก Outdoor เป็น Indoor ที่สฟ.มุกดาหาร2 จ.มุกดาหาร การไฟฟ้าส่วนภูมิภาค การไฟฟ้าส่วนภูมิภาค","active":true,"gl":{"2018":1.99,"2019":47469071.23,"2020":351746.03,"2025":14678694.05},"inv":{"2018":3061662.56,"2019":46066728.75,"2021":-87800},"exp":{},"contract":62499513.3,"gl_total":62499513.3,"inv_total":49040591.31,"expense":58310607,"inv_exp_total":null,"con_exp":54995356.79,"diff":13458921.99,"profit":4188906.3,"status":"diff"},{"code":"GLI19008","name":"SG-ATP Wayside (Automatic Train Protection) บจก. ริเวอร์ เอนจิเนียริ่ง บจก. ริเวอร์ เอนจิเนียริ่ง","active":false,"gl":{"2019":2429906.56,"2020":13181800.13,"2021":69822898.44,"2022":77348128.19},"inv":{"2019":2429906.56,"2020":34189982.61,"2021":80783153.81,"2022":45284882.29,"2023":14136346.43},"exp":{},"contract":162600012.09,"gl_total":162782733.32,"inv_total":176824271.7,"expense":117232685.36,"inv_exp_total":null,"con_exp":114129938.71,"diff":-14041538.38,"profit":45550047.96,"status":"diff"},{"code":"GLI19002","name":"USO Log_(Ph.2) ระบบบริหารจัดการและจัดเก็บข้อมูลจราจรคอมพิวเตอร์ กิจการร่วมค้า ซีจีแอล กิจการร่วมค้า ซีจีแอล","active":true,"gl":{"2019":199612794.23,"2020":5625507.2,"2021":6294499.32,"2022":11061149.21,"2023":783726.85,"2024":3365356.85,"2025":21891601.51},"inv":{"2019":107145794.4,"2020":4672897.2,"2021":75002056.08,"2024":43003321.5,"2025":13393224.3,"2026":26493372.71},"exp":{},"contract":265037760.98,"gl_total":248634635.17,"inv_total":269710666.19,"expense":206977113.33,"inv_exp_total":null,"con_exp":232224029.9,"diff":-21076031.02,"profit":41657521.84,"status":"diff"},{"code":"EN","name":"- - -","active":true,"gl":{"2021":100,"2022":2.16},"inv":{},"exp":{},"contract":null,"gl_total":102.16,"inv_total":null,"expense":18124151.36,"inv_exp_total":null,"con_exp":null,"diff":102.16,"profit":-18124049.2,"status":"gl_only"},{"code":"GLI19006","name":"จัดหาเครื่องสำรองไฟฉุกเฉิน สนับสนุนภารกิจแก้ไขปัญหาชายแดนใต้ กองอำนวยการรักษาความมั่นคงภายในราชอาณาจักร กองอำนวยการรักษาความมั่นคงภายในราชอาณาจักร","active":false,"gl":{"2019":738317.76},"inv":{"2019":738317.76},"exp":{},"contract":738317.76,"gl_total":738317.76,"inv_total":738317.76,"expense":403895.34,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":334422.42,"status":"match"},{"code":"SA","name":"- - -","active":true,"gl":{"2020":0.11,"2021":368.71,"2022":6697.9,"2023":5391.44,"2024":6102.5,"2025":787.52},"inv":{},"exp":{},"contract":null,"gl_total":19348.18,"inv_total":null,"expense":10895527.97,"inv_exp_total":null,"con_exp":null,"diff":19348.18,"profit":-10876179.79,"status":"gl_only"},{"code":"GLI19010","name":"รถสูบน้ำระยะไกล ชนิดรถบรรทุก 10 ล้อ จำนวน 2 คัน องค์การบริหารส่วนจังหวัดสมุทรปราการ องค์การบริหารส่วนจังหวัดสมุทรปราการ","active":false,"gl":{"2020":90783238.51},"inv":{"2020":90644859.81},"exp":{},"contract":90644859.81,"gl_total":90783238.51,"inv_total":90644859.81,"expense":56563550.67,"inv_exp_total":null,"con_exp":76070909.2,"diff":138378.7,"profit":34219687.84,"status":"diff"},{"code":"ST","name":"- - -","active":true,"gl":{"2020":355135.7,"2021":476860.87,"2022":96824,"2023":297626.91,"2024":88594},"inv":{},"exp":{},"contract":null,"gl_total":1315041.48,"inv_total":null,"expense":33854309.13,"inv_exp_total":null,"con_exp":null,"diff":1315041.48,"profit":-32539267.65,"status":"gl_only"},{"code":"GLI19011","name":"รถสูบส่งน้ำระยะไกล ชนิดรถบรรทุก 10 ล้อ จำนวน 4 คัน องค์การบริหารส่วนจังหวัดสมุทรปราการ องค์การบริหารส่วนจังหวัดสมุทรปราการ","active":false,"gl":{"2020":181013366.84},"inv":{"2020":180897196.26},"exp":{},"contract":180897196.26,"gl_total":181013366.84,"inv_total":180897196.26,"expense":134365364.26,"inv_exp_total":null,"con_exp":157271475.01,"diff":116170.58,"profit":46648002.58,"status":"diff"},{"code":"CM","name":"- - -","active":true,"gl":{"2020":90.3,"2022":76077.7},"inv":{},"exp":{},"contract":null,"gl_total":76168,"inv_total":null,"expense":6861462.47,"inv_exp_total":null,"con_exp":null,"diff":76168,"profit":-6785294.47,"status":"gl_only"},{"code":"SC","name":"- - -","active":true,"gl":{"2020":1},"inv":{},"exp":{},"contract":null,"gl_total":1,"inv_total":null,"expense":2975358.02,"inv_exp_total":null,"con_exp":null,"diff":1,"profit":-2975357.02,"status":"gl_only"},{"code":"FN","name":"- - -","active":true,"gl":{"2021":100},"inv":{},"exp":{},"contract":null,"gl_total":100,"inv_total":null,"expense":1148913.47,"inv_exp_total":null,"con_exp":null,"diff":100,"profit":-1148813.47,"status":"gl_only"},{"code":"GLI20003","name":"การจ้างค่าปรับปรุงเพิ่มประสิทธิภาพความปลอดภัยระบบไฟฟ้าอาคารศาลากลางจังหวัด สำนักงานปลัดกระทรวงมหาดไทย สำนักงานปลัดกระทรวงมหาดไทย","active":true,"gl":{"2020":13838529.91,"2021":43456533.77,"2022":104938584.19,"2025":-3.01},"inv":{"2020":24335046.73,"2021":27579719.63,"2022":110318878.5},"exp":{},"contract":162233644.86,"gl_total":162233644.86,"inv_total":162233644.86,"expense":148099934.49,"inv_exp_total":null,"con_exp":140692850.96,"diff":0,"profit":14133710.37,"status":"match"},{"code":"GLI20001","name":"รถยนต์ดูดสิ่งโสโครกดินโคลนและฉีดล้างท่อระบายน้ำ จำนวน 4 คัน พร้อมอุปกรณ์ องค์การบริหารส่วนจังหวัดสมุทรปราการ องค์การบริหารส่วนจังหวัดสมุทรปราการ","active":false,"gl":{"2020":110093457.94},"inv":{"2020":110093457.94},"exp":{},"contract":110093457.94,"gl_total":110093457.94,"inv_total":110093457.94,"expense":101581073.18,"inv_exp_total":null,"con_exp":101160400,"diff":0,"profit":8512384.76,"status":"match"},{"code":"GLI20002","name":"เครื่องสูบน้ำขับด้วยเครื่องยนต์ดีเซล อัตราการสูบ 28,000 ลิตร/นาทีฯ จำนวน 69 ชุด กรมป้องกันและบรรเทาสาธารณภัย กรมป้องกันและบรรเทาสาธารณภัย","active":false,"gl":{"2020":78406570.09},"inv":{"2020":78406570.09},"exp":{},"contract":78406570.09,"gl_total":78406570.09,"inv_total":78406570.09,"expense":74901346.57,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":3505223.52,"status":"match"},{"code":"Z_200001","name":"Renovate GLI อาคารแต่งตั้ง ชั้น 2 บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":true,"gl":{"2022":33004.3,"2025":438829.86},"inv":{},"exp":{},"contract":2000000,"gl_total":471834.16,"inv_total":null,"expense":1021065.48,"inv_exp_total":null,"con_exp":4328069.3,"diff":471834.16,"profit":-549231.32,"status":"gl_only"},{"code":"LW","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":224333.82,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-224333.82,"status":"expense_only"},{"code":"GLI21003","name":"งานจ้างเหมาเอกชนควบคุมโรงงานกำจัดสิ่งปฏิกูลหนองแขม ระยะที่ 6 กิจการร่วมค้า GLR กิจการร่วมค้า GLR","active":true,"gl":{"2021":92152615.65,"2022":52923010.29,"2023":48266207.45,"2024":9920268.84,"2025":3241.98},"inv":{"2021":41027778.09,"2022":50530333.47,"2023":48266207.45,"2024":9919747.59},"exp":{},"contract":272373925.23,"gl_total":203265344.21,"inv_total":149744066.6,"expense":147189476.55,"inv_exp_total":null,"con_exp":111244184.34,"diff":53521277.61,"profit":56075867.66,"status":"diff"},{"code":"GLI21004","name":"การจ้างก่อสร้างออกแบบ จัดหาและติดตั้งระบบห้ามล้ออัตโนมัติ Automatic Train Protection (ATP)ฯ กิจการร่วมค้า อีซีเอ็ม จีแอลไอ กิจการร่วมค้า อีซีเอ็ม จีแอลไอ","active":true,"gl":{"2021":63579401.84,"2022":112672325.47,"2023":97286931.55,"2024":65195252.53,"2025":52990387.68},"inv":{"2021":74427616.81,"2023":18202769.45,"2024":193903527.95,"2025":52882780.35,"2026":35255186.9},"exp":{},"contract":391724299.07,"gl_total":391724299.07,"inv_total":374671881.46,"expense":389093313.21,"inv_exp_total":null,"con_exp":374903079.59,"diff":17052417.61,"profit":2630985.86,"status":"diff"},{"code":"GLI21006","name":"งานจ้างเหมาเอกชนควบคุมโรงงานกำจัดไขมันและแปรรูปไขมัน ที่ศูนย์กำจัดมูลฝอยหนองแขม ระยะที่ 2 กิจการร่วมค้า GLR กิจการร่วมค้า GLR","active":true,"gl":{"2021":21865915.15,"2022":25120428.19,"2023":21322383.87,"2024":4328385.13},"inv":{"2021":8149768.32,"2022":20990887.57,"2023":21322383.87,"2024":4328385.13},"exp":{},"contract":101559813.08,"gl_total":72637112.34,"inv_total":54791424.89,"expense":60944576.9,"inv_exp_total":null,"con_exp":50423398.04,"diff":17845687.45,"profit":11692535.44,"status":"diff"},{"code":"Z_200002","name":"Street Light Research and Development บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":true,"gl":{"2020":1441.85,"2025":147375.6},"inv":{},"exp":{},"contract":408950,"gl_total":148817.45,"inv_total":null,"expense":216903.39,"inv_exp_total":null,"con_exp":596050,"diff":148817.45,"profit":-68085.94,"status":"gl_only"},{"code":"PU","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":378787.18,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-378787.18,"status":"expense_only"},{"code":"GLI22003","name":"ปรับปรุงระบบจำหน่ายไฟฟ้าเป็นเคเบิลใต้ดินบริเวณถนนรัตนาเขต ถนนพหลโยธิน ถนนธนาลัย จ.เชียงราย (งานโยธา) เทศบาลนครเชียงราย เทศบาลนครเชียงราย","active":true,"gl":{"2022":30686365.43,"2023":12445294.36,"2025":683286.21},"inv":{"2022":13057312.77,"2023":30074347.02},"exp":{},"contract":43814946,"gl_total":43814946,"inv_total":43131659.79,"expense":44598544.23,"inv_exp_total":null,"con_exp":42258516.72,"diff":683286.21,"profit":-783598.23,"status":"diff"},{"code":"GLI22001","name":"จ้างก่อสร้างปรับปรุงระบบจำหน่ายไฟฟ้าเป็นเคเบิลใต้ดินฯ จังหวัดเชียงราย (งานไฟฟ้า) การไฟฟ้าส่วนภูมิภาค การไฟฟ้าส่วนภูมิภาค","active":true,"gl":{"2022":15917438.56,"2023":51037505.59,"2024":-1802495.02,"2025":2868909.17},"inv":{"2022":36581578.8,"2023":24470093.07,"2024":11072056.1},"exp":{},"contract":68021358.3,"gl_total":68021358.3,"inv_total":72123727.97,"expense":66711767.97,"inv_exp_total":null,"con_exp":62946512.25,"diff":-4102369.67,"profit":1309590.33,"status":"diff"},{"code":"MA","name":"- - -","active":true,"gl":{"2021":10000},"inv":{},"exp":{},"contract":null,"gl_total":10000,"inv_total":null,"expense":12212790.67,"inv_exp_total":null,"con_exp":null,"diff":10000,"profit":-12202790.67,"status":"gl_only"},{"code":"GLI22002","name":"งานจัดซื้อและติดตั้งเครื่องสูบน้ำขนาด 125 ลบ.ม./นาที จำนวน 1 ชุด ที่สถานีสูบจ่ายน้ำบางพลีฯ กิจการร่วมค้า จีแอลอี กิจการร่วมค้า จีแอลอี","active":true,"gl":{"2022":117183.76,"2023":25906715.6,"2024":12536025.57,"2025":940075.07},"inv":{"2024":31320000,"2025":7830000},"exp":{},"contract":39500000,"gl_total":39500000,"inv_total":39150000,"expense":42840159.56,"inv_exp_total":null,"con_exp":39471832.74,"diff":350000,"profit":-3340159.56,"status":"diff"},{"code":"AC","name":"- - -","active":true,"gl":{"2021":452.84,"2023":-0.02,"2024":515091.4},"inv":{},"exp":{},"contract":null,"gl_total":515544.22,"inv_total":null,"expense":10251662.63,"inv_exp_total":null,"con_exp":null,"diff":515544.22,"profit":-9736118.41,"status":"gl_only"},{"code":"GLI22009","name":"งานจ้างเหมาติดตั้งระบบติดตามสถานะเครื่องจักรและงานซอฟต์แวร์ ระบบบริหารจัดการน้ำจำนวน21สถานี(แก้มลิง) บจก. ริเวอร์ เอนจิเนียริ่ง บจก. ริเวอร์ เอนจิเนียริ่ง","active":true,"gl":{"2022":37757680.36,"2023":14650001.52,"2025":-7109746.07},"inv":{"2022":30020096,"2023":23888587.68},"exp":{},"contract":52407678.88,"gl_total":45297935.81,"inv_total":53908683.68,"expense":36763820.11,"inv_exp_total":null,"con_exp":42534090,"diff":-8610747.87,"profit":8534115.7,"status":"diff"},{"code":"MR","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":1565987.91,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-1565987.91,"status":"expense_only"},{"code":"GLI23002","name":"โครงการก่อสร้างระบบรวบรวมน้ำเสีย ระยะที่ 3 ของเทศบาลนครตรัง กิจการร่วมค้า GLR กิจการร่วมค้า GLR","active":true,"gl":{"2023":48413484.17,"2024":56859315.37,"2025":67613514.59},"inv":{"2023":35283606.31,"2024":36876448.23,"2025":52973918.64},"exp":{},"contract":191726776.34,"gl_total":172886314.13,"inv_total":125133973.18,"expense":219954123.96,"inv_exp_total":null,"con_exp":258201812.86,"diff":47752340.95,"profit":-47067809.83,"status":"diff"},{"code":"GLI23001","name":"โครงการเพิ่มประสิทธิภาพการบริหารจัดการระบบเทคโนโลยีสารสนเทศและการสื่อสารสำหรับงานชลประทาน ระยะที่ 6ฯ กรมชลประทาน กรมชลประทาน","active":true,"gl":{"2023":18271028.03,"2025":0.01},"inv":{"2023":18271028.03},"exp":{},"contract":18271028.04,"gl_total":18271028.04,"inv_total":18271028.03,"expense":15549601.09,"inv_exp_total":null,"con_exp":15016277,"diff":0.01,"profit":2721426.95,"status":"match"},{"code":"GLI23006","name":"จ้างติดตั้งระบบโทรมาตรเพื่อการติดตามสถานการณ์น้ำของอาคารชลประทาน พ.ศ.2566 สำหรับงานโทรมาตรเพื่อการติดตามและบริหารจัดการน้ำ ในพื้นที่โครงการชลประทาน ฝ่ายติดตามและพยากรณ์สถานการณ์น้ำ แขวงถนนนครไชยศรี เขตดุสิต กรุงเทพมหานคร กรมชลประทาน กรมชลประทาน","active":true,"gl":{"2023":3977689.57,"2024":2397574.37,"2025":2702272.79},"inv":{"2023":9252336.45},"exp":{},"contract":9252336.45,"gl_total":9077536.73,"inv_total":9252336.45,"expense":6483408.83,"inv_exp_total":null,"con_exp":9414000,"diff":-174799.72,"profit":2594127.9,"status":"diff"},{"code":"Z_62001","name":"IoT Laboratory บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":true,"gl":{"2022":739.92,"2025":3999260.08},"inv":{},"exp":{},"contract":4000000,"gl_total":4000000,"inv_total":null,"expense":8726712.02,"inv_exp_total":null,"con_exp":6350000,"diff":4000000,"profit":-4726712.02,"status":"gl_only"},{"code":"SH","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":1351201.63,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-1351201.63,"status":"expense_only"},{"code":"VS","name":"Vehical & Service Unit บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":true,"gl":{"2025":2780525.21},"inv":{"2025":3364485.98},"exp":{},"contract":null,"gl_total":2780525.21,"inv_total":3364485.98,"expense":14226211.57,"inv_exp_total":null,"con_exp":null,"diff":-583960.77,"profit":-11445686.36,"status":"diff"},{"code":"GLI24001","name":"จ้างเหมาโครงการติดตั้งปรับปรุงและขยายเขตระบบไฟฟ้าแสงสว่าง ภายในเขตเทศบาลนครเชียงราย (ตามโครงการปรับปรุงระบบไฟฟ้าใต้ดิน 1 จังหวัด 1 ถนนเพื่อเฉลิมพระเกียรติ ในพื้นที่จังหวัดเชียงราย) เทศบาลนครเชียงราย เทศบาลนครเชียงราย","active":true,"gl":{"2024":2663551.4},"inv":{"2024":2663551.4},"exp":{},"contract":2663551.4,"gl_total":2663551.4,"inv_total":2663551.4,"expense":2664141.8,"inv_exp_total":null,"con_exp":2385771.85,"diff":0,"profit":-590.4,"status":"match"},{"code":"GLI24004","name":"จ้างโครงการจัดหาและติดตั้งระบบควบคุมอาคารชลประทานทางไกลอัตโนมัติประตูระบายน้ำคลองบางตลาด จำนวน 1 งาน โครงการชลประทานนนทบุรี โครงการชลประทานนนทบุรี","active":true,"gl":{"2024":2576861.33,"2025":5019946.08},"inv":{"2024":4457943.92,"2025":2971962.62},"exp":{},"contract":7429906.54,"gl_total":7596807.41,"inv_total":7429906.54,"expense":4349766.3,"inv_exp_total":null,"con_exp":6666200,"diff":166900.87,"profit":3247041.11,"status":"diff"},{"code":"GLI24006","name":"จ้างเหมาเอกชนควบคุมโรงงานกำจัดไขมันและแปรรูปไขมันที่ศูนย์กำจัดมูลฝอยหนองแขม ระยะที่ 3 กิจการร่วมค้า GLR กิจการร่วมค้า GLR","active":true,"gl":{"2024":9489935.73,"2025":21896413.69},"inv":{"2024":6822672.89,"2025":22225037.39,"2026":11126119.63},"exp":{},"contract":152052897.2,"gl_total":31386349.42,"inv_total":40173829.91,"expense":59751242.64,"inv_exp_total":null,"con_exp":92358358.69,"diff":-8787480.49,"profit":-28364893.22,"status":"diff"},{"code":"GLI24007","name":"จ้างเหมาเอกชนควบคุมโรงงานกำจัดสิ่งปฏิกูลหนองแขม ระยะที่ 7 กิจการร่วมค้า GLR กิจการร่วมค้า GLR","active":true,"gl":{"2024":86339430.18,"2025":-31517671.31},"inv":{"2024":12018229.9,"2025":39256738.32,"2026":16324452.34},"exp":{},"contract":354790093.46,"gl_total":54821758.87,"inv_total":67599420.56,"expense":131026796.89,"inv_exp_total":null,"con_exp":191368742.87,"diff":-12777661.69,"profit":-76205038.02,"status":"diff"},{"code":"GLI24008","name":"ซื้อเครื่องย่อยกิ่งไม้ ขนาดไม่น้อยกว่า 100 ลูกบาศก์เมตรต่อชั่วโมง จำนวน 1 เครื่อง สำนักงานยุทธศาสตร์จัดการมูลฝอย สำนักสิ่งแวดล้อม กรุงเทพมหานคร สำนักงานยุทธศาสตร์จัดการมูลฝอย สำนักสิ่งแวดล้อม กรุงเทพมหานคร","active":true,"gl":{"2025":15241358.4},"inv":{"2025":18205607.48},"exp":{},"contract":18205607.48,"gl_total":15241358.4,"inv_total":18205607.48,"expense":13334450.16,"inv_exp_total":null,"con_exp":15927830,"diff":-2964249.08,"profit":1906908.24,"status":"diff"},{"code":"SB","name":"- - -","active":true,"gl":{"2024":231.43,"2025":502.66},"inv":{},"exp":{},"contract":null,"gl_total":734.09,"inv_total":null,"expense":838690.95,"inv_exp_total":null,"con_exp":null,"diff":734.09,"profit":-837956.86,"status":"gl_only"},{"code":"GLI25006","name":"ซื้อขายอุปกรณ์ Nexus G จำนวน 18 ชุด บริษัท ไบรท์ อินทิเกรชั่น เทคโนโลยี จำกัด บริษัท ไบรท์ อินทิเกรชั่น เทคโนโลยี จำกัด","active":true,"gl":{"2025":1087754.07},"inv":{"2025":3044439.18},"exp":{},"contract":3044439.18,"gl_total":1087754.07,"inv_total":3044439.18,"expense":390548.85,"inv_exp_total":null,"con_exp":1093080,"diff":-1956685.11,"profit":697205.22,"status":"diff"},{"code":"IM","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":233534.46,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-233534.46,"status":"expense_only"},{"code":"PC","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":338799.42,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-338799.42,"status":"expense_only"},{"code":"GLI25005","name":"จ้างติดตั้งเครื่องสูบน้ำบนแพเหล็กพร้อมอุปกรณ์ประกอบ สถานีสูบน้ำบ้านพาลุกา ต.ชะโนด อ.หว้านใหญ่ จ.มุกดาหาร บริษัท อะกริโฟลว์ โซลูชั่น จำกัด บริษัท อะกริโฟลว์ โซลูชั่น จำกัด","active":true,"gl":{"2025":3066637.77},"inv":{"2025":3238317.76},"exp":{},"contract":3238317.76,"gl_total":3066637.77,"inv_total":3238317.76,"expense":3020881.58,"inv_exp_total":null,"con_exp":3190000,"diff":-171679.99,"profit":45756.19,"status":"diff"},{"code":"GLI25008","name":"จ้างก่อสร้างปรับปรุงระบบจำหน่ายไฟฟ้าเป็นเคเบิลใต้ดินบริเวณถนนห้วยยอด จ.ตรัง (งานด้านโยธา) เทศบาลนครตรัง เทศบาลนครตรัง","active":true,"gl":{"2025":7876189.7},"inv":{},"exp":{},"contract":58063074.14,"gl_total":7876189.7,"inv_total":null,"expense":19489664.24,"inv_exp_total":null,"con_exp":46738063.67,"diff":7876189.7,"profit":-11613474.54,"status":"gl_only"},{"code":"GLI25012","name":"จ้างเหมาบริการติดตั้งระบบควบคุมสั่งการระยะไกล ปตร.นายยอด บริษัท ไบรท์ อินทิเกรชั่น เทคโนโลยี จำกัด บริษัท ไบรท์ อินทิเกรชั่น เทคโนโลยี จำกัด","active":true,"gl":{"2025":311952.98},"inv":{"2025":767102.8,"2026":1789906.55},"exp":{},"contract":2557009.35,"gl_total":311952.98,"inv_total":2557009.35,"expense":188877.95,"inv_exp_total":null,"con_exp":1548190.65,"diff":-2245056.37,"profit":123075.03,"status":"diff"},{"code":"RE","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":9956268.97,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-9956268.97,"status":"expense_only"},{"code":"GLI22004","name":"จ้างเหมาติดตั้งระบบติดตามสถานะและประสิทธิภาพเครื่องสูบ สถานีสูบน้ำคลองเตย บจก. ริเวอร์ เอนจิเนียริ่ง บจก. ริเวอร์ เอนจิเนียริ่ง","active":false,"gl":{"2022":1392456.28,"2023":4215120.36},"inv":{"2022":1682242.99,"2023":3925233.65},"exp":{},"contract":5607476.64,"gl_total":5607576.64,"inv_total":5607476.64,"expense":1913027.21,"inv_exp_total":null,"con_exp":3799180,"diff":100,"profit":3694549.43,"status":"diff"},{"code":"GLI23003","name":"จ้างบริการ Cloud Storage ระบบ Smart Environment จำนวน 1 งาน คณะวิศวกรรมศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย คณะวิศวกรรมศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย","active":false,"gl":{"2023":240000},"inv":{"2023":240000},"exp":{},"contract":240000,"gl_total":240000,"inv_total":240000,"expense":217045,"inv_exp_total":null,"con_exp":233000,"diff":0,"profit":22955,"status":"match"},{"code":"GLI23004","name":"จ้างบริการ Cloud Server ระบบ Smart Environment คณะวิศวกรรมศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย คณะวิศวกรรมศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย","active":false,"gl":{"2023":398000},"inv":{"2023":398000},"exp":{},"contract":398000,"gl_total":398000,"inv_total":398000,"expense":358665,"inv_exp_total":null,"con_exp":361200,"diff":0,"profit":39335,"status":"match"},{"code":"GLI22008","name":"งานจ้างเหมาติดตั้งระบบติดตามสถานะเครื่องจักรและงานซอฟต์แวร์ ระบบบริหารจัดการน้ำ จำนวน2สถานี(คลองเตย) บจก. ริเวอร์ เอนจิเนียริ่ง บจก. ริเวอร์ เอนจิเนียริ่ง","active":true,"gl":{"2022":12595781,"2023":4799299,"2025":-1490013.52},"inv":{"2022":10371904,"2023":7541771.2},"exp":{},"contract":17395080,"gl_total":15905066.48,"inv_total":17913675.2,"expense":6105332.16,"inv_exp_total":null,"con_exp":6677290,"diff":-2008608.72,"profit":9799734.32,"status":"diff"},{"code":"Z_24001","name":"งานทดลองติดตั้งและทดสอบอุปกรณ์ Telematic Gateway บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":true,"gl":{},"inv":{},"exp":{},"contract":161520,"gl_total":0,"inv_total":null,"expense":38731.12,"inv_exp_total":null,"con_exp":161520,"diff":0,"profit":-38731.12,"status":"gl_only"},{"code":"DS","name":"- - -","active":true,"gl":{"2018":24750,"2019":51717.76,"2023":4280},"inv":{},"exp":{},"contract":null,"gl_total":80747.76,"inv_total":null,"expense":11393524.12,"inv_exp_total":null,"con_exp":null,"diff":80747.76,"profit":-11312776.36,"status":"gl_only"},{"code":"SD","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":2305848.02,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-2305848.02,"status":"expense_only"},{"code":"WT","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":1746517.47,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-1746517.47,"status":"expense_only"},{"code":"CS","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":3876650.39,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-3876650.39,"status":"expense_only"},{"code":"GLI24010","name":"ซื้อขายอุปกรณ์ Nexus G จำนวน 10 ชุด บริษัท ไบรท์ อินทิเกรชั่น เทคโนโลยี จำกัด บริษัท ไบรท์ อินทิเกรชั่น เทคโนโลยี จำกัด","active":true,"gl":{"2024":128297.1,"2025":267256.35},"inv":{"2024":448719.63,"2025":1153850.47},"exp":{},"contract":1602570.1,"gl_total":395553.45,"inv_total":1602570.1,"expense":170343.41,"inv_exp_total":null,"con_exp":690140,"diff":-1207016.65,"profit":225210.04,"status":"diff"},{"code":"GLI25002","name":"ครุภัณฑ์การเกษตร เครื่องสูบน้ำแบบหอยโข่ง ขนาด 12 นิ้ว เครื่องยนต์ดีเซล ขนาดไม่น้อยกว่า 120 แรงม้า พร้อมอุปกรณ์ท่อสูบน้ำครบชุด จำนวน 5 เครื่อง สำนักงานเทศบาลนครรังสิต สำนักงานเทศบาลนครรังสิต","active":true,"gl":{"2025":4069521.85},"inv":{"2025":4626168.22},"exp":{},"contract":4626168.22,"gl_total":4069521.85,"inv_total":4626168.22,"expense":2502233.89,"inv_exp_total":null,"con_exp":2844500,"diff":-556646.37,"profit":1567287.96,"status":"diff"},{"code":"GLI25004","name":"จ้างติดตั้งเครื่องสูบน้ำบนแพเหล็กพร้อมอุปกรณ์ประกอบ สถานีสูบน้ำบ้านโคก ต.โพธิ์ไทร อ.ดอนตาล จ.มุกดาหาร บริษัท สยาม ธารา กรุ๊ป จำกัด บริษัท สยาม ธารา กรุ๊ป จำกัด","active":true,"gl":{"2025":3001597.26},"inv":{"2025":3238317.76},"exp":{},"contract":3238317.76,"gl_total":3001597.26,"inv_total":3238317.76,"expense":2956811.52,"inv_exp_total":null,"con_exp":3190000,"diff":-236720.5,"profit":44785.74,"status":"diff"},{"code":"GLI25007","name":"งานจัดซื้อและติดตั้งอุปกรณ์ Nexus G จำนวน 3 ชุด และอุปกรณ์ประกอบอื่น ๆ ที่เกี่ยวข้อง บริษัท เอเอ็นทเวนตี้ไฟว์ จำกัด บริษัท เอเอ็นทเวนตี้ไฟว์ จำกัด","active":true,"gl":{"2025":87877.71},"inv":{"2025":602885.28},"exp":{},"contract":602885.28,"gl_total":87877.71,"inv_total":602885.28,"expense":51561.82,"inv_exp_total":null,"con_exp":353740,"diff":-515007.57,"profit":36315.89,"status":"diff"},{"code":"GLI25001","name":"จ้างเหมางานก่อสร้าง Thickener Building และ EQ Basin กิจการร่วมค้า RVK กิจการร่วมค้า RVK","active":true,"gl":{"2025":457183.75},"inv":{"2025":14606848.6,"2026":11008694.89},"exp":{},"contract":97378990.65,"gl_total":457183.75,"inv_total":25615543.49,"expense":1381911.32,"inv_exp_total":null,"con_exp":84818821.95,"diff":-25158359.74,"profit":-924727.57,"status":"diff"},{"code":"GLI25011","name":"ซื้อเครื่องมือวัดคุณภาพน้ำ แบบหัวรวม จำนวน 1 เครื่อง โครงการชลประทานเชียงราย โครงการชลประทานเชียงราย","active":true,"gl":{"2025":180294.56},"inv":{"2025":182242.99},"exp":{},"contract":182242.99,"gl_total":180294.56,"inv_total":182242.99,"expense":120201,"inv_exp_total":null,"con_exp":121500,"diff":-1948.43,"profit":60093.56,"status":"diff"},{"code":"GLI25013","name":"จ้างเหมาบริการติดตั้งระบบควบคุมสั่งการระยะไกล ปตร.ยายส่อน บริษัท คาแนล วัน จำกัด บริษัท คาแนล วัน จำกัด","active":true,"gl":{"2025":973279.25},"inv":{"2025":2010981.31,"2026":4692289.72},"exp":{},"contract":6703271.03,"gl_total":973279.25,"inv_total":6703271.03,"expense":515563.48,"inv_exp_total":null,"con_exp":3550842.94,"diff":-5729991.78,"profit":457715.77,"status":"diff"},{"code":"ME","name":"- - -","active":true,"gl":{"2018":0.02},"inv":{},"exp":{},"contract":null,"gl_total":0.02,"inv_total":null,"expense":34083.64,"inv_exp_total":null,"con_exp":null,"diff":0.02,"profit":-34083.62,"status":"gl_only"},{"code":"GLI18003","name":"เครื่องสูบน้ำขนาด 12 นิ้ว จำนวน 30 เครื่อง และขนาด 8 นิ้ว จำนวน 20 เครื่อง องค์การบริหารส่วนจังหวัดสมุทรปราการ องค์การบริหารส่วนจังหวัดสมุทรปราการ","active":false,"gl":{"2018":55183441.74},"inv":{},"exp":{},"contract":null,"gl_total":55183441.74,"inv_total":null,"expense":51882462.35,"inv_exp_total":null,"con_exp":null,"diff":55183441.74,"profit":3300979.39,"status":"gl_only"},{"code":"GLI18005","name":"ติดตั้งแผงกั้นราวสแตนเลสกันตกที่ชั้นชานชลาสถานีไฟฟ้าแอร์พอร์ตลิงค์ บริษัท รถไฟฟ้า รฟท. จำกัด บริษัท รถไฟฟ้า รฟท. จำกัด","active":false,"gl":{"2018":10158592.28,"2019":2417949.77},"inv":{"2018":7545925.23,"2019":5030616.82},"exp":{},"contract":12576542.06,"gl_total":12576542.05,"inv_total":12576542.05,"expense":11147672.33,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":1428869.72,"status":"match"},{"code":"GLI18006","name":"เครื่องผลักดันน้ำและอื่นๆ จำนวน 4 รายการ กรมชลประทาน กรมชลประทาน","active":false,"gl":{"2018":122196909.28},"inv":{"2018":122199532.72},"exp":{},"contract":122199532.71,"gl_total":122196909.28,"inv_total":122199532.72,"expense":119123355.75,"inv_exp_total":null,"con_exp":null,"diff":-2623.44,"profit":3073553.53,"status":"diff"},{"code":"GLI17012","name":"ปรับปรุงสถานีไฟฟ้าระบบ 22 เควี จาก Outdoor เป็น Indoor สถานีไฟฟ้าลำปาง 2 สถานีไฟฟ้ามุกดาหาร 2 การไฟฟ้าส่วนภูมิภาค การไฟฟ้าส่วนภูมิภาค","active":false,"gl":{"2018":30170994.42},"inv":{"2018":1903263.5,"2019":12608822.43,"2021":682549.07},"exp":{},"contract":null,"gl_total":30170994.42,"inv_total":15194635,"expense":19263382.31,"inv_exp_total":null,"con_exp":null,"diff":14976359.42,"profit":10907612.11,"status":"diff"},{"code":"GLI16012","name":"งานกระเพาะหมู กิจการร่วมค้าอาร์.ซีวายเอส กิจการร่วมค้า อาร์.ซีวายเอส","active":false,"gl":{"2018":39693501.21,"2022":37450},"inv":{"2018":3911600},"exp":{},"contract":69110654.21,"gl_total":39730951.21,"inv_total":3911600,"expense":24301487.51,"inv_exp_total":null,"con_exp":null,"diff":35819351.21,"profit":15429463.7,"status":"diff"},{"code":"SE","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":67054.88,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-67054.88,"status":"expense_only"},{"code":"STORE","name":"GLI_Store64_สโตร์กลาง บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":true,"gl":{"2018":19247111,"2019":64367280.41,"2020":471113.04,"2021":164852.02,"2022":249740,"2023":18000},"inv":{"2016":492630,"2017":19819208.46,"2018":9866167.34,"2019":60289158,"2020":470989.67,"2021":307347.32,"2022":107240,"2023":18000,"2025":841121.5,"2026":5112149.55},"exp":{},"contract":400000,"gl_total":84518096.47,"inv_total":97324011.84,"expense":86049322.68,"inv_exp_total":null,"con_exp":null,"diff":-12805915.37,"profit":-1531226.21,"status":"diff"},{"code":"GLI19005","name":"AOT งานระบบสื่อสารในอาคารจอดรถยนต์ สนญ. ทอท. บจก. ริเวอร์ เอนจิเนียริ่ง บจก. ริเวอร์ เอนจิเนียริ่ง","active":true,"gl":{"2019":9045555.77,"2020":7703379.23,"2022":100,"2025":-100},"inv":{"2019":5976903.18,"2020":10772031.82,"2024":800000},"exp":{},"contract":16748935,"gl_total":16748935,"inv_total":17548935,"expense":16120451.45,"inv_exp_total":null,"con_exp":14271745.4,"diff":-800000,"profit":628483.55,"status":"diff"},{"code":"GLI19004","name":"จัดหาและติดตั้งโครงข่ายวิทยุระบบดิจิตอลฯ กิจการร่วมค้า ไอ.จี.แอล. กิจการร่วมค้า ไอ.จี.แอล.","active":true,"gl":{"2019":23959000},"inv":{"2019":23959000},"exp":{},"contract":23959000,"gl_total":23959000,"inv_total":23959000,"expense":21059708.07,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":2899291.93,"status":"match"},{"code":"TS","name":"- - -","active":true,"gl":{"2019":0.8},"inv":{},"exp":{},"contract":null,"gl_total":0.8,"inv_total":null,"expense":313344.74,"inv_exp_total":null,"con_exp":null,"diff":0.8,"profit":-313343.94,"status":"gl_only"},{"code":"GLI19003","name":"งานซ่อมเครื่องพ่นละอองน้ำดักจับฝุ่นและควันแบบลากจูง องค์การบริหารส่วนจังหวัดสมุทรปราการ องค์การบริหารส่วนจังหวัดสมุทรปราการ","active":false,"gl":{"2019":158878.5},"inv":{"2019":158878.5},"exp":{},"contract":158878.5,"gl_total":158878.5,"inv_total":158878.5,"expense":20,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":158858.5,"status":"match"},{"code":"DD","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":5772081.9,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-5772081.9,"status":"expense_only"},{"code":"GLI19007","name":"เครื่องสูบน้ำขนาด 8 นิ้ว ชนิดเครื่องยนต์ดีเซล 3 เครื่อง เทศบาลเมืองพระประแดง เทศบาลเมืองพระประแดง","active":false,"gl":{"2019":2590654.2},"inv":{"2019":2590654.2},"exp":{},"contract":2590654.21,"gl_total":2590654.2,"inv_total":2590654.2,"expense":2158944.5,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":431709.7,"status":"match"},{"code":"Z_62002","name":"Renovate GLI อาคารแต่งตั้ง ชั้น 1 บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":false,"gl":{},"inv":{},"exp":{},"contract":3000000,"gl_total":0,"inv_total":null,"expense":486883.16,"inv_exp_total":null,"con_exp":2500000,"diff":0,"profit":-486883.16,"status":"gl_only"},{"code":"กชป00120","name":"ประกวดราคา EB.ซ.02/2563(คท.)ซื้อเครื่องผลักดันน้ำและอื่น ๆ จำนวน 4 รายการ บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":true,"gl":{},"inv":{},"exp":{},"contract":95250000,"gl_total":0,"inv_total":null,"expense":520,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-520,"status":"gl_only"},{"code":"กฟภ.ลป120/2562","name":"ประกวดราคา ปรับปรุงไฟฟ้าเป็นเคเบิลใต้ดิน จ.ลำปาง เฟส 1 สี่แยกดอนปาน-ถนนดวงรัตน์ บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":true,"gl":{},"inv":{},"exp":{},"contract":114711538.26,"gl_total":0,"inv_total":null,"expense":234,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-234,"status":"gl_only"},{"code":"GLI19009","name":"รถอเนกประสงค์ ยี่ห้อ Multione รุ่น 10.9 พร้อมอุปกรณ์หัวต่อ 6 ชุด กองอำนวยการรักษาความมั่นคงภายในราชอาณาจักร กองอำนวยการรักษาความมั่นคงภายในราชอาณาจักร","active":false,"gl":{"2020":4885046.73},"inv":{"2020":4885046.73},"exp":{},"contract":4931775.7,"gl_total":4885046.73,"inv_total":4885046.73,"expense":2147652.07,"inv_exp_total":null,"con_exp":3433100,"diff":0,"profit":2737394.66,"status":"match"},{"code":"GLI20006","name":"ระบบควบคุม PLC & SCADA สถานีสูบน้ำมหาวงษ์ บจก. ริเวอร์ เอนจิเนียริ่ง บจก. ริเวอร์ เอนจิเนียริ่ง","active":false,"gl":{"2020":25384.25,"2021":1474615.75,"2023":2202.4},"inv":{"2021":1500000},"exp":{},"contract":1500000,"gl_total":1502202.4,"inv_total":1500000,"expense":1016694.95,"inv_exp_total":null,"con_exp":1378040,"diff":2202.4,"profit":485507.45,"status":"diff"},{"code":"GLI20004","name":"ระบบควบคุม PLC & SCADA สถานีสูบน้ำบางนางเกรง บจก. ริเวอร์ เอนจิเนียริ่ง บจก. ริเวอร์ เอนจิเนียริ่ง","active":false,"gl":{"2020":189392.19,"2021":1310607.81},"inv":{"2021":1500000},"exp":{},"contract":1500000,"gl_total":1500000,"inv_total":1500000,"expense":902223.02,"inv_exp_total":null,"con_exp":1378040,"diff":0,"profit":597776.98,"status":"match"},{"code":"GLI20007","name":"(โครงการ Red line) ออกแบบ จัดหา และติดตั้งระบบอาณัติสัญญาณแบบ ETCS รถไฟฟ้าสายสีแดง บจก. ริเวอร์ เอนจิเนียริ่ง บจก. ริเวอร์ เอนจิเนียริ่ง","active":true,"gl":{"2020":1852.34,"2021":196226.52,"2022":561422.69,"2025":166666.67},"inv":{"2020":100000,"2021":213084.11,"2022":446417.44},"exp":{},"contract":926168.22,"gl_total":926168.22,"inv_total":759501.55,"expense":458116.64,"inv_exp_total":null,"con_exp":400000,"diff":166666.67,"profit":468051.58,"status":"diff"},{"code":"GLI20005","name":"ระบบควบคุม PLC & SCADA สถานีสูบน้ำปากน้ำ บจก. ริเวอร์ เอนจิเนียริ่ง บจก. ริเวอร์ เอนจิเนียริ่ง","active":false,"gl":{"2020":19628.24,"2021":1480371.76},"inv":{"2021":1500000},"exp":{},"contract":1500000,"gl_total":1500000,"inv_total":1500000,"expense":420949.39,"inv_exp_total":null,"con_exp":1378040,"diff":0,"profit":1079050.61,"status":"match"},{"code":"GLI21001","name":"จัดซื้อเครื่องมือสำหรับงานก่อสร้างสายส่ง 115 เควี (21 รายการ) (ไฟฟ้า) ตามแผนงานจัดหาเครื่องมือฯ กฟภ. การไฟฟ้าส่วนภูมิภาค การไฟฟ้าส่วนภูมิภาค","active":false,"gl":{"2021":192372},"inv":{"2021":192372},"exp":{},"contract":192372,"gl_total":192372,"inv_total":192372,"expense":160239,"inv_exp_total":null,"con_exp":167900,"diff":0,"profit":32133,"status":"match"},{"code":"GLI21005","name":"งานจ้างเหมาซ่อมปรับปรุงวงจรควบคุมภายในเครื่องทางสะดวกของระบบเครื่องทางสะดวกชนิดลูกตราฯ การรถไฟแห่งประเทศไทย การรถไฟแห่งประเทศไทย","active":false,"gl":{"2021":2969285.05},"inv":{"2021":2969285.05,"2022":160000},"exp":{},"contract":2969285.05,"gl_total":2969285.05,"inv_total":3129285.05,"expense":2264171.84,"inv_exp_total":null,"con_exp":2392523.37,"diff":-160000,"profit":705113.21,"status":"diff"},{"code":"Z_210002","name":"โครงการระบบควบคุมอุปกรณ์เคลื่อนที่ แบบ IOT บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":true,"gl":{"2021":0.05,"2022":-169.85,"2025":169.8},"inv":{},"exp":{},"contract":null,"gl_total":0,"inv_total":null,"expense":12523.55,"inv_exp_total":null,"con_exp":42056.98,"diff":0,"profit":-12523.55,"status":"gl_only"},{"code":"Z_210003","name":"โครงการจัดซื้อรถ Low Entry AC Electric bus บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":0,"inv_total":null,"expense":224772.14,"inv_exp_total":null,"con_exp":6059716,"diff":0,"profit":-224772.14,"status":"gl_only"},{"code":"BID002/2565","name":"จ้างเหมาบริหารจัดการและจัดเก็บรายได้จากพื้นที่ส่วนของลานจอดรถที่สถานีกลางบางซื่อ จำนวน 1 รายการ การรถไฟแห่งประเทศไทย การรถไฟแห่งประเทศไทย","active":false,"gl":{},"inv":{},"exp":{},"contract":1,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID006/2565","name":"งานซื้อและติดตั้งเครื่องวัดคุณภาพนํ้าประปาระยะไกลฯ จำนวน 1 ระบบ เลขที่ ซล.3/2566 การประปานครหลวง การประปานครหลวง","active":false,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":0,"inv_total":null,"expense":9898.28,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-9898.28,"status":"gl_only"},{"code":"GLI22006","name":"งานจัดซื้ออุปกรณ์แสดงผล Smart School Bus บริษัท ติงส์ ออน เน็ต จำกัด บริษัท ติงส์ ออน เน็ต จำกัด","active":false,"gl":{"2022":1575100,"2023":100},"inv":{"2022":1575000},"exp":{},"contract":1575000,"gl_total":1575200,"inv_total":1575000,"expense":1247243.12,"inv_exp_total":null,"con_exp":1401550,"diff":200,"profit":327956.88,"status":"diff"},{"code":"BID008/2565","name":"งานก่อสร้างถังเก็บนํ้าใส ขนาด 20,000 ลูกบาศก์เมตร ที่สถานีสูบจ่ายนํ้าสําโรงฯ สัญญา G-SR-9 การประปานครหลวง การประปานครหลวง","active":false,"gl":{},"inv":{},"exp":{},"contract":524568459.97,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"GLI22010","name":"งานจัดซื้ออุปกรณ์ Raspberry Pi4 Model B Smart School Bus บริษัท ติงส์ ออน เน็ต จำกัด บริษัท ติงส์ ออน เน็ต จำกัด","active":false,"gl":{"2022":897204.34,"2023":26730.66},"inv":{"2000":277150.5,"2023":646684.5},"exp":{},"contract":923835,"gl_total":923935,"inv_total":923835,"expense":619780.25,"inv_exp_total":null,"con_exp":632350,"diff":100,"profit":304154.75,"status":"diff"},{"code":"BID004/2566","name":"จ้างดัดแปลงรถโดยสารนั่งปรับอากาศและแบบมีห้องอาหารเพื่อใช้งานร่วมกับรถโบกี้ไฟฟ้ากำลัง จำนวน 23 คัน การรถไฟแห่งประเทศไทย การรถไฟแห่งประเทศไทย","active":false,"gl":{},"inv":{},"exp":{},"contract":98526168.22,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"IA","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":2447163.78,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-2447163.78,"status":"expense_only"},{"code":"FT","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":21481.33,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-21481.33,"status":"expense_only"},{"code":"BID010/2567","name":"จ้างปรับปรุงระบบสูบน้ำ สถานีสูบน้ำกิ่วลม จำนวน 1 งาน การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย","active":false,"gl":{},"inv":{},"exp":{},"contract":49379713.34,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"DT","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":126629.16,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-126629.16,"status":"expense_only"},{"code":"DR","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":165001.93,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-165001.93,"status":"expense_only"},{"code":"GLI25003","name":"จ้างก่อสร้างปรับปรุงระบบจำหน่ายไฟฟ้าเป็นเคเบิลใต้ดินบริเวณหาดราไวย์ จ.ภูเก็ต การไฟฟ้าส่วนภูมิภาค การไฟฟ้าส่วนภูมิภาค","active":true,"gl":{"2025":13569144.61},"inv":{},"exp":{},"contract":85449088.58,"gl_total":13569144.61,"inv_total":null,"expense":12332012.7,"inv_exp_total":null,"con_exp":68755310,"diff":13569144.61,"profit":1237131.91,"status":"gl_only"},{"code":"ET","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":23850.22,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-23850.22,"status":"expense_only"},{"code":"BID015/2568","name":"จ้างจัดหาและติดตั้งระบบควบคุมอาคารชลประทานทางไกลอัตโนมัติ ประตูระบายน้ำและสถานีสูบน้ำยายส่อน ตำบลปลายบาง อำเภอบางกรวย จังหวัดนนทบุรี จำนวน 1 งาน เลขที่ EB.พม. /จ.01/ 2569 กรมชลประทาน กรมชลประทาน","active":false,"gl":{},"inv":{},"exp":{},"contract":7284485.98,"gl_total":0,"inv_total":null,"expense":629.08,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-629.08,"status":"gl_only"},{"code":"BID016/2568","name":"จ้างจัดหาและติดตั้งระบบควบคุมอาคารชลประทานทางไกลอัตโนมัติ ประตูระบายน้ำนายยอด ตำบลพิมลราช อำเภอบางบัวทอง จังหวัดนนทบุรี จำนวน 1 งาน เลขที่ EB.พม./จ.02/2569 กรมชลประทาน กรมชลประทาน","active":false,"gl":{},"inv":{},"exp":{},"contract":2803738.32,"gl_total":0,"inv_total":null,"expense":200,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-200,"status":"gl_only"},{"code":"GLI25009","name":"จ้างก่อสร้างปรับปรุงระบบจำหน่ายไฟฟ้าเป็นเคเบิลใต้ดินบริเวณถนนห้วยยอด จ.ตรัง (งานด้านไฟฟ้า) การไฟฟ้าส่วนภูมิภาค การไฟฟ้าส่วนภูมิภาค","active":true,"gl":{"2025":9839828.37},"inv":{},"exp":{},"contract":101603118,"gl_total":9839828.37,"inv_total":null,"expense":11093651.81,"inv_exp_total":null,"con_exp":83542197.33,"diff":9839828.37,"profit":-1253823.44,"status":"gl_only"},{"code":"GLI18004","name":"เครื่องสูบน้ำแบบหอยโข่งชนิดขับเคลื่อนด้วยเครื่องยนต์ดีเซล ขนาดท่อทางส่งและทางดูดไม่น้อยกว่า 6 นิ้ว พร้อมอุปกรณ์ เทศบาลตำบลเสาธงหิน เทศบาลตำบลเสาธงหิน","active":false,"gl":{"2018":2640186.92,"2019":1946.7},"inv":{},"exp":{},"contract":null,"gl_total":2642133.62,"inv_total":null,"expense":1973423.71,"inv_exp_total":null,"con_exp":null,"diff":2642133.62,"profit":668709.91,"status":"gl_only"},{"code":"GLI19001","name":"ติดตั้งระบบรักษาความปลอดภัยในพื้นที่เฝ้าระวังเข้มงวด กองบัญชาการตำรวจนครบาล กองบัญชาการตำรวจนครบาล","active":false,"gl":{},"inv":{},"exp":{},"contract":100000,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"GLI16008","name":"งานเครื่องกั้นถนน 8 แห่ง กิจการร่วมค้าดับบลิว-อาร์ กิจการร่วมค้า ดับบลิว-อาร์","active":false,"gl":{},"inv":{"2018":1721936},"exp":{},"contract":null,"gl_total":0,"inv_total":1721936,"expense":7933.44,"inv_exp_total":null,"con_exp":null,"diff":-1721936,"profit":-7933.44,"status":"diff"},{"code":"GLI22007","name":"ซื้อวัสดุครุภัณฑ์การเกษตร(เครื่องสูบน้ำหอยโข่งแบบ Horizontal Split Case)โดยวิธีเฉพาะเจาะจงจำนวน1ชุด สำนักงานเทศบาลนครรังสิต สำนักงานเทศบาลนครรังสิต","active":false,"gl":{"2022":2242990.65},"inv":{"2022":2242990.65},"exp":{},"contract":2242990.65,"gl_total":2242990.65,"inv_total":2242990.65,"expense":1685621.3,"inv_exp_total":null,"con_exp":1676400,"diff":0,"profit":557369.35,"status":"match"},{"code":"GLI21002","name":"จัดซื้อเครื่องมือสำหรับงานก่อสร้างสายส่ง 115 เควี (21 รายการ) (ไฟฟ้า) ตามแผนงานจัดหาเครื่องมือฯ เฟส2 การไฟฟ้าส่วนภูมิภาค การไฟฟ้าส่วนภูมิภาค","active":false,"gl":{"2021":68299},"inv":{"2021":68299},"exp":{},"contract":68299,"gl_total":68299,"inv_total":68299,"expense":63915.95,"inv_exp_total":null,"con_exp":63915.95,"diff":0,"profit":4383.05,"status":"match"},{"code":"BID008/2566","name":"ซื้อครุภัณฑ์ยานพาหนะและขนส่ง รถสุขาเคลื่อนที่ ชนิด 10 ล้อ (ดีเซล) สำนักงานเทศบาลนครรังสิต สำนักงานเทศบาลนครรังสิต","active":false,"gl":{},"inv":{},"exp":{},"contract":12149532.71,"gl_total":0,"inv_total":null,"expense":1747.22,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-1747.22,"status":"gl_only"},{"code":"BID009/2566","name":"จ้างงานการตรวจสอบการขออนุญาตเดินรถบนทางหลวงพิเศษ ทางหลวงแผ่นดิน และทางหลวงสัมปทาน กรมทางหลวง กรมทางหลวง","active":false,"gl":{},"inv":{},"exp":{},"contract":9345794.39,"gl_total":0,"inv_total":null,"expense":3343.33,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-3343.33,"status":"gl_only"},{"code":"BID008/2567","name":"จ้างงานการตรวจสอบการขออนุญาตเดินรถบนทางหลวงพิเศษ ทางหลวงแผ่นดิน และทางหลวงสัมปทาน กรมทางหลวง กรมทางหลวง","active":false,"gl":{},"inv":{},"exp":{},"contract":8741485.98,"gl_total":0,"inv_total":null,"expense":10,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-10,"status":"gl_only"},{"code":"BID014/2567","name":"จ้างก่อสร้างปรับปรุงหอพักพยาบาล 1 โรงพยาบาลสิรินธร โรงพยาบาลสิรินธร สำนักการแพทย์ กรุงเทพมหานคร โรงพยาบาลสิรินธร สำนักการแพทย์ กรุงเทพมหานคร","active":false,"gl":{},"inv":{},"exp":{},"contract":24429906.54,"gl_total":0,"inv_total":null,"expense":10,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-10,"status":"gl_only"},{"code":"GLI25010","name":"ปรับปรุงหอพักพยาบาล 1 โรงพยาบาลสิรินธร โรงพยาบาลสิรินธร สำนักการแพทย์ กรุงเทพมหานคร โรงพยาบาลสิรินธร สำนักการแพทย์ กรุงเทพมหานคร","active":true,"gl":{},"inv":{},"exp":{},"contract":23000000,"gl_total":0,"inv_total":null,"expense":155.22,"inv_exp_total":null,"con_exp":23005,"diff":0,"profit":-155.22,"status":"gl_only"},{"code":"BID008/2568","name":"ซื้อพร้อมติดตั้งมอเตอร์และเครื่องสูบน้ำดิบหมายเลข P01A, P01B, P01C พร้อมอุปกรณ์ที่เกี่ยวข้อง ที่โรงสูบ 11 โรงงานผลิตน้ำสามเสน 4 จำนวน 3 ชุด เลขที่ ซล.58/2560 (ครั้งที่ 2) การประปานครหลวง การประปานครหลวง","active":false,"gl":{},"inv":{},"exp":{},"contract":68263500,"gl_total":0,"inv_total":null,"expense":517.24,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-517.24,"status":"gl_only"},{"code":"BID010/2568","name":"ซื้อพร้อมติดตั้งเครื่องสูบน้ำ หมายเลข 10 พร้อมอุปกรณ์ประกอบที่เกี่ยวข้อง ที่โรงสูบส่งน้ำ 2 โรงงานผลิตน้ำบางเขน จำนวน 1 งาน เลขที่ ซล.14-2567 การประปานครหลวง การประปานครหลวง","active":false,"gl":{},"inv":{},"exp":{},"contract":50000000,"gl_total":0,"inv_total":null,"expense":10,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-10,"status":"gl_only"},{"code":"BID017/2568","name":"ซื้อ Overhead Crane ขนาด 5 Tons พร้อมอุปกรณ์ส่วนควบ ใช้งานที่โรงรถจักรบางซื่อ งทป.เลขที่ 68202300000000018 จำนวน 1 ชุด. การรถไฟแห่งประเทศไทย การรถไฟแห่งประเทศไทย","active":false,"gl":{},"inv":{},"exp":{},"contract":4730000,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID014/2568","name":"ประกวดราคาซื้อพร้อมติดตั้งเครื่องสูบน้ำ,มอเตอร์ไฟฟ้า,อุปกรณ์ควบคุมความเร็วรอบมอเตอร์ และอุปกรณ์ที่เกี่ยวข้อง หมายเลข 1 ที่สถานีสูบจ่ายน้ำราษฎร์บูรณะ จำนวน 1 งาน เลขที่ ซล.32-2568 ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) การประปานครหลวง การประปานครหลวง","active":false,"gl":{},"inv":{},"exp":{},"contract":59102611.78,"gl_total":0,"inv_total":null,"expense":10,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-10,"status":"gl_only"},{"code":"GLI25014","name":"ซื้อเครื่องย่อยกิ่งไม้ ขนาดไม่น้อยกว่า 400 แรงม้า จำนวน 1 เครื่อง เทศบาลเมืองลาดสวาย เทศบาลเมืองลาดสวาย","active":true,"gl":{},"inv":{},"exp":{},"contract":26532710.28,"gl_total":0,"inv_total":null,"expense":982.22,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-982.22,"status":"gl_only"},{"code":"GLI26003","name":"ซื้อรถสุขาเคลื่อนที่ ชนิด 6 ล้อ จำนวน 5 คัน องค์การบริหารส่วนจังหวัดภูเก็ต องค์การบริหารส่วนจังหวัดภูเก็ต","active":true,"gl":{},"inv":{},"exp":{},"contract":37359813.08,"gl_total":0,"inv_total":null,"expense":65.56,"inv_exp_total":null,"con_exp":32592616.81,"diff":0,"profit":-65.56,"status":"gl_only"},{"code":"PD","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":70000,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-70000,"status":"expense_only"},{"code":"TGG52007","name":"รถดูดจอมทอง สำนักงานเขตจอมทอง สำนักงานเขตจอมทอง","active":true,"gl":{},"inv":{},"exp":{},"contract":1,"gl_total":0,"inv_total":null,"expense":73864.34,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-73864.34,"status":"gl_only"},{"code":"BF.RETENTION","name":"ยกยอดเงินประกันผลงาน โครงการที่ปิดไปแล้ว บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":false,"gl":{"2020":14400.01,"2021":39857.5},"inv":{"2015":138000},"exp":{},"contract":null,"gl_total":54257.51,"inv_total":138000,"expense":138000,"inv_exp_total":null,"con_exp":null,"diff":-83742.49,"profit":-83742.49,"status":"diff"},{"code":"Z_200003","name":"RPRO บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":true,"gl":{"2021":54000,"2025":146000},"inv":{},"exp":{},"contract":200000,"gl_total":200000,"inv_total":null,"expense":23518674.41,"inv_exp_total":null,"con_exp":300000,"diff":200000,"profit":-23318674.41,"status":"gl_only"},{"code":"GLI14009","name":"งานเครื่องย่อยกิ่งไม้75ชุด สำนักงานสวนสาธารณะสำนักสิ่งแวดล้อม สำนักงานสวนสาธารณะ สำนักสิ่งแวดล้อม","active":false,"gl":{"2021":8720.5},"inv":{},"exp":{},"contract":333967289.72,"gl_total":8720.5,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":8720.5,"profit":8720.5,"status":"gl_only"},{"code":"GLI16005","name":"รถบูรณะพื้นผิวถนนและทางเท้า10คัน กรุงเทพมหานคร(สำนักการโยธา) กรุงเทพมหานคร(สำนักการโยธา)","active":true,"gl":{"2019":17984560},"inv":{"2019":17984560},"exp":{},"contract":100,"gl_total":17984560,"inv_total":17984560,"expense":17124128.39,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":860431.61,"status":"match"},{"code":"Z_210001","name":"เครื่องกำเนิดไฟฟ้าพลังน้ำ Proposal 400,000 kWh vortex hydro power plant 50 KW#TURBULENT บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":0,"inv_total":null,"expense":16700,"inv_exp_total":null,"con_exp":4940000,"diff":0,"profit":-16700,"status":"gl_only"},{"code":"GLI22005","name":"ซื้อวัสดุครุภัณฑ์การเกษตร(เครื่องสูบน้ำหอยโข่งแบบ Horizontal Split Case)โดยวิธีเฉพาะเจาะจง จำนวน2ชุด สำนักงานเทศบาลนครรังสิต สำนักงานเทศบาลนครรังสิต","active":false,"gl":{"2022":4485981.31},"inv":{"2022":4485981.31},"exp":{},"contract":4485981.31,"gl_total":4485981.31,"inv_total":4485981.31,"expense":3369324.6,"inv_exp_total":null,"con_exp":3362800,"diff":0,"profit":1116656.71,"status":"match"},{"code":"BID009/2565","name":"งานก่อสร้างถังเก็บนํ้าใส ขนาด 70,000 ลบ.ม. ที่สถานีสูบจ่ายนํ้ามีนบุรีฯ สัญญา G-MB-9(R1) การประปานครหลวง การประปานครหลวง","active":false,"gl":{},"inv":{},"exp":{},"contract":736173287.96,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID002/2566","name":"งานก่อสร้างสถานีสูบจ่ายน้ำลาดกระบังแห่งที่ 2 ถังเก็บน้ำใสขนาด 50,000 ลูกบาศก์เมตร สัญญา GES-LK-9 การประปานครหลวง การประปานครหลวง","active":false,"gl":{},"inv":{},"exp":{},"contract":1106715039.64,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID011/2566","name":"จ้างติดตั้ง Automatic Train Protection ETCS Level 1 Train borne Equipment-supply and Installation พร้อมอะไหล่ สำหรับติดตั้งบนรถดีเซลราง จำนวน 117 ชุด การรถไฟแห่งประเทศไทย การรถไฟแห่งประเทศไทย","active":false,"gl":{},"inv":{},"exp":{},"contract":938077850.47,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"GLI24002","name":"ซื้อวัสดุสำหรับโรงงานกำจัดสิ่งปฏิกูลหนองแขม จำนวน 1 รายการ (โพลิเมอร์ KENFLOC CP 852 F) สำนักงานจัดการมูลฝอยและสิ่งปฏิกูล สำนักสิ่งแวดล้อม กรุงเทพมหานคร สำนักงานจัดการมูลฝอยและสิ่งปฏิกูล สำนักสิ่งแวดล้อม กรุงเทพมหานคร","active":false,"gl":{"2024":460000},"inv":{"2024":460000},"exp":{},"contract":460000,"gl_total":460000,"inv_total":460000,"expense":234000,"inv_exp_total":null,"con_exp":236000,"diff":0,"profit":226000,"status":"match"},{"code":"GLI24003","name":"ซื้อวัสดุสำหรับโรงงานกำจัดไขมันและแปรรูปไขมันหนองแขม จำนวน 1 รายการ (โพลิเมอร์ KENFLOC CP 860 F) สำนักงานจัดการมูลฝอยและสิ่งปฏิกูล สำนักสิ่งแวดล้อม กรุงเทพมหานคร สำนักงานจัดการมูลฝอยและสิ่งปฏิกูล สำนักสิ่งแวดล้อม กรุงเทพมหานคร","active":false,"gl":{"2024":447300},"inv":{"2024":447300},"exp":{},"contract":447300,"gl_total":447300,"inv_total":447300,"expense":183600,"inv_exp_total":null,"con_exp":189000,"diff":0,"profit":263700,"status":"match"},{"code":"GLI24005","name":"จัดซื้อวัสดุสารโพลิเมอร์ จำนวน 2 รายการ สำนักงานจัดการมูลฝอยและสิ่งปฏิกูล สำนักสิ่งแวดล้อม กรุงเทพมหานคร สำนักงานจัดการมูลฝอยและสิ่งปฏิกูล สำนักสิ่งแวดล้อม กรุงเทพมหานคร","active":true,"gl":{"2024":420842.03,"2025":20639.48},"inv":{"2024":453650},"exp":{},"contract":453650,"gl_total":441481.51,"inv_total":453650,"expense":206800,"inv_exp_total":null,"con_exp":212500,"diff":-12168.49,"profit":234681.51,"status":"diff"},{"code":"BID011/2567","name":"การจ้างก่อสร้างนิคมอุตสาหกรรมเกษตร แอลพีพี นครสวรรค์ หมู่ที่ 8 ตำบลโคกเดื่อ อำเภอไพศาลี จังหวัดนครสวรรค์ บริษัท แอลพีพี อินดัสเตรียล เอสเตท จำกัด บริษัท แอลพีพี อินดัสเตรียล เอสเตท จำกัด","active":false,"gl":{},"inv":{},"exp":{},"contract":1,"gl_total":0,"inv_total":null,"expense":12515,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-12515,"status":"gl_only"},{"code":"GLI25003#1","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":null,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"expense_only"},{"code":"GLI25008#1","name":"- - -","active":true,"gl":{"2025":10140925.95},"inv":{},"exp":{},"contract":null,"gl_total":10140925.95,"inv_total":null,"expense":null,"inv_exp_total":null,"con_exp":null,"diff":10140925.95,"profit":10140925.95,"status":"gl_only"},{"code":"GLI25008#2","name":"- - -","active":true,"gl":{"2025":10181150},"inv":{},"exp":{},"contract":null,"gl_total":10181150,"inv_total":null,"expense":null,"inv_exp_total":null,"con_exp":null,"diff":10181150,"profit":10181150,"status":"gl_only"},{"code":"99","name":"- - -","active":true,"gl":{"2018":-1712169.57},"inv":{},"exp":{},"contract":null,"gl_total":-1712169.57,"inv_total":null,"expense":596.69,"inv_exp_total":null,"con_exp":null,"diff":-1712169.57,"profit":-1712766.26,"status":"gl_only"},{"code":"BD","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":241025.31,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-241025.31,"status":"expense_only"},{"code":"BID005/2566","name":"ประกวดราคาซื้อ พร้อมติดตั้งเครื่องสูบน้ำ, มอเตอร์, ชุดปรับความเร็วรอบ และอุปกรณ์ที่เกี่ยวข้อง หมายเลข 1 และ 2 ที่สถานีสูบน้ำดิบบางซื่อ จำนวน 1 งาน เลขที่ ซล.23-2562 (ครั้งที่ 2) การประปานครหลวง การประปานครหลวง","active":false,"gl":{},"inv":{},"exp":{},"contract":71950000,"gl_total":0,"inv_total":null,"expense":14204.91,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-14204.91,"status":"gl_only"},{"code":"BID002/2567","name":"จ้างเหมาเอกชนควบคุมโรงงานกำจัดสิ่งปฏิกูลอ่อนนุช ระยะที่ 4 สำนักงานจัดการมูลฝอยและสิ่งปฏิกูล สำนักสิ่งแวดล้อม กรุงเทพมหานคร สำนักงานจัดการมูลฝอยและสิ่งปฏิกูล สำนักสิ่งแวดล้อม กรุงเทพมหานคร","active":false,"gl":{},"inv":{},"exp":{},"contract":319763317.76,"gl_total":0,"inv_total":null,"expense":96561.32,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-96561.32,"status":"gl_only"},{"code":"BID005/2567","name":"ซื้ออุปกรณ์ทดแทนคอมพิวเตอร์ สถาบันคุ้มครองเงินฝาก สถาบันคุ้มครองเงินฝาก","active":false,"gl":{},"inv":{},"exp":{},"contract":7086966.66,"gl_total":0,"inv_total":null,"expense":271.71,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-271.71,"status":"gl_only"},{"code":"GLI25003#2","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":null,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"expense_only"},{"code":"GLI25009#2","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":null,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"expense_only"},{"code":"GLI25009#1","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":null,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"expense_only"},{"code":"IGL18001","name":"ก่อสร้างจัดหาและติดตั้งระบบโครงข่ายวิทยุชนิดดิจิตอลเพื่อความปลอดภัยในการเดินรถฯ กิจการร่วมค้าไอ.จี.แอล. กิจการร่วมค้า ไอ.จี.แอล.","active":false,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"DE","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":284429.14,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-284429.14,"status":"expense_only"},{"code":"CD","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":62388.51,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-62388.51,"status":"expense_only"},{"code":"SS","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":153075.88,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-153075.88,"status":"expense_only"},{"code":"ES","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":83442.35,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-83442.35,"status":"expense_only"},{"code":"CV","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":403433,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-403433,"status":"expense_only"},{"code":"LA","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":null,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"expense_only"},{"code":"BS","name":"- - -","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":null,"inv_total":null,"expense":37568,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":-37568,"status":"expense_only"},{"code":"GLI17013","name":"ตู้ควบคุมประตูระบายน้ำ บจก.ซีวายเอสอินโนเวชั่น บจก. ซีวายเอส อินโนเวชั่น","active":false,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"CLOSE002-2019","name":"IoT Laboratory บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":false,"gl":{},"inv":{},"exp":{},"contract":100,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"CLOSE003-2019","name":"IoT Laboratory บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":false,"gl":{},"inv":{},"exp":{},"contract":100,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"ADMIN-HR","name":"เครื่องเขียน และ อุปกรณ์ สำนักงาน Centre HR บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":false,"gl":{},"inv":{},"exp":{},"contract":100000,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"CLOSE010-2019","name":"ระบบบริหารจัดการและจัดเก็บข้อมูลจราจรคอมพิวเตอร์ (USO Log)-เฟส2 กิจการร่วมค้า ซีจีแอล กิจการร่วมค้า ซีจีแอล","active":false,"gl":{},"inv":{},"exp":{},"contract":267864485,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID001/2565","name":"จ้างดัดแปลงปรับปรุงรถ JR-HOKKAIDO จำนวน 10 คัน การรถไฟแห่งประเทศไทย การรถไฟแห่งประเทศไทย","active":false,"gl":{},"inv":{},"exp":{},"contract":1,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID003/2565","name":"จ้างผู้บริหารโครงการรถโรงเรียนรุ่นใหม่เด็กปลอดภัย (Smart School Bus Platform) สำนักงานส่งเสริมเศรษฐกิจดิจิทัล สำนักงานส่งเสริมเศรษฐกิจดิจิทัล","active":false,"gl":{},"inv":{},"exp":{},"contract":1,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID005/2565","name":"ประกวดราคาซื้อชุดโปรแกรมประยุกต์สำหรับงานบริหารจัดการฐานข้อมูลแบบ Enterprise กรมชลประทาน กรมชลประทาน","active":false,"gl":{},"inv":{},"exp":{},"contract":1,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID001/2566","name":"จ้างบำรุงรักษาอุปกรณ์คอมพิวเตอร์และระบบ VDI และอุปกรณ์คอมพิวเตอร์พกพา สถาบันคุ้มครองเงินฝาก สถาบันคุ้มครองเงินฝาก","active":false,"gl":{},"inv":{},"exp":{},"contract":4106666.66,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID003/2566","name":"จ้างบริการ Performance Monitoring - Server และ Network สถาบันคุ้มครองเงินฝาก สถาบันคุ้มครองเงินฝาก","active":false,"gl":{},"inv":{},"exp":{},"contract":2190156.07,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID007/2566","name":"จ้างเหมาต่อเรือขุดแบบยุ้งดิน ขนาดความจุไม่น้อยกว่า 2,500 ลูกบาศก์เมตร จำนวน 1 ลำ (ทดแทนเรือสันดอน 7) การท่าเรือแห่งประเทศไทย การท่าเรือแห่งประเทศไทย","active":false,"gl":{},"inv":{},"exp":{},"contract":2336448598.13,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID010/2566","name":"จ้างงานก่อสร้างถัง Sludge Thickener พร้อมงานที่เกี่ยวข้อง บริเวณโรงกำจัด ตะกอน โรงงานผลิตน้ำบางเขน เลขที่ จล.6-2567 การประปานครหลวง การประปานครหลวง","active":false,"gl":{},"inv":{},"exp":{},"contract":335000000,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID012/2566","name":"จ้างงานการตรวจสอบน้ำหนักโดยหน่วยเครื่องชั่งน้ำหนักเคลื่อนที่ส่วนกลาง (Spot Check) กรมทางหลวง กรมทางหลวง","active":false,"gl":{},"inv":{},"exp":{},"contract":13271796.26,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID013/2566","name":"ซื้อรถงับผักตบชวาพร้อมเครน ความยาวแขนไม่น้อยกว่า 15 เมตร 1 คัน สำนักงานเขตลาดกระบัง สำนักงานเขตลาดกระบัง","active":false,"gl":{},"inv":{},"exp":{},"contract":9158878.5,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID009/2567","name":"ซื้อรถไสผิวถนน ขนาดความกว้างหัวไสไม่น้อยกว่า 30 เซนติเมตร 3 คัน กรุงเทพมหานคร(สำนักการโยธา) กรุงเทพมหานคร(สำนักการโยธา)","active":false,"gl":{},"inv":{},"exp":{},"contract":22429906.54,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID012/2567","name":"งานค่าใช้จ่ายในการตรวจสอบน้ำหนักโดยหน่วยเครื่องชั่งน้ำหนักเคลื่อนที่ส่วนกลาง (Spot Check) 1 โครงการ กรมทางหลวง กรมทางหลวง","active":false,"gl":{},"inv":{},"exp":{},"contract":16573028.04,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID015/2567","name":"จ้างก่อสร้างปรับปรุงสายส่งและระบบจำหน่ายไฟฟ้าเป็นเคเบิลใต้ดินบริเวณถนนรังสิต- ปทุมธานี (ตั้งแต่บริเวณรางรถไฟถึงท่ารถต่างจังหวัด) จังหวัดปทุมธานี การไฟฟ้าส่วนภูมิภาค การไฟฟ้าส่วนภูมิภาค","active":false,"gl":{},"inv":{},"exp":{},"contract":408017560.75,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID016/2567","name":"ซื้อพร้อมติดตั้ง มอเตอร์และเครื่องสูบน้ำดิบหมายเลข P01A, P01B, P01C พร้อมอุปกรณ์ที่เกี่ยวข้อง ที่โรงสูบ 11 โรงงานผลิตน้ำสามเสน 4 จำนวน 3 ชุด เลขที่ ซล.58/2560 การประปานครหลวง การประปานครหลวง","active":false,"gl":{},"inv":{},"exp":{},"contract":64200000,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID001/2568","name":"จ้างก่อสร้างโครงการปรับปรุงระบบระบายน้ำ ระบบไฟฟ้า และระบบเก็บขยะ สถานีสูบน้ำพระโขนง ระยะที่ 1 สำนักงานระบบควบคุมน้ำ สำนักการระบายน้ำ กรุงเทพมหานคร สำนักงานระบบควบคุมน้ำ สำนักการระบายน้ำ กรุงเทพมหานคร","active":false,"gl":{},"inv":{},"exp":{},"contract":280373831.78,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID003/2568","name":"จ้างก่อสร้างปรับปรุงระบบจำหน่ายไฟฟ้าเป็นเคเบิลใต้ดินบริเวณถนนป่ายาง และถนนเหมืองแดง อ.แม่สาย จ.เชียงราย การไฟฟ้าส่วนภูมิภาค การไฟฟ้าส่วนภูมิภาค","active":false,"gl":{},"inv":{},"exp":{},"contract":183854271.03,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID005/2568","name":"ซื้อพร้อมติดตั้งมอเตอร์ไฟฟ้าขนาดไม่ต่ำกว่า 1200 kw หมายเลข 3 และ 4 ที่สถานีสูบจ่ายน้ำท่าพระ จำนวน 1 งาน เลขที่ ซล.12-2566 (ครั้งที่ 2) การประปานครหลวง การประปานครหลวง","active":false,"gl":{},"inv":{},"exp":{},"contract":17950000,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID006/2568","name":"โครงการจัดหาบริการระบบบริหารจัดการข้อมูลและเหตุการณ์ทางด้านความมั่นคงปลอดภัยทางไซเบอร์ ประจำปี 2568 บริษัท จัดการและพัฒนาทรัพยากรน้ำภาคตะวันออก จำกัด (มหาชน) บริษัท จัดการและพัฒนาทรัพยากรน้ำภาคตะวันออก จำกัด (มหาชน)","active":false,"gl":{},"inv":{},"exp":{},"contract":2750000,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID009/2568","name":"รถสุขาเคลื่อนที่ (ไฟฟ้า) ชนิดปรับอากาศ ขนาดเล็ก ประเภทแบตเตอรี่ (BEV) ที่มีขนาดความจุของแบตเตอรี่ ตั้งแต่ 150 กิโลวัตต์ชั่วโมง (kWh) ขึ้นไป กำลังมอเตอร์ไฟฟ้าสูงสุด ไม่น้อยกว่า 200 กิโลวัตต์ จำนวน 2 คัน สำนักงานจัดการมูลฝอยและสิ่งปฏิกูล สำนักสิ่งแวดล้อม กรุงเทพมหานคร สำนักงานจัดการมูลฝอยและสิ่งปฏิกูล สำนักสิ่งแวดล้อม กรุงเทพมหานคร","active":false,"gl":{},"inv":{},"exp":{},"contract":14018691.59,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID011/2568","name":"จ้างติดตั้งเครือข่าย Centralized Management และ Centralized Log จำนวน 1 ระบบ โดยวิธีคัดเลือก สถาบันการบินพลเรือน สถาบันการบินพลเรือน","active":false,"gl":{},"inv":{},"exp":{},"contract":1440000,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID012/2568","name":"จ้างก่อสร้างปรับปรุงระบบจำหน่ายไฟฟ้าเป็นเคเบิลใต้ดิน บริเวณถนนกะตะ ตั้งแต่ซอยกะรน 2 ถึงสามแยกถนนโคกโตนด และถนนแยก (ถนนเกศขวัญ, ถนนท้ายนา และซอยกะตะ) อำเภอเมืองภูเก็ต จังหวัดภูเก็ต การไฟฟ้าส่วนภูมิภาค การไฟฟ้าส่วนภูมิภาค","active":true,"gl":{},"inv":{},"exp":{},"contract":221860221.88,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID013/2568","name":"จ้างก่อสร้างปรับปรุงระบบจำหน่ายไฟฟ้าเป็นเคเบิลใต้ดินบริเวณถนนไตรรัตน์ ถนนสนามบิน ถนนบรรพปราการ และถนนอุตรกิจ จ.เชียงราย การไฟฟ้าส่วนภูมิภาค การไฟฟ้าส่วนภูมิภาค","active":true,"gl":{},"inv":{},"exp":{},"contract":296855140.19,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"GLI26001","name":"จ้างก่อสร้างปรับปรุงระบบจำหน่ายไฟฟ้าเป็นเคเบิลใต้ดิน บริเวณถนนกะตะ ตั้งแต่ซอยกะรน 2 ถึงสามแยกถนนโคกโตนด และถนนแยก (ถนนเกศขวัญ, ถนนท้ายนา และซอยกะตะ) อำเภอเมืองภูเก็ต จังหวัดภูเก็ต (งานด้านไฟฟ้า) การไฟฟ้าส่วนภูมิภาค การไฟฟ้าส่วนภูมิภาค","active":true,"gl":{},"inv":{"2026":5447236.45},"exp":{},"contract":54472364.49,"gl_total":0,"inv_total":5447236.45,"expense":0,"inv_exp_total":null,"con_exp":59828.12,"diff":-5447236.45,"profit":0,"status":"diff"},{"code":"GLI26002","name":"จ้างก่อสร้างปรับปรุงระบบจำหน่ายไฟฟ้าเป็นเคเบิลใต้ดิน บริเวณถนนกะตะ ตั้งแต่ซอยกะรน 2 ถึงสามแยกถนนโคกโตนด และถนนแยก (ถนนเกศขวัญ, ถนนท้ายนา และซอยกะตะ) อำเภอเมืองภูเก็ต จังหวัดภูเก็ต (งานด้านโยธา) สำนักงานเทศบาลตำบลกะรน สำนักงานเทศบาลตำบลกะรน","active":true,"gl":{},"inv":{},"exp":{},"contract":51928387.85,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":38612863.7,"diff":0,"profit":0,"status":"gl_only"},{"code":"GLI26010","name":"จ้างจัดทำโครงการติดตั้งระบบติดตามสถานการณ์น้ำของอาคารชลประทานเพื่อการบริหารจัดการน้ำในพื้นที่ลุ่มน้ำเจ้าพระยา กรมชลประทาน กรมชลประทาน","active":true,"gl":{},"inv":{},"exp":{},"contract":72803738.32,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":42655244,"diff":0,"profit":0,"status":"gl_only"},{"code":"GLI26004","name":"จ้างก่อสร้างปรับปรุงระบบจำหน่ายไฟฟ้าเป็นเคเบิลใต้ดินบริเวณถนนไตรรัตน์ ถนนสนามบิน ถนนบรรพปราการ และถนนอุตรกิจ จ.เชียงราย (งานด้านไฟฟ้า) การไฟฟ้าส่วนภูมิภาค การไฟฟ้าส่วนภูมิภาค","active":true,"gl":{},"inv":{"2026":8811621.25},"exp":{},"contract":88116212.51,"gl_total":0,"inv_total":8811621.25,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":-8811621.25,"profit":0,"status":"diff"},{"code":"GLI26005","name":"จ้างก่อสร้างปรับปรุงระบบจำหน่ายไฟฟ้าเป็นเคเบิลใต้ดินบริเวณถนนไตรรัตน์ ถนนสนามบิน ถนนบรรพปราการ และถนนอุตรกิจ จ.เชียงราย เทศบาลนครเชียงราย เทศบาลนครเชียงราย","active":true,"gl":{},"inv":{},"exp":{},"contract":55077174.68,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":42545700.94,"diff":0,"profit":0,"status":"gl_only"},{"code":"GLI26006","name":"งานติดตั้งและเชื่อมโยงข้อมูลรถ 9 คัน บริษัท เค.ที.เค. ออโต้คาร์ จำกัด บริษัท เค.ที.เค. ออโต้คาร์ จำกัด","active":true,"gl":{},"inv":{"2026":50467.29},"exp":{},"contract":252336.45,"gl_total":0,"inv_total":50467.29,"expense":0,"inv_exp_total":null,"con_exp":163730,"diff":-50467.29,"profit":0,"status":"diff"},{"code":"GLI26007","name":"งานติดตั้งและเชื่อมโยงข้อมูลรถ 67 คัน บริษัท จุฑาชา คอนซันแตนท์ จำกัด บริษัท จุฑาชา คอนซันแตนท์ จำกัด","active":true,"gl":{},"inv":{"2026":319102.8},"exp":{},"contract":1595514,"gl_total":0,"inv_total":319102.8,"expense":0,"inv_exp_total":null,"con_exp":1035700,"diff":-319102.8,"profit":0,"status":"diff"},{"code":"GLI26008","name":"งานติดตั้งและเชื่อมโยงข้อมูลรถ 21 คัน บริษัท จุฑาชา คอนซันแตนท์ จำกัด บริษัท จุฑาชา คอนซันแตนท์ จำกัด","active":true,"gl":{},"inv":{"2026":106260},"exp":{},"contract":531300,"gl_total":0,"inv_total":106260,"expense":0,"inv_exp_total":null,"con_exp":373440,"diff":-106260,"profit":0,"status":"diff"},{"code":"GLI26009","name":"งานติดตั้งและเชื่อมโยงข้อมูลรถ 25 คัน บริษัท โตโยต้า เอกนิมิตไทย จำกัด บริษัท โตโยต้า เอกนิมิตไทย จำกัด","active":true,"gl":{},"inv":{},"exp":{},"contract":700934.58,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":430320,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID002/2569","name":"จ้างก่อสร้างปรับปรุงระบบจำหน่ายไฟฟ้าเป็นเคเบิลใต้ดิน บริเวณปากทางถนนเศรษฐกิจ 1 ถึงองค์การบริหารส่วนตำบลท่าทราย จ.สมุทรสาคร การไฟฟ้าส่วนภูมิภาค การไฟฟ้าส่วนภูมิภาค","active":true,"gl":{},"inv":{},"exp":{},"contract":63407476.64,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"Z26001","name":"จัดซื้ออุปกรณ์เพื่อขยายผลการดำเนินงานชุด Water Level EdgeBox (Alpha) จำนวน 5 ชุด บจก. แกรนด์ไลน์ อินโนเวชั่น บจก. แกรนด์ไลน์ อินโนเวชั่น","active":true,"gl":{},"inv":{},"exp":{},"contract":173028.73,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":185140.74,"diff":0,"profit":0,"status":"gl_only"},{"code":"BID003/2569","name":"โครงการจัดหาบริการระบบบริหารจัดการข้อมูลและเหตุการณ์ทางด้านความมั่นคงปลอดภัยทางไซเบอร์ ประจำปีงบประมาณ 2569 บริษัท จัดการและพัฒนาทรัพยากรน้ำภาคตะวันออก จำกัด (มหาชน) บริษัท จัดการและพัฒนาทรัพยากรน้ำภาคตะวันออก จำกัด (มหาชน)","active":true,"gl":{},"inv":{},"exp":{},"contract":1,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"GLI26011","name":"งานระบบ SCADA บ่อสูบน้ำถนนลาดพร้าวตอนลงคลองลาดพร้าว (ขาเข้า) บจก. ริเวอร์ เอนจิเนียริ่ง บจก. ริเวอร์ เอนจิเนียริ่ง","active":true,"gl":{},"inv":{},"exp":{},"contract":752000,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"GLI26002SUB01","name":"จ้างก่อสร้างปรับปรุงระบบจำหน่ายไฟฟ้าเป็นเคเบิลใต้ดิน บริเวณถนนกะตะ ซอยกะรน 2 จังหวัดภูเก็ต (งานด้านโยธา) - ผรม.ทองแสนขัน บริษัท ทองแสนขัน จำกัด บริษัท ทองแสนขัน จำกัด","active":true,"gl":{},"inv":{},"exp":{},"contract":null,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"},{"code":"GLI26012","name":"งานซื้อและติดตั้งระบบชุดอุปกรณ์เชื่อมต่อสถานะการทำงานของเครื่องผลักดันน้ำ บริษัท ริเวอร์ แมชชีนกล จำกัด บริษัท ริเวอร์ แมชชีนกล จำกัด","active":true,"gl":{},"inv":{},"exp":{},"contract":1236695.33,"gl_total":0,"inv_total":null,"expense":0,"inv_exp_total":null,"con_exp":null,"diff":0,"profit":0,"status":"gl_only"}],"gl_grand":3937263235.9,"inv_grand":3670375818.04,"diff_grand":266887417.86,"gl_ytot":{"2018":438515588.04,"2019":474396042.72,"2020":511503014.18,"2021":315786021.97,"2022":512656782.86,"2023":393540488.27,"2024":707515098.95,"2025":904690004.02},"inv_ytot":{"2015":138000,"2016":492630,"2017":19819208.46,"2018":236340019.37,"2019":339512781.95,"2020":546290321.85,"2021":314817229.29,"2022":341528642.99,"2023":403492843.71,"2024":517570331.09,"2025":725832962.94,"2026":323426742.78,"ไม่ระบุปี":277150.5},"counts":{"match":22,"diff":53,"gl_only":99,"inv_only":0,"expense_only":31},"contract_grand":14422160018.08,"contract_ytot":{"2018":474727850.45,"2019":748307390.31,"2020":356159841.11,"2021":768887993.43,"2022":235974346.78,"2023":1341363991.19,"2024":584305576.18,"2025":366686922.94},"contract_pre2018":400100,"contract_post2025":147103564.97,"expense_grand":4409599597.94,"expense_ytot":{"2018":423471098.05,"2019":464541617.36,"2020":485935773.8,"2021":353370697.71,"2022":504346519.76,"2023":492557413.3,"2024":754860672.07,"2025":931822495.88},"profit_grand":-472336362.04,"profit_ytot":{"2018":15044489.99,"2019":9854425.36,"2020":25567240.38,"2021":-37584675.74,"2022":8310263.1,"2023":-99016925.03,"2024":-47345573.12,"2025":-27132491.86}};
@@ -8574,7 +8801,7 @@ function _tkSnapModal(){
   v('proj','tkmProj');v('owner','tkmOwner');v('contact','tkmContact');v('docno','tkmDocNo');v('grp','tkmGrp');v('doc','tkmDoc');v('desc','tkmDesc');
   /* v14.8: the payment block too — a sync landing mid-typing must not eat the amount */
   v('fdesc','tkmFdesc');v('amt','tkmAmt');v('vatr','tkmVatR');v('vat','tkmVat');v('vatm','tkmVatM');
-  v('whtr','tkmWhtR');v('wht','tkmWht');v('whtm','tkmWhtM');v('retr','tkmRetR');v('ret','tkmRet');v('retm','tkmRetM');
+  v('whtr','tkmWhtR');v('wht','tkmWht');v('whtm','tkmWhtM');v('retr','tkmRetR');v('ret','tkmRet');v('retm','tkmRetM');v('retb','tkmRetB');
   sg('st','tkmStatus','data-st');sg('pr','tkmPrio','data-pr');
   sg('hl','tkmHL','data-hl');sg('tc','tkmTC','data-tc');sg('co','tkmCo','data-co');
   var ae=document.activeElement,af=(ae&&ae.id&&m.contains(ae))?ae.id:'',ss=null,se=null;
@@ -8587,13 +8814,13 @@ function _tkRestoreModal(s){
   var set=function(id,val){if(val===undefined)return;var e=document.getElementById(id);if(e&&e.value!==val)e.value=val;};
   set('tkmTitle',s.title);set('tkckNew',s.cknew);set('tkmDoc',s.doc);set('tkmAssign',s.assign);set('tkmDue',s.due);set('tkmCat',s.cat);set('tkmProj',s.proj);set('tkmOwner',s.owner);set('tkmContact',s.contact);set('tkmDocNo',s.docno);set('tkmGrp',s.grp);set('tkmDesc',s.desc);
   set('tkmFdesc',s.fdesc);set('tkmAmt',s.amt);set('tkmVatR',s.vatr);set('tkmVat',s.vat);set('tkmVatM',s.vatm);
-  set('tkmWhtR',s.whtr);set('tkmWht',s.wht);set('tkmWhtM',s.whtm);set('tkmRetR',s.retr);set('tkmRet',s.ret);set('tkmRetM',s.retm);
+  set('tkmWhtR',s.whtr);set('tkmWht',s.wht);set('tkmWhtM',s.whtm);set('tkmRetR',s.retr);set('tkmRet',s.ret);set('tkmRetM',s.retm);set('tkmRetB',s.retb);
   try{_tkPaySync();}catch(_pe){}
   var seg=function(wrap,attr,val){if(!val)return;var box=document.getElementById(wrap);if(!box)return;var bs=box.querySelectorAll('.tkmsb');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].getAttribute(attr)===val);};
   seg('tkmStatus','data-st',s.st);seg('tkmPrio','data-pr',s.pr);
   var segAny=function(wrap,attr,val){var box=document.getElementById(wrap);if(!box||val==null)return;var bs=box.querySelectorAll('.tkmsb');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].getAttribute(attr)===val);};
   segAny('tkmHL','data-hl',s.hl);segAny('tkmTC','data-tc',s.tc);segAny('tkmCo','data-co',s.co);
-  if(s.af){var fe=document.getElementById(s.af);if(fe){try{fe.focus();if(s.ss!=null&&('setSelectionRange' in fe))fe.setSelectionRange(s.ss,s.se);}catch(e){}}}
+  if(s.af){var fe=document.getElementById(s.af);if(fe){try{window._tkPayNoFmt=1;fe.focus();window._tkPayNoFmt=0;if(s.ss!=null&&('setSelectionRange' in fe))fe.setSelectionRange(s.ss,s.se);}catch(e){}}}
 }
 function _tkKanban(view){
   var vert=(_tkLayout==='vert'),n=TK_STAT.length;
@@ -8746,7 +8973,8 @@ function _tkModalHTML(){
   h+='<div class="tkmrow"><label class="tkmf"><div class="tkmlbl">Assignee</div><select class="tkmin" id="tkmAssign">'+((typeof _ptUserOptions==='function')?_ptUserOptions(t.assignee):'<option value="">—</option>')+'</select></label>';
   h+='<label class="tkmf"><div class="tkmlbl">Due date</div><input class="tkmin" id="tkmDue" type="date" value="'+_eatt(t.due||'')+'"></label></div>';
   h+='<label class="tkml"><div class="tkmlbl">Category</div><select class="tkmin" id="tkmCat"><option value="">— None —</option>'+TK_CAT.map(function(c){return '<option value="'+c[0]+'"'+((t.cat||'')===c[0]?' selected':'')+'>'+c[1]+'</option>';}).join('')+'</select></label>';
-  h+='<label class="tkml"><div class="tkmlbl">Group <span style="font-weight:500;color:var(--muted)">— give related tasks the same group name and they are kept together within a step</span></div><input class="tkmin" id="tkmGrp" list="tkmGrpList" value="'+_eatt(t.grp||'')+'" placeholder="e.g. B1–B5 · leave empty for no group" autocomplete="off"><datalist id="tkmGrpList">'+_tkGrpAll().map(function(g){return '<option value="'+_eatt(g)+'">';}).join('')+'</datalist></label>';
+  /* v14.9: the Group field is gone from the form by request — a card still belongs to the
+     group of the step it was added under, and the board's own group headings rename it. */
   h+='<div class="tkml"><div class="tkmlbl">Attachments / images</div><div class="tkattdrop" id="tkmAttDrop"><div class="tkattbar"><button class="tkbtn ghost" id="tkmAttAdd" type="button">📎 Add file / image</button><span class="tkatthint">Select several files (Ctrl/⌘ or Shift) or drag them here</span><span class="tkattstatus" id="tkmAttStatus"></span></div><input type="file" id="tkmAttFile" multiple style="display:none"><div class="tkattlist" id="tkmAttList">'+_tkAttListHTML()+'</div></div></div>';
   h+=meta;
   h+='</div>';
@@ -8775,7 +9003,11 @@ function _tkSaveModal(){
   }else if(!title){alert((mode==='simple')?'กรุณากรอกหัวข้อ':'กรุณากรอกบรรทัดที่ 4 (คำอธิบาย) — ใช้เป็นชื่อเรื่องหลักของการ์ด');var ti=document.getElementById('tkmTitle');if(ti)ti.focus();return;}
   var pEl=document.querySelector('#tkmPrio .tkmsb.on');
   var prio=pEl?pEl.getAttribute('data-pr'):'med';
-  var assignee=g('tkmAssign'),due=g('tkmDue'),proj=(g('tkmProj')||'').trim(),cat=g('tkmCat'),grp=(g('tkmGrp')||'').trim();
+  var assignee=g('tkmAssign'),due=g('tkmDue'),proj=(g('tkmProj')||'').trim(),cat=g('tkmCat');
+  /* no Group input any more — read it only if one exists, otherwise keep what the card has
+     (a blank read here would have wiped every existing grouping on the next save) */
+  var _ge=document.getElementById('tkmGrp');
+  var grp=_ge?((_ge.value||'').trim()):((((_tkModalId==='__new__')?(_tkNewGrp||''):(((_tkFind(_tkModalId)||{}).grp)||''))+'').trim());
   var doc=(g('tkmDoc')||'').trim();
   var hlEl=document.querySelector('#tkmHL .tkmsb.on'),tcEl=document.querySelector('#tkmTC .tkmsb.on');
   var hl=hlEl?hlEl.getAttribute('data-hl'):'',tc=tcEl?tcEl.getAttribute('data-tc'):'';
@@ -9046,6 +9278,14 @@ function _tkrExport(){
       (lt==null?'':lt),(dy==null?'':dy),nd,nl.length,((t.att&&t.att.length)||0)
     ].map(_tkrCsvCell).join(','));
   });
+  var _ps=_tkPaySum(R);
+  if(_ps.n){
+    var _tr=[];for(var _k=0;_k<head.length;_k++)_tr.push('');
+    _tr[3]='รวมทั้งสิ้น ('+_ps.n+' รายการที่มีตัวเงิน)';
+    _tr[16]=_ps.amt.toFixed(2);_tr[18]=_ps.vat.toFixed(2);_tr[19]=_ps.tot.toFixed(2);
+    _tr[21]=_ps.wht.toFixed(2);_tr[23]=_ps.ret.toFixed(2);_tr[24]=_ps.net.toFixed(2);
+    lines.push(_tr.map(_tkrCsvCell).join(','));
+  }
   var txt='﻿'+lines.join('\r\n');
   try{
     var blob=new Blob([txt],{type:'text/csv;charset=utf-8;'});
@@ -9149,6 +9389,13 @@ function renderTkr(){
    +'<div class="tkrkpi" style="--k:#B42318"><div class="tkrkl">Late</div><div class="tkrkn">'+late+'</div><div class="tkrks">'+noDue+' row(s) with no due date</div></div>'
    +'<div class="tkrkpi" style="--k:#B45309"><div class="tkrkl">Average time (days)</div><div class="tkrkn">'+(avg==null?'—':avg)+'</div><div class="tkrks">from the day the card was created to the day it was marked done</div></div>'
    +'<div class="tkrkpi" style="--k:#1D5FAE"><div class="tkrkl">Assignees (people)</div><div class="tkrkn">'+peopleN+'</div><div class="tkrks">with a task completed in this period</div></div>'
+   +(function(){/* v14.8: ยอดเงินของงวด — ตัวเลขที่คนทำบัญชีเปิดรายงานนี้มาหา */
+      var ps=_tkPaySum(full);if(!ps.n)return '';
+      return '<div class="tkrkpi" style="--k:#0A463E"><div class="tkrkl">จ่ายสุทธิรวม</div>'
+        +'<div class="tkrkn">'+_tkPM(ps.net)+'</div>'
+        +'<div class="tkrks">'+ps.n+' รายการที่มีตัวเงิน · ก่อน VAT '+_tkPM(ps.amt)+' · รวม VAT '+_tkPM(ps.tot)
+        +(ps.wht?(' · หัก ณ ที่จ่าย '+_tkPM(ps.wht)):'')+(ps.ret?(' · ประกันผลงาน '+_tkPM(ps.ret)):'')+'</div></div>';
+    })()
    +'</div>';
 
   if(!allN){
@@ -9171,7 +9418,8 @@ function renderTkr(){
         var cl=!!_tkrCol[g];
         h+='<tr class="tkrgrow"><td colspan="14" data-tkrgx="'+_eatt(g)+'" style="cursor:pointer" title="Click to collapse / expand this group">'
           +'<span class="tkrgnm">'+(cl?'▸':'▾')+' '+esc(g)+'</span><span class="tkrgn">'+list.length+' tasks</span>'
-          +'<span class="tkrgs">'+(gn?('Average time '+(Math.round((gs/gn)*10)/10)+' d'):'No duration data')+(gl?(' · Late '+gl+' rows'):'')+'</span></td></tr>';
+          +'<span class="tkrgs">'+(gn?('Average time '+(Math.round((gs/gn)*10)/10)+' d'):'No duration data')+(gl?(' · Late '+gl+' rows'):'')
+          +(function(){var gp=_tkPaySum(list);return gp.n?(' · จ่ายสุทธิ '+_tkPM(gp.net)):'';})()+'</span></td></tr>';
         if(!cl)list.forEach(function(t){h+=_tkrRowHTML(t,++n);});
         else n+=list.length;
       });
@@ -33956,48 +34204,59 @@ body.sbfold .sbshow-btn{display:inline-flex}
 #page-pdrepjv .apjv-topR .apjv-drag:hover{color:#9B2C46}
 /* ===== v14.8: Tracking — payment detail block (modal form + card strip) ===== */
 /* ---- the form block in the task modal ---- */
-#page-tk .tkpay{border:1.5px solid #CFE3DC;border-radius:11px;padding:10px 11px;background:#F4FAF8}
-#page-tk .tkpayr{display:grid;grid-template-columns:20px 128px minmax(0,1fr) 190px;align-items:center;gap:9px;margin-bottom:7px}
-#page-tk .tkpayr:last-child{margin-bottom:0}
-#page-tk .tkpayic{flex:none;font-size:13px;line-height:1;text-align:center}
-#page-tk .tkpaylb{font-size:11.5px;font-weight:700;color:var(--ink2,#4A5563);line-height:1.25}
-#page-tk .tkpayhint{display:block;font-size:9px;font-weight:600;color:var(--muted,#8C8676);letter-spacing:.01em}
-#page-tk .tkpaymid{min-width:0}
-#page-tk .tkpayval{display:flex;align-items:center;gap:6px;justify-content:flex-end}
-#page-tk .tkpayrq{font-size:9.5px;font-weight:700;color:var(--muted,#8C8676);background:#fff;border:1px solid #DCE7E3;
-  border-radius:999px;padding:2px 9px;white-space:nowrap}
-#page-tk .tkpayrs{font-family:inherit;font-size:11.5px;font-weight:700;color:var(--ink,#141C29);width:100%;
-  padding:5px 8px;border:1px solid var(--line,#E6E0D4);border-radius:8px;background:#fff;
+#page-tk .tkpay{border:1.5px solid #CFE3DC;border-radius:11px;padding:11px 12px;background:#F4FAF8}
+/* one grid for every row: icon · label · rate/note · amount · reset — so all right edges line up */
+#page-tk .tkpayr{display:grid;grid-template-columns:18px 132px 150px 156px 24px;align-items:center;
+  column-gap:9px;row-gap:0;min-height:36px;margin:0}
+#page-tk .tkpayic{font-size:13px;line-height:1;text-align:center}
+#page-tk .tkpaylb{font-size:12px;font-weight:700;color:var(--ink2,#4A5563);line-height:1.3;min-width:0}
+#page-tk .tkpaysub{display:block;font-size:9.5px;font-weight:600;color:var(--muted,#8C8676);line-height:1.5}
+#page-tk .tkpaymid{min-width:0;display:flex;align-items:center}
+#page-tk .tkpayval{min-width:0;display:flex;align-items:center}
+#page-tk .tkpayrz{display:flex;align-items:center;justify-content:center}
+/* every control shares one box metric: same height, same radius, same type size */
+#page-tk .tkpayrq{width:100%;text-align:center;font-size:10px;font-weight:700;color:var(--muted,#8C8676);
+  background:#fff;border:1px solid #DCE7E3;border-radius:8px;padding:0 8px;height:30px;line-height:28px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#page-tk .tkpay select{width:100%;height:30px;box-sizing:border-box;font-family:inherit;font-size:12px;font-weight:700;
+  color:var(--ink,#141C29);padding:0 26px 0 9px;border:1px solid var(--line,#E6E0D4);border-radius:8px;background:#fff;
   text-overflow:ellipsis;cursor:pointer}
-#page-tk .tkpayrs:focus{outline:none;border-color:#0E5C52;box-shadow:0 0 0 2px rgba(14,92,82,.15)}
-#page-tk .tkpayin{font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:700;text-align:right;
-  width:100%;min-width:0;padding:6px 9px;border:1px solid var(--line,#E6E0D4);border-radius:8px;background:#fff;
-  color:var(--ink,#141C29);box-sizing:border-box;font-variant-numeric:tabular-nums}
+#page-tk .tkpay select:focus{outline:none;border-color:#0E5C52;box-shadow:0 0 0 2px rgba(14,92,82,.15)}
+#page-tk .tkpayin,#page-tk .tkpayout{width:100%;height:30px;box-sizing:border-box;
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:700;text-align:right;
+  padding:0 10px;border:1px solid var(--line,#E6E0D4);border-radius:8px;background:#fff;
+  color:var(--ink,#141C29);font-variant-numeric:tabular-nums;line-height:28px}
 #page-tk .tkpayin:focus{outline:none;border-color:#0E5C52;box-shadow:0 0 0 2px rgba(14,92,82,.15)}
-#page-tk .tkpayin.big{font-size:14px;font-weight:800;color:#0A463E;border-color:#9ECFC2;background:#fff}
-#page-tk .tkpaytx{font-size:12.5px}
-/* the free-text detail line spans the rate + amount columns instead of squeezing into one */
-#page-tk .tkpayr.desc .tkpaymid{display:none}
-#page-tk .tkpayr.desc .tkpayval{grid-column:3 / -1;display:block}
-#page-tk .tkpayr.desc .tkpaytx{width:100%;text-align:left}
-#page-tk .tkpayr.base{background:#fff;border:1px solid #CFE3DC;border-radius:9px;padding:6px 8px;margin:0 -1px 8px}
-#page-tk .tkpayrst{flex:none;width:23px;height:23px;border-radius:7px;border:1px solid var(--line,#E6E0D4);
-  background:#fff;color:#B9B2A4;font-size:11px;line-height:1;cursor:pointer;transition:.12s}
-#page-tk .tkpayrst.on{border-color:#E9B96A;background:#FDF3E0;color:#96631A}
-#page-tk .tkpayrst:hover{border-color:#0E5C52;color:#0E5C52}
-#page-tk .tkpayout{font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:800;color:#0A463E;
-  font-variant-numeric:tabular-nums;padding:6px 10px;border-radius:8px;background:#E6F0EC;border:1px solid #BEDBD2;
-  width:100%;box-sizing:border-box;text-align:right}
-#page-tk .tkpayout.net{background:#0E5C52;border-color:#0E5C52;color:#fff;font-size:15px}
+#page-tk .tkpayin::placeholder{color:#C4BCAE;font-weight:600}
+#page-tk .tkpayout{background:#E6F0EC;border-color:#BEDBD2;color:#0A463E;display:block}
+#page-tk .tkpayout.net{background:#0E5C52;border-color:#0E5C52;color:#fff}
 #page-tk .tkpayout.net.neg{background:#B42318;border-color:#B42318}
+/* the detail line is the one free-text row — it fills the rate + amount columns */
+#page-tk .tkpayr.desc .tkpaymid{display:none}
+#page-tk .tkpayr.desc .tkpayval{grid-column:3 / 5}
+#page-tk .tkpaytx{text-align:left;font-family:inherit;font-size:12.5px;font-weight:600}
+/* emphasis comes from colour and weight, never from a different size */
+#page-tk .tkpayr.base .tkpayin{border-color:#9ECFC2;color:#0A463E;font-weight:800}
 #page-tk .tkpayr.sum .tkpaylb,#page-tk .tkpayr.net .tkpaylb{font-weight:800;color:#0A463E}
 #page-tk .tkpayr.ded .tkpaylb{color:#B45309}
 #page-tk .tkpayr.ded .tkpayin{color:#B45309}
-#page-tk .tkpayr.sum{border-top:1px dashed #CFE3DC;padding-top:8px}
-#page-tk .tkpayr.net{border-top:1.5px solid #CFE3DC;padding-top:9px;margin-top:2px}
+#page-tk .tkpayr.sum{border-top:1px dashed #CFE3DC;margin-top:4px;padding-top:5px}
+#page-tk .tkpayr.net{border-top:1.5px solid #CFE3DC;margin-top:4px;padding-top:6px}
+#page-tk .tkpayrst{width:24px;height:24px;border-radius:7px;border:1px solid var(--line,#E6E0D4);
+  background:#fff;color:#B9B2A4;font-size:11px;line-height:1;cursor:pointer;transition:.12s;padding:0}
+#page-tk .tkpayrst.on{border-color:#E9B96A;background:#FDF3E0;color:#96631A}
+#page-tk .tkpayrst:hover{border-color:#0E5C52;color:#0E5C52}
+#page-tk .tkpaybase{font-family:inherit;font-size:9.5px;font-weight:700;color:var(--muted,#8C8676);background:#fff;
+  border:1px solid var(--line,#E6E0D4);border-radius:999px;padding:1px 8px;margin-top:2px;cursor:pointer;
+  white-space:nowrap;transition:.12s;line-height:1.45}
+#page-tk .tkpaybase:hover{border-color:#0E5C52;color:#0E5C52}
+#page-tk .tkpaybase.on{background:#FDF3E0;border-color:#E9B96A;color:#96631A}
 @media(max-width:620px){
-  #page-tk .tkpayr{grid-template-columns:20px 1fr;row-gap:5px}
-  #page-tk .tkpaymid,#page-tk .tkpayval{grid-column:2}
+  #page-tk .tkpayr{grid-template-columns:18px 1fr 24px;row-gap:5px}
+  #page-tk .tkpaymid{grid-column:2}
+  #page-tk .tkpayval{grid-column:2}
+  #page-tk .tkpayr.desc .tkpayval{grid-column:2}
+  #page-tk .tkpayrz{grid-row:span 2}
 }
 
 /* ---- the strip on a Kanban card ---- */
@@ -34015,6 +34274,11 @@ body.sbfold .sbshow-btn{display:inline-flex}
 .tkpc.net{margin-top:4px;padding-top:4px;border-top:1.5px solid rgba(14,92,82,.22)}
 .tkpc.net .tkpck{font-size:11px;font-weight:800;color:#0A463E}
 .tkpc.net .tkpcv{font-size:13px;font-weight:800;color:#0A463E}
+.tkpcv.neg{color:#B42318}
+#page-tk .tkpaybase{font-family:inherit;font-size:9px;font-weight:700;color:var(--muted,#8C8676);background:#fff;
+  border:1px solid var(--line,#E6E0D4);border-radius:999px;padding:1px 8px;margin-top:2px;cursor:pointer;white-space:nowrap;transition:.12s}
+#page-tk .tkpaybase:hover{border-color:#0E5C52;color:#0E5C52}
+#page-tk .tkpaybase.on{background:#FDF3E0;border-color:#E9B96A;color:#96631A}
 
 /* ---- one-line form in the List view and the Completed report ---- */
 .tkpayln{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;color:#0A463E;
@@ -34033,179 +34297,6 @@ body.sbfold .sbshow-btn{display:inline-flex}
     return l?h.replace(/<span>[^<]*Entries<\/span>/,'<span>'+l+'</span>'):h;
   };
   try{if(document.getElementById('apjvWrap')&&document.querySelector('#page-pdrepjv .apjv-tbl'))renderApjv();}catch(_e){}
-})();
-</script>
-<script id="tkPayJs">
-/* ===== v14.8: Tracking — payment detail on a task =====
-   รายละเอียด · จำนวนเงิน · VAT 7% · จำนวนเงินรวม · หัก ณ ที่จ่าย · เงินประกันผลงาน · จ่ายสุทธิ
-
-   ฐานของแต่ละรายการ (ตามหลักภาษีไทย):
-   · VAT            คิดจากมูลค่าสินค้า/บริการ "ก่อนภาษี" (ป.รัษฎากร ม.79)
-   · หัก ณ ที่จ่าย   คิดจากมูลค่างาน "ก่อน VAT" ไม่ใช่ยอดรวมภาษี (คำสั่งกรมสรรพากร ท.ป.4/2528)
-   · เงินประกันผลงาน คิดจากมูลค่างาน "ก่อน VAT" ตามธรรมเนียมสัญญาก่อสร้าง — VAT และ WHT
-                    ยังคิดจากมูลค่างานเต็มจำนวนในงวดนั้น ไม่ใช่ยอดหลังหักประกันผลงาน
-   · จ่ายสุทธิ       = จำนวนเงินรวม (รวม VAT) − หัก ณ ที่จ่าย − เงินประกันผลงาน
-     ทั้งสองรายการหักจากยอดเดียวกัน ลำดับการหักจึงไม่เปลี่ยนผลลัพธ์
-
-   ทุกช่องจำนวนเงินที่คำนวณให้ แก้ทับเองได้ (สัญญาบางฉบับระบุเป็นจำนวนเงินตายตัว) กด ↺ เพื่อกลับไปใช้ค่าที่คำนวณ */
-
-var TK_VATR=[[7,'VAT 7%'],[0,'ไม่มี VAT']];
-var TK_WHTR=[[0,'ไม่หัก'],[1,'1% · ค่าขนส่ง · ส่วนราชการจ่าย (ม.69 ทวิ)'],[1.5,'1.5%'],[2,'2% · ค่าโฆษณา'],
-             [3,'3% · จ้างทำของ/รับเหมา/บริการ'],[5,'5% · ค่าเช่า · รางวัล/ส่วนลด'],[10,'10% · เงินปันผล'],[15,'15% · ดอกเบี้ย · ค่าสิทธิ']];
-var TK_RETR=[[0,'ไม่หัก'],[2.5,'2.5%'],[5,'5%'],[10,'10%']];
-
-function _tkPN(v){ if(v==null)return 0; var s=(''+v).replace(/[,  ]/g,'').trim(); if(s===''||s==='-')return 0; var n=parseFloat(s); return isFinite(n)?n:0; }
-function _tkPR2(n){ n=+n||0; return Math.round((n+(n<0?-1e-9:1e-9))*100)/100; }
-function _tkPM(n){ return _tkPR2(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-
-/* คำนวณจุดเดียว — ฟอร์ม การ์ด ลิสต์ รายงาน และ CSV เรียกตัวนี้ทั้งหมด */
-function _tkPay(t){
-  t=t||{};
-  var amt=_tkPR2(_tkPN(t.amt));
-  var vatr=(t.vatr==null||t.vatr==='')?7:_tkPN(t.vatr);
-  var whtr=_tkPN(t.whtr), retr=_tkPN(t.retr);
-  var vat=t.vatm?_tkPR2(_tkPN(t.vat)):_tkPR2(amt*vatr/100);
-  var wht=t.whtm?_tkPR2(_tkPN(t.wht)):_tkPR2(amt*whtr/100);
-  var ret=t.retm?_tkPR2(_tkPN(t.ret)):_tkPR2(amt*retr/100);
-  var tot=_tkPR2(amt+vat), net=_tkPR2(tot-wht-ret);
-  var fdesc=((t.fdesc||'')+'').trim();
-  return {fdesc:fdesc,amt:amt,vatr:vatr,vat:vat,tot:tot,whtr:whtr,wht:wht,retr:retr,ret:ret,net:net,
-          vatm:!!t.vatm,whtm:!!t.whtm,retm:!!t.retm,
-          has:!!(amt||vat||wht||ret||fdesc)};
-}
-
-/* ---------- ฟอร์มในการ์ด ---------- */
-function _tkPayRateSel(id,list,cur){
-  var c=_tkPN(cur),hit=false,h='<select class="tkpayrs" id="'+id+'">';
-  for(var i=0;i<list.length;i++){var on=(_tkPN(list[i][0])===c);if(on)hit=true;
-    h+='<option value="'+list[i][0]+'"'+(on?' selected':'')+'>'+esc(list[i][1])+'</option>';}
-  if(!hit)h+='<option value="'+c+'" selected>'+esc(c+'%')+'</option>';
-  return h+'</select>';
-}
-function _tkPayBlockHTML(t){
-  var p=_tkPay(t||{});
-  var row=function(cls,ic,lbl,mid,right,hint){
-    return '<div class="tkpayr '+cls+'"><span class="tkpayic">'+ic+'</span><span class="tkpaylb">'+lbl
-      +(hint?('<span class="tkpayhint">'+hint+'</span>'):'')+'</span>'
-      +'<span class="tkpaymid">'+(mid||'')+'</span><span class="tkpayval">'+right+'</span></div>';
-  };
-  var amtIn=function(id,val,man,rst){
-    return '<input class="tkpayin" id="'+id+'" inputmode="decimal" value="'+_eatt(_tkPM(val))+'" placeholder="0.00">'
-      +(rst?('<input type="hidden" id="'+id+'M" value="'+(man?'1':'')+'">'
-        +'<button class="tkpayrst'+(man?' on':'')+'" type="button" data-tkrst="'+rst+'" title="กลับไปใช้ยอดที่คำนวณจากอัตรา">↺</button>'):'');
-  };
-  return '<div class="tkml tkpaywrap"><div class="tkmlbl">💰 รายละเอียดจำนวนเงิน '
-      +'<span style="font-weight:500;color:var(--muted)">— เว้นว่างไว้ได้ ถ้างานนี้ไม่มีตัวเงิน · ช่องที่คำนวณให้ แก้ทับเองได้</span></div>'
-    +'<div class="tkpay" id="tkmPay">'
-      +row('desc','📝','รายละเอียด','','<input class="tkmin tkpaytx" id="tkmFdesc" value="'+_eatt((t&&t.fdesc)||'')+'" placeholder="รายการที่เรียกเก็บ เช่น ค่าจ้างงวดที่ 7 (งวด 21) · ขายเศษซากแอร์" autocomplete="off">')
-      +row('base','💵','จำนวนเงิน','<span class="tkpayrq">ก่อน VAT</span>','<input class="tkpayin big" id="tkmAmt" inputmode="decimal" value="'+_eatt(p.amt?_tkPM(p.amt):'')+'" placeholder="0.00">')
-      +row('','🧾','VAT',_tkPayRateSel('tkmVatR',TK_VATR,p.vatr),amtIn('tkmVat',p.vat,t&&t.vatm,'vat'))
-      +row('sum','Σ','จำนวนเงินรวม','<span class="tkpayrq">รวม VAT</span>','<span class="tkpayout" id="tkmTot">'+_tkPM(p.tot)+'</span>')
-      +row('ded','✂️','หัก ณ ที่จ่าย',_tkPayRateSel('tkmWhtR',TK_WHTR,p.whtr),amtIn('tkmWht',p.wht,t&&t.whtm,'wht'),'ฐานก่อน VAT')
-      +row('ded','🛡️','เงินประกันผลงาน',_tkPayRateSel('tkmRetR',TK_RETR,p.retr),amtIn('tkmRet',p.ret,t&&t.retm,'ret'),'ฐานก่อน VAT')
-      +row('net','✅','จ่ายสุทธิ','<span class="tkpayrq">รวม − หัก − ประกัน</span>','<span class="tkpayout net" id="tkmNet">'+_tkPM(p.net)+'</span>')
-    +'</div></div>';
-}
-
-/* อ่านค่าจากฟอร์ม (ใช้ตอนคำนวณสด และตอนบันทึก) */
-function _tkPayForm(){
-  var g=function(id){var e=document.getElementById(id);return e?e.value:null;};
-  if(document.getElementById('tkmAmt')==null)return null;
-  return {fdesc:((g('tkmFdesc')||'')+'').trim(),
-          amt:_tkPN(g('tkmAmt')),
-          vatr:_tkPN(g('tkmVatR')),vat:_tkPN(g('tkmVat')),vatm:(g('tkmVatM')?1:0),
-          whtr:_tkPN(g('tkmWhtR')),wht:_tkPN(g('tkmWht')),whtm:(g('tkmWhtM')?1:0),
-          retr:_tkPN(g('tkmRetR')),ret:_tkPN(g('tkmRet')),retm:(g('tkmRetM')?1:0)};
-}
-/* คำนวณสดขณะพิมพ์ */
-function _tkPaySync(){
-  var f=_tkPayForm();if(!f)return;
-  var p=_tkPay(f),s=function(id,v){var e=document.getElementById(id);if(e&&document.activeElement!==e)e.value=_tkPM(v);};
-  s('tkmVat',p.vat);s('tkmWht',p.wht);s('tkmRet',p.ret);
-  var rb=document.querySelectorAll('.tkpayrst');
-  for(var i=0;i<rb.length;i++){var k=rb[i].getAttribute('data-tkrst');
-    var mm=document.getElementById('tkm'+k.charAt(0).toUpperCase()+k.slice(1)+'M');
-    rb[i].classList.toggle('on',!!(mm&&mm.value));}
-  var tot=document.getElementById('tkmTot'),net=document.getElementById('tkmNet');
-  if(tot)tot.textContent=_tkPM(p.tot);
-  if(net){net.textContent=_tkPM(p.net);net.classList.toggle('neg',p.net<-0.004);}
-}
-/* เขียนลงตัวงาน — เรียกทั้งตอนสร้างใหม่และตอนแก้ไข */
-function _tkPayApply(t){
-  var f=_tkPayForm();if(!t||!f)return t;
-  var p=_tkPay(f);
-  t.fdesc=f.fdesc;t.amt=p.amt;
-  t.vatr=p.vatr;t.vat=p.vat;t.vatm=f.vatm?1:0;
-  t.whtr=p.whtr;t.wht=p.wht;t.whtm=f.whtm?1:0;
-  t.retr=p.retr;t.ret=p.ret;t.retm=f.retm?1:0;
-  t.tot=p.tot;t.net=p.net;
-  return t;
-}
-/* สำเนาการ์ด — ต้องยกยอดเงินไปด้วย */
-function _tkPayCopy(src,dst){
-  if(!src||!dst)return dst;
-  var k=['fdesc','amt','vatr','vat','vatm','whtr','wht','whtm','retr','ret','retm','tot','net'];
-  for(var i=0;i<k.length;i++)if(src[k[i]]!=null&&src[k[i]]!=='')dst[k[i]]=src[k[i]];
-  return dst;
-}
-
-/* ---------- แสดงผลบนการ์ด / ลิสต์ / รายงาน ---------- */
-function _tkPayCardHTML(t){
-  var p=_tkPay(t);if(!p.has)return '';
-  var line=function(cls,k,v,sign){return '<div class="tkpc '+cls+'"><span class="tkpck">'+k+'</span><span class="tkpcv">'+(sign||'')+_tkPM(v)+'</span></div>';};
-  var h='<div class="tkpaycard">';
-  if(p.fdesc)h+='<div class="tkpcd">'+esc(p.fdesc)+'</div>';
-  h+=line('','จำนวนเงิน',p.amt);
-  var rt=function(m,r){return m?' (กำหนดเอง)':(' '+(r||0)+'%');};
-  if(p.vat)h+=line('','VAT'+rt(p.vatm,p.vatr),p.vat,'+');
-  h+=line('sum','จำนวนเงินรวม',p.tot);
-  if(p.wht)h+=line('ded','หัก ณ ที่จ่าย'+rt(p.whtm,p.whtr),p.wht,'−');
-  if(p.ret)h+=line('ded','เงินประกันผลงาน'+rt(p.retm,p.retr),p.ret,'−');
-  h+=line('net','จ่ายสุทธิ',p.net);
-  return h+'</div>';
-}
-function _tkPayLineHTML(t,cls){
-  var p=_tkPay(t);if(!p.has)return '';
-  var b=[];
-  b.push('฿'+_tkPM(p.amt));
-  if(p.vat)b.push('VAT '+_tkPM(p.vat));
-  b.push('รวม '+_tkPM(p.tot));
-  if(p.wht)b.push('−หัก ณ ที่จ่าย '+_tkPM(p.wht));
-  if(p.ret)b.push('−ประกันผลงาน '+_tkPM(p.ret));
-  return '<span class="'+(cls||'tkldesc')+' tkpayln">'+(p.fdesc?(esc(p.fdesc)+' · '):'')+b.join(' · ')
-    +' <b>สุทธิ '+_tkPM(p.net)+'</b></span>';
-}
-
-/* ---------- การคำนวณสดในฟอร์ม ---------- */
-(function(){
-  var isAmt=function(el){return el&&el.id&&(el.id==='tkmAmt'||el.id==='tkmVat'||el.id==='tkmWht'||el.id==='tkmRet');};
-  document.addEventListener('input',function(e){
-    var el=e.target;if(!el||!el.closest||!el.closest('#tkmPay'))return;
-    if(el.id==='tkmVat'||el.id==='tkmWht'||el.id==='tkmRet'){
-      var m=document.getElementById(el.id+'M');if(m&&!m.value){m.value='1';
-        var b=document.querySelector('.tkpayrst[data-tkrst="'+el.id.slice(3).toLowerCase()+'"]');if(b)b.classList.add('on');}
-    }
-    _tkPaySync();
-  },true);
-  document.addEventListener('change',function(e){
-    var el=e.target;if(!el||!el.closest||!el.closest('#tkmPay'))return;_tkPaySync();
-  },true);
-  /* ช่องจำนวนเงิน: แก้แบบดิบขณะพิมพ์ ใส่ลูกน้ำให้เมื่อออกจากช่อง */
-  document.addEventListener('focusin',function(e){
-    var el=e.target;if(!isAmt(el)||!el.closest('#tkmPay'))return;
-    var n=_tkPN(el.value);el.value=n?(''+n):'';
-  },true);
-  document.addEventListener('focusout',function(e){
-    var el=e.target;if(!isAmt(el)||!el.closest('#tkmPay'))return;
-    var n=_tkPN(el.value);el.value=(el.id==='tkmAmt'&&!n)?'':_tkPM(n);_tkPaySync();
-  },true);
-  document.addEventListener('click',function(e){
-    var b=e.target&&e.target.closest?e.target.closest('.tkpayrst'):null;if(!b)return;
-    e.preventDefault();e.stopPropagation();
-    var k=b.getAttribute('data-tkrst'),id='tkm'+k.charAt(0).toUpperCase()+k.slice(1);
-    var m=document.getElementById(id+'M');if(m)m.value='';
-    b.classList.remove('on');_tkPaySync();
-  },true);
 })();
 </script>
 </body></html>
