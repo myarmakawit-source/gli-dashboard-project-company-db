@@ -8314,6 +8314,7 @@ function _tkClipClear(){_tkClip=null;_tkClipSave();renderTracking();}
 function _tkCopyCard(id){
   var t=_tkFind(id);if(!t)return;
   _tkClip={title:t.title||'',desc:t.desc||'',prio:t.prio||'med',assignee:t.assignee||'',due:t.due||'',proj:t.proj||'',owner:t.owner||'',contact:t.contact||'',docno:t.docno||'',cat:t.cat||'',doc:t.doc||'',hl:t.hl||'',tc:t.tc||'',co:t.co||'',mode:t.mode||'full',rows:_tkRowList(t).map(function(r){return {id:_tkRowId(),vno:r.vno,co:r.co};}),grp:((t.grp||'')+'').trim(),notes:_tkNoteList(t).map(function(n){return {id:_tkNoteId(),ts:n.ts,txt:n.txt,done:!!n.done,dts:n.dts};}),att:(t.att||[]).slice()};
+  _tkPayCopy(t,_tkClip);
   _tkClipSave();
   if(typeof gliLog==='function')gliLog('คัดลอกงาน (Tracking)',t.title||'');
   renderTracking();
@@ -8341,6 +8342,7 @@ function _tkClipMake(src,st,beforeId,grp){
           cono:((src.mode==='rows')?0:(src.co?_cIss(src.co):0)),mode:src.mode||'full',
           rows:(src.rows||[]).map(function(r){return {id:_tkRowId(),vno:r.vno,co:r.co,cono:(r.co?_cIss(r.co):0)};}),notes:(src.notes||[]).map(function(n){return {id:_tkNoteId(),ts:n.ts,txt:n.txt,done:!!n.done,dts:n.dts};}),grp:((grp!=null)?grp:(src.grp||'')),att:[],
           created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done:0,done_dt:(st===dk)?_tkToday():''};
+  _tkPayCopy(src,nt);
   loadTrack();TRACKDATA.push(nt);_tkPlaceIn(nt,st,beforeId||null);
   _tkFlashId=nid;saveTrack();
   if(typeof gliLog==='function')gliLog('วางสำเนางาน (Tracking)',(nt.title||'')+' → '+_tkStat(st)[1]);
@@ -8528,7 +8530,7 @@ function renderTracking(){
   var _openN=TRACKDATA.length-_doneN;
   var view=TRACKDATA.filter(function(t){
     if(_tkIsDone(t))return false;/* v10.72: งานที่กดเสร็จแล้วย้ายไปหน้า Report งานที่เสร็จ */
-    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.co||'')+' '+_tkCoText(t)+' '+_tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.contact||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+_tkDocNames(t.doc,' '))).toLowerCase().indexOf(q)<0))return false;
+    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.co||'')+' '+_tkCoText(t)+' '+_tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.contact||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+_tkDocNames(t.doc,' ')+' '+(t.fdesc||''))).toLowerCase().indexOf(q)<0))return false;
     if(_tkFA&&t.assignee!==_tkFA)return false;
     if(_tkFP&&(t.prio||'med')!==_tkFP)return false;if(_tkFC&&(t.cat||'')!==_tkFC)return false;if(_tkFD&&(t.doc||'')!==_tkFD)return false;
     return true;
@@ -8570,6 +8572,9 @@ function _tkSnapModal(){
     else if(document.getElementById(wrap))_tkMS[k]=null;};
   v('title','tkmTitle');v('cknew','tkckNew');v('assign','tkmAssign');v('due','tkmDue');v('cat','tkmCat');
   v('proj','tkmProj');v('owner','tkmOwner');v('contact','tkmContact');v('docno','tkmDocNo');v('grp','tkmGrp');v('doc','tkmDoc');v('desc','tkmDesc');
+  /* v14.8: the payment block too — a sync landing mid-typing must not eat the amount */
+  v('fdesc','tkmFdesc');v('amt','tkmAmt');v('vatr','tkmVatR');v('vat','tkmVat');v('vatm','tkmVatM');
+  v('whtr','tkmWhtR');v('wht','tkmWht');v('whtm','tkmWhtM');v('retr','tkmRetR');v('ret','tkmRet');v('retm','tkmRetM');
   sg('st','tkmStatus','data-st');sg('pr','tkmPrio','data-pr');
   sg('hl','tkmHL','data-hl');sg('tc','tkmTC','data-tc');sg('co','tkmCo','data-co');
   var ae=document.activeElement,af=(ae&&ae.id&&m.contains(ae))?ae.id:'',ss=null,se=null;
@@ -8581,6 +8586,9 @@ function _tkRestoreModal(s){
   if(!s)return;var m=document.getElementById('tkModal');if(!m)return;
   var set=function(id,val){if(val===undefined)return;var e=document.getElementById(id);if(e&&e.value!==val)e.value=val;};
   set('tkmTitle',s.title);set('tkckNew',s.cknew);set('tkmDoc',s.doc);set('tkmAssign',s.assign);set('tkmDue',s.due);set('tkmCat',s.cat);set('tkmProj',s.proj);set('tkmOwner',s.owner);set('tkmContact',s.contact);set('tkmDocNo',s.docno);set('tkmGrp',s.grp);set('tkmDesc',s.desc);
+  set('tkmFdesc',s.fdesc);set('tkmAmt',s.amt);set('tkmVatR',s.vatr);set('tkmVat',s.vat);set('tkmVatM',s.vatm);
+  set('tkmWhtR',s.whtr);set('tkmWht',s.wht);set('tkmWhtM',s.whtm);set('tkmRetR',s.retr);set('tkmRet',s.ret);set('tkmRetM',s.retm);
+  try{_tkPaySync();}catch(_pe){}
   var seg=function(wrap,attr,val){if(!val)return;var box=document.getElementById(wrap);if(!box)return;var bs=box.querySelectorAll('.tkmsb');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].getAttribute(attr)===val);};
   seg('tkmStatus','data-st',s.st);seg('tkmPrio','data-pr',s.pr);
   var segAny=function(wrap,attr,val){var box=document.getElementById(wrap);if(!box||val==null)return;var bs=box.querySelectorAll('.tkmsb');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].getAttribute(attr)===val);};
@@ -8658,6 +8666,7 @@ function _tkCard(t,pos){
   h+=_ctH;
   if(_dn)h+='<div class="tkhl tkhl3"><span class="tkhlk">3</span><span class="tkhlv" title="'+_eatt(_dn)+'">'+esc(_dn)+'</span></div>';
   h+='<div class="tkcardttl">'+esc(t.title||'(no description)')+'</div></div>';}
+  h+=_tkPayCardHTML(t);
   var _nl=_tkNoteList(t);
   if(_nl.length){
     h+='<div class="tkcardck">';
@@ -8690,7 +8699,7 @@ function _tkList(view){
       +(((t.owner||'')+'').trim()?(' · '+esc(((t.owner||'')+'').trim())):'')
       +(((t.contact||'')+'').trim()?(' · 👤 '+esc(((t.contact||'')+'').trim())):'')
       +(((t.docno||'')+'').trim()?(' · <i>'+esc(((t.docno||'')+'').trim())+'</i>'):'')+'</span>'):'')
-    +(t.desc?('<span class="tkldesc">'+esc((t.desc||'').slice(0,70))+'</span>'):'')+'</td>';
+    +(t.desc?('<span class="tkldesc">'+esc((t.desc||'').slice(0,70))+'</span>'):'')+_tkPayLineHTML(t)+'</td>';
     h+='<td>'+(t.proj?('<span class="tkproj">🔗 '+esc(t.proj)+'</span>'):'<span class="tkdim">—</span>')+'</td>';
     h+='<td><span class="tkassign">'+_tkAvatar(t.assignee)+'</span></td>';
     h+='<td><span class="tkprio" style="background:'+pr[3]+';color:'+pr[2]+'">'+pr[1]+'</span></td>';
@@ -8725,6 +8734,7 @@ function _tkModalHTML(){
     +'<div class="tkmnrow"><span class="tkmnn">3</span><span class="tkmnl">Document no.</span><span class="tkmnf"><input class="tkmin" id="tkmDocNo" value="'+_eatt(t.docno||'')+'" placeholder="e.g. RV2026080004 · PV2569-0881" autocomplete="off" spellcheck="false"></span></div>'
     +'<div class="tkmnrow"><span class="tkmnn">4</span><span class="tkmnl">Description</span><span class="tkmnf"><input class="tkmin" id="tkmTitle" value="'+_eatt(t.title||'')+'" placeholder="What needs doing — e.g. Settlement · ใบกำกับภาษี/ใบเสร็จรับเงิน ระยะ 7 (งวด 21)" autocomplete="off"></span></div>'
     +'</div>';}
+  h+=_tkPayBlockHTML(t);
   h+='<div class="tkml">Checklist <span style="font-weight:500;color:var(--muted)">— tick an item when it is done and it turns green</span>'
     +(_tkNotes.length?('<span class="tkckn'+((_tkNotes.filter(function(n){return n.done;}).length===_tkNotes.length)?' all':'')+'">'+_tkNotes.filter(function(n){return n.done;}).length+'/'+_tkNotes.length+'</span>'):'')
     +_tkNoteHTML()+'</div>';
@@ -8780,12 +8790,13 @@ function _tkSaveModal(){
   var notes=_tkNotes.slice();
   if(isNew){
     var nt={id:(_tkNewId||_uid()),title:title,desc:descv,status:status,prio:prio,assignee:assignee,due:due,proj:proj,owner:owner,contact:contact,docno:docno,cat:cat,doc:doc,grp:grp,hl:hl,tc:tc,notes:notes,co:co,cono:_cono,mode:mode,rows:rows,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done:0,done_dt:(status===_dk)?_tkToday():''};
+    _tkPayApply(nt);
     TRACKDATA.push(nt);
     if(typeof gliLog==='function')gliLog('Added task',title+(assignee&&_ptFind(assignee)?(' · assigned to '+_ptName(_ptFind(assignee))):''));
   }else{
     var t=_tkFind(_tkModalId);if(!t){_tkModalId=null;renderTracking();return;}
     var oldSt=t.status;
-    t.title=title;t.notes=notes;t.desc=descv;t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.owner=owner;t.contact=contact;t.docno=docno;t.cat=cat;t.doc=doc;t.grp=grp;t.hl=hl;t.tc=tc;t.co=co;t.cono=_cono;t.mode=mode;t.rows=rows;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));
+    t.title=title;t.notes=notes;t.desc=descv;t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.owner=owner;t.contact=contact;t.docno=docno;t.cat=cat;t.doc=doc;t.grp=grp;t.hl=hl;t.tc=tc;t.co=co;t.cono=_cono;t.mode=mode;t.rows=rows;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));_tkPayApply(t);
     /* v10.72: การ์ดที่เก็บเข้า Report งานที่เสร็จแล้ว — แก้ไขรายละเอียดได้ แต่ต้องไม่ล้างวันที่เสร็จทิ้ง
        (เดิมกฎนี้ผูกกับหัวข้อ "Done" ของบอร์ดอย่างเดียว งานที่ done แต่ค้างอยู่หัวข้ออื่นจึงโดนล้าง) */
     if(!t.done){if(status===_dk&&oldSt!==_dk)t.done_dt=_tkToday();if(status!==_dk)t.done_dt='';}
@@ -8952,7 +8963,7 @@ function _tkrRows(){
     if(_tkrFSt&&(t.status||TK_STAT[0][0])!==_tkrFSt)return false;
     if(q){
       var u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;
-      var hay=[_tkTaskName(t),t.desc,t.proj,t.owner,t.contact,t.docno,t.grp,t.co,t.done_by,
+      var hay=[_tkTaskName(t),t.desc,t.fdesc,t.proj,t.owner,t.contact,t.docno,t.grp,t.co,t.done_by,
         (u&&typeof _ptName==='function')?_ptName(u):'',_tkCoText(t),
         _tkProjName(t.proj),_tkDocNames(t.doc),((_tkCat(t.cat)||[])[1]||''),
         ((_tkStat(t.status||TK_STAT[0][0])||[])[1]||''),
@@ -9016,16 +9027,20 @@ function _tkrCsvCell(v){v=(v==null?'':(''+v));return '"'+v.replace(/"/g,'""').re
 function _tkrExport(){
   var R=_tkrRows();
   if(!R.length){alert('ไม่มีข้อมูลในช่วงที่เลือก');return;}
-  var head=['ลำดับ','วันที่เสร็จ','เวลา','งาน','คำอธิบายเพิ่มเติม','ประเภทเอกสาร','บริษัท','หัวข้อบอร์ด','กลุ่ม','หมวดงาน','รหัสโปรเจค','ชื่อโครงการ','ชื่อผู้ว่าจ้าง','ชื่อผู้ติดต่อ','รหัสเอกสาร','ผู้รับผิดชอบ','ผู้กดเสร็จ','ผู้สร้างงาน','วันที่สร้าง','กำหนดส่ง','ตรงเวลา/ช้า (วัน)','ใช้เวลา (วัน)','Checklist เสร็จ','Checklist ทั้งหมด','ไฟล์แนบ'];
+  var head=['ลำดับ','วันที่เสร็จ','เวลา','งาน','คำอธิบายเพิ่มเติม','ประเภทเอกสาร','บริษัท','หัวข้อบอร์ด','กลุ่ม','หมวดงาน','รหัสโปรเจค','ชื่อโครงการ','ชื่อผู้ว่าจ้าง','ชื่อผู้ติดต่อ','รหัสเอกสาร','รายละเอียดจำนวนเงิน','จำนวนเงิน (ก่อน VAT)','อัตรา VAT %','VAT','จำนวนเงินรวม','อัตราหัก ณ ที่จ่าย %','หัก ณ ที่จ่าย','อัตราเงินประกันผลงาน %','เงินประกันผลงาน','จ่ายสุทธิ','ผู้รับผิดชอบ','ผู้กดเสร็จ','ผู้สร้างงาน','วันที่สร้าง','กำหนดส่ง','ตรงเวลา/ช้า (วัน)','ใช้เวลา (วัน)','Checklist เสร็จ','Checklist ทั้งหมด','ไฟล์แนบ'];
   var lines=[head.map(_tkrCsvCell).join(',')];
   R.forEach(function(t,i){
     var u=(typeof _ptFind==='function')?_ptFind(t.assignee):null;
+    var _pp=_tkPay(t),_pc=function(v){return v?_tkPR2(v).toFixed(2):'';};
     var nl=_tkNoteList(t),nd=0;nl.forEach(function(n){if(n.done)nd++;});
     var lt=_tkrLate(t),dy=_tkrDays(t),ts=_tkDoneTs(t);
     lines.push([i+1,_tkrDate(ts),_tkrTime(ts),_tkTaskName(t),(t.desc||''),
       _tkDocNames(t.doc),(_tkCoText(t)||(((t.co||'')+'').toUpperCase())),
       ((_tkStat(t.status||TK_STAT[0][0])||[])[1]||''),((t.grp||'')+''),((_tkCat(t.cat)||[])[1]||''),
       (t.proj||''),(t.proj?_tkProjName(t.proj):''),(t.owner||''),(t.contact||''),(t.docno||''),
+      _pp.fdesc,_pc(_pp.amt),(_pp.vatm?'กำหนดเอง':(_pp.amt?_pp.vatr:'')),_pc(_pp.vat),_pc(_pp.tot),
+      (_pp.whtm?'กำหนดเอง':(_pp.wht?_pp.whtr:'')),_pc(_pp.wht),
+      (_pp.retm?'กำหนดเอง':(_pp.ret?_pp.retr:'')),_pc(_pp.ret),_pc(_pp.net),
       (u?_ptName(u):''),(t.done_by||''),(t.by||''),
       (t.created?_tkrDate(t.created):''),(t.due?_tkrDate(new Date(t.due+'T00:00:00').getTime()):''),
       (lt==null?'':lt),(dy==null?'':dy),nd,nl.length,((t.att&&t.att.length)||0)
@@ -9070,6 +9085,7 @@ function _tkrRowHTML(t,no){
   if(ct)h+=' <span class="tkrchip" style="background:'+ct[3]+';color:'+ct[2]+'">'+esc(ct[1])+'</span>';
   if(sub.length)h+='<span class="tkrsubl">'+sub.join(' · ')+'</span>';
   if(((t.desc||'')+'').trim())h+='<span class="tkrsubl">'+esc(((t.desc||'')+'').trim().slice(0,110))+'</span>';
+  h+=_tkPayLineHTML(t,'tkrsubl');
   h+='</td>';
   h+='<td>'+(dc?('<span class="tkrchip" style="background:'+dc[3]+';color:'+dc[2]+'">'+esc(dc[1])+'</span>'):'<span class="tkrdim">—</span>')+'</td>';
   h+='<td>'+_tkrCoCell(t)+'</td>';
@@ -33938,6 +33954,72 @@ body.sbfold .sbshow-btn{display:inline-flex}
 /* the tick and the delete button already sit in rose — keep the row grip quiet */
 #page-pdrepjv .apjv-topR .apjv-drag{color:#D59FB0}
 #page-pdrepjv .apjv-topR .apjv-drag:hover{color:#9B2C46}
+/* ===== v14.8: Tracking — payment detail block (modal form + card strip) ===== */
+/* ---- the form block in the task modal ---- */
+#page-tk .tkpay{border:1.5px solid #CFE3DC;border-radius:11px;padding:10px 11px;background:#F4FAF8}
+#page-tk .tkpayr{display:grid;grid-template-columns:20px 128px minmax(0,1fr) 190px;align-items:center;gap:9px;margin-bottom:7px}
+#page-tk .tkpayr:last-child{margin-bottom:0}
+#page-tk .tkpayic{flex:none;font-size:13px;line-height:1;text-align:center}
+#page-tk .tkpaylb{font-size:11.5px;font-weight:700;color:var(--ink2,#4A5563);line-height:1.25}
+#page-tk .tkpayhint{display:block;font-size:9px;font-weight:600;color:var(--muted,#8C8676);letter-spacing:.01em}
+#page-tk .tkpaymid{min-width:0}
+#page-tk .tkpayval{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+#page-tk .tkpayrq{font-size:9.5px;font-weight:700;color:var(--muted,#8C8676);background:#fff;border:1px solid #DCE7E3;
+  border-radius:999px;padding:2px 9px;white-space:nowrap}
+#page-tk .tkpayrs{font-family:inherit;font-size:11.5px;font-weight:700;color:var(--ink,#141C29);width:100%;
+  padding:5px 8px;border:1px solid var(--line,#E6E0D4);border-radius:8px;background:#fff;
+  text-overflow:ellipsis;cursor:pointer}
+#page-tk .tkpayrs:focus{outline:none;border-color:#0E5C52;box-shadow:0 0 0 2px rgba(14,92,82,.15)}
+#page-tk .tkpayin{font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:700;text-align:right;
+  width:100%;min-width:0;padding:6px 9px;border:1px solid var(--line,#E6E0D4);border-radius:8px;background:#fff;
+  color:var(--ink,#141C29);box-sizing:border-box;font-variant-numeric:tabular-nums}
+#page-tk .tkpayin:focus{outline:none;border-color:#0E5C52;box-shadow:0 0 0 2px rgba(14,92,82,.15)}
+#page-tk .tkpayin.big{font-size:14px;font-weight:800;color:#0A463E;border-color:#9ECFC2;background:#fff}
+#page-tk .tkpaytx{font-size:12.5px}
+/* the free-text detail line spans the rate + amount columns instead of squeezing into one */
+#page-tk .tkpayr.desc .tkpaymid{display:none}
+#page-tk .tkpayr.desc .tkpayval{grid-column:3 / -1;display:block}
+#page-tk .tkpayr.desc .tkpaytx{width:100%;text-align:left}
+#page-tk .tkpayr.base{background:#fff;border:1px solid #CFE3DC;border-radius:9px;padding:6px 8px;margin:0 -1px 8px}
+#page-tk .tkpayrst{flex:none;width:23px;height:23px;border-radius:7px;border:1px solid var(--line,#E6E0D4);
+  background:#fff;color:#B9B2A4;font-size:11px;line-height:1;cursor:pointer;transition:.12s}
+#page-tk .tkpayrst.on{border-color:#E9B96A;background:#FDF3E0;color:#96631A}
+#page-tk .tkpayrst:hover{border-color:#0E5C52;color:#0E5C52}
+#page-tk .tkpayout{font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:800;color:#0A463E;
+  font-variant-numeric:tabular-nums;padding:6px 10px;border-radius:8px;background:#E6F0EC;border:1px solid #BEDBD2;
+  width:100%;box-sizing:border-box;text-align:right}
+#page-tk .tkpayout.net{background:#0E5C52;border-color:#0E5C52;color:#fff;font-size:15px}
+#page-tk .tkpayout.net.neg{background:#B42318;border-color:#B42318}
+#page-tk .tkpayr.sum .tkpaylb,#page-tk .tkpayr.net .tkpaylb{font-weight:800;color:#0A463E}
+#page-tk .tkpayr.ded .tkpaylb{color:#B45309}
+#page-tk .tkpayr.ded .tkpayin{color:#B45309}
+#page-tk .tkpayr.sum{border-top:1px dashed #CFE3DC;padding-top:8px}
+#page-tk .tkpayr.net{border-top:1.5px solid #CFE3DC;padding-top:9px;margin-top:2px}
+@media(max-width:620px){
+  #page-tk .tkpayr{grid-template-columns:20px 1fr;row-gap:5px}
+  #page-tk .tkpaymid,#page-tk .tkpayval{grid-column:2}
+}
+
+/* ---- the strip on a Kanban card ---- */
+.tkpaycard{margin:7px 0 4px;padding:7px 9px;border-radius:9px;background:rgba(255,255,255,.72);
+  border:1px solid rgba(14,92,82,.16);border-left:3px solid #0E5C52}
+.tkpcd{font-size:11.5px;font-weight:700;color:var(--ink2,#4A5563);line-height:1.45;margin-bottom:4px;
+  padding-bottom:4px;border-bottom:1px dashed rgba(14,92,82,.18)}
+.tkpc{display:flex;align-items:baseline;justify-content:space-between;gap:8px;line-height:1.5}
+.tkpck{font-size:10.5px;font-weight:600;color:var(--muted,#8C8676);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tkpcv{flex:none;font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:700;color:var(--ink,#141C29);
+  font-variant-numeric:tabular-nums}
+.tkpc.sum{border-top:1px dashed rgba(14,92,82,.18);margin-top:3px;padding-top:3px}
+.tkpc.sum .tkpck,.tkpc.sum .tkpcv{color:#0A463E;font-weight:800}
+.tkpc.ded .tkpck,.tkpc.ded .tkpcv{color:#B45309}
+.tkpc.net{margin-top:4px;padding-top:4px;border-top:1.5px solid rgba(14,92,82,.22)}
+.tkpc.net .tkpck{font-size:11px;font-weight:800;color:#0A463E}
+.tkpc.net .tkpcv{font-size:13px;font-weight:800;color:#0A463E}
+
+/* ---- one-line form in the List view and the Completed report ---- */
+.tkpayln{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;color:#0A463E;
+  font-variant-numeric:tabular-nums;display:block;line-height:1.5}
+.tkpayln b{font-weight:800}
 </style>
 <script id="jvSidesJs">
 /* ===== v14.6: Joint Venture — name each side's entry table for what it holds,
@@ -33951,6 +34033,179 @@ body.sbfold .sbshow-btn{display:inline-flex}
     return l?h.replace(/<span>[^<]*Entries<\/span>/,'<span>'+l+'</span>'):h;
   };
   try{if(document.getElementById('apjvWrap')&&document.querySelector('#page-pdrepjv .apjv-tbl'))renderApjv();}catch(_e){}
+})();
+</script>
+<script id="tkPayJs">
+/* ===== v14.8: Tracking — payment detail on a task =====
+   รายละเอียด · จำนวนเงิน · VAT 7% · จำนวนเงินรวม · หัก ณ ที่จ่าย · เงินประกันผลงาน · จ่ายสุทธิ
+
+   ฐานของแต่ละรายการ (ตามหลักภาษีไทย):
+   · VAT            คิดจากมูลค่าสินค้า/บริการ "ก่อนภาษี" (ป.รัษฎากร ม.79)
+   · หัก ณ ที่จ่าย   คิดจากมูลค่างาน "ก่อน VAT" ไม่ใช่ยอดรวมภาษี (คำสั่งกรมสรรพากร ท.ป.4/2528)
+   · เงินประกันผลงาน คิดจากมูลค่างาน "ก่อน VAT" ตามธรรมเนียมสัญญาก่อสร้าง — VAT และ WHT
+                    ยังคิดจากมูลค่างานเต็มจำนวนในงวดนั้น ไม่ใช่ยอดหลังหักประกันผลงาน
+   · จ่ายสุทธิ       = จำนวนเงินรวม (รวม VAT) − หัก ณ ที่จ่าย − เงินประกันผลงาน
+     ทั้งสองรายการหักจากยอดเดียวกัน ลำดับการหักจึงไม่เปลี่ยนผลลัพธ์
+
+   ทุกช่องจำนวนเงินที่คำนวณให้ แก้ทับเองได้ (สัญญาบางฉบับระบุเป็นจำนวนเงินตายตัว) กด ↺ เพื่อกลับไปใช้ค่าที่คำนวณ */
+
+var TK_VATR=[[7,'VAT 7%'],[0,'ไม่มี VAT']];
+var TK_WHTR=[[0,'ไม่หัก'],[1,'1% · ค่าขนส่ง · ส่วนราชการจ่าย (ม.69 ทวิ)'],[1.5,'1.5%'],[2,'2% · ค่าโฆษณา'],
+             [3,'3% · จ้างทำของ/รับเหมา/บริการ'],[5,'5% · ค่าเช่า · รางวัล/ส่วนลด'],[10,'10% · เงินปันผล'],[15,'15% · ดอกเบี้ย · ค่าสิทธิ']];
+var TK_RETR=[[0,'ไม่หัก'],[2.5,'2.5%'],[5,'5%'],[10,'10%']];
+
+function _tkPN(v){ if(v==null)return 0; var s=(''+v).replace(/[,  ]/g,'').trim(); if(s===''||s==='-')return 0; var n=parseFloat(s); return isFinite(n)?n:0; }
+function _tkPR2(n){ n=+n||0; return Math.round((n+(n<0?-1e-9:1e-9))*100)/100; }
+function _tkPM(n){ return _tkPR2(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+/* คำนวณจุดเดียว — ฟอร์ม การ์ด ลิสต์ รายงาน และ CSV เรียกตัวนี้ทั้งหมด */
+function _tkPay(t){
+  t=t||{};
+  var amt=_tkPR2(_tkPN(t.amt));
+  var vatr=(t.vatr==null||t.vatr==='')?7:_tkPN(t.vatr);
+  var whtr=_tkPN(t.whtr), retr=_tkPN(t.retr);
+  var vat=t.vatm?_tkPR2(_tkPN(t.vat)):_tkPR2(amt*vatr/100);
+  var wht=t.whtm?_tkPR2(_tkPN(t.wht)):_tkPR2(amt*whtr/100);
+  var ret=t.retm?_tkPR2(_tkPN(t.ret)):_tkPR2(amt*retr/100);
+  var tot=_tkPR2(amt+vat), net=_tkPR2(tot-wht-ret);
+  var fdesc=((t.fdesc||'')+'').trim();
+  return {fdesc:fdesc,amt:amt,vatr:vatr,vat:vat,tot:tot,whtr:whtr,wht:wht,retr:retr,ret:ret,net:net,
+          vatm:!!t.vatm,whtm:!!t.whtm,retm:!!t.retm,
+          has:!!(amt||vat||wht||ret||fdesc)};
+}
+
+/* ---------- ฟอร์มในการ์ด ---------- */
+function _tkPayRateSel(id,list,cur){
+  var c=_tkPN(cur),hit=false,h='<select class="tkpayrs" id="'+id+'">';
+  for(var i=0;i<list.length;i++){var on=(_tkPN(list[i][0])===c);if(on)hit=true;
+    h+='<option value="'+list[i][0]+'"'+(on?' selected':'')+'>'+esc(list[i][1])+'</option>';}
+  if(!hit)h+='<option value="'+c+'" selected>'+esc(c+'%')+'</option>';
+  return h+'</select>';
+}
+function _tkPayBlockHTML(t){
+  var p=_tkPay(t||{});
+  var row=function(cls,ic,lbl,mid,right,hint){
+    return '<div class="tkpayr '+cls+'"><span class="tkpayic">'+ic+'</span><span class="tkpaylb">'+lbl
+      +(hint?('<span class="tkpayhint">'+hint+'</span>'):'')+'</span>'
+      +'<span class="tkpaymid">'+(mid||'')+'</span><span class="tkpayval">'+right+'</span></div>';
+  };
+  var amtIn=function(id,val,man,rst){
+    return '<input class="tkpayin" id="'+id+'" inputmode="decimal" value="'+_eatt(_tkPM(val))+'" placeholder="0.00">'
+      +(rst?('<input type="hidden" id="'+id+'M" value="'+(man?'1':'')+'">'
+        +'<button class="tkpayrst'+(man?' on':'')+'" type="button" data-tkrst="'+rst+'" title="กลับไปใช้ยอดที่คำนวณจากอัตรา">↺</button>'):'');
+  };
+  return '<div class="tkml tkpaywrap"><div class="tkmlbl">💰 รายละเอียดจำนวนเงิน '
+      +'<span style="font-weight:500;color:var(--muted)">— เว้นว่างไว้ได้ ถ้างานนี้ไม่มีตัวเงิน · ช่องที่คำนวณให้ แก้ทับเองได้</span></div>'
+    +'<div class="tkpay" id="tkmPay">'
+      +row('desc','📝','รายละเอียด','','<input class="tkmin tkpaytx" id="tkmFdesc" value="'+_eatt((t&&t.fdesc)||'')+'" placeholder="รายการที่เรียกเก็บ เช่น ค่าจ้างงวดที่ 7 (งวด 21) · ขายเศษซากแอร์" autocomplete="off">')
+      +row('base','💵','จำนวนเงิน','<span class="tkpayrq">ก่อน VAT</span>','<input class="tkpayin big" id="tkmAmt" inputmode="decimal" value="'+_eatt(p.amt?_tkPM(p.amt):'')+'" placeholder="0.00">')
+      +row('','🧾','VAT',_tkPayRateSel('tkmVatR',TK_VATR,p.vatr),amtIn('tkmVat',p.vat,t&&t.vatm,'vat'))
+      +row('sum','Σ','จำนวนเงินรวม','<span class="tkpayrq">รวม VAT</span>','<span class="tkpayout" id="tkmTot">'+_tkPM(p.tot)+'</span>')
+      +row('ded','✂️','หัก ณ ที่จ่าย',_tkPayRateSel('tkmWhtR',TK_WHTR,p.whtr),amtIn('tkmWht',p.wht,t&&t.whtm,'wht'),'ฐานก่อน VAT')
+      +row('ded','🛡️','เงินประกันผลงาน',_tkPayRateSel('tkmRetR',TK_RETR,p.retr),amtIn('tkmRet',p.ret,t&&t.retm,'ret'),'ฐานก่อน VAT')
+      +row('net','✅','จ่ายสุทธิ','<span class="tkpayrq">รวม − หัก − ประกัน</span>','<span class="tkpayout net" id="tkmNet">'+_tkPM(p.net)+'</span>')
+    +'</div></div>';
+}
+
+/* อ่านค่าจากฟอร์ม (ใช้ตอนคำนวณสด และตอนบันทึก) */
+function _tkPayForm(){
+  var g=function(id){var e=document.getElementById(id);return e?e.value:null;};
+  if(document.getElementById('tkmAmt')==null)return null;
+  return {fdesc:((g('tkmFdesc')||'')+'').trim(),
+          amt:_tkPN(g('tkmAmt')),
+          vatr:_tkPN(g('tkmVatR')),vat:_tkPN(g('tkmVat')),vatm:(g('tkmVatM')?1:0),
+          whtr:_tkPN(g('tkmWhtR')),wht:_tkPN(g('tkmWht')),whtm:(g('tkmWhtM')?1:0),
+          retr:_tkPN(g('tkmRetR')),ret:_tkPN(g('tkmRet')),retm:(g('tkmRetM')?1:0)};
+}
+/* คำนวณสดขณะพิมพ์ */
+function _tkPaySync(){
+  var f=_tkPayForm();if(!f)return;
+  var p=_tkPay(f),s=function(id,v){var e=document.getElementById(id);if(e&&document.activeElement!==e)e.value=_tkPM(v);};
+  s('tkmVat',p.vat);s('tkmWht',p.wht);s('tkmRet',p.ret);
+  var rb=document.querySelectorAll('.tkpayrst');
+  for(var i=0;i<rb.length;i++){var k=rb[i].getAttribute('data-tkrst');
+    var mm=document.getElementById('tkm'+k.charAt(0).toUpperCase()+k.slice(1)+'M');
+    rb[i].classList.toggle('on',!!(mm&&mm.value));}
+  var tot=document.getElementById('tkmTot'),net=document.getElementById('tkmNet');
+  if(tot)tot.textContent=_tkPM(p.tot);
+  if(net){net.textContent=_tkPM(p.net);net.classList.toggle('neg',p.net<-0.004);}
+}
+/* เขียนลงตัวงาน — เรียกทั้งตอนสร้างใหม่และตอนแก้ไข */
+function _tkPayApply(t){
+  var f=_tkPayForm();if(!t||!f)return t;
+  var p=_tkPay(f);
+  t.fdesc=f.fdesc;t.amt=p.amt;
+  t.vatr=p.vatr;t.vat=p.vat;t.vatm=f.vatm?1:0;
+  t.whtr=p.whtr;t.wht=p.wht;t.whtm=f.whtm?1:0;
+  t.retr=p.retr;t.ret=p.ret;t.retm=f.retm?1:0;
+  t.tot=p.tot;t.net=p.net;
+  return t;
+}
+/* สำเนาการ์ด — ต้องยกยอดเงินไปด้วย */
+function _tkPayCopy(src,dst){
+  if(!src||!dst)return dst;
+  var k=['fdesc','amt','vatr','vat','vatm','whtr','wht','whtm','retr','ret','retm','tot','net'];
+  for(var i=0;i<k.length;i++)if(src[k[i]]!=null&&src[k[i]]!=='')dst[k[i]]=src[k[i]];
+  return dst;
+}
+
+/* ---------- แสดงผลบนการ์ด / ลิสต์ / รายงาน ---------- */
+function _tkPayCardHTML(t){
+  var p=_tkPay(t);if(!p.has)return '';
+  var line=function(cls,k,v,sign){return '<div class="tkpc '+cls+'"><span class="tkpck">'+k+'</span><span class="tkpcv">'+(sign||'')+_tkPM(v)+'</span></div>';};
+  var h='<div class="tkpaycard">';
+  if(p.fdesc)h+='<div class="tkpcd">'+esc(p.fdesc)+'</div>';
+  h+=line('','จำนวนเงิน',p.amt);
+  var rt=function(m,r){return m?' (กำหนดเอง)':(' '+(r||0)+'%');};
+  if(p.vat)h+=line('','VAT'+rt(p.vatm,p.vatr),p.vat,'+');
+  h+=line('sum','จำนวนเงินรวม',p.tot);
+  if(p.wht)h+=line('ded','หัก ณ ที่จ่าย'+rt(p.whtm,p.whtr),p.wht,'−');
+  if(p.ret)h+=line('ded','เงินประกันผลงาน'+rt(p.retm,p.retr),p.ret,'−');
+  h+=line('net','จ่ายสุทธิ',p.net);
+  return h+'</div>';
+}
+function _tkPayLineHTML(t,cls){
+  var p=_tkPay(t);if(!p.has)return '';
+  var b=[];
+  b.push('฿'+_tkPM(p.amt));
+  if(p.vat)b.push('VAT '+_tkPM(p.vat));
+  b.push('รวม '+_tkPM(p.tot));
+  if(p.wht)b.push('−หัก ณ ที่จ่าย '+_tkPM(p.wht));
+  if(p.ret)b.push('−ประกันผลงาน '+_tkPM(p.ret));
+  return '<span class="'+(cls||'tkldesc')+' tkpayln">'+(p.fdesc?(esc(p.fdesc)+' · '):'')+b.join(' · ')
+    +' <b>สุทธิ '+_tkPM(p.net)+'</b></span>';
+}
+
+/* ---------- การคำนวณสดในฟอร์ม ---------- */
+(function(){
+  var isAmt=function(el){return el&&el.id&&(el.id==='tkmAmt'||el.id==='tkmVat'||el.id==='tkmWht'||el.id==='tkmRet');};
+  document.addEventListener('input',function(e){
+    var el=e.target;if(!el||!el.closest||!el.closest('#tkmPay'))return;
+    if(el.id==='tkmVat'||el.id==='tkmWht'||el.id==='tkmRet'){
+      var m=document.getElementById(el.id+'M');if(m&&!m.value){m.value='1';
+        var b=document.querySelector('.tkpayrst[data-tkrst="'+el.id.slice(3).toLowerCase()+'"]');if(b)b.classList.add('on');}
+    }
+    _tkPaySync();
+  },true);
+  document.addEventListener('change',function(e){
+    var el=e.target;if(!el||!el.closest||!el.closest('#tkmPay'))return;_tkPaySync();
+  },true);
+  /* ช่องจำนวนเงิน: แก้แบบดิบขณะพิมพ์ ใส่ลูกน้ำให้เมื่อออกจากช่อง */
+  document.addEventListener('focusin',function(e){
+    var el=e.target;if(!isAmt(el)||!el.closest('#tkmPay'))return;
+    var n=_tkPN(el.value);el.value=n?(''+n):'';
+  },true);
+  document.addEventListener('focusout',function(e){
+    var el=e.target;if(!isAmt(el)||!el.closest('#tkmPay'))return;
+    var n=_tkPN(el.value);el.value=(el.id==='tkmAmt'&&!n)?'':_tkPM(n);_tkPaySync();
+  },true);
+  document.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest?e.target.closest('.tkpayrst'):null;if(!b)return;
+    e.preventDefault();e.stopPropagation();
+    var k=b.getAttribute('data-tkrst'),id='tkm'+k.charAt(0).toUpperCase()+k.slice(1);
+    var m=document.getElementById(id+'M');if(m)m.value='';
+    b.classList.remove('on');_tkPaySync();
+  },true);
 })();
 </script>
 </body></html>
