@@ -33850,4 +33850,96 @@ body.sbfold .sbshow-btn{display:inline-flex}
   try{if(document.getElementById('apjvWrap')&&document.querySelector('#page-pdrepjv .apjv-tbl'))renderApjv();}catch(_e){}
 })();
 </script>
+<style id="jvSidesCss">
+/* ===== v14.6: Joint Venture — the two sides read apart at a glance.
+   Liability (what we owe) carries indigo, Asset (what we have) carries the brand
+   green, on the card rail, the heading, the table bar, the hover and the totals.
+   Routine expenses is a liability, so it wears the indigo too. Last block in the
+   document, so it settles every tie with the Database-form rules above. ===== */
+
+#page-pdrepjv .apjv-liab{--sc:#2C4E8A;--scd:#1B3A6B;--scb:#1E3A6E;--scp:#E7EDF8;--scl:#C3D2EC}
+#page-pdrepjv .apjv-asset{--sc:#12665B;--scd:#0B5744;--scb:#0F3D37;--scp:#E3F3EC;--scl:#BEE6D6}
+
+/* ---------- the card: coloured rail + a tinted top edge ---------- */
+#page-pdrepjv .apjv-col{position:relative;border-left:4px solid var(--sc,#CBD5E1)!important;
+  border-color:var(--scl,#EFE7D8);border-left-color:var(--sc,#CBD5E1)!important}
+#page-pdrepjv .apjv-col::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;
+  background:linear-gradient(90deg,var(--sc,#CBD5E1),color-mix(in srgb,var(--sc,#CBD5E1) 25%,#fff));
+  z-index:2;pointer-events:none}
+
+/* ---------- the column heading: pastel band, icon tile, side badge ---------- */
+#page-pdrepjv .apjv-col>.apjv-colhd{background:var(--scp,#F7F9FC)!important;
+  border-color:var(--scl,#E6E0D4)!important;border-bottom:1px solid var(--scl,#E6E0D4)!important;
+  padding:12px 15px!important}
+#page-pdrepjv .apjv-col>.apjv-colhd .apjv-colic{width:27px;height:27px;border-radius:9px;flex:none;
+  display:inline-flex;align-items:center;justify-content:center;font-size:15px;
+  background:#fff;border:1px solid var(--scl,#E6E0D4);box-shadow:0 1px 3px rgba(16,24,40,.07)}
+#page-pdrepjv .apjv-liab>.apjv-colhd .apjv-coltt{color:var(--scd)!important}
+#page-pdrepjv .apjv-asset>.apjv-colhd .apjv-coltt{color:var(--scd)!important}
+#page-pdrepjv .apjv-col>.apjv-colhd .apjv-coltt::after{
+  display:inline-block;vertical-align:middle;margin-left:10px;padding:2px 10px;border-radius:999px;
+  font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+  background:#fff;border:1px solid var(--scl);color:var(--sc)}
+#page-pdrepjv .apjv-liab>.apjv-colhd .apjv-coltt::after{content:"\0e2b\0e19\0e35\0e49\0e2a\0e34\0e19\0020\00b7\0020what we owe"}
+#page-pdrepjv .apjv-asset>.apjv-colhd .apjv-coltt::after{content:"\0e2a\0e34\0e19\0e17\0e23\0e31\0e1e\0e22\0e4c\0020\00b7\0020what we have"}
+#page-pdrepjv .apjv-col>.apjv-colhd .apjv-cohint{background:#fff!important;color:var(--sc)!important;
+  border:1px solid var(--scl)}
+
+/* ---------- the table bar takes the side's colour ---------- */
+#page-pdrepjv .apjv-liab .apjv-tbl thead th,
+#page-pdrepjv .apjv-asset .apjv-tbl thead th{background:var(--scb)!important}
+#page-pdrepjv .apjv-liab .apjv-tbl thead th.on,
+#page-pdrepjv .apjv-asset .apjv-tbl thead th.on{
+  background:color-mix(in srgb,var(--scb) 82%,#fff)!important}
+
+/* ---------- section heads follow the side ---------- */
+#page-pdrepjv .apjv-col .apjv-sechd{background:var(--scp)!important;border-color:var(--scl)!important;
+  color:var(--scd)!important}
+#page-pdrepjv .apjv-col .apjv-sec:not(.apjv-sub) .apjv-sechd{font-weight:900}
+#page-pdrepjv .apjv-col .apjv-add{border-color:var(--scl)!important;color:var(--scd)!important}
+#page-pdrepjv .apjv-col .apjv-tw{border-color:var(--scl)!important}
+
+/* the Routine card has no column heading of its own — badge its section head */
+#page-pdrepjv .apjv-topR .apjv-sub-routine .apjv-sechd>span:first-child::after{
+  content:"\0e2b\0e19\0e35\0e49\0e2a\0e34\0e19\0020\00b7\0020liability";
+  display:inline-block;vertical-align:middle;margin-left:9px;padding:2px 9px;border-radius:999px;
+  font-size:8.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  background:#fff;border:1px solid var(--scl);color:var(--sc)}
+
+/* ---------- rows: hover and totals in the side's colour ---------- */
+#page-pdrepjv .apjv-liab .apjv-tbl tbody tr[data-id]:hover td,
+#page-pdrepjv .apjv-asset .apjv-tbl tbody tr[data-id]:hover td{
+  background:color-mix(in srgb,var(--sc) 6%,#fff)!important}
+#page-pdrepjv .apjv-col .apjv-tbl tfoot td{background:var(--scp)!important;
+  border-top:1.5px solid var(--scl)!important;color:var(--scd)!important;font-weight:800!important}
+#page-pdrepjv .apjv-col .apjv-tbl tfoot td.ra,#page-pdrepjv .apjv-col .apjv-tbl tfoot .apjvtot{
+  color:var(--scd)!important}
+/* the Index group bands keep the side's tint on the chip and the name */
+#page-pdrepjv .apjv-col .apjv-grp-code{color:var(--scd)!important;background:var(--scp)!important}
+#page-pdrepjv .apjv-col .apjv-grp .apjv-grp-nm,
+#page-pdrepjv .apjv-col .apjv-grpsub .apjv-grpsub-lbl,
+#page-pdrepjv .apjv-col .apjv-grpsub .apjv-grp-nm{color:var(--sc)!important}
+#page-pdrepjv .apjv-col .apjv-grpsub td{background:color-mix(in srgb,var(--sc) 5%,#fff)!important;
+  border-top-color:var(--scl)!important;border-bottom-color:var(--scl)!important}
+
+/* ---------- a dashed rule down the middle of the two columns ---------- */
+#page-pdrepjv .apjv-cols{position:relative}
+#page-pdrepjv .apjv-cols::before{content:"";position:absolute;left:50%;top:10px;bottom:10px;
+  border-left:2px dashed #D3DCE8;transform:translateX(-1px);pointer-events:none;z-index:0}
+@media (max-width:1180px){#page-pdrepjv .apjv-cols::before{display:none}}
+</style>
+<script id="jvSidesJs">
+/* ===== v14.6: Joint Venture — name each side's entry table for what it holds,
+   so "Entries" no longer reads the same on both sides. ===== */
+(function(){
+  if(typeof _apjvMainSec!=='function')return;
+  var _orig=_apjvMainSec;
+  var LBL={liab:'💳 Payable entries',asset:'💰 Asset entries'};
+  _apjvMainSec=function(side){
+    var h=_orig(side),l=LBL[side];
+    return l?h.replace(/<span>[^<]*Entries<\/span>/,'<span>'+l+'</span>'):h;
+  };
+  try{if(document.getElementById('apjvWrap')&&document.querySelector('#page-pdrepjv .apjv-tbl'))renderApjv();}catch(_e){}
+})();
+</script>
 </body></html>
