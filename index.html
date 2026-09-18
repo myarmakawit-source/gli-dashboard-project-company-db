@@ -1685,7 +1685,7 @@ h1{ background:var(--g-aurora) !important;
 .tkpill.over{background:#FDECEA;color:#B42318}
 .tkpill.done{background:#E7F6EC;color:#15803D}
 .tkboard{display:flex;gap:13px;overflow-x:auto;padding-bottom:10px;align-items:flex-start}
-.tkcol{flex:1 1 0;min-width:296px;max-width:400px;background:var(--cb);border-radius:13px;padding:10px;border:1px solid var(--line)}
+.tkcol{flex:1 1 0;min-width:296px;max-width:460px;background:var(--cb);border-radius:13px;padding:10px;border:1px solid var(--line)}
 .tkcolhd{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:800;color:var(--c);margin-bottom:10px;padding:1px 3px}
 .tkcoldot{width:10px;height:10px;border-radius:50%;background:var(--c)}
 .tkcoln{margin-left:auto;background:#fff;color:var(--c);font-size:11.5px;font-weight:800;padding:1px 9px;border-radius:12px;border:1px solid var(--c)}
@@ -7917,7 +7917,8 @@ function _tkProjInfo(code){
 }
 /* ชื่อย่อที่จำง่าย — ตัดคำนำหน้าราชการ ตัดหางชื่อผู้ว่าจ้างที่ต่อท้ายมา
    และตัดส่วนขยายยาว ๆ (ภายใต้โครงการ… / ตามสัญญา… / จำนวน… ) ชื่อเต็มยังอยู่ใน tooltip */
-function _tkProjShort(name,owner){
+function _tkProjShort(name,owner,max){
+  max=+max||42;
   var s=((name||'')+'').replace(/\s+/g,' ').trim();
   if(!s)return '';
   var ow=((owner||'')+'').replace(/\s+/g,' ').trim();
@@ -7928,7 +7929,7 @@ function _tkProjShort(name,owner){
            'พร้อมติดตั้ง','พร้อมอุปกรณ์','ขนาดความจุ','ขนาด ','จำนวน ','ระยะที่','งวดที่','สัญญา '];
   for(var k=0;k<cut.length;k++){var p=s.indexOf(cut[k]);if(p>10)s=s.slice(0,p).trim();}
   s=s.replace(/[\s\-\u2013\u2014\u00b7,(]+$/,'').trim();
-  if(s.length>42){var q=s.slice(0,42),sp=q.lastIndexOf(' ');s=((sp>22)?q.slice(0,sp):q).trim()+'\u2026';}
+  if(s.length>max){var q=s.slice(0,max),sp=q.lastIndexOf(' ');s=((sp>(max*0.55))?q.slice(0,sp):q).trim()+'\u2026';}
   return s;
 }
 function _tkPRowName(code){return _tkProjInfo(code).name;}
@@ -9016,14 +9017,16 @@ function _tkCard(t,pos){
     var _pw=_tkPRowList(t);
     h+='<div class="tkcardp">';
     _pw.forEach(function(r){var c=_tkCo(r.co),code=((r.proj||'')+'').trim();
-      var inf=_tkProjInfo(code),sh=_tkProjShort(inf.name,inf.owner);
+      var inf=_tkProjInfo(code),sh=_tkProjShort(inf.name,inf.owner,88);
+      var _tip=_eatt(inf.name?(inf.name+(inf.owner?('\n'+inf.owner):'')):'');
       h+='<div class="tkcp">'
-        +(c?('<span class="tkcvco" style="background:'+c[2]+';color:#fff">'+esc(_tkCoLabel(r.co,r.cono))+'</span>'):'')
-        +'<span class="tkcpt">'+esc(r.ttl||'')+'</span>'
-        +(code?('<span class="tkcpc">'+esc(code)+'</span>'):'')
-        +((sh||inf.owner)?('<span class="tkcpn" title="'+_eatt(inf.name?(inf.name+(inf.owner?('\n'+inf.owner):'')):'')+'">'
-            +(sh?('<b>'+esc(sh)+'</b>'):'')
-            +(inf.owner?((sh?' \u00b7 ':'')+esc(inf.owner)):'')+'</span>'):'')
+        +'<div class="tkcph">'
+          +(c?('<span class="tkcvco" style="background:'+c[2]+';color:#fff">'+esc(_tkCoLabel(r.co,r.cono))+'</span>'):'')
+          +'<span class="tkcpt">'+esc(r.ttl||'')+'</span>'
+          +(code?('<span class="tkcpc">'+esc(code)+'</span>'):'')
+        +'</div>'
+        +(sh?('<div class="tkcpn" title="'+_tip+'">'+esc(sh)+'</div>'):'')
+        +(inf.owner?('<div class="tkcpo" title="'+_eatt(inf.owner)+'">\uD83C\uDFDB\uFE0F '+esc(inf.owner)+'</div>'):'')
       +'</div>';});
     h+='</div>';
     if(((t.title||'')+'').trim())h+='<div class="tkcardttl">'+esc(t.title)+'</div>';
@@ -34495,13 +34498,17 @@ body.sbfold .sbshow-btn{display:inline-flex}
 }
 
 /* layout 4 on a Kanban card */
-.tkcardp{display:flex;flex-direction:column;gap:4px;margin-bottom:4px}
-.tkcp{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;line-height:1.45}
+.tkcardp{display:flex;flex-direction:column;gap:7px;margin-bottom:5px}
+.tkcp+.tkcp{border-top:1px dashed rgba(16,24,40,.10);padding-top:7px}
+.tkcph{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;line-height:1.45}
 .tkcpt{font-size:13px;font-weight:700;color:var(--ink,#141C29)}
 .tkcpc{font-size:11.5px;font-weight:800;color:var(--brand-d,#0A463E);font-family:"IBM Plex Mono",monospace}
-.tkcpn{flex:1 0 100%;font-size:11px;font-weight:600;color:var(--ink2,#4A5563);line-height:1.45;
+/* the project name gets a line of its own and wraps onto a second one when it is long */
+.tkcpn{font-size:11.5px;font-weight:600;color:var(--ink2,#4A5563);line-height:1.5;margin-top:1px;
   overflow-wrap:break-word;word-break:break-word;
-  /* project names run long — two lines on the card, the full name is in the tooltip */
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tkcpo{font-size:10.5px;font-weight:700;color:var(--brand,#0E5C52);line-height:1.5;margin-top:1px;
+  overflow-wrap:break-word;word-break:break-word;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 </style>
 <script id="jvSidesJs">
