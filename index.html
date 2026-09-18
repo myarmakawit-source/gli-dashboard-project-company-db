@@ -7875,30 +7875,105 @@ function _tkPRowAdd(){
   renderTracking();var l=document.querySelectorAll('.tkpttl');if(l.length)l[l.length-1].focus();
 }
 function _tkPRowDel(id){for(var i=0;i<_tkPRows.length;i++)if(_tkPRows[i].id===id){_tkPRows.splice(i,1);break;}renderTracking();}
-/* ชื่อโครงการของแถวหนึ่ง — คืนค่าว่างถ้ายังไม่ได้กรอกรหัส หรือหารหัสไม่เจอ */
-function _tkPRowName(code){
-  code=((code||'')+'').trim();if(!code)return '';
-  var nm=_tkProjName(code);
-  return (nm&&nm!==code)?nm:'';
+/* ชื่อโครงการ + ผู้ว่าจ้างของรหัสหนึ่ง
+   เดิมมองแค่ DATA.rows แบบเทียบรหัสตรงตัว จึงบอกว่า "ไม่พบ" ทั้งที่ฐานข้อมูลมี
+   ตอนนี้ไล่ตามลำดับเดียวกับที่ทั้งแอปใช้: ชื่อ/ผู้ว่าจ้างที่ผู้ใช้แก้เอง (NAMEOV/CUSTOV)
+   → PM Report (PMROWS ที่อัปโหลดไว้) → ทะเบียนโครงการ (DATA.rows/CUSTOMER)
+   และรับรหัสที่มีงวดต่อท้าย (GLI26015#1) กับตัวพิมพ์เล็ก-ใหญ่ไม่ตรงด้วย */
+function _tkProjKeys(code){
+  code=((code||'')+'').trim();if(!code)return [];
+  var out=[code],base=code.replace(/[#\-]\d+$/,'');
+  if(base&&base!==code)out.push(base);
+  return out;
+}
+function _tkProjRow(code){
+  if(typeof DATA==='undefined'||!DATA.rows)return null;
+  var ks=_tkProjKeys(code),i,j;
+  for(j=0;j<ks.length;j++){for(i=0;i<DATA.rows.length;i++)if(DATA.rows[i].code===ks[j])return DATA.rows[i];}
+  for(j=0;j<ks.length;j++){var up=ks[j].toUpperCase();
+    for(i=0;i<DATA.rows.length;i++)if(((DATA.rows[i].code||'')+'').toUpperCase()===up)return DATA.rows[i];}
+  return null;
+}
+function _tkProjInfo(code){
+  code=((code||'')+'').trim();
+  var out={code:code,name:'',owner:'',found:false};
+  if(!code)return out;
+  var ks=_tkProjKeys(code),k,i;
+  /* ชื่อ/ผู้ว่าจ้างที่แก้ไว้เองมาก่อนเสมอ */
+  for(i=0;i<ks.length;i++){k=ks[i];
+    try{if(typeof NAMEOV!=='undefined'&&NAMEOV&&NAMEOV[k]!=null&&!out.name)out.name=(''+NAMEOV[k]).trim();}catch(e){}
+    try{if(typeof CUSTOV!=='undefined'&&CUSTOV&&CUSTOV[k]!=null&&!out.owner)out.owner=(''+CUSTOV[k]).trim();}catch(e){}}
+  var hit=null;try{hit=(typeof _tkPmFind==='function')?_tkPmFind(code):null;}catch(e){hit=null;}
+  if(hit){out.found=true;if(!out.name&&hit.name)out.name=hit.name;if(!out.owner&&hit.owner)out.owner=hit.owner;}
+  var r=_tkProjRow(code);
+  if(r){out.found=true;
+    if(!out.name)out.name=((r.name||'')+'').trim();
+    if(!out.owner){try{out.owner=(typeof custOf==='function')?(custOf(r)||''):'';}catch(e){}}}
+  if(!out.owner){for(i=0;i<ks.length&&!out.owner;i++){
+    try{if(typeof CUSTOMER!=='undefined'&&CUSTOMER&&CUSTOMER[ks[i]])out.owner=(''+CUSTOMER[ks[i]]).trim();}catch(e){}}}
+  if(out.name==='- - -')out.name='';
+  if(out.name||out.owner)out.found=true;
+  return out;
+}
+/* ชื่อย่อที่จำง่าย — ตัดคำนำหน้าราชการ ตัดหางชื่อผู้ว่าจ้างที่ต่อท้ายมา
+   และตัดส่วนขยายยาว ๆ (ภายใต้โครงการ… / ตามสัญญา… / จำนวน… ) ชื่อเต็มยังอยู่ใน tooltip */
+function _tkProjShort(name,owner){
+  var s=((name||'')+'').replace(/\s+/g,' ').trim();
+  if(!s)return '';
+  var ow=((owner||'')+'').replace(/\s+/g,' ').trim();
+  if(ow){var i;while((i=s.lastIndexOf(ow))>=0&&i>8){s=s.slice(0,i).trim();}}
+  var lead=/^(งานจ้างเหมา|จ้างเหมา|งานจ้างที่ปรึกษา|จ้างที่ปรึกษา|งานจ้าง|จ้าง|งานก่อสร้าง|งานปรับปรุง|งานติดตั้ง|งานจัดซื้อ|จัดซื้อจัดจ้าง|จัดจ้าง|จัดซื้อ|จัดทำ|จัดหา|ประกวดราคา|โครงการ|การจ้าง|การจัดซื้อ|งาน)\s*/;
+  for(var n=0;n<2;n++){var t=s.replace(lead,'');if(t===s||t.length<12)break;s=t;}
+  var cut=['ภายใต้โครงการ','ตามสัญญา','สัญญาเลขที่','เลขที่สัญญา','ด้วยวิธี','โดยวิธี','ตามประกาศ',
+           'พร้อมติดตั้ง','พร้อมอุปกรณ์','ขนาดความจุ','ขนาด ','จำนวน ','ระยะที่','งวดที่','สัญญา '];
+  for(var k=0;k<cut.length;k++){var p=s.indexOf(cut[k]);if(p>10)s=s.slice(0,p).trim();}
+  s=s.replace(/[\s\-\u2013\u2014\u00b7,(]+$/,'').trim();
+  if(s.length>42){var q=s.slice(0,42),sp=q.lastIndexOf(' ');s=((sp>22)?q.slice(0,sp):q).trim()+'\u2026';}
+  return s;
+}
+function _tkPRowName(code){return _tkProjInfo(code).name;}
+/* PM Report โหลดแบบ lazy — ถ้ายังไม่โหลด ให้สั่งโหลดแล้ววาดใหม่ แทนที่จะขึ้นว่าไม่พบ */
+var _tkPmKick=0;
+function _tkPmEnsure(){
+  if(_tkPmKick)return;
+  try{if(typeof _tkPmRows==='function'&&_tkPmRows())return;}catch(e){return;}
+  if(typeof _pmBoot!=='function')return;
+  _tkPmKick=1;
+  try{_pmBoot().then(function(){_tkPmKick=2;try{if(_tkMode==='proj'&&_tkModalId)renderTracking();}catch(e2){}})
+      .catch(function(){_tkPmKick=0;});}catch(e){_tkPmKick=0;}
 }
 function _tkPRowNameUpd(r){
   if(!r)return;var el=document.querySelector('[data-pnm="'+r.id+'"]');if(!el)return;
-  var code=((r.proj||'')+'').trim(),nm=_tkPRowName(code);
-  el.textContent=nm||(code?'\u2014 \u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e23\u0e2b\u0e31\u0e2a\u0e19\u0e35\u0e49 \u2014':'\u2014');
-  el.title=nm||'';el.classList.toggle('none',!nm);
+  var code=((r.proj||'')+'').trim(),inf=_tkProjInfo(code),sh=_tkProjShort(inf.name,inf.owner);
+  var loading=(!inf.found&&code&&_tkPmKick===1);
+  el.innerHTML=code
+    ? (inf.found
+        ? ('<span class="tkpnm-n">'+esc(sh||inf.name||code)+'</span>'
+           +(inf.owner?('<span class="tkpnm-o">'+esc(inf.owner)+'</span>'):''))
+        : ('<span class="tkpnm-n">'+(loading?'\u0e01\u0e33\u0e25\u0e31\u0e07\u0e42\u0e2b\u0e25\u0e14\u2026':'\u2014 \u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e23\u0e2b\u0e31\u0e2a\u0e19\u0e35\u0e49 \u2014')+'</span>'))
+    : '<span class="tkpnm-n">\u2014</span>';
+  el.title=inf.name?(inf.name+(inf.owner?('\n'+inf.owner):'')):'';
+  el.classList.toggle('none',!inf.found);
+  if(code&&!inf.found)_tkPmEnsure();
 }
 function _tkProjBlockHTML(){
   var h='<div class="tkphd"><span class="tkphn">#</span><span>\u0e2b\u0e31\u0e27\u0e02\u0e49\u0e2d</span>'
     +'<span>\u0e1a\u0e23\u0e34\u0e29\u0e31\u0e17</span><span>\u0e23\u0e2b\u0e31\u0e2a\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23</span>'
-    +'<span>\u0e0a\u0e37\u0e48\u0e2d\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23 \u00b7 \u0e14\u0e36\u0e07\u0e2d\u0e31\u0e15\u0e42\u0e19\u0e21\u0e31\u0e15\u0e34</span><span></span></div>';
+    +'<span>\u0e0a\u0e37\u0e48\u0e2d\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23 \u00b7 \u0e1c\u0e39\u0e49\u0e27\u0e48\u0e32\u0e08\u0e49\u0e32\u0e07 \u2014 \u0e14\u0e36\u0e07\u0e2d\u0e31\u0e15\u0e42\u0e19\u0e21\u0e31\u0e15\u0e34</span><span></span></div>';
   if(!_tkPRows.length)h+='<div class="tkckempty">\u0e22\u0e31\u0e07\u0e44\u0e21\u0e48\u0e21\u0e35\u0e41\u0e16\u0e27 \u2014 \u0e01\u0e14 \u201c\uff0b \u0e40\u0e1e\u0e34\u0e48\u0e21\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23\u201d \u0e14\u0e49\u0e32\u0e19\u0e25\u0e48\u0e32\u0e07</div>';
   _tkPRows.forEach(function(r,i){
-    var code=((r.proj||'')+'').trim(),nm=_tkPRowName(code);
+    var code=((r.proj||'')+'').trim(),inf=_tkProjInfo(code),sh=_tkProjShort(inf.name,inf.owner);
+    if(code&&!inf.found)_tkPmEnsure();
     h+='<div class="tkprow"><span class="tkvn">'+(i+1)+'</span>'
       +'<input class="tkpin tkpttl" data-pttl="'+_eatt(r.id)+'" value="'+_eatt(r.ttl||'')+'" placeholder="\u0e2b\u0e31\u0e27\u0e02\u0e49\u0e2d\u0e07\u0e32\u0e19" autocomplete="off">'
       +'<span class="tkvco">'+TK_CO.map(function(c){return '<button class="tkvcob'+((((r.co||'')+'').toUpperCase()===c[0])?' on':'')+'" data-pco="'+_eatt(r.id)+'|'+c[0]+'" type="button" style="--c:'+c[2]+'">'+esc(c[1])+'</button>';}).join('')+'</span>'
       +'<input class="tkpin tkpprj" data-pprj="'+_eatt(r.id)+'" list="tkpProjList" value="'+_eatt(code)+'" placeholder="\u0e40\u0e0a\u0e48\u0e19 GLI26010" autocomplete="off" spellcheck="false">'
-      +'<span class="tkpnm'+(nm?'':' none')+'" data-pnm="'+_eatt(r.id)+'" title="'+_eatt(nm)+'">'+esc(nm||(code?'\u2014 \u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e23\u0e2b\u0e31\u0e2a\u0e19\u0e35\u0e49 \u2014':'\u2014'))+'</span>'
+      +'<span class="tkpnm'+(inf.found?'':' none')+'" data-pnm="'+_eatt(r.id)+'" title="'+_eatt(inf.name?(inf.name+(inf.owner?('\n'+inf.owner):'')):'')+'">'
+        +(code?(inf.found
+            ?('<span class="tkpnm-n">'+esc(sh||inf.name||code)+'</span>'+(inf.owner?('<span class="tkpnm-o">'+esc(inf.owner)+'</span>'):''))
+            :'<span class="tkpnm-n">\u2014 \u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e23\u0e2b\u0e31\u0e2a\u0e19\u0e35\u0e49 \u2014</span>')
+          :'<span class="tkpnm-n">\u2014</span>')
+      +'</span>'
       +'<button class="tkvx" data-pdel="'+_eatt(r.id)+'" type="button" title="\u0e25\u0e1a\u0e41\u0e16\u0e27\u0e19\u0e35\u0e49">\u2715</button></div>';
   });
   h+='<datalist id="tkpProjList">'+_tkProjCodeList()+'</datalist>';
@@ -8812,7 +8887,7 @@ function renderTracking(){
   var _openN=TRACKDATA.length-_doneN;
   var view=TRACKDATA.filter(function(t){
     if(_tkIsDone(t))return false;/* v10.72: งานที่กดเสร็จแล้วย้ายไปหน้า Report งานที่เสร็จ */
-    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.co||'')+' '+_tkCoText(t)+' '+_tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.contact||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+_tkDocNames(t.doc,' ')+' '+(t.fdesc||'')+' '+_tkPRowList(t).map(function(r){return (r.ttl||'')+' '+(r.proj||'')+' '+_tkPRowName(r.proj);}).join(' '))).toLowerCase().indexOf(q)<0))return false;
+    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.co||'')+' '+_tkCoText(t)+' '+_tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.contact||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+_tkDocNames(t.doc,' ')+' '+(t.fdesc||'')+' '+_tkPRowList(t).map(function(r){var _pf=_tkProjInfo(r.proj);return (r.ttl||'')+' '+(r.proj||'')+' '+_pf.name+' '+_pf.owner;}).join(' '))).toLowerCase().indexOf(q)<0))return false;
     if(_tkFA&&t.assignee!==_tkFA)return false;
     if(_tkFP&&(t.prio||'med')!==_tkFP)return false;if(_tkFC&&(t.cat||'')!==_tkFC)return false;if(_tkFD&&(t.doc||'')!==_tkFD)return false;
     return true;
@@ -8940,12 +9015,15 @@ function _tkCard(t,pos){
   }else if(t.mode==='proj'){
     var _pw=_tkPRowList(t);
     h+='<div class="tkcardp">';
-    _pw.forEach(function(r){var c=_tkCo(r.co),code=((r.proj||'')+'').trim(),nm=_tkPRowName(code);
+    _pw.forEach(function(r){var c=_tkCo(r.co),code=((r.proj||'')+'').trim();
+      var inf=_tkProjInfo(code),sh=_tkProjShort(inf.name,inf.owner);
       h+='<div class="tkcp">'
         +(c?('<span class="tkcvco" style="background:'+c[2]+';color:#fff">'+esc(_tkCoLabel(r.co,r.cono))+'</span>'):'')
         +'<span class="tkcpt">'+esc(r.ttl||'')+'</span>'
         +(code?('<span class="tkcpc">'+esc(code)+'</span>'):'')
-        +(nm?('<span class="tkcpn" title="'+_eatt(nm)+'">'+esc(nm)+'</span>'):'')
+        +((sh||inf.owner)?('<span class="tkcpn" title="'+_eatt(inf.name?(inf.name+(inf.owner?('\n'+inf.owner):'')):'')+'">'
+            +(sh?('<b>'+esc(sh)+'</b>'):'')
+            +(inf.owner?((sh?' \u00b7 ':'')+esc(inf.owner)):'')+'</span>'):'')
       +'</div>';});
     h+='</div>';
     if(((t.title||'')+'').trim())h+='<div class="tkcardttl">'+esc(t.title)+'</div>';
@@ -34399,10 +34477,15 @@ body.sbfold .sbshow-btn{display:inline-flex}
 #page-tk .tkpprj{font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:12px}
 #page-tk .tkprow .tkvco{display:flex;gap:5px}
 #page-tk .tkprow .tkvcob{flex:1;height:32px;box-sizing:border-box;padding:0;font-size:10.5px}
-#page-tk .tkpnm{min-width:0;font-size:11.5px;font-weight:700;color:var(--brand-d,#0A463E);
-  background:var(--brand-t,#E6F0EC);border:1px solid #CFE3DC;border-radius:9px;height:32px;line-height:30px;
-  padding:0 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#page-tk .tkpnm.none{color:var(--muted,#8C8676);background:#FAF8F4;border-style:dashed;font-weight:600}
+#page-tk .tkpnm{min-width:0;display:flex;flex-direction:column;justify-content:center;gap:1px;
+  background:var(--brand-t,#E6F0EC);border:1px solid #CFE3DC;border-radius:9px;min-height:32px;
+  padding:4px 10px;overflow:hidden}
+#page-tk .tkpnm-n{font-size:11.5px;font-weight:700;color:var(--brand-d,#0A463E);line-height:1.3;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#page-tk .tkpnm-o{font-size:10px;font-weight:600;color:var(--ink2,#4A5563);line-height:1.3;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#page-tk .tkpnm.none{background:#FAF8F4;border-style:dashed}
+#page-tk .tkpnm.none .tkpnm-n{color:var(--muted,#8C8676);font-weight:600}
 #page-tk .tkprow .tkvx{justify-self:center}
 @media(max-width:700px){
   #page-tk .tkphd{display:none}
