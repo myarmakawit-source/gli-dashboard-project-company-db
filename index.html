@@ -9797,6 +9797,155 @@ function _gmDigest(){
   out.push('ช่วยสรุปให้หน่อยว่ามีเรื่องอะไรบ้าง เรื่องไหนต้องทำ/ต้องตอบก่อน และมีอะไรที่เกี่ยวกับงานบัญชี ภาษี หรือโครงการที่ต้องรีบจัดการ');
   return out.join('\n');
 }
+/* ===== v15.1: Gmail Inbox — สรุปให้อ่านในหน้าเว็บเลย และคอยจับ "เรื่องที่รออยู่" =====
+   ทุกอย่างคำนวณในเบราว์เซอร์จากหัวข้อ/ผู้ส่ง/ข้อความย่อที่ดึงมาแล้ว — ไม่มีการส่งอีเมล
+   ออกไปที่ไหนทั้งสิ้น (จะเป็นการขัดหลักของโมดูลนี้ และคีย์ของบริการ AI ใด ๆ
+   ที่ฝังในหน้าเว็บนิ่ง ๆ แบบนี้ถือว่าเปิดเผยต่อสาธารณะ)
+   ปุ่ม "คัดลอกให้ Claude สรุป" ยังอยู่ ไว้ใช้ตอนอยากได้สรุปเป็นภาษาคน */
+
+/* ---- คำที่บอกว่าเรื่องนี้ต้องทำ/ต้องตอบ ---- */
+var GM_ACT=[
+ [/ด่วนที่สุด|ด่วนมาก|\burgent\b|โปรดดำเนินการโดยด่วน/i,'ด่วน'],
+ [/ภายในวันที่|ภายในวัน|ครบกำหนด|เกินกำหนด|\boverdue\b|due ?date|deadline|หมดเขต|วันสุดท้าย/i,'มีกำหนดเวลา'],
+ [/กรุณา(ส่ง|ชำระ|ดำเนินการ|ยืนยัน|ตอบ|แจ้ง|จัดส่ง)|ขอให้(ส่ง|ชำระ|ดำเนินการ|จัดส่ง)|โปรด(ส่ง|ชำระ|ยืนยัน|ตอบ|ตรวจสอบ)|action required|please (send|confirm|reply|review|sign)/i,'ขอให้ดำเนินการ'],
+ [/ขออนุมัติ|รออนุมัติ|โปรดอนุมัติ|รอการอนุมัติ|approval|approve|ลงนาม|เซ็น|sign(ature)?\b/i,'รออนุมัติ/ลงนาม'],
+ [/ทวงถาม|ติดตาม(เรื่อง|เอกสาร|การชำระ)|follow ?up|reminder|แจ้งเตือน(การ|ให้)|ยังไม่ได้รับ/i,'ติดตาม/ทวงถาม'],
+ [/ตอบกลับ|reply|โปรดแจ้งกลับ|รอคำตอบ|ชี้แจง|สอบถาม/i,'รอคำตอบ']
+];
+function _gmAction(m){
+  var hay=((m.subj||'')+' '+(m.snip||''));
+  var why=[],i;
+  for(i=0;i<GM_ACT.length;i++)if(GM_ACT[i][0].test(hay))why.push(GM_ACT[i][1]);
+  return why;
+}
+/* วันครบกำหนดที่เขียนไว้ในหัวข้อ/ข้อความย่อ — เอามาโชว์ตรง ๆ ไม่ตีความ */
+function _gmDue(m){
+  var hay=((m.subj||'')+' '+(m.snip||''));
+  var mm=hay.match(/(?:ภายในวันที่|ภายใน|ครบกำหนด(?:วันที่)?|หมดเขต(?:วันที่)?|due(?: date)?:?)\s*([0-9]{1,2}\s*(?:[\/\-\.]\s*[0-9]{1,2}\s*[\/\-\.]\s*[0-9]{2,4}|[ก-ฮ]{1,2}\.?[ก-ฮ]\.?\s*[0-9]{2,4}))/i);
+  return mm?((mm[1]||'').replace(/\s+/g,' ').trim()):'';
+}
+
+/* ---- รายการเรื่องที่ "รออยู่" ---- */
+function _gmWatchOwn(){var a=(GMCFG&&Array.isArray(GMCFG.watch))?GMCFG.watch:[];
+  return a.map(function(x){return ((x||'')+'').trim();}).filter(function(x){return x;});}
+/* ดึงรหัสโครงการ / เลขเอกสาร จากงานที่ยังค้างบนบอร์ด Tracking — เรื่องที่กำลังตามอยู่จริง */
+function _gmWatchAuto(){
+  if(GMCFG&&GMCFG.watchAuto===false)return [];
+  var out=[],seen={},push=function(v,src){
+    v=((v||'')+'').trim();if(v.length<4||seen[v.toUpperCase()])return;
+    seen[v.toUpperCase()]=1;out.push({t:v,src:src});};
+  try{
+    if(typeof loadTrack==='function')loadTrack();
+    var T=(typeof TRACKDATA!=='undefined'&&Array.isArray(TRACKDATA))?TRACKDATA:[];
+    for(var i=0;i<T.length&&out.length<80;i++){
+      var t=T[i];if(!t||t.done)continue;
+      push(t.proj,'โครงการที่ค้างอยู่');
+      push(t.docno,'เลขเอกสารที่ตามอยู่');
+      var pr=(typeof _tkPRowList==='function')?_tkPRowList(t):[];
+      for(var j=0;j<pr.length;j++)push(pr[j].proj,'โครงการที่ค้างอยู่');
+      var rw=(typeof _tkRowList==='function')?_tkRowList(t):[];
+      for(var k=0;k<rw.length;k++)push(rw[k].vno,'เลขเอกสารที่ตามอยู่');
+    }
+  }catch(e){}
+  return out;
+}
+function _gmWatchAll(){
+  var out=_gmWatchOwn().map(function(t){return {t:t,src:'ที่คุณระบุเอง'};});
+  var seen={};out.forEach(function(x){seen[x.t.toUpperCase()]=1;});
+  _gmWatchAuto().forEach(function(x){if(!seen[x.t.toUpperCase()]){seen[x.t.toUpperCase()]=1;out.push(x);}});
+  return out;
+}
+function _gmWatchHit(m,W){
+  var hay=((m.subj||'')+' '+(m.snip||'')+' '+(m.from||'')+' '+(m.email||'')).toLowerCase();
+  var hit=[],i;
+  for(i=0;i<W.length;i++){if(hay.indexOf(W[i].t.toLowerCase())>=0)hit.push(W[i]);}
+  return hit;
+}
+
+/* ---- แผงสรุป ---- */
+function _gmLine(m,extra){
+  var c=_gmCat(m);
+  return '<div class="gmbl" data-open="'+_eatt(m.thread)+'" title="คลิกเพื่อเปิดใน Gmail">'
+    +'<span class="gmbtag" style="background:'+c[3]+';color:'+c[2]+'">'+esc(c[1])+'</span>'
+    +'<span class="gmbsub">'+esc(m.subj)+'</span>'
+    +'<span class="gmbfrom">'+esc(m.from)+'</span>'
+    +(m.unread?'<span class="gmnew">ใหม่</span>':'')
+    +'<span class="gmbdate">'+esc(_gmDate(m.ts))+'</span>'
+    +(extra||'')+'</div>';
+}
+function _gmBriefHTML(){
+  var L=_gmMsgs;if(!L.length)return '';
+  var W=_gmWatchAll(),i;
+  var watch=[],act=[];
+  for(i=0;i<L.length;i++){
+    var m=L[i],hit=W.length?_gmWatchHit(m,W):[],why=_gmAction(m);
+    if(hit.length)watch.push({m:m,hit:hit});
+    if(why.length)act.push({m:m,why:why,due:_gmDue(m)});
+  }
+  var h='<div class="gmbrief">';
+
+  /* 1 — เรื่องที่รออยู่ */
+  h+='<div class="gmbsec watch"><div class="gmbh"><span class="gmbi">⭐</span>เรื่องที่คุณรออยู่'
+    +'<span class="gmbn">'+watch.length+'</span>'
+    +'<button class="gmbtn ghost" id="gmWatchCfg" type="button">⚙ ตั้งค่าคำที่เฝ้าดู ('+W.length+')</button></div>';
+  if(GMCFG.watchOpen){
+    h+='<div class="gmwbox">';
+    h+='<div class="gmwadd"><input class="gmin wide" id="gmWatchIn" type="text" placeholder="พิมพ์คำที่อยากให้จับ เช่น GLI26010 · ภ.พ.30 · ใบแจ้งหนี้ · ชื่อคู่ค้า แล้วกด Enter" autocomplete="off">'
+      +'<button class="gmbtn primary" id="gmWatchAdd" type="button">＋ เพิ่ม</button></div>';
+    var own=_gmWatchOwn();
+    h+='<div class="gmwchips">'+(own.length?own.map(function(t){
+        return '<span class="gmwchip">'+esc(t)+'<button class="gmwx" data-wdel="'+_eatt(t)+'" type="button" title="เอาออก">✕</button></span>';
+      }).join(''):'<span class="gmwnone">ยังไม่ได้ระบุคำของตัวเอง — ด้านล่างเป็นคำที่ดึงจากงานที่ค้างอยู่ให้อัตโนมัติ</span>')+'</div>';
+    var auto=_gmWatchAuto();
+    h+='<label class="gmchk"><input type="checkbox" id="gmWatchAuto"'+((GMCFG.watchAuto===false)?'':' checked')+'> '
+      +'เฝ้าดูรหัสโครงการและเลขเอกสารของงานที่ยังค้างบนบอร์ด Tracking ให้อัตโนมัติ ('+auto.length+' รายการ)</label>';
+    if(auto.length)h+='<div class="gmwchips auto">'+auto.slice(0,24).map(function(x){
+      return '<span class="gmwchip auto" title="'+_eatt(x.src)+'">'+esc(x.t)+'</span>';}).join('')
+      +(auto.length>24?('<span class="gmwnone">+ อีก '+(auto.length-24)+'</span>'):'')+'</div>';
+    h+='<div class="gmnote">คำเหล่านี้เก็บไว้ในเครื่องนี้เท่านั้น ไม่ซิงค์ขึ้นคลาวด์</div>';
+    h+='</div>';
+  }
+  if(!W.length)h+='<div class="gmbempty">ยังไม่ได้ตั้งคำที่เฝ้าดู — กด “ตั้งค่าคำที่เฝ้าดู” แล้วใส่เรื่องที่กำลังรอ เช่น รหัสโครงการ เลขที่ใบแจ้งหนี้ หรือชื่อคู่ค้า</div>';
+  else if(!watch.length)h+='<div class="gmbempty">ไม่มีอีเมลที่ตรงกับเรื่องที่เฝ้าดูในช่วงนี้</div>';
+  else watch.slice(0,12).forEach(function(x){
+    h+=_gmLine(x.m,'<span class="gmbwhy">'+x.hit.slice(0,3).map(function(w){return '⭐ '+esc(w.t);}).join(' ')+'</span>');});
+  if(watch.length>12)h+='<div class="gmbmore">+ อีก '+(watch.length-12)+' ฉบับที่ตรงกับเรื่องที่เฝ้าดู</div>';
+  h+='</div>';
+
+  /* 2 — ต้องทำ / ต้องตอบ */
+  h+='<div class="gmbsec act"><div class="gmbh"><span class="gmbi">⏰</span>น่าจะต้องทำหรือต้องตอบ<span class="gmbn">'+act.length+'</span></div>';
+  if(!act.length)h+='<div class="gmbempty">ไม่พบอีเมลที่มีคำบอกกำหนดเวลาหรือขอให้ดำเนินการ</div>';
+  else act.slice(0,12).forEach(function(x){
+    h+=_gmLine(x.m,'<span class="gmbwhy act">'+x.why.slice(0,2).map(function(w){return esc(w);}).join(' · ')
+      +(x.due?(' → '+esc(x.due)):'')+'</span>');});
+  if(act.length>12)h+='<div class="gmbmore">+ อีก '+(act.length-12)+' ฉบับ</div>';
+  h+='</div>';
+
+  /* 3 — สรุปรายหมวด */
+  var g={},o=[];
+  L.forEach(function(m){var c=_gmCat(m);if(!g[c[0]]){g[c[0]]={c:c,l:[]};o.push(c[0]);}g[c[0]].l.push(m);});
+  o.sort(function(a,b){return g[b].l.length-g[a].l.length;});
+  h+='<div class="gmbsec cats"><div class="gmbh"><span class="gmbi">📊</span>มีเรื่องอะไรเข้ามาบ้าง<span class="gmbn">'+o.length+' หมวด</span></div>';
+  o.forEach(function(k){
+    var G=g[k],c=G.c,un=G.l.filter(function(m){return m.unread;}).length;
+    var sd={},sl=[];
+    G.l.forEach(function(m){var n=m.from||m.email;if(!sd[n]){sd[n]=0;sl.push(n);}sd[n]++;});
+    sl.sort(function(a,b){return sd[b]-sd[a];});
+    h+='<div class="gmbcat" style="--c:'+c[2]+';--cb:'+c[3]+'">'
+      +'<div class="gmbcath"><span class="gmbcatn">'+esc(c[1])+'</span>'
+        +'<span class="gmbcatc">'+G.l.length+' ฉบับ'+(un?(' · ยังไม่อ่าน '+un):'')+'</span>'
+        +'<button class="gmbcatb" data-cat="'+c[0]+'" type="button">ดูเฉพาะหมวดนี้ →</button></div>'
+      +'<div class="gmbcats">ผู้ส่งหลัก: '+esc(sl.slice(0,3).map(function(n){return n+' ('+sd[n]+')';}).join(' · '))+'</div>'
+      +'<ul class="gmbul">'+G.l.slice(0,3).map(function(m){
+          return '<li data-open="'+_eatt(m.thread)+'" title="คลิกเพื่อเปิดใน Gmail">'+(m.unread?'<b>':'')+esc(m.subj)+(m.unread?'</b>':'')+'</li>';
+        }).join('')+'</ul>'
+      +(G.l.length>3?('<div class="gmbmore">+ อีก '+(G.l.length-3)+' ฉบับในหมวดนี้</div>'):'')
+    +'</div>';
+  });
+  h+='</div>';
+
+  return h+'</div>';
+}
 function _gmCopyDigest(){
   var t=_gmDigest();
   var ok=function(){_gmNote='คัดลอกแล้ว '+_gmFiltered().length+' ฉบับ — เอาไปวางในแชท Claude แล้วให้สรุปได้เลย';renderGm();};
@@ -9873,6 +10022,8 @@ function renderGm(){
       h+='<div class="gmtool"><button class="gmbtn primary" id="gmCopy" type="button">📋 คัดลอกให้ Claude สรุป ('+F.length+' ฉบับ)</button>'
        +'<button class="gmbtn" id="gmDl" type="button">⬇ ดาวน์โหลด .txt</button>'
        +'<span class="gmnote" style="margin:0">คัดลอกแล้ววางในแชท Claude → ผมจะสรุปให้ว่ามีเรื่องอะไร เรื่องไหนต้องรีบทำก่อน</span></div>';
+      h+=_gmBriefHTML();
+      h+='<div class="gmbsep">รายการทั้งหมด</div>';
       h+='<div class="gmcatbar"><button class="gmcatb'+(_gmFC?'':' on')+'" data-cat="" type="button" style="--c:#0E5C52;--cb:#E6F0EC">ทั้งหมด '+L.length+'</button>';
       GM_CAT.concat([GM_OTHER]).forEach(function(c){if(!cats[c[0]])return;
         h+='<button class="gmcatb'+(_gmFC===c[0]?' on':'')+'" data-cat="'+c[0]+'" type="button" style="--c:'+c[2]+';--cb:'+c[3]+'">'+esc(c[1])+' '+cats[c[0]]+'</button>';});
@@ -9915,6 +10066,10 @@ function _gmBind(){
     if((b=cl('#gmCopyOrigin'))){_gmFallbackCopy(location.origin,function(){_gmNote='คัดลอก '+location.origin+' แล้ว';renderGm();});return;}
     if((b=cl('#gmCopy'))){_gmCopyDigest();return;}
     if((b=cl('#gmDl'))){_gmDownload();return;}
+    if((b=cl('#gmWatchCfg'))){GMCFG.watchOpen=!GMCFG.watchOpen;_gmSave();renderGm();return;}
+    if((b=cl('#gmWatchAdd'))){_gmWatchAddFromInput();return;}
+    if((b=cl('[data-wdel]'))){var _wd=b.getAttribute('data-wdel')||'';
+      GMCFG.watch=_gmWatchOwn().filter(function(x){return x!==_wd;});_gmSave();renderGm();return;}
     if((b=cl('[data-cat]'))){_gmFC=b.getAttribute('data-cat')||'';renderGm();return;}
     if((b=cl('[data-open]'))){window.open('https://mail.google.com/mail/u/'+encodeURIComponent(_gmAcct||0)+'/#all/'+encodeURIComponent(b.getAttribute('data-open')),'_blank','noopener');return;}
   });
@@ -9926,7 +10081,22 @@ function _gmBind(){
     else if(el.id==='gmAtt'){GMCFG.att=!!el.checked;_gmSave();renderGm();}
     else if(el.id==='gmNoPromo'){GMCFG.noPromo=!!el.checked;_gmSave();renderGm();}
     else if(el.id==='gmQ'){GMCFG.q=el.value||'';_gmSave();renderGm();}
+    else if(el.id==='gmWatchAuto'){GMCFG.watchAuto=!!el.checked;_gmSave();renderGm();}
   });
+  pg.addEventListener('keydown',function(e){
+    if(e.key!=='Enter')return;var el=e.target;if(!el||el.id!=='gmWatchIn')return;
+    e.preventDefault();_gmWatchAddFromInput();
+  });
+}
+function _gmWatchAddFromInput(){
+  var i=document.getElementById('gmWatchIn');if(!i)return;
+  var v=((i.value||'')+'').trim();if(!v)return;
+  var cur=_gmWatchOwn();
+  /* ใส่ทีละหลายคำได้ คั่นด้วย , หรือ ; */
+  v.split(/[,;]/).forEach(function(x){x=((x||'')+'').trim();
+    if(x&&cur.map(function(c){return c.toUpperCase();}).indexOf(x.toUpperCase())<0)cur.push(x);});
+  GMCFG.watch=cur;GMCFG.watchOpen=true;_gmSave();renderGm();
+  var n=document.getElementById('gmWatchIn');if(n)n.focus();
 }
 
 var curPayer=null,curWco=null,_whtEdit=null,_wView='reg',_wSumMo=0;
@@ -34510,6 +34680,63 @@ body.sbfold .sbshow-btn{display:inline-flex}
 .tkcpo{font-size:10.5px;font-weight:700;color:var(--brand,#0E5C52);line-height:1.5;margin-top:1px;
   overflow-wrap:break-word;word-break:break-word;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* ===== v15.1: Gmail Inbox — แผงสรุปในหน้าเว็บ + รายการเรื่องที่เฝ้าดู ===== */
+#page-gm .gmbrief{display:flex;flex-direction:column;gap:12px;margin:14px 0}
+#page-gm .gmbsec{border:1.5px solid var(--line,#E6E0D4);border-radius:14px;background:#fff;padding:12px 14px 13px}
+#page-gm .gmbsec.watch{border-color:#EFD9A6;background:linear-gradient(180deg,#FFFCF4,#fff)}
+#page-gm .gmbsec.act{border-color:#F2C9C4;background:linear-gradient(180deg,#FFF7F6,#fff)}
+#page-gm .gmbh{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:900;color:var(--ink,#141C29);margin-bottom:9px}
+#page-gm .gmbi{font-size:15px;line-height:1}
+#page-gm .gmbn{font-size:11px;font-weight:800;color:var(--ink2,#4A5563);background:var(--line2,#F1ECE2);
+  border-radius:999px;padding:2px 10px}
+#page-gm .gmbh .gmbtn{margin-left:auto}
+#page-gm .gmbempty{font-size:12px;font-weight:600;color:var(--muted,#8C8676);padding:7px 2px;line-height:1.55}
+#page-gm .gmbmore{font-size:11px;font-weight:700;color:var(--muted,#8C8676);padding:5px 2px 0}
+/* หนึ่งบรรทัดต่อหนึ่งอีเมล */
+#page-gm .gmbl{display:flex;align-items:baseline;flex-wrap:wrap;gap:7px;padding:6px 8px;border-radius:9px;cursor:pointer;
+  line-height:1.5;transition:.12s}
+#page-gm .gmbl:hover{background:var(--brand-t,#E6F0EC)}
+#page-gm .gmbl+.gmbl{border-top:1px dashed rgba(16,24,40,.08)}
+#page-gm .gmbtag{flex:none;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap}
+#page-gm .gmbsub{flex:1 1 260px;min-width:0;font-size:12.5px;font-weight:700;color:var(--ink,#141C29);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#page-gm .gmbfrom{flex:none;font-size:11px;font-weight:600;color:var(--ink2,#4A5563);max-width:180px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#page-gm .gmbdate{flex:none;font-size:10.5px;font-weight:700;color:var(--muted,#8C8676);font-variant-numeric:tabular-nums}
+#page-gm .gmbwhy{flex:1 0 100%;font-size:10.5px;font-weight:700;color:#8A5E12}
+#page-gm .gmbwhy.act{color:#B42318}
+/* กล่องตั้งค่าคำที่เฝ้าดู */
+#page-gm .gmwbox{border:1px dashed #E3D3A8;background:#FFFDF7;border-radius:11px;padding:10px 11px;margin-bottom:9px}
+#page-gm .gmwadd{display:flex;gap:7px;margin-bottom:8px;flex-wrap:wrap}
+#page-gm .gmwadd .gmin{flex:1;min-width:220px}
+#page-gm .gmwchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+#page-gm .gmwchip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:#8A5E12;
+  background:#FDF3E0;border:1px solid #EBD4A5;border-radius:999px;padding:3px 5px 3px 11px}
+#page-gm .gmwchip.auto{color:var(--brand-d,#0A463E);background:var(--brand-t,#E6F0EC);border-color:#BEDBD2;
+  padding:3px 11px;font-family:"IBM Plex Mono",monospace;font-weight:700}
+#page-gm .gmwx{border:0;background:rgba(0,0,0,.06);color:#8A5E12;width:17px;height:17px;border-radius:50%;
+  font-size:10px;line-height:1;cursor:pointer;padding:0}
+#page-gm .gmwx:hover{background:#B42318;color:#fff}
+#page-gm .gmwnone{font-size:11px;font-weight:600;color:var(--muted,#8C8676)}
+/* สรุปรายหมวด */
+#page-gm .gmbcat{border-left:3px solid var(--c);background:var(--cb);border-radius:0 11px 11px 0;padding:9px 12px;margin-bottom:8px}
+#page-gm .gmbcat:last-child{margin-bottom:0}
+#page-gm .gmbcath{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+#page-gm .gmbcatn{font-size:12.5px;font-weight:900;color:var(--c)}
+#page-gm .gmbcatc{font-size:11px;font-weight:700;color:var(--ink2,#4A5563)}
+#page-gm .gmbcatb{margin-left:auto;border:0;background:transparent;color:var(--c);font-family:inherit;
+  font-size:10.5px;font-weight:800;cursor:pointer;padding:0}
+#page-gm .gmbcatb:hover{text-decoration:underline}
+#page-gm .gmbcats{font-size:10.5px;font-weight:600;color:var(--ink2,#4A5563);margin-top:3px;line-height:1.5;
+  overflow-wrap:break-word;word-break:break-word}
+#page-gm .gmbul{margin:5px 0 0;padding-left:17px;list-style:disc}
+#page-gm .gmbul li{font-size:11.5px;font-weight:600;color:var(--ink,#141C29);line-height:1.55;cursor:pointer;
+  overflow-wrap:break-word;word-break:break-word}
+#page-gm .gmbul li:hover{text-decoration:underline}
+#page-gm .gmbcat .gmbmore{padding-top:3px}
+#page-gm .gmbsep{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted,#8C8676);margin:16px 0 8px;display:flex;align-items:center;gap:10px}
+#page-gm .gmbsep::after{content:"";flex:1;height:1px;background:var(--line,#E6E0D4)}
 </style>
 <script id="jvSidesJs">
 /* ===== v14.6: Joint Venture — name each side's entry table for what it holds,
