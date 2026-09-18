@@ -1685,7 +1685,7 @@ h1{ background:var(--g-aurora) !important;
 .tkpill.over{background:#FDECEA;color:#B42318}
 .tkpill.done{background:#E7F6EC;color:#15803D}
 .tkboard{display:flex;gap:13px;overflow-x:auto;padding-bottom:10px;align-items:flex-start}
-.tkcol{flex:1 1 0;min-width:296px;max-width:460px;background:var(--cb);border-radius:13px;padding:10px;border:1px solid var(--line)}
+.tkcol{flex:1 1 0;min-width:296px;max-width:400px;background:var(--cb);border-radius:13px;padding:10px;border:1px solid var(--line)}
 .tkcolhd{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:800;color:var(--c);margin-bottom:10px;padding:1px 3px}
 .tkcoldot{width:10px;height:10px;border-radius:50%;background:var(--c)}
 .tkcoln{margin-left:auto;background:#fff;color:var(--c);font-size:11.5px;font-weight:800;padding:1px 9px;border-radius:12px;border:1px solid var(--c)}
@@ -7875,106 +7875,30 @@ function _tkPRowAdd(){
   renderTracking();var l=document.querySelectorAll('.tkpttl');if(l.length)l[l.length-1].focus();
 }
 function _tkPRowDel(id){for(var i=0;i<_tkPRows.length;i++)if(_tkPRows[i].id===id){_tkPRows.splice(i,1);break;}renderTracking();}
-/* ชื่อโครงการ + ผู้ว่าจ้างของรหัสหนึ่ง
-   เดิมมองแค่ DATA.rows แบบเทียบรหัสตรงตัว จึงบอกว่า "ไม่พบ" ทั้งที่ฐานข้อมูลมี
-   ตอนนี้ไล่ตามลำดับเดียวกับที่ทั้งแอปใช้: ชื่อ/ผู้ว่าจ้างที่ผู้ใช้แก้เอง (NAMEOV/CUSTOV)
-   → PM Report (PMROWS ที่อัปโหลดไว้) → ทะเบียนโครงการ (DATA.rows/CUSTOMER)
-   และรับรหัสที่มีงวดต่อท้าย (GLI26015#1) กับตัวพิมพ์เล็ก-ใหญ่ไม่ตรงด้วย */
-function _tkProjKeys(code){
-  code=((code||'')+'').trim();if(!code)return [];
-  var out=[code],base=code.replace(/[#\-]\d+$/,'');
-  if(base&&base!==code)out.push(base);
-  return out;
-}
-function _tkProjRow(code){
-  if(typeof DATA==='undefined'||!DATA.rows)return null;
-  var ks=_tkProjKeys(code),i,j;
-  for(j=0;j<ks.length;j++){for(i=0;i<DATA.rows.length;i++)if(DATA.rows[i].code===ks[j])return DATA.rows[i];}
-  for(j=0;j<ks.length;j++){var up=ks[j].toUpperCase();
-    for(i=0;i<DATA.rows.length;i++)if(((DATA.rows[i].code||'')+'').toUpperCase()===up)return DATA.rows[i];}
-  return null;
-}
-function _tkProjInfo(code){
-  code=((code||'')+'').trim();
-  var out={code:code,name:'',owner:'',found:false};
-  if(!code)return out;
-  var ks=_tkProjKeys(code),k,i;
-  /* ชื่อ/ผู้ว่าจ้างที่แก้ไว้เองมาก่อนเสมอ */
-  for(i=0;i<ks.length;i++){k=ks[i];
-    try{if(typeof NAMEOV!=='undefined'&&NAMEOV&&NAMEOV[k]!=null&&!out.name)out.name=(''+NAMEOV[k]).trim();}catch(e){}
-    try{if(typeof CUSTOV!=='undefined'&&CUSTOV&&CUSTOV[k]!=null&&!out.owner)out.owner=(''+CUSTOV[k]).trim();}catch(e){}}
-  var hit=null;try{hit=(typeof _tkPmFind==='function')?_tkPmFind(code):null;}catch(e){hit=null;}
-  if(hit){out.found=true;if(!out.name&&hit.name)out.name=hit.name;if(!out.owner&&hit.owner)out.owner=hit.owner;}
-  var r=_tkProjRow(code);
-  if(r){out.found=true;
-    if(!out.name)out.name=((r.name||'')+'').trim();
-    if(!out.owner){try{out.owner=(typeof custOf==='function')?(custOf(r)||''):'';}catch(e){}}}
-  if(!out.owner){for(i=0;i<ks.length&&!out.owner;i++){
-    try{if(typeof CUSTOMER!=='undefined'&&CUSTOMER&&CUSTOMER[ks[i]])out.owner=(''+CUSTOMER[ks[i]]).trim();}catch(e){}}}
-  if(out.name==='- - -')out.name='';
-  if(out.name||out.owner)out.found=true;
-  return out;
-}
-/* ชื่อย่อที่จำง่าย — ตัดคำนำหน้าราชการ ตัดหางชื่อผู้ว่าจ้างที่ต่อท้ายมา
-   และตัดส่วนขยายยาว ๆ (ภายใต้โครงการ… / ตามสัญญา… / จำนวน… ) ชื่อเต็มยังอยู่ใน tooltip */
-function _tkProjShort(name,owner,max){
-  max=+max||42;
-  var s=((name||'')+'').replace(/\s+/g,' ').trim();
-  if(!s)return '';
-  var ow=((owner||'')+'').replace(/\s+/g,' ').trim();
-  if(ow){var i;while((i=s.lastIndexOf(ow))>=0&&i>8){s=s.slice(0,i).trim();}}
-  var lead=/^(งานจ้างเหมา|จ้างเหมา|งานจ้างที่ปรึกษา|จ้างที่ปรึกษา|งานจ้าง|จ้าง|งานก่อสร้าง|งานปรับปรุง|งานติดตั้ง|งานจัดซื้อ|จัดซื้อจัดจ้าง|จัดจ้าง|จัดซื้อ|จัดทำ|จัดหา|ประกวดราคา|โครงการ|การจ้าง|การจัดซื้อ|งาน)\s*/;
-  for(var n=0;n<2;n++){var t=s.replace(lead,'');if(t===s||t.length<12)break;s=t;}
-  var cut=['ภายใต้โครงการ','ตามสัญญา','สัญญาเลขที่','เลขที่สัญญา','ด้วยวิธี','โดยวิธี','ตามประกาศ',
-           'พร้อมติดตั้ง','พร้อมอุปกรณ์','ขนาดความจุ','ขนาด ','จำนวน ','ระยะที่','งวดที่','สัญญา '];
-  for(var k=0;k<cut.length;k++){var p=s.indexOf(cut[k]);if(p>10)s=s.slice(0,p).trim();}
-  s=s.replace(/[\s\-\u2013\u2014\u00b7,(]+$/,'').trim();
-  if(s.length>max){var q=s.slice(0,max),sp=q.lastIndexOf(' ');s=((sp>(max*0.55))?q.slice(0,sp):q).trim()+'\u2026';}
-  return s;
-}
-function _tkPRowName(code){return _tkProjInfo(code).name;}
-/* PM Report โหลดแบบ lazy — ถ้ายังไม่โหลด ให้สั่งโหลดแล้ววาดใหม่ แทนที่จะขึ้นว่าไม่พบ */
-var _tkPmKick=0;
-function _tkPmEnsure(){
-  if(_tkPmKick)return;
-  try{if(typeof _tkPmRows==='function'&&_tkPmRows())return;}catch(e){return;}
-  if(typeof _pmBoot!=='function')return;
-  _tkPmKick=1;
-  try{_pmBoot().then(function(){_tkPmKick=2;try{if(_tkMode==='proj'&&_tkModalId)renderTracking();}catch(e2){}})
-      .catch(function(){_tkPmKick=0;});}catch(e){_tkPmKick=0;}
+/* ชื่อโครงการของแถวหนึ่ง — คืนค่าว่างถ้ายังไม่ได้กรอกรหัส หรือหารหัสไม่เจอ */
+function _tkPRowName(code){
+  code=((code||'')+'').trim();if(!code)return '';
+  var nm=_tkProjName(code);
+  return (nm&&nm!==code)?nm:'';
 }
 function _tkPRowNameUpd(r){
   if(!r)return;var el=document.querySelector('[data-pnm="'+r.id+'"]');if(!el)return;
-  var code=((r.proj||'')+'').trim(),inf=_tkProjInfo(code),sh=_tkProjShort(inf.name,inf.owner);
-  var loading=(!inf.found&&code&&_tkPmKick===1);
-  el.innerHTML=code
-    ? (inf.found
-        ? ('<span class="tkpnm-n">'+esc(sh||inf.name||code)+'</span>'
-           +(inf.owner?('<span class="tkpnm-o">'+esc(inf.owner)+'</span>'):''))
-        : ('<span class="tkpnm-n">'+(loading?'\u0e01\u0e33\u0e25\u0e31\u0e07\u0e42\u0e2b\u0e25\u0e14\u2026':'\u2014 \u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e23\u0e2b\u0e31\u0e2a\u0e19\u0e35\u0e49 \u2014')+'</span>'))
-    : '<span class="tkpnm-n">\u2014</span>';
-  el.title=inf.name?(inf.name+(inf.owner?('\n'+inf.owner):'')):'';
-  el.classList.toggle('none',!inf.found);
-  if(code&&!inf.found)_tkPmEnsure();
+  var code=((r.proj||'')+'').trim(),nm=_tkPRowName(code);
+  el.textContent=nm||(code?'\u2014 \u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e23\u0e2b\u0e31\u0e2a\u0e19\u0e35\u0e49 \u2014':'\u2014');
+  el.title=nm||'';el.classList.toggle('none',!nm);
 }
 function _tkProjBlockHTML(){
   var h='<div class="tkphd"><span class="tkphn">#</span><span>\u0e2b\u0e31\u0e27\u0e02\u0e49\u0e2d</span>'
     +'<span>\u0e1a\u0e23\u0e34\u0e29\u0e31\u0e17</span><span>\u0e23\u0e2b\u0e31\u0e2a\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23</span>'
-    +'<span>\u0e0a\u0e37\u0e48\u0e2d\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23 \u00b7 \u0e1c\u0e39\u0e49\u0e27\u0e48\u0e32\u0e08\u0e49\u0e32\u0e07 \u2014 \u0e14\u0e36\u0e07\u0e2d\u0e31\u0e15\u0e42\u0e19\u0e21\u0e31\u0e15\u0e34</span><span></span></div>';
+    +'<span>\u0e0a\u0e37\u0e48\u0e2d\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23 \u00b7 \u0e14\u0e36\u0e07\u0e2d\u0e31\u0e15\u0e42\u0e19\u0e21\u0e31\u0e15\u0e34</span><span></span></div>';
   if(!_tkPRows.length)h+='<div class="tkckempty">\u0e22\u0e31\u0e07\u0e44\u0e21\u0e48\u0e21\u0e35\u0e41\u0e16\u0e27 \u2014 \u0e01\u0e14 \u201c\uff0b \u0e40\u0e1e\u0e34\u0e48\u0e21\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23\u201d \u0e14\u0e49\u0e32\u0e19\u0e25\u0e48\u0e32\u0e07</div>';
   _tkPRows.forEach(function(r,i){
-    var code=((r.proj||'')+'').trim(),inf=_tkProjInfo(code),sh=_tkProjShort(inf.name,inf.owner);
-    if(code&&!inf.found)_tkPmEnsure();
+    var code=((r.proj||'')+'').trim(),nm=_tkPRowName(code);
     h+='<div class="tkprow"><span class="tkvn">'+(i+1)+'</span>'
       +'<input class="tkpin tkpttl" data-pttl="'+_eatt(r.id)+'" value="'+_eatt(r.ttl||'')+'" placeholder="\u0e2b\u0e31\u0e27\u0e02\u0e49\u0e2d\u0e07\u0e32\u0e19" autocomplete="off">'
       +'<span class="tkvco">'+TK_CO.map(function(c){return '<button class="tkvcob'+((((r.co||'')+'').toUpperCase()===c[0])?' on':'')+'" data-pco="'+_eatt(r.id)+'|'+c[0]+'" type="button" style="--c:'+c[2]+'">'+esc(c[1])+'</button>';}).join('')+'</span>'
       +'<input class="tkpin tkpprj" data-pprj="'+_eatt(r.id)+'" list="tkpProjList" value="'+_eatt(code)+'" placeholder="\u0e40\u0e0a\u0e48\u0e19 GLI26010" autocomplete="off" spellcheck="false">'
-      +'<span class="tkpnm'+(inf.found?'':' none')+'" data-pnm="'+_eatt(r.id)+'" title="'+_eatt(inf.name?(inf.name+(inf.owner?('\n'+inf.owner):'')):'')+'">'
-        +(code?(inf.found
-            ?('<span class="tkpnm-n">'+esc(sh||inf.name||code)+'</span>'+(inf.owner?('<span class="tkpnm-o">'+esc(inf.owner)+'</span>'):''))
-            :'<span class="tkpnm-n">\u2014 \u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e23\u0e2b\u0e31\u0e2a\u0e19\u0e35\u0e49 \u2014</span>')
-          :'<span class="tkpnm-n">\u2014</span>')
-      +'</span>'
+      +'<span class="tkpnm'+(nm?'':' none')+'" data-pnm="'+_eatt(r.id)+'" title="'+_eatt(nm)+'">'+esc(nm||(code?'\u2014 \u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e23\u0e2b\u0e31\u0e2a\u0e19\u0e35\u0e49 \u2014':'\u2014'))+'</span>'
       +'<button class="tkvx" data-pdel="'+_eatt(r.id)+'" type="button" title="\u0e25\u0e1a\u0e41\u0e16\u0e27\u0e19\u0e35\u0e49">\u2715</button></div>';
   });
   h+='<datalist id="tkpProjList">'+_tkProjCodeList()+'</datalist>';
@@ -8888,7 +8812,7 @@ function renderTracking(){
   var _openN=TRACKDATA.length-_doneN;
   var view=TRACKDATA.filter(function(t){
     if(_tkIsDone(t))return false;/* v10.72: งานที่กดเสร็จแล้วย้ายไปหน้า Report งานที่เสร็จ */
-    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.co||'')+' '+_tkCoText(t)+' '+_tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.contact||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+_tkDocNames(t.doc,' ')+' '+(t.fdesc||'')+' '+_tkPRowList(t).map(function(r){var _pf=_tkProjInfo(r.proj);return (r.ttl||'')+' '+(r.proj||'')+' '+_pf.name+' '+_pf.owner;}).join(' '))).toLowerCase().indexOf(q)<0))return false;
+    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.co||'')+' '+_tkCoText(t)+' '+_tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.contact||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+_tkDocNames(t.doc,' ')+' '+(t.fdesc||'')+' '+_tkPRowList(t).map(function(r){return (r.ttl||'')+' '+(r.proj||'')+' '+_tkPRowName(r.proj);}).join(' '))).toLowerCase().indexOf(q)<0))return false;
     if(_tkFA&&t.assignee!==_tkFA)return false;
     if(_tkFP&&(t.prio||'med')!==_tkFP)return false;if(_tkFC&&(t.cat||'')!==_tkFC)return false;if(_tkFD&&(t.doc||'')!==_tkFD)return false;
     return true;
@@ -9016,17 +8940,12 @@ function _tkCard(t,pos){
   }else if(t.mode==='proj'){
     var _pw=_tkPRowList(t);
     h+='<div class="tkcardp">';
-    _pw.forEach(function(r){var c=_tkCo(r.co),code=((r.proj||'')+'').trim();
-      var inf=_tkProjInfo(code),sh=_tkProjShort(inf.name,inf.owner,88);
-      var _tip=_eatt(inf.name?(inf.name+(inf.owner?('\n'+inf.owner):'')):'');
+    _pw.forEach(function(r){var c=_tkCo(r.co),code=((r.proj||'')+'').trim(),nm=_tkPRowName(code);
       h+='<div class="tkcp">'
-        +'<div class="tkcph">'
-          +(c?('<span class="tkcvco" style="background:'+c[2]+';color:#fff">'+esc(_tkCoLabel(r.co,r.cono))+'</span>'):'')
-          +'<span class="tkcpt">'+esc(r.ttl||'')+'</span>'
-          +(code?('<span class="tkcpc">'+esc(code)+'</span>'):'')
-        +'</div>'
-        +(sh?('<div class="tkcpn" title="'+_tip+'">'+esc(sh)+'</div>'):'')
-        +(inf.owner?('<div class="tkcpo" title="'+_eatt(inf.owner)+'">\uD83C\uDFDB\uFE0F '+esc(inf.owner)+'</div>'):'')
+        +(c?('<span class="tkcvco" style="background:'+c[2]+';color:#fff">'+esc(_tkCoLabel(r.co,r.cono))+'</span>'):'')
+        +'<span class="tkcpt">'+esc(r.ttl||'')+'</span>'
+        +(code?('<span class="tkcpc">'+esc(code)+'</span>'):'')
+        +(nm?('<span class="tkcpn" title="'+_eatt(nm)+'">'+esc(nm)+'</span>'):'')
       +'</div>';});
     h+='</div>';
     if(((t.title||'')+'').trim())h+='<div class="tkcardttl">'+esc(t.title)+'</div>';
@@ -9797,170 +9716,6 @@ function _gmDigest(){
   out.push('ช่วยสรุปให้หน่อยว่ามีเรื่องอะไรบ้าง เรื่องไหนต้องทำ/ต้องตอบก่อน และมีอะไรที่เกี่ยวกับงานบัญชี ภาษี หรือโครงการที่ต้องรีบจัดการ');
   return out.join('\n');
 }
-/* ===== v15.1: Gmail Inbox — สรุปให้อ่านในหน้าเว็บเลย และคอยจับ "เรื่องที่รออยู่" =====
-   ทุกอย่างคำนวณในเบราว์เซอร์จากหัวข้อ/ผู้ส่ง/ข้อความย่อที่ดึงมาแล้ว — ไม่มีการส่งอีเมล
-   ออกไปที่ไหนทั้งสิ้น (จะเป็นการขัดหลักของโมดูลนี้ และคีย์ของบริการ AI ใด ๆ
-   ที่ฝังในหน้าเว็บนิ่ง ๆ แบบนี้ถือว่าเปิดเผยต่อสาธารณะ)
-   ปุ่ม "คัดลอกให้ Claude สรุป" ยังอยู่ ไว้ใช้ตอนอยากได้สรุปเป็นภาษาคน */
-
-/* ---- คำที่บอกว่าเรื่องนี้ต้องทำ/ต้องตอบ ---- */
-var GM_ACT=[
- [/ด่วนที่สุด|ด่วนมาก|\burgent\b|โปรดดำเนินการโดยด่วน/i,'ด่วน'],
- [/ภายในวันที่|ภายในวัน|ครบกำหนด|เกินกำหนด|\boverdue\b|due ?date|deadline|หมดเขต|วันสุดท้าย/i,'มีกำหนดเวลา'],
- [/กรุณา(ส่ง|ชำระ|ดำเนินการ|ยืนยัน|ตอบ|แจ้ง|จัดส่ง)|ขอให้(ส่ง|ชำระ|ดำเนินการ|จัดส่ง)|โปรด(ส่ง|ชำระ|ยืนยัน|ตอบ|ตรวจสอบ)|action required|please (send|confirm|reply|review|sign)/i,'ขอให้ดำเนินการ'],
- [/ขออนุมัติ|รออนุมัติ|โปรดอนุมัติ|รอการอนุมัติ|approval|approve|ลงนาม|เซ็น|sign(ature)?\b/i,'รออนุมัติ/ลงนาม'],
- [/ทวงถาม|ติดตาม(เรื่อง|เอกสาร|การชำระ)|follow ?up|reminder|แจ้งเตือน(การ|ให้)|ยังไม่ได้รับ/i,'ติดตาม/ทวงถาม'],
- [/ตอบกลับ|reply|โปรดแจ้งกลับ|รอคำตอบ|ชี้แจง|สอบถาม/i,'รอคำตอบ']
-];
-function _gmAction(m){
-  var hay=((m.subj||'')+' '+(m.snip||''));
-  var why=[],i;
-  for(i=0;i<GM_ACT.length;i++)if(GM_ACT[i][0].test(hay))why.push(GM_ACT[i][1]);
-  return why;
-}
-/* วันครบกำหนดที่เขียนไว้ในหัวข้อ/ข้อความย่อ — เอามาโชว์ตรง ๆ ไม่ตีความ */
-function _gmDue(m){
-  var hay=((m.subj||'')+' '+(m.snip||''));
-  var mm=hay.match(/(?:ภายในวันที่|ภายใน|ครบกำหนด(?:วันที่)?|หมดเขต(?:วันที่)?|due(?: date)?:?)\s*([0-9]{1,2}\s*(?:[\/\-\.]\s*[0-9]{1,2}\s*[\/\-\.]\s*[0-9]{2,4}|[ก-ฮ]{1,2}\.?[ก-ฮ]\.?\s*[0-9]{2,4}))/i);
-  return mm?((mm[1]||'').replace(/\s+/g,' ').trim()):'';
-}
-
-/* ---- รายการเรื่องที่ "รออยู่" ---- */
-function _gmWatchOwn(){var a=(GMCFG&&Array.isArray(GMCFG.watch))?GMCFG.watch:[];
-  return a.map(function(x){return ((x||'')+'').trim();}).filter(function(x){return x;});}
-/* ดึงรหัสโครงการ / เลขเอกสาร จากงานที่ยังค้างบนบอร์ด Tracking — เรื่องที่กำลังตามอยู่จริง */
-function _gmWatchAuto(){
-  if(GMCFG&&GMCFG.watchAuto===false)return [];
-  var out=[],seen={},push=function(v,src){
-    v=((v||'')+'').trim();if(v.length<4||seen[v.toUpperCase()])return;
-    seen[v.toUpperCase()]=1;out.push({t:v,src:src});};
-  try{
-    if(typeof loadTrack==='function')loadTrack();
-    var T=(typeof TRACKDATA!=='undefined'&&Array.isArray(TRACKDATA))?TRACKDATA:[];
-    for(var i=0;i<T.length&&out.length<80;i++){
-      var t=T[i];if(!t||t.done)continue;
-      push(t.proj,'โครงการที่ค้างอยู่');
-      push(t.docno,'เลขเอกสารที่ตามอยู่');
-      var pr=(typeof _tkPRowList==='function')?_tkPRowList(t):[];
-      for(var j=0;j<pr.length;j++)push(pr[j].proj,'โครงการที่ค้างอยู่');
-      var rw=(typeof _tkRowList==='function')?_tkRowList(t):[];
-      for(var k=0;k<rw.length;k++)push(rw[k].vno,'เลขเอกสารที่ตามอยู่');
-    }
-  }catch(e){}
-  return out;
-}
-function _gmWatchAll(){
-  var out=_gmWatchOwn().map(function(t){return {t:t,src:'ที่คุณระบุเอง'};});
-  var seen={};out.forEach(function(x){seen[x.t.toUpperCase()]=1;});
-  _gmWatchAuto().forEach(function(x){if(!seen[x.t.toUpperCase()]){seen[x.t.toUpperCase()]=1;out.push(x);}});
-  return out;
-}
-function _gmWatchHit(m,W){
-  var hay=((m.subj||'')+' '+(m.snip||'')+' '+(m.from||'')+' '+(m.email||'')).toLowerCase();
-  var hit=[],i;
-  for(i=0;i<W.length;i++){if(hay.indexOf(W[i].t.toLowerCase())>=0)hit.push(W[i]);}
-  return hit;
-}
-
-/* ---- แผงสรุป ---- */
-function _gmLine(m,extra){
-  var c=_gmCat(m);
-  return '<div class="gmbl" data-open="'+_eatt(m.thread)+'" title="คลิกเพื่อเปิดใน Gmail">'
-    +'<span class="gmbtag" style="background:'+c[3]+';color:'+c[2]+'">'+esc(c[1])+'</span>'
-    +'<span class="gmbsub">'+esc(m.subj)+'</span>'
-    +'<span class="gmbfrom">'+esc(m.from)+'</span>'
-    +(m.unread?'<span class="gmnew">ใหม่</span>':'')
-    +'<span class="gmbdate">'+esc(_gmDate(m.ts))+'</span>'
-    +(extra||'')+'</div>';
-}
-function _gmBriefHTML(){
-  var L=_gmMsgs;if(!L.length)return '';
-  var W=_gmWatchAll(),i;
-  var watch=[],act=[];
-  for(i=0;i<L.length;i++){
-    var m=L[i],hit=W.length?_gmWatchHit(m,W):[],why=_gmAction(m);
-    if(hit.length)watch.push({m:m,hit:hit});
-    if(why.length)act.push({m:m,why:why,due:_gmDue(m)});
-  }
-  var h='<div class="gmbrief">';
-
-  /* 1 — เรื่องที่รออยู่ */
-  h+='<div class="gmbsec watch"><div class="gmbh"><span class="gmbi">⭐</span>เรื่องที่คุณรออยู่'
-    +'<span class="gmbn">'+watch.length+'</span>'
-    +'<button class="gmbtn ghost" id="gmWatchCfg" type="button">⚙ ตั้งค่าคำที่เฝ้าดู ('+W.length+')</button></div>';
-  if(GMCFG.watchOpen){
-    h+='<div class="gmwbox">';
-    h+='<div class="gmwadd"><input class="gmin wide" id="gmWatchIn" type="text" placeholder="พิมพ์คำที่อยากให้จับ เช่น GLI26010 · ภ.พ.30 · ใบแจ้งหนี้ · ชื่อคู่ค้า แล้วกด Enter" autocomplete="off">'
-      +'<button class="gmbtn primary" id="gmWatchAdd" type="button">＋ เพิ่ม</button></div>';
-    var own=_gmWatchOwn();
-    h+='<div class="gmwchips">'+(own.length?own.map(function(t){
-        return '<span class="gmwchip">'+esc(t)+'<button class="gmwx" data-wdel="'+_eatt(t)+'" type="button" title="เอาออก">✕</button></span>';
-      }).join(''):'<span class="gmwnone">ยังไม่ได้ระบุคำของตัวเอง — ด้านล่างเป็นคำที่ดึงจากงานที่ค้างอยู่ให้อัตโนมัติ</span>')+'</div>';
-    var auto=_gmWatchAuto();
-    h+='<label class="gmchk"><input type="checkbox" id="gmWatchAuto"'+((GMCFG.watchAuto===false)?'':' checked')+'> '
-      +'เฝ้าดูรหัสโครงการและเลขเอกสารของงานที่ยังค้างบนบอร์ด Tracking ให้อัตโนมัติ ('+auto.length+' รายการ)</label>';
-    if(auto.length)h+='<div class="gmwchips auto">'+auto.slice(0,24).map(function(x){
-      return '<span class="gmwchip auto" title="'+_eatt(x.src)+'">'+esc(x.t)+'</span>';}).join('')
-      +(auto.length>24?('<span class="gmwnone">+ อีก '+(auto.length-24)+'</span>'):'')+'</div>';
-    h+='<div class="gmnote">คำเหล่านี้เก็บไว้ในเครื่องนี้เท่านั้น ไม่ซิงค์ขึ้นคลาวด์</div>';
-    h+='</div>';
-  }
-  if(!W.length)h+='<div class="gmbempty">ยังไม่ได้ตั้งคำที่เฝ้าดู — กด “ตั้งค่าคำที่เฝ้าดู” แล้วใส่เรื่องที่กำลังรอ เช่น รหัสโครงการ เลขที่ใบแจ้งหนี้ หรือชื่อคู่ค้า</div>';
-  else if(!watch.length)h+='<div class="gmbempty">ไม่มีอีเมลที่ตรงกับเรื่องที่เฝ้าดูในช่วงนี้</div>';
-  else watch.slice(0,12).forEach(function(x){
-    h+=_gmLine(x.m,'<span class="gmbwhy">'+x.hit.slice(0,3).map(function(w){return '⭐ '+esc(w.t);}).join(' ')+'</span>');});
-  if(watch.length>12)h+='<div class="gmbmore">+ อีก '+(watch.length-12)+' ฉบับที่ตรงกับเรื่องที่เฝ้าดู</div>';
-  h+='</div>';
-
-  /* 2 — ต้องทำ / ต้องตอบ */
-  h+='<div class="gmbsec act"><div class="gmbh"><span class="gmbi">⏰</span>น่าจะต้องทำหรือต้องตอบ<span class="gmbn">'+act.length+'</span></div>';
-  if(!act.length)h+='<div class="gmbempty">ไม่พบอีเมลที่มีคำบอกกำหนดเวลาหรือขอให้ดำเนินการ</div>';
-  else act.slice(0,12).forEach(function(x){
-    h+=_gmLine(x.m,'<span class="gmbwhy act">'+x.why.slice(0,2).map(function(w){return esc(w);}).join(' · ')
-      +(x.due?(' → '+esc(x.due)):'')+'</span>');});
-  if(act.length>12)h+='<div class="gmbmore">+ อีก '+(act.length-12)+' ฉบับ</div>';
-  h+='</div>';
-
-  /* 3 — สรุปรายหมวด */
-  var g={},o=[];
-  L.forEach(function(m){var c=_gmCat(m);if(!g[c[0]]){g[c[0]]={c:c,l:[]};o.push(c[0]);}g[c[0]].l.push(m);});
-  o.sort(function(a,b){return g[b].l.length-g[a].l.length;});
-  h+='<div class="gmbsec cats"><div class="gmbh"><span class="gmbi">📊</span>มีเรื่องอะไรเข้ามาบ้าง<span class="gmbn">'+o.length+' หมวด</span></div>';
-  o.forEach(function(k){
-    var G=g[k],c=G.c,un=G.l.filter(function(m){return m.unread;}).length;
-    var sd={},sl=[];
-    G.l.forEach(function(m){var n=m.from||m.email;if(!sd[n]){sd[n]=0;sl.push(n);}sd[n]++;});
-    sl.sort(function(a,b){return sd[b]-sd[a];});
-    h+='<div class="gmbcat" style="--c:'+c[2]+';--cb:'+c[3]+'">'
-      +'<div class="gmbcath"><span class="gmbcatn">'+esc(c[1])+'</span>'
-        +'<span class="gmbcatc">'+G.l.length+' ฉบับ'+(un?(' · ยังไม่อ่าน '+un):'')+'</span>'
-        +'<button class="gmbcatb" data-cat="'+c[0]+'" type="button">ดูเฉพาะหมวดนี้ →</button></div>'
-      +'<div class="gmbcats">ผู้ส่งหลัก: '+esc(sl.slice(0,3).map(function(n){return n+' ('+sd[n]+')';}).join(' · '))+'</div>'
-      +'<ul class="gmbul">'+G.l.slice(0,3).map(function(m){
-          return '<li data-open="'+_eatt(m.thread)+'" title="คลิกเพื่อเปิดใน Gmail">'+(m.unread?'<b>':'')+esc(m.subj)+(m.unread?'</b>':'')+'</li>';
-        }).join('')+'</ul>'
-      +(G.l.length>3?('<div class="gmbmore">+ อีก '+(G.l.length-3)+' ฉบับในหมวดนี้</div>'):'')
-    +'</div>';
-  });
-  h+='</div>';
-
-  return h+'</div>';
-}
-/* เปิดเธรดใน Gmail
-   เดิมเอาอีเมลไปใส่ในช่อง /mail/u/... ซึ่งรับได้แค่ "ลำดับบัญชี" (0,1,2) ไม่ใช่อีเมล
-   พอ encodeURIComponent ทำให้ @ กลายเป็น %40 Gmail จึงหาบัญชีไม่เจอแล้วคืน Temporary Error (404)
-   ที่ถูกคือส่งอีเมลผ่านพารามิเตอร์ authuser ให้ Google เลือกบัญชีเอง */
-function _gmThreadUrl(tid){
-  tid=((tid||'')+'').trim();
-  var acct=((_gmAcct||'')+'').trim();
-  var base=acct?('https://mail.google.com/mail/?authuser='+encodeURIComponent(acct))
-               :'https://mail.google.com/mail/u/0/';
-  return base+'#all/'+encodeURIComponent(tid);
-}
-function _gmOpenThread(tid){
-  if(!tid)return;
-  try{window.open(_gmThreadUrl(tid),'_blank','noopener');}catch(e){}
-}
 function _gmCopyDigest(){
   var t=_gmDigest();
   var ok=function(){_gmNote='คัดลอกแล้ว '+_gmFiltered().length+' ฉบับ — เอาไปวางในแชท Claude แล้วให้สรุปได้เลย';renderGm();};
@@ -10037,8 +9792,6 @@ function renderGm(){
       h+='<div class="gmtool"><button class="gmbtn primary" id="gmCopy" type="button">📋 คัดลอกให้ Claude สรุป ('+F.length+' ฉบับ)</button>'
        +'<button class="gmbtn" id="gmDl" type="button">⬇ ดาวน์โหลด .txt</button>'
        +'<span class="gmnote" style="margin:0">คัดลอกแล้ววางในแชท Claude → ผมจะสรุปให้ว่ามีเรื่องอะไร เรื่องไหนต้องรีบทำก่อน</span></div>';
-      h+=_gmBriefHTML();
-      h+='<div class="gmbsep">รายการทั้งหมด</div>';
       h+='<div class="gmcatbar"><button class="gmcatb'+(_gmFC?'':' on')+'" data-cat="" type="button" style="--c:#0E5C52;--cb:#E6F0EC">ทั้งหมด '+L.length+'</button>';
       GM_CAT.concat([GM_OTHER]).forEach(function(c){if(!cats[c[0]])return;
         h+='<button class="gmcatb'+(_gmFC===c[0]?' on':'')+'" data-cat="'+c[0]+'" type="button" style="--c:'+c[2]+';--cb:'+c[3]+'">'+esc(c[1])+' '+cats[c[0]]+'</button>';});
@@ -10081,12 +9834,8 @@ function _gmBind(){
     if((b=cl('#gmCopyOrigin'))){_gmFallbackCopy(location.origin,function(){_gmNote='คัดลอก '+location.origin+' แล้ว';renderGm();});return;}
     if((b=cl('#gmCopy'))){_gmCopyDigest();return;}
     if((b=cl('#gmDl'))){_gmDownload();return;}
-    if((b=cl('#gmWatchCfg'))){GMCFG.watchOpen=!GMCFG.watchOpen;_gmSave();renderGm();return;}
-    if((b=cl('#gmWatchAdd'))){_gmWatchAddFromInput();return;}
-    if((b=cl('[data-wdel]'))){var _wd=b.getAttribute('data-wdel')||'';
-      GMCFG.watch=_gmWatchOwn().filter(function(x){return x!==_wd;});_gmSave();renderGm();return;}
     if((b=cl('[data-cat]'))){_gmFC=b.getAttribute('data-cat')||'';renderGm();return;}
-    if((b=cl('[data-open]'))){_gmOpenThread(b.getAttribute('data-open'));return;}
+    if((b=cl('[data-open]'))){window.open('https://mail.google.com/mail/u/'+encodeURIComponent(_gmAcct||0)+'/#all/'+encodeURIComponent(b.getAttribute('data-open')),'_blank','noopener');return;}
   });
   pg.addEventListener('change',function(e){
     var el=e.target;if(!el||!el.id)return;
@@ -10096,22 +9845,7 @@ function _gmBind(){
     else if(el.id==='gmAtt'){GMCFG.att=!!el.checked;_gmSave();renderGm();}
     else if(el.id==='gmNoPromo'){GMCFG.noPromo=!!el.checked;_gmSave();renderGm();}
     else if(el.id==='gmQ'){GMCFG.q=el.value||'';_gmSave();renderGm();}
-    else if(el.id==='gmWatchAuto'){GMCFG.watchAuto=!!el.checked;_gmSave();renderGm();}
   });
-  pg.addEventListener('keydown',function(e){
-    if(e.key!=='Enter')return;var el=e.target;if(!el||el.id!=='gmWatchIn')return;
-    e.preventDefault();_gmWatchAddFromInput();
-  });
-}
-function _gmWatchAddFromInput(){
-  var i=document.getElementById('gmWatchIn');if(!i)return;
-  var v=((i.value||'')+'').trim();if(!v)return;
-  var cur=_gmWatchOwn();
-  /* ใส่ทีละหลายคำได้ คั่นด้วย , หรือ ; */
-  v.split(/[,;]/).forEach(function(x){x=((x||'')+'').trim();
-    if(x&&cur.map(function(c){return c.toUpperCase();}).indexOf(x.toUpperCase())<0)cur.push(x);});
-  GMCFG.watch=cur;GMCFG.watchOpen=true;_gmSave();renderGm();
-  var n=document.getElementById('gmWatchIn');if(n)n.focus();
 }
 
 var curPayer=null,curWco=null,_whtEdit=null,_wView='reg',_wSumMo=0;
@@ -34665,15 +34399,10 @@ body.sbfold .sbshow-btn{display:inline-flex}
 #page-tk .tkpprj{font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:12px}
 #page-tk .tkprow .tkvco{display:flex;gap:5px}
 #page-tk .tkprow .tkvcob{flex:1;height:32px;box-sizing:border-box;padding:0;font-size:10.5px}
-#page-tk .tkpnm{min-width:0;display:flex;flex-direction:column;justify-content:center;gap:1px;
-  background:var(--brand-t,#E6F0EC);border:1px solid #CFE3DC;border-radius:9px;min-height:32px;
-  padding:4px 10px;overflow:hidden}
-#page-tk .tkpnm-n{font-size:11.5px;font-weight:700;color:var(--brand-d,#0A463E);line-height:1.3;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#page-tk .tkpnm-o{font-size:10px;font-weight:600;color:var(--ink2,#4A5563);line-height:1.3;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#page-tk .tkpnm.none{background:#FAF8F4;border-style:dashed}
-#page-tk .tkpnm.none .tkpnm-n{color:var(--muted,#8C8676);font-weight:600}
+#page-tk .tkpnm{min-width:0;font-size:11.5px;font-weight:700;color:var(--brand-d,#0A463E);
+  background:var(--brand-t,#E6F0EC);border:1px solid #CFE3DC;border-radius:9px;height:32px;line-height:30px;
+  padding:0 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#page-tk .tkpnm.none{color:var(--muted,#8C8676);background:#FAF8F4;border-style:dashed;font-weight:600}
 #page-tk .tkprow .tkvx{justify-self:center}
 @media(max-width:700px){
   #page-tk .tkphd{display:none}
@@ -34683,75 +34412,14 @@ body.sbfold .sbshow-btn{display:inline-flex}
 }
 
 /* layout 4 on a Kanban card */
-.tkcardp{display:flex;flex-direction:column;gap:7px;margin-bottom:5px}
-.tkcp+.tkcp{border-top:1px dashed rgba(16,24,40,.10);padding-top:7px}
-.tkcph{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;line-height:1.45}
+.tkcardp{display:flex;flex-direction:column;gap:4px;margin-bottom:4px}
+.tkcp{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;line-height:1.45}
 .tkcpt{font-size:13px;font-weight:700;color:var(--ink,#141C29)}
 .tkcpc{font-size:11.5px;font-weight:800;color:var(--brand-d,#0A463E);font-family:"IBM Plex Mono",monospace}
-/* the project name gets a line of its own and wraps onto a second one when it is long */
-.tkcpn{font-size:11.5px;font-weight:600;color:var(--ink2,#4A5563);line-height:1.5;margin-top:1px;
+.tkcpn{flex:1 0 100%;font-size:11px;font-weight:600;color:var(--ink2,#4A5563);line-height:1.45;
   overflow-wrap:break-word;word-break:break-word;
+  /* project names run long — two lines on the card, the full name is in the tooltip */
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.tkcpo{font-size:10.5px;font-weight:700;color:var(--brand,#0E5C52);line-height:1.5;margin-top:1px;
-  overflow-wrap:break-word;word-break:break-word;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-/* ===== v15.1: Gmail Inbox — แผงสรุปในหน้าเว็บ + รายการเรื่องที่เฝ้าดู ===== */
-#page-gm .gmbrief{display:flex;flex-direction:column;gap:12px;margin:14px 0}
-#page-gm .gmbsec{border:1.5px solid var(--line,#E6E0D4);border-radius:14px;background:#fff;padding:12px 14px 13px}
-#page-gm .gmbsec.watch{border-color:#EFD9A6;background:linear-gradient(180deg,#FFFCF4,#fff)}
-#page-gm .gmbsec.act{border-color:#F2C9C4;background:linear-gradient(180deg,#FFF7F6,#fff)}
-#page-gm .gmbh{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:900;color:var(--ink,#141C29);margin-bottom:9px}
-#page-gm .gmbi{font-size:15px;line-height:1}
-#page-gm .gmbn{font-size:11px;font-weight:800;color:var(--ink2,#4A5563);background:var(--line2,#F1ECE2);
-  border-radius:999px;padding:2px 10px}
-#page-gm .gmbh .gmbtn{margin-left:auto}
-#page-gm .gmbempty{font-size:12px;font-weight:600;color:var(--muted,#8C8676);padding:7px 2px;line-height:1.55}
-#page-gm .gmbmore{font-size:11px;font-weight:700;color:var(--muted,#8C8676);padding:5px 2px 0}
-/* หนึ่งบรรทัดต่อหนึ่งอีเมล */
-#page-gm .gmbl{display:flex;align-items:baseline;flex-wrap:wrap;gap:7px;padding:6px 8px;border-radius:9px;cursor:pointer;
-  line-height:1.5;transition:.12s}
-#page-gm .gmbl:hover{background:var(--brand-t,#E6F0EC)}
-#page-gm .gmbl+.gmbl{border-top:1px dashed rgba(16,24,40,.08)}
-#page-gm .gmbtag{flex:none;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap}
-#page-gm .gmbsub{flex:1 1 260px;min-width:0;font-size:12.5px;font-weight:700;color:var(--ink,#141C29);
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#page-gm .gmbfrom{flex:none;font-size:11px;font-weight:600;color:var(--ink2,#4A5563);max-width:180px;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#page-gm .gmbdate{flex:none;font-size:10.5px;font-weight:700;color:var(--muted,#8C8676);font-variant-numeric:tabular-nums}
-#page-gm .gmbwhy{flex:1 0 100%;font-size:10.5px;font-weight:700;color:#8A5E12}
-#page-gm .gmbwhy.act{color:#B42318}
-/* กล่องตั้งค่าคำที่เฝ้าดู */
-#page-gm .gmwbox{border:1px dashed #E3D3A8;background:#FFFDF7;border-radius:11px;padding:10px 11px;margin-bottom:9px}
-#page-gm .gmwadd{display:flex;gap:7px;margin-bottom:8px;flex-wrap:wrap}
-#page-gm .gmwadd .gmin{flex:1;min-width:220px}
-#page-gm .gmwchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-#page-gm .gmwchip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:#8A5E12;
-  background:#FDF3E0;border:1px solid #EBD4A5;border-radius:999px;padding:3px 5px 3px 11px}
-#page-gm .gmwchip.auto{color:var(--brand-d,#0A463E);background:var(--brand-t,#E6F0EC);border-color:#BEDBD2;
-  padding:3px 11px;font-family:"IBM Plex Mono",monospace;font-weight:700}
-#page-gm .gmwx{border:0;background:rgba(0,0,0,.06);color:#8A5E12;width:17px;height:17px;border-radius:50%;
-  font-size:10px;line-height:1;cursor:pointer;padding:0}
-#page-gm .gmwx:hover{background:#B42318;color:#fff}
-#page-gm .gmwnone{font-size:11px;font-weight:600;color:var(--muted,#8C8676)}
-/* สรุปรายหมวด */
-#page-gm .gmbcat{border-left:3px solid var(--c);background:var(--cb);border-radius:0 11px 11px 0;padding:9px 12px;margin-bottom:8px}
-#page-gm .gmbcat:last-child{margin-bottom:0}
-#page-gm .gmbcath{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
-#page-gm .gmbcatn{font-size:12.5px;font-weight:900;color:var(--c)}
-#page-gm .gmbcatc{font-size:11px;font-weight:700;color:var(--ink2,#4A5563)}
-#page-gm .gmbcatb{margin-left:auto;border:0;background:transparent;color:var(--c);font-family:inherit;
-  font-size:10.5px;font-weight:800;cursor:pointer;padding:0}
-#page-gm .gmbcatb:hover{text-decoration:underline}
-#page-gm .gmbcats{font-size:10.5px;font-weight:600;color:var(--ink2,#4A5563);margin-top:3px;line-height:1.5;
-  overflow-wrap:break-word;word-break:break-word}
-#page-gm .gmbul{margin:5px 0 0;padding-left:17px;list-style:disc}
-#page-gm .gmbul li{font-size:11.5px;font-weight:600;color:var(--ink,#141C29);line-height:1.55;cursor:pointer;
-  overflow-wrap:break-word;word-break:break-word}
-#page-gm .gmbul li:hover{text-decoration:underline}
-#page-gm .gmbcat .gmbmore{padding-top:3px}
-#page-gm .gmbsep{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
-  color:var(--muted,#8C8676);margin:16px 0 8px;display:flex;align-items:center;gap:10px}
-#page-gm .gmbsep::after{content:"";flex:1;height:1px;background:var(--line,#E6E0D4)}
 </style>
 <script id="jvSidesJs">
 /* ===== v14.6: Joint Venture — name each side's entry table for what it holds,
