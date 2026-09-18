@@ -7789,7 +7789,7 @@ function _tkAttId(){return 'tka_'+Date.now().toString(36)+'_'+Math.floor(Math.ra
 function _tkAttList(t){return (t&&t.att&&t.att.length)?t.att:[];}
 /* v10.66: Description → รายการติ๊ก (checklist) · แต่ละรายการ = {id, ts เวลาที่เพิ่ม, txt, done, dts เวลาที่ติ๊ก}
    งานเก่าที่ยังเก็บเป็นข้อความยาว (desc) จะถูกแปลงเป็นรายการแรกให้ตอนเปิดการ์ด — ข้อความเดิมไม่หาย */
-var _tkNotes=[],_tkRows=[],_tkMode='full';
+var _tkNotes=[],_tkRows=[],_tkPRows=[],_tkMode='full';
 /* v10.67: บริษัทเจ้าของงาน — โหมด 1 ตั้งทั้งการ์ด · โหมด 2 ตั้งรายแถว Voucher */
 var TK_CO=[['GLI','GLI','#0E5C52','#E6F0EC'],['JV','JV','#B45309','#FEF3C7']];
 /* ===== v10.74: เลขลำดับรายบริษัท — เลือก GLI / JV แล้วระบบรันเลขให้เอง (GLI-1 · JV-1) =====
@@ -7819,11 +7819,13 @@ function _tkCoMatch(t,k){
   k=((k||'')+'').trim().toUpperCase();if(!k)return true;if(!t)return false;
   if((((t.co||'')+'').toUpperCase())===k)return true;
   var rw=_tkRowList(t),i;for(i=0;i<rw.length;i++)if((((rw[i].co||'')+'').toUpperCase())===k)return true;
+  var pw=_tkPRowList(t);for(i=0;i<pw.length;i++)if((((pw[i].co||'')+'').toUpperCase())===k)return true;
   return false;
 }
 function _tkCoText(t){
   if(!t)return '';
   if(t.mode==='rows')return _tkRowList(t).map(function(r){return _tkCoLabel(r.co,r.cono);}).join(' ');
+  if(t.mode==='proj')return _tkPRowList(t).map(function(r){return _tkCoLabel(r.co,r.cono);}).join(' ');
   return _tkCoLabel(t.co,t.cono);
 }
 /* v10.74: งานที่มีอยู่ก่อนฟีเจอร์นี้ยังไม่มีเลขลำดับ — เติมให้ครั้งเดียวเรียงตามวันที่สร้างการ์ด
@@ -7857,7 +7859,52 @@ function _tkRowFind(id){for(var i=0;i<_tkRows.length;i++)if(_tkRows[i].id===id)r
 function _tkRowAdd(){_tkRows.push({id:_tkRowId(),vno:'',co:(_tkRows.length?_tkRows[_tkRows.length-1].co:'GLI')});renderTracking();
   var l=document.querySelectorAll('.tkvin');if(l.length)l[l.length-1].focus();}
 function _tkRowDel(id){for(var i=0;i<_tkRows.length;i++)if(_tkRows[i].id===id){_tkRows.splice(i,1);break;}renderTracking();}
-function _tkModeSet(m){_tkMode=(m==='rows'||m==='simple')?m:'full';if(_tkMode==='rows'&&!_tkRows.length)_tkRows=[{id:_tkRowId(),vno:'',co:'GLI'}];renderTracking();}
+function _tkModeSet(m){
+  _tkMode=(m==='rows'||m==='simple'||m==='proj')?m:'full';
+  if(_tkMode==='rows'&&!_tkRows.length)_tkRows=[{id:_tkRowId(),vno:'',co:'GLI'}];
+  if(_tkMode==='proj'&&!_tkPRows.length)_tkPRows=[{id:_tkRowId(),ttl:'',co:'GLI',proj:''}];
+  renderTracking();
+}
+/* ===== v15.0: แบบ 4 — หลายโครงการในการ์ดเดียว แถวละบรรทัดแนวนอน =====
+   แต่ละแถว: หัวข้อ · GLI/JV · รหัสโครงการ → ชื่อโครงการดึงอัตโนมัติจากทะเบียนโครงการ
+   (ชุดเดียวกับที่ PM Report / GL / Progress % ใช้) ชื่อจึงไม่ต้องเก็บ ไม่มีวันค้างเป็นชื่อเก่า */
+function _tkPRowList(t){return (t&&Array.isArray(t.prows))?t.prows:[];}
+function _tkPRowFind(id){for(var i=0;i<_tkPRows.length;i++)if(_tkPRows[i].id===id)return _tkPRows[i];return null;}
+function _tkPRowAdd(){
+  _tkPRows.push({id:_tkRowId(),ttl:'',co:(_tkPRows.length?_tkPRows[_tkPRows.length-1].co:'GLI'),proj:''});
+  renderTracking();var l=document.querySelectorAll('.tkpttl');if(l.length)l[l.length-1].focus();
+}
+function _tkPRowDel(id){for(var i=0;i<_tkPRows.length;i++)if(_tkPRows[i].id===id){_tkPRows.splice(i,1);break;}renderTracking();}
+/* ชื่อโครงการของแถวหนึ่ง — คืนค่าว่างถ้ายังไม่ได้กรอกรหัส หรือหารหัสไม่เจอ */
+function _tkPRowName(code){
+  code=((code||'')+'').trim();if(!code)return '';
+  var nm=_tkProjName(code);
+  return (nm&&nm!==code)?nm:'';
+}
+function _tkPRowNameUpd(r){
+  if(!r)return;var el=document.querySelector('[data-pnm="'+r.id+'"]');if(!el)return;
+  var code=((r.proj||'')+'').trim(),nm=_tkPRowName(code);
+  el.textContent=nm||(code?'\u2014 \u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e23\u0e2b\u0e31\u0e2a\u0e19\u0e35\u0e49 \u2014':'\u2014');
+  el.title=nm||'';el.classList.toggle('none',!nm);
+}
+function _tkProjBlockHTML(){
+  var h='<div class="tkphd"><span class="tkphn">#</span><span>\u0e2b\u0e31\u0e27\u0e02\u0e49\u0e2d</span>'
+    +'<span>\u0e1a\u0e23\u0e34\u0e29\u0e31\u0e17</span><span>\u0e23\u0e2b\u0e31\u0e2a\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23</span>'
+    +'<span>\u0e0a\u0e37\u0e48\u0e2d\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23 \u00b7 \u0e14\u0e36\u0e07\u0e2d\u0e31\u0e15\u0e42\u0e19\u0e21\u0e31\u0e15\u0e34</span><span></span></div>';
+  if(!_tkPRows.length)h+='<div class="tkckempty">\u0e22\u0e31\u0e07\u0e44\u0e21\u0e48\u0e21\u0e35\u0e41\u0e16\u0e27 \u2014 \u0e01\u0e14 \u201c\uff0b \u0e40\u0e1e\u0e34\u0e48\u0e21\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23\u201d \u0e14\u0e49\u0e32\u0e19\u0e25\u0e48\u0e32\u0e07</div>';
+  _tkPRows.forEach(function(r,i){
+    var code=((r.proj||'')+'').trim(),nm=_tkPRowName(code);
+    h+='<div class="tkprow"><span class="tkvn">'+(i+1)+'</span>'
+      +'<input class="tkpin tkpttl" data-pttl="'+_eatt(r.id)+'" value="'+_eatt(r.ttl||'')+'" placeholder="\u0e2b\u0e31\u0e27\u0e02\u0e49\u0e2d\u0e07\u0e32\u0e19" autocomplete="off">'
+      +'<span class="tkvco">'+TK_CO.map(function(c){return '<button class="tkvcob'+((((r.co||'')+'').toUpperCase()===c[0])?' on':'')+'" data-pco="'+_eatt(r.id)+'|'+c[0]+'" type="button" style="--c:'+c[2]+'">'+esc(c[1])+'</button>';}).join('')+'</span>'
+      +'<input class="tkpin tkpprj" data-pprj="'+_eatt(r.id)+'" list="tkpProjList" value="'+_eatt(code)+'" placeholder="\u0e40\u0e0a\u0e48\u0e19 GLI26010" autocomplete="off" spellcheck="false">'
+      +'<span class="tkpnm'+(nm?'':' none')+'" data-pnm="'+_eatt(r.id)+'" title="'+_eatt(nm)+'">'+esc(nm||(code?'\u2014 \u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e23\u0e2b\u0e31\u0e2a\u0e19\u0e35\u0e49 \u2014':'\u2014'))+'</span>'
+      +'<button class="tkvx" data-pdel="'+_eatt(r.id)+'" type="button" title="\u0e25\u0e1a\u0e41\u0e16\u0e27\u0e19\u0e35\u0e49">\u2715</button></div>';
+  });
+  h+='<datalist id="tkpProjList">'+_tkProjCodeList()+'</datalist>';
+  h+='<button class="tkvadd" id="tkpAdd" type="button">\uff0b \u0e40\u0e1e\u0e34\u0e48\u0e21\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23</button>';
+  return h;
+}
 function _tkRowNoChip(r){
   var c=_tkCo(r&&r.co);
   if(!c)return '<span class="tkcono sm" data-vno-chip="'+_eatt((r&&r.id)||'')+'" hidden></span>';
@@ -7937,6 +7984,11 @@ function _tkCoNoChipUpd(co){
   el.className='tkcono'+(own?'':' pend');
   el.title=own?'เลขลำดับของงานนี้':'เลขลำดับที่จะได้เมื่อกดบันทึก';
   el.textContent=c[1]+'-'+(own?(+t.cono):(_tkCoNoMax(c[0])+1));
+}
+function _tkModeBtn(m,ic,ttl,sub){
+  return '<button class="tkmodeb'+((_tkMode===m)?' on':'')+'" data-tkmode="'+m+'" type="button">'
+    +'<span class="tkmodeic">'+ic+'</span>'
+    +'<span class="tkmodetx"><span class="tkmodet">'+esc(ttl)+'</span><span class="tkmodes">'+esc(sub)+'</span></span></button>';
 }
 function _tkFullBlockHTML(t){
   return _tkCoRowHTML(t)
@@ -8540,7 +8592,7 @@ function _tkClipSave(){try{if(_tkClip)localStorage.setItem('gli_tkclip',JSON.str
 function _tkClipClear(){_tkClip=null;_tkClipSave();renderTracking();}
 function _tkCopyCard(id){
   var t=_tkFind(id);if(!t)return;
-  _tkClip={title:t.title||'',desc:t.desc||'',prio:t.prio||'med',assignee:t.assignee||'',due:t.due||'',proj:t.proj||'',owner:t.owner||'',contact:t.contact||'',docno:t.docno||'',cat:t.cat||'',doc:t.doc||'',hl:t.hl||'',tc:t.tc||'',co:t.co||'',mode:t.mode||'full',rows:_tkRowList(t).map(function(r){return {id:_tkRowId(),vno:r.vno,co:r.co};}),grp:((t.grp||'')+'').trim(),notes:_tkNoteList(t).map(function(n){return {id:_tkNoteId(),ts:n.ts,txt:n.txt,done:!!n.done,dts:n.dts};}),att:(t.att||[]).slice()};
+  _tkClip={title:t.title||'',desc:t.desc||'',prio:t.prio||'med',assignee:t.assignee||'',due:t.due||'',proj:t.proj||'',owner:t.owner||'',contact:t.contact||'',docno:t.docno||'',cat:t.cat||'',doc:t.doc||'',hl:t.hl||'',tc:t.tc||'',co:t.co||'',mode:t.mode||'full',rows:_tkRowList(t).map(function(r){return {id:_tkRowId(),vno:r.vno,co:r.co};}),prows:_tkPRowList(t).map(function(r){return {id:_tkRowId(),ttl:r.ttl,co:r.co,proj:r.proj};}),grp:((t.grp||'')+'').trim(),notes:_tkNoteList(t).map(function(n){return {id:_tkNoteId(),ts:n.ts,txt:n.txt,done:!!n.done,dts:n.dts};}),att:(t.att||[]).slice()};
   _tkPayCopy(t,_tkClip);
   _tkClipSave();
   if(typeof gliLog==='function')gliLog('คัดลอกงาน (Tracking)',t.title||'');
@@ -8567,7 +8619,8 @@ function _tkClipMake(src,st,beforeId,grp){
   var nt={id:nid,title:src.title||'',desc:src.desc||'',status:st,prio:src.prio||'med',assignee:src.assignee||'',
           due:src.due||'',proj:src.proj||'',owner:src.owner||'',contact:src.contact||'',docno:src.docno||'',cat:src.cat||'',doc:src.doc||'',hl:src.hl||'',tc:src.tc||'',co:src.co||'',
           cono:((src.mode==='rows')?0:(src.co?_cIss(src.co):0)),mode:src.mode||'full',
-          rows:(src.rows||[]).map(function(r){return {id:_tkRowId(),vno:r.vno,co:r.co,cono:(r.co?_cIss(r.co):0)};}),notes:(src.notes||[]).map(function(n){return {id:_tkNoteId(),ts:n.ts,txt:n.txt,done:!!n.done,dts:n.dts};}),grp:((grp!=null)?grp:(src.grp||'')),att:[],
+          rows:(src.rows||[]).map(function(r){return {id:_tkRowId(),vno:r.vno,co:r.co,cono:(r.co?_cIss(r.co):0)};}),
+          prows:(src.prows||[]).map(function(r){return {id:_tkRowId(),ttl:r.ttl||'',co:r.co||'',cono:(r.co?_cIss(r.co):0),proj:r.proj||''};}),notes:(src.notes||[]).map(function(n){return {id:_tkNoteId(),ts:n.ts,txt:n.txt,done:!!n.done,dts:n.dts};}),grp:((grp!=null)?grp:(src.grp||'')),att:[],
           created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done:0,done_dt:(st===dk)?_tkToday():''};
   _tkPayCopy(src,nt);
   loadTrack();TRACKDATA.push(nt);_tkPlaceIn(nt,st,beforeId||null);
@@ -8729,6 +8782,8 @@ function _tkTaskName(t){
   if(!t)return '';
   if(t.mode==='rows'){var v=_tkRowList(t).map(function(r){return ((r.vno||'')+'').trim();}).filter(function(x){return x;}).join(' · ');
     if(v)return v;}
+  if(t.mode==='proj'){var pv=_tkPRowList(t).map(function(r){return ((r.ttl||'')+'').trim()||((r.proj||'')+'').trim();}).filter(function(x){return x;}).join(' · ');
+    if(pv)return pv;}
   return ((t.title||'')+'').trim();
 }
 function _tkDoneMark(id){
@@ -8757,7 +8812,7 @@ function renderTracking(){
   var _openN=TRACKDATA.length-_doneN;
   var view=TRACKDATA.filter(function(t){
     if(_tkIsDone(t))return false;/* v10.72: งานที่กดเสร็จแล้วย้ายไปหน้า Report งานที่เสร็จ */
-    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.co||'')+' '+_tkCoText(t)+' '+_tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.contact||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+_tkDocNames(t.doc,' ')+' '+(t.fdesc||''))).toLowerCase().indexOf(q)<0))return false;
+    if(q&&((((t.title||'')+' '+(t.desc||'')+' '+(t.co||'')+' '+_tkCoText(t)+' '+_tkRowList(t).map(function(r){return (r.vno||'')+' '+(r.co||'');}).join(' ')+' '+_tkNoteList(t).map(function(n){return n.txt||'';}).join(' ')+' '+(t.proj||'')+' '+(t.owner||'')+' '+(t.contact||'')+' '+(t.docno||'')+' '+(t.grp||'')+' '+_tkProjName(t.proj)+' '+((_tkCat(t.cat)||[])[1]||'')+' '+_tkDocNames(t.doc,' ')+' '+(t.fdesc||'')+' '+_tkPRowList(t).map(function(r){return (r.ttl||'')+' '+(r.proj||'')+' '+_tkPRowName(r.proj);}).join(' '))).toLowerCase().indexOf(q)<0))return false;
     if(_tkFA&&t.assignee!==_tkFA)return false;
     if(_tkFP&&(t.prio||'med')!==_tkFP)return false;if(_tkFC&&(t.cat||'')!==_tkFC)return false;if(_tkFD&&(t.doc||'')!==_tkFD)return false;
     return true;
@@ -8866,7 +8921,7 @@ function _tkCard(t,pos){
   /* สีไฮไลท์ที่ตั้งเองที่การ์ด (hl) ชนะสีของประเภทเอกสารเสมอ */
   var cstyle='--p:'+pr[2]+';'+(t.hl?('background:'+hl[2]+';border-color:'+hl[3]+';'):(dc?('background:'+dc[3]+';border-color:'+dc[2]+'66;'):''));
   var h='<div class="tkcard'+((t.id===_tkFlashId)?' justadded':'')+'" draggable="true" data-id="'+t.id+'" style="'+cstyle+'">';
-  h+='<div class="tkcardtop">'+((t.mode==='rows')?'':_tkCoBadge(t.co,t.cono))+'<span class="tkprio" style="background:'+pr[3]+';color:'+pr[2]+'">'+pr[1]+'</span>';
+  h+='<div class="tkcardtop">'+((t.mode==='rows'||t.mode==='proj')?'':_tkCoBadge(t.co,t.cono))+'<span class="tkprio" style="background:'+pr[3]+';color:'+pr[2]+'">'+pr[1]+'</span>';
   h+=_tkDocChips(t.doc);
   if(t.cat){var _tc=_tkCat(t.cat);if(_tc)h+='<span class="tkcat" style="background:'+_tc[3]+';color:'+_tc[2]+'">'+esc(_tc[1])+'</span>';}
   h+='</div>';
@@ -8878,6 +8933,20 @@ function _tkCard(t,pos){
     h+='<div class="tkcardv">';
     _vr.forEach(function(r){var c=_tkCo(r.co);
       h+='<div class="tkcv"><span class="tkcvn">'+esc(r.vno||'')+'</span>'+(c?('<span class="tkcvco" style="background:'+c[2]+';color:#fff">'+esc(_tkCoLabel(r.co,r.cono))+'</span>'):'')+'</div>';});
+    h+='</div>';
+    if(((t.title||'')+'').trim())h+='<div class="tkcardttl">'+esc(t.title)+'</div>';
+    h+=_ctH;
+    h+='</div>';
+  }else if(t.mode==='proj'){
+    var _pw=_tkPRowList(t);
+    h+='<div class="tkcardp">';
+    _pw.forEach(function(r){var c=_tkCo(r.co),code=((r.proj||'')+'').trim(),nm=_tkPRowName(code);
+      h+='<div class="tkcp">'
+        +(c?('<span class="tkcvco" style="background:'+c[2]+';color:#fff">'+esc(_tkCoLabel(r.co,r.cono))+'</span>'):'')
+        +'<span class="tkcpt">'+esc(r.ttl||'')+'</span>'
+        +(code?('<span class="tkcpc">'+esc(code)+'</span>'):'')
+        +(nm?('<span class="tkcpn" title="'+_eatt(nm)+'">'+esc(nm)+'</span>'):'')
+      +'</div>';});
     h+='</div>';
     if(((t.title||'')+'').trim())h+='<div class="tkcardttl">'+esc(t.title)+'</div>';
     h+=_ctH;
@@ -8939,20 +9008,23 @@ function _tkList(view){
 function _tkModalHTML(){
   if(!_tkModalId)return '';
   var isNew=(_tkModalId==='__new__');
-  var t=isNew?{title:'',desc:'',status:_tkNewStatus||'todo',prio:'med',assignee:'',due:'',proj:'',owner:'',contact:'',docno:'',cat:'',doc:'',grp:(_tkNewGrp||''),co:'',mode:'full',rows:[]}:_tkFind(_tkModalId);
+  var t=isNew?{title:'',desc:'',status:_tkNewStatus||'todo',prio:'med',assignee:'',due:'',proj:'',owner:'',contact:'',docno:'',cat:'',doc:'',grp:(_tkNewGrp||''),co:'',mode:'full',rows:[],prows:[]}:_tkFind(_tkModalId);
   if(!t)return '';
   var meta='';if(!isNew&&(t.by||t.created)){meta='<div class="tkmmeta">Created by '+esc(t.by||'—')+(t.created?(' · '+_tkFmtDate(new Date(t.created).toISOString().slice(0,10))):'')+(t.done_dt?(' · Done '+_tkFmtDate(t.done_dt)):'')+'</div>';}
-  var h='<div class="tkmodal" id="tkModal"><div class="tkmcard">';
+  var h='<div class="tkmodal" id="tkModal"><div class="tkmcard'+((_tkMode==='proj')?' wide':'')+'">';
   h+='<div class="tkmhd">'+(isNew?'➕ New Task':'✎ Edit Task')+'<button class="tkmx" id="tkMClose" type="button">✕</button></div>';
   h+='<div class="tkmbody">';
   h+='<div class="tkml">Task name'
     +'<div class="tkmodesw">'
-      +'<button class="tkmodeb'+((_tkMode==='full')?' on':'')+'" data-tkmode="full" type="button">Layout 1 · 5 lines + pull from PM Report</button>'
-      +'<button class="tkmodeb'+((_tkMode==='rows')?' on':'')+'" data-tkmode="rows" type="button">Layout 2 · Voucher + company (multi-row)</button>'
-      +'<button class="tkmodeb'+((_tkMode==='simple')?' on':'')+'" data-tkmode="simple" type="button">Layout 3 · Title + description</button>'
+      +_tkModeBtn('full','\uD83D\uDCCB','\u0e41\u0e1a\u0e1a 1 \u00b7 \u0e07\u0e32\u0e19\u0e23\u0e32\u0e22\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23','\u0e23\u0e2b\u0e31\u0e2a \u00b7 \u0e1c\u0e39\u0e49\u0e27\u0e48\u0e32\u0e08\u0e49\u0e32\u0e07 \u00b7 \u0e40\u0e2d\u0e01\u0e2a\u0e32\u0e23 \u2014 \u0e14\u0e36\u0e07\u0e0a\u0e37\u0e48\u0e2d\u0e08\u0e32\u0e01 PM Report')
+      +_tkModeBtn('rows','\uD83E\uDDFE','\u0e41\u0e1a\u0e1a 2 \u00b7 Voucher \u0e2b\u0e25\u0e32\u0e22\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23','\u0e40\u0e25\u0e02\u0e17\u0e35\u0e48 Voucher + \u0e1a\u0e23\u0e34\u0e29\u0e31\u0e17 \u0e40\u0e1e\u0e34\u0e48\u0e21\u0e44\u0e14\u0e49\u0e2b\u0e25\u0e32\u0e22\u0e41\u0e16\u0e27')
+      +_tkModeBtn('simple','\u270D\uFE0F','\u0e41\u0e1a\u0e1a 3 \u00b7 \u0e2b\u0e31\u0e27\u0e02\u0e49\u0e2d + \u0e04\u0e33\u0e2d\u0e18\u0e34\u0e1a\u0e32\u0e22','\u0e07\u0e32\u0e19\u0e17\u0e31\u0e48\u0e27\u0e44\u0e1b\u0e17\u0e35\u0e48\u0e44\u0e21\u0e48\u0e1c\u0e39\u0e01\u0e01\u0e31\u0e1a\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23')
+      +_tkModeBtn('proj','\uD83C\uDFD7\uFE0F','\u0e41\u0e1a\u0e1a 4 \u00b7 \u0e2b\u0e25\u0e32\u0e22\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23 (\u0e41\u0e19\u0e27\u0e19\u0e2d\u0e19)','\u0e2b\u0e31\u0e27\u0e02\u0e49\u0e2d + GLI/JV + \u0e23\u0e2b\u0e31\u0e2a \u2014 \u0e14\u0e36\u0e07\u0e0a\u0e37\u0e48\u0e2d\u0e42\u0e04\u0e23\u0e07\u0e01\u0e32\u0e23\u0e2d\u0e31\u0e15\u0e42\u0e19\u0e21\u0e31\u0e15\u0e34')
     +'</div>'
     +'<div class="tkmname">'
-    +((_tkMode==='rows')?(_tkRowsBlockHTML()+_tkContactRowHTML(t)+_tkDocRowHTML(t)):(_tkMode==='simple')?_tkSimpleBlockHTML(t):_tkFullBlockHTML(t))
+    +((_tkMode==='rows')?(_tkRowsBlockHTML()+_tkContactRowHTML(t)+_tkDocRowHTML(t))
+      :(_tkMode==='proj')?(_tkProjBlockHTML()+_tkContactRowHTML(t)+_tkDocRowHTML(t))
+      :(_tkMode==='simple')?_tkSimpleBlockHTML(t):_tkFullBlockHTML(t))
     +'</div></div>';
   if(false){h+='<div class="tkmname">'
     +'<div class="tkmnrow"><span class="tkmnn">1</span><span class="tkmnl">Project code</span><span class="tkmnf"><input class="tkmin" id="tkmProj" list="tkmProjList" value="'+_eatt(t.proj||'')+'" placeholder="Type the code — lines 2 and 4 are filled from the PM Report" autocomplete="off" spellcheck="false"><datalist id="tkmProjList">'+_tkProjCodeList()+'</datalist></span><button class="tkmnpull" id="tkmPmPull" type="button" title="Pull the customer and project name from the PM Report — overwrites what is there">↻ Pull from PM Report</button></div>'
@@ -8984,22 +9056,27 @@ function _tkModalHTML(){
 function _tkOpen(id){_tkAF={owner:'',title:''};_tkMS={};_tkModalId=id;var _t=_tkFind(id);_tkAtt=(_t&&_t.att)?_t.att.slice():[];
   _tkNotes=_tkNoteList(_t).map(function(n){return {id:n.id||_tkNoteId(),ts:n.ts||0,txt:n.txt||'',done:!!n.done,dts:n.dts||0};});
   _tkRows=_tkRowList(_t).map(function(r){return {id:r.id||_tkRowId(),vno:r.vno||'',co:r.co||'',cono:+r.cono||0};});
-  _tkMode=(((_t&&_t.mode)==='rows')||((_t&&_t.mode)==='simple'))?_t.mode:'full';
+  _tkPRows=_tkPRowList(_t).map(function(r){return {id:r.id||_tkRowId(),ttl:r.ttl||'',co:r.co||'',cono:+r.cono||0,proj:r.proj||''};});
+  _tkMode=(((_t&&_t.mode)==='rows')||((_t&&_t.mode)==='simple')||((_t&&_t.mode)==='proj'))?_t.mode:'full';
   renderTracking();}
 function _tkCloseModal(){_tkAttCleanupNew();_tkMS={};_tkModalId=null;_tkNewGrp='';renderTracking();}
-function _tkAdd(st,grp){_tkAF={owner:'',title:''};_tkMS={};_tkNotes=[];_tkRows=[];_tkMode='full';_tkModalId='__new__';_tkNewStatus=st||'todo';_tkNewGrp=grp||'';_tkNewId=_uid();_tkAtt=[];renderTracking();var ti=document.getElementById('tkmTitle');if(ti)ti.focus();}
+function _tkAdd(st,grp){_tkAF={owner:'',title:''};_tkMS={};_tkNotes=[];_tkRows=[];_tkPRows=[];_tkMode='full';_tkModalId='__new__';_tkNewStatus=st||'todo';_tkNewGrp=grp||'';_tkNewId=_uid();_tkAtt=[];renderTracking();var ti=document.getElementById('tkmTitle');if(ti)ti.focus();}
 function _tkSaveModal(){
   var g=function(id){var e=document.getElementById(id);return e?e.value:'';};
   var title=(g('tkmTitle')||'').trim(),owner=(g('tkmOwner')||'').trim(),docno=(g('tkmDocNo')||'').trim(),contact=(g('tkmContact')||'').trim();
   var coEl=document.querySelector('#tkmCo .tkmsb.on'),co=coEl?(coEl.getAttribute('data-co')||''):'';
-  var mode=(_tkMode==='rows'||_tkMode==='simple')?_tkMode:'full';
+  var mode=(_tkMode==='rows'||_tkMode==='simple'||_tkMode==='proj')?_tkMode:'full';
   var descv=(mode==='simple')?((g('tkmDesc')||'').replace(/\s+$/,'')):'';
   var _iss=_tkCoNoIssuer();
   var rows=_tkRows.filter(function(r){return ((r.vno||'')+'').trim();}).map(function(r){
     /* r.cono ถูกล้างไปแล้วตอนกดเปลี่ยนบริษัท — ที่เหลืออยู่คือเลขเดิมที่ยังใช้ได้ */
     return {id:r.id,vno:((r.vno||'')+'').trim(),co:r.co||'',cono:(r.co?((+r.cono||0)||_iss(r.co)):0)};});
+  var prows=_tkPRows.filter(function(r){return (((r.ttl||'')+'').trim()||((r.proj||'')+'').trim());}).map(function(r){
+    return {id:r.id,ttl:((r.ttl||'')+'').trim(),co:r.co||'',cono:(r.co?((+r.cono||0)||_iss(r.co)):0),proj:((r.proj||'')+'').trim()};});
   if(mode==='rows'){
     if(!rows.length){alert('แบบ 2 — กรุณากรอกเลขที่ Voucher อย่างน้อย 1 แถว');var ve=document.querySelector('.tkvin');if(ve)ve.focus();return;}
+  }else if(mode==='proj'){
+    if(!prows.length){alert('แบบ 4 — กรอกอย่างน้อย 1 แถว (หัวข้อ หรือ รหัสโครงการ)');var pe=document.querySelector('.tkpttl');if(pe)pe.focus();return;}
   }else if(!title){alert((mode==='simple')?'กรุณากรอกหัวข้อ':'กรุณากรอกบรรทัดที่ 4 (คำอธิบาย) — ใช้เป็นชื่อเรื่องหลักของการ์ด');var ti=document.getElementById('tkmTitle');if(ti)ti.focus();return;}
   var pEl=document.querySelector('#tkmPrio .tkmsb.on');
   var prio=pEl?pEl.getAttribute('data-pr'):'med';
@@ -9014,21 +9091,21 @@ function _tkSaveModal(){
   var isNew=(_tkModalId==='__new__'),_dk=_tkDoneKey();loadTrack();
   /* เลขลำดับระดับการ์ด (โหมด 1/3) — คงเลขเดิมถ้าบริษัทไม่เปลี่ยน · เปลี่ยนบริษัท/เพิ่งเลือก = ออกเลขใหม่ */
   var _prevT=isNew?null:_tkFind(_tkModalId),_cono=0;
-  if(mode!=='rows'&&co){
+  if(mode!=='rows'&&mode!=='proj'&&co){
     _cono=(_prevT&&(+_prevT.cono||0)&&((((_prevT.co||'')+'').toUpperCase())===co.toUpperCase()))?(+_prevT.cono):_iss(co);
   }
   /* ไม่มีช่อง Status ในฟอร์มแล้ว — การ์ดใหม่อยู่หัวข้อที่กด “+ Add Task”, การ์ดเดิมคงหัวข้อเดิม (ย้ายด้วยการลาก) */
   var status=isNew?(_tkNewStatus||TK_STAT[0][0]):(((_tkFind(_tkModalId)||{}).status)||TK_STAT[0][0]);
   var notes=_tkNotes.slice();
   if(isNew){
-    var nt={id:(_tkNewId||_uid()),title:title,desc:descv,status:status,prio:prio,assignee:assignee,due:due,proj:proj,owner:owner,contact:contact,docno:docno,cat:cat,doc:doc,grp:grp,hl:hl,tc:tc,notes:notes,co:co,cono:_cono,mode:mode,rows:rows,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done:0,done_dt:(status===_dk)?_tkToday():''};
+    var nt={id:(_tkNewId||_uid()),title:title,desc:descv,status:status,prio:prio,assignee:assignee,due:due,proj:proj,owner:owner,contact:contact,docno:docno,cat:cat,doc:doc,grp:grp,hl:hl,tc:tc,notes:notes,co:co,cono:_cono,mode:mode,rows:rows,prows:prows,att:(_tkAtt?_tkAtt.slice():[]),created:Date.now(),by:((typeof _hubUser==='function')?_hubUser():'')||'',done:0,done_dt:(status===_dk)?_tkToday():''};
     _tkPayApply(nt);
     TRACKDATA.push(nt);
     if(typeof gliLog==='function')gliLog('Added task',title+(assignee&&_ptFind(assignee)?(' · assigned to '+_ptName(_ptFind(assignee))):''));
   }else{
     var t=_tkFind(_tkModalId);if(!t){_tkModalId=null;renderTracking();return;}
     var oldSt=t.status;
-    t.title=title;t.notes=notes;t.desc=descv;t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.owner=owner;t.contact=contact;t.docno=docno;t.cat=cat;t.doc=doc;t.grp=grp;t.hl=hl;t.tc=tc;t.co=co;t.cono=_cono;t.mode=mode;t.rows=rows;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));_tkPayApply(t);
+    t.title=title;t.notes=notes;t.desc=descv;t.status=status;t.prio=prio;t.assignee=assignee;t.due=due;t.proj=proj;t.owner=owner;t.contact=contact;t.docno=docno;t.cat=cat;t.doc=doc;t.grp=grp;t.hl=hl;t.tc=tc;t.co=co;t.cono=_cono;t.mode=mode;t.rows=rows;t.prows=prows;t.att=(_tkAtt?_tkAtt.slice():(t.att||[]));_tkPayApply(t);
     /* v10.72: การ์ดที่เก็บเข้า Report งานที่เสร็จแล้ว — แก้ไขรายละเอียดได้ แต่ต้องไม่ล้างวันที่เสร็จทิ้ง
        (เดิมกฎนี้ผูกกับหัวข้อ "Done" ของบอร์ดอย่างเดียว งานที่ done แต่ค้างอยู่หัวข้ออื่นจึงโดนล้าง) */
     if(!t.done){if(status===_dk&&oldSt!==_dk)t.done_dt=_tkToday();if(status!==_dk)t.done_dt='';}
@@ -9086,6 +9163,14 @@ function _tkBind(){
     if((b=cl(e,'#tkMDone'))){var _mid=_tkModalId;if(!_mid||_mid==='__new__')return;_tkSaveModal();if(_tkModalId===null)_tkDoneMark(_mid);return;}
     if((b=cl(e,'[data-tkmode]'))){_tkModeSet(b.getAttribute('data-tkmode'));return;}
     if((b=cl(e,'#tkvAdd'))){_tkRowAdd();return;}
+    if((b=cl(e,'#tkpAdd'))){_tkPRowAdd();return;}
+    if((b=cl(e,'[data-pdel]'))){_tkPRowDel(b.getAttribute('data-pdel'));return;}
+    if((b=cl(e,'[data-pco]'))){var _pp2=(b.getAttribute('data-pco')||'').split('|'),_pr2=_tkPRowFind(_pp2[0]);
+      if(_pr2){var _wasP=((_pr2.co||'')+'').toUpperCase();_pr2.co=_pp2[1];
+        if(_wasP!==(((_pp2[1]||'')+'').toUpperCase()))_pr2.cono=0;/* เปลี่ยนบริษัท = ออกเลขใหม่ตอนบันทึก */
+        var _pws=b.parentNode.querySelectorAll('[data-pco]');
+        for(var _pi=0;_pi<_pws.length;_pi++)_pws[_pi].classList.toggle('on',(_pws[_pi].getAttribute('data-pco')||'').split('|')[1]===_pp2[1]);}
+      return;}
     if((b=cl(e,'[data-vdel]'))){_tkRowDel(b.getAttribute('data-vdel'));return;}
     if((b=cl(e,'[data-vco]'))){var _vp=(b.getAttribute('data-vco')||'').split('|'),_vr2=_tkRowFind(_vp[0]);
       if(_vr2){var _wasCo=((_vr2.co||'')+'').toUpperCase();_vr2.co=_vp[1];
@@ -9108,7 +9193,7 @@ function _tkBind(){
     if((b=cl(e,'[data-edit]'))){_tkOpen(b.getAttribute('data-edit'));return;}
     if(e.target&&e.target.classList&&e.target.classList.contains('tkmodal')){_tkCloseModal();return;}
   });
-  pg.addEventListener('input',function(e){if(cl(e,'#page-tkr'))return;var _vn=e.target&&e.target.getAttribute&&e.target.getAttribute('data-vno');if(_vn){var _vr3=_tkRowFind(_vn);if(_vr3)_vr3.vno=e.target.value;return;}var _nt=e.target&&e.target.getAttribute&&e.target.getAttribute('data-ntx');if(_nt){var _n=_tkNoteFind(_tkNotes,_nt);if(_n)_n.txt=e.target.value;return;}if(e.target&&e.target.id==='tkmProj'){if(_tkPmT)clearTimeout(_tkPmT);_tkPmT=setTimeout(function(){_tkPmApply(false);},350);return;}if(e.target&&e.target.id==='tkSearch'){_tkQ=e.target.value;_tkDeb(function(){_tkRefocus=true;renderTracking();});}});
+  pg.addEventListener('input',function(e){if(cl(e,'#page-tkr'))return;var _vn=e.target&&e.target.getAttribute&&e.target.getAttribute('data-vno');if(_vn){var _vr3=_tkRowFind(_vn);if(_vr3)_vr3.vno=e.target.value;return;}var _pt=e.target&&e.target.getAttribute&&e.target.getAttribute('data-pttl');if(_pt){var _pr3=_tkPRowFind(_pt);if(_pr3)_pr3.ttl=e.target.value;return;}var _pj=e.target&&e.target.getAttribute&&e.target.getAttribute('data-pprj');if(_pj){var _pr4=_tkPRowFind(_pj);if(_pr4){_pr4.proj=e.target.value;_tkPRowNameUpd(_pr4);}return;}var _nt=e.target&&e.target.getAttribute&&e.target.getAttribute('data-ntx');if(_nt){var _n=_tkNoteFind(_tkNotes,_nt);if(_n)_n.txt=e.target.value;return;}if(e.target&&e.target.id==='tkmProj'){if(_tkPmT)clearTimeout(_tkPmT);_tkPmT=setTimeout(function(){_tkPmApply(false);},350);return;}if(e.target&&e.target.id==='tkSearch'){_tkQ=e.target.value;_tkDeb(function(){_tkRefocus=true;renderTracking();});}});
   pg.addEventListener('keydown',function(e){if(e.key!=='Enter')return;var el=e.target;if(!el)return;
     if(el.getAttribute&&el.getAttribute('data-vno')){e.preventDefault();_tkRowAdd();return;}
     if(el.id==='tkckNew'){e.preventDefault();_tkNoteAdd();return;}
@@ -34284,6 +34369,57 @@ body.sbfold .sbshow-btn{display:inline-flex}
 .tkpayln{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;color:#0A463E;
   font-variant-numeric:tabular-nums;display:block;line-height:1.5}
 .tkpayln b{font-weight:800}
+/* ===== v15.0: Tracking — layout picker as four equal cards, and layout 4's rows ===== */
+/* four equal boxes, two per line — every card is the same size whatever its wording */
+#page-tk .tkmodesw{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:7px!important;margin:7px 0 10px!important;align-items:stretch}
+#page-tk .tkmodeb{display:flex!important;align-items:flex-start;gap:8px;text-align:left;width:100%;
+  min-height:50px;padding:9px 11px!important;font-size:11.5px;border-radius:10px;
+  border:1.5px solid var(--line,#E6E0D4);background:#fff;color:var(--ink2,#4A5563);cursor:pointer;transition:.12s}
+#page-tk .tkmodeb:hover{border-color:var(--brand,#0E5C52)}
+#page-tk .tkmodeb.on{border-color:var(--brand,#0E5C52);background:var(--brand,#0E5C52);color:#fff}
+#page-tk .tkmodeic{flex:none;font-size:14px;line-height:1.25}
+#page-tk .tkmodetx{display:flex;flex-direction:column;gap:2px;min-width:0}
+#page-tk .tkmodet{font-size:11.5px;font-weight:800;line-height:1.3}
+#page-tk .tkmodes{font-size:9.5px;font-weight:600;line-height:1.4;opacity:.72;white-space:normal}
+@media(max-width:560px){#page-tk .tkmodesw{grid-template-columns:1fr!important}}
+
+/* layout 4 — one project per line, laid out across */
+#page-tk .tkmcard.wide{width:840px}
+#page-tk .tkphd,#page-tk .tkprow{display:grid;
+  grid-template-columns:19px minmax(0,1.35fr) 86px 118px minmax(0,1.6fr) 20px;
+  align-items:center;column-gap:8px}
+#page-tk .tkphd{font-size:10px;font-weight:800;color:var(--muted,#8C8676);margin-bottom:5px;letter-spacing:.01em}
+#page-tk .tkphd .tkphn{text-align:center}
+#page-tk .tkprow{margin-bottom:7px}
+#page-tk .tkprow:last-of-type{margin-bottom:2px}
+#page-tk .tkpin{width:100%;height:32px;box-sizing:border-box;font-family:inherit;font-size:12.5px;
+  padding:0 10px;border:1px solid var(--line,#E6E0D4);border-radius:9px;color:var(--ink,#141C29);background:#fff}
+#page-tk .tkpin:focus{outline:none;border-color:var(--brand,#0E5C52);box-shadow:0 0 0 2px rgba(14,92,82,.15)}
+#page-tk .tkpprj{font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:12px}
+#page-tk .tkprow .tkvco{display:flex;gap:5px}
+#page-tk .tkprow .tkvcob{flex:1;height:32px;box-sizing:border-box;padding:0;font-size:10.5px}
+#page-tk .tkpnm{min-width:0;font-size:11.5px;font-weight:700;color:var(--brand-d,#0A463E);
+  background:var(--brand-t,#E6F0EC);border:1px solid #CFE3DC;border-radius:9px;height:32px;line-height:30px;
+  padding:0 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#page-tk .tkpnm.none{color:var(--muted,#8C8676);background:#FAF8F4;border-style:dashed;font-weight:600}
+#page-tk .tkprow .tkvx{justify-self:center}
+@media(max-width:700px){
+  #page-tk .tkphd{display:none}
+  #page-tk .tkprow{grid-template-columns:19px minmax(0,1fr) 20px;row-gap:5px}
+  #page-tk .tkprow .tkvco,#page-tk .tkpprj,#page-tk .tkpnm{grid-column:2}
+  #page-tk .tkprow .tkvx{grid-row:1}
+}
+
+/* layout 4 on a Kanban card */
+.tkcardp{display:flex;flex-direction:column;gap:4px;margin-bottom:4px}
+.tkcp{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;line-height:1.45}
+.tkcpt{font-size:13px;font-weight:700;color:var(--ink,#141C29)}
+.tkcpc{font-size:11.5px;font-weight:800;color:var(--brand-d,#0A463E);font-family:"IBM Plex Mono",monospace}
+.tkcpn{flex:1 0 100%;font-size:11px;font-weight:600;color:var(--ink2,#4A5563);line-height:1.45;
+  overflow-wrap:break-word;word-break:break-word;
+  /* project names run long — two lines on the card, the full name is in the tooltip */
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 </style>
 <script id="jvSidesJs">
 /* ===== v14.6: Joint Venture — name each side's entry table for what it holds,
