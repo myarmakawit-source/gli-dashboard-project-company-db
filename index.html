@@ -9946,6 +9946,21 @@ function _gmBriefHTML(){
 
   return h+'</div>';
 }
+/* เปิดเธรดใน Gmail
+   เดิมเอาอีเมลไปใส่ในช่อง /mail/u/... ซึ่งรับได้แค่ "ลำดับบัญชี" (0,1,2) ไม่ใช่อีเมล
+   พอ encodeURIComponent ทำให้ @ กลายเป็น %40 Gmail จึงหาบัญชีไม่เจอแล้วคืน Temporary Error (404)
+   ที่ถูกคือส่งอีเมลผ่านพารามิเตอร์ authuser ให้ Google เลือกบัญชีเอง */
+function _gmThreadUrl(tid){
+  tid=((tid||'')+'').trim();
+  var acct=((_gmAcct||'')+'').trim();
+  var base=acct?('https://mail.google.com/mail/?authuser='+encodeURIComponent(acct))
+               :'https://mail.google.com/mail/u/0/';
+  return base+'#all/'+encodeURIComponent(tid);
+}
+function _gmOpenThread(tid){
+  if(!tid)return;
+  try{window.open(_gmThreadUrl(tid),'_blank','noopener');}catch(e){}
+}
 function _gmCopyDigest(){
   var t=_gmDigest();
   var ok=function(){_gmNote='คัดลอกแล้ว '+_gmFiltered().length+' ฉบับ — เอาไปวางในแชท Claude แล้วให้สรุปได้เลย';renderGm();};
@@ -10071,7 +10086,7 @@ function _gmBind(){
     if((b=cl('[data-wdel]'))){var _wd=b.getAttribute('data-wdel')||'';
       GMCFG.watch=_gmWatchOwn().filter(function(x){return x!==_wd;});_gmSave();renderGm();return;}
     if((b=cl('[data-cat]'))){_gmFC=b.getAttribute('data-cat')||'';renderGm();return;}
-    if((b=cl('[data-open]'))){window.open('https://mail.google.com/mail/u/'+encodeURIComponent(_gmAcct||0)+'/#all/'+encodeURIComponent(b.getAttribute('data-open')),'_blank','noopener');return;}
+    if((b=cl('[data-open]'))){_gmOpenThread(b.getAttribute('data-open'));return;}
   });
   pg.addEventListener('change',function(e){
     var el=e.target;if(!el||!el.id)return;
