@@ -9653,16 +9653,16 @@ var GMCFG={};try{var _gm0=JSON.parse(localStorage.getItem('gli_gm')||'{}');if(_g
 function _gmSave(){try{localStorage.setItem('gli_gm',JSON.stringify(GMCFG));}catch(e){}}
 var _gmTok=null,_gmExp=0,_gmMsgs=[],_gmBusy='',_gmErr='',_gmNote='',_gmAcct='',_gmTC=null,_gmFC='',_gmLoaded=false;
 var GM_CAT=[
- ['tax','Tax · Revenue Dept','#B45309','#FEF3C7',/สรรพากร|ภ\.?ง\.?ด|ภ\.?พ\.?\s?30|ภาษี|rd\.go\.th|e-?filing|withholding|vat|หัก ?ณ ?ที่จ่าย/i],
- ['audit','Auditor · Financial statements','#BE123C','#FFE4E6',/ผู้สอบบัญชี|auditor|งบการเงิน|financial statement|dbd|กรมพัฒนาธุรกิจ|นำส่งงบ|บอจ|สบช/i],
- ['bank','Banking · Finance','#1D5FAE','#E7EFF8',/ธนาคาร|\bbank\b|โอนเงิน|statement|เช็ค|cheque|bbl|kbank|kasikorn|scb|ktb|\bttb\b|\buob\b|cimb|gsb|exim|เงินเข้า|เงินออก|สินเชื่อ|ค้ำประกัน/i],
- ['inv','Invoices · Billing','#15803D','#E7F6EC',/ใบแจ้งหนี้|invoice|ใบเสร็จ|receipt|ใบกำกับ|วางบิล|billing|ใบส่งของ|quotation|ใบเสนอราคา|po\b|purchase order/i],
- ['bid','Bidding · Procurement','#7C3AED','#F3E8FF',/ประกวดราคา|e-?gp|จัดซื้อ|จัดจ้าง|ประมูล|\btor\b|ยื่นซอง|เสนอราคา|\bbid\b|procurement|สัญญาจ้าง/i],
- ['gov','Government agencies','#0E7490','#E0F2FE',/go\.th|or\.th|กรมชลประทาน|การไฟฟ้า|การประปา|กระทรวง|เทศบาล|อบจ|อบต|องค์การบริหารส่วน|สำนักงานเขต/i],
- ['proj','Projects · Site','#0F766E','#D9F2EE',/GLI\d{5}|BID\d{3}|โครงการ|หน้างาน|ส่งมอบงาน|ตรวจรับ|งวดงาน|site/i],
- ['sys','System · Notifications','#475569','#F1F5F9',/no-?reply|noreply|notification|newsletter|alert|security|verify|\botp\b|ยืนยันตัวตน|subscription|unsubscribe/i]
+ ['tax','ภาษี · สรรพากร','#B45309','#FEF3C7',/สรรพากร|ภ\.?ง\.?ด|ภ\.?พ\.?\s?30|ภาษี|rd\.go\.th|e-?filing|withholding|vat|หัก ?ณ ?ที่จ่าย/i],
+ ['audit','ผู้สอบบัญชี · งบการเงิน','#BE123C','#FFE4E6',/ผู้สอบบัญชี|auditor|งบการเงิน|financial statement|dbd|กรมพัฒนาธุรกิจ|นำส่งงบ|บอจ|สบช/i],
+ ['bank','ธนาคาร · การเงิน','#1D5FAE','#E7EFF8',/ธนาคาร|\bbank\b|โอนเงิน|statement|เช็ค|cheque|bbl|kbank|kasikorn|scb|ktb|\bttb\b|\buob\b|cimb|gsb|exim|เงินเข้า|เงินออก|สินเชื่อ|ค้ำประกัน/i],
+ ['inv','ใบแจ้งหนี้ · วางบิล','#15803D','#E7F6EC',/ใบแจ้งหนี้|invoice|ใบเสร็จ|receipt|ใบกำกับ|วางบิล|billing|ใบส่งของ|quotation|ใบเสนอราคา|po\b|purchase order/i],
+ ['bid','ประมูล · จัดซื้อจัดจ้าง','#7C3AED','#F3E8FF',/ประกวดราคา|e-?gp|จัดซื้อ|จัดจ้าง|ประมูล|\btor\b|ยื่นซอง|เสนอราคา|\bbid\b|procurement|สัญญาจ้าง/i],
+ ['gov','หน่วยงานราชการ','#0E7490','#E0F2FE',/go\.th|or\.th|กรมชลประทาน|การไฟฟ้า|การประปา|กระทรวง|เทศบาล|อบจ|อบต|องค์การบริหารส่วน|สำนักงานเขต/i],
+ ['proj','โครงการ · หน้างาน','#0F766E','#D9F2EE',/GLI\d{5}|BID\d{3}|โครงการ|หน้างาน|ส่งมอบงาน|ตรวจรับ|งวดงาน|site/i],
+ ['sys','ระบบ · แจ้งเตือน','#475569','#F1F5F9',/no-?reply|noreply|notification|newsletter|alert|security|verify|\botp\b|ยืนยันตัวตน|subscription|unsubscribe/i]
 ];
-var GM_OTHER=['other','Other','#8C8676','#F0EDE6',null];
+var GM_OTHER=['other','อื่น ๆ','#8C8676','#F0EDE6',null];
 function _gmText(m){return ((m&&m.subj)||'')+' \n'+((m&&m.snip)||'')+' \n'+((m&&m.body)||'');}
 function _gmCat(m){var hay=(m.subj+' '+m.snip+' '+(m.body||'').slice(0,1500)+' '+m.email+' '+m.from);
   for(var i=0;i<GM_CAT.length;i++)if(GM_CAT[i][4].test(hay))return GM_CAT[i];return GM_OTHER;}
@@ -9868,12 +9868,12 @@ function _gmDigest(){
 
 /* ---- คำที่บอกว่าเรื่องนี้ต้องทำ/ต้องตอบ ---- */
 var GM_ACT=[
- [/ด่วนที่สุด|ด่วนมาก|\burgent\b|โปรดดำเนินการโดยด่วน/i,'urgent'],
- [/ภายในวันที่|ภายในวัน|ครบกำหนด|เกินกำหนด|\boverdue\b|due ?date|deadline|หมดเขต|วันสุดท้าย/i,'has a deadline'],
- [/กรุณา(ส่ง|ชำระ|ดำเนินการ|ยืนยัน|ตอบ|แจ้ง|จัดส่ง)|ขอให้(ส่ง|ชำระ|ดำเนินการ|จัดส่ง)|โปรด(ส่ง|ชำระ|ยืนยัน|ตอบ|ตรวจสอบ)|action required|please (send|confirm|reply|review|sign)/i,'asks us to act'],
- [/ขออนุมัติ|รออนุมัติ|โปรดอนุมัติ|รอการอนุมัติ|approval|approve|ลงนาม|เซ็น|sign(ature)?\b/i,'approval / signature'],
- [/ทวงถาม|ติดตาม(เรื่อง|เอกสาร|การชำระ)|follow ?up|reminder|แจ้งเตือน(การ|ให้)|ยังไม่ได้รับ/i,'chasing us'],
- [/ตอบกลับ|reply|โปรดแจ้งกลับ|รอคำตอบ|ชี้แจง|สอบถาม/i,'awaiting a reply']
+ [/ด่วนที่สุด|ด่วนมาก|\burgent\b|โปรดดำเนินการโดยด่วน/i,'ด่วน'],
+ [/ภายในวันที่|ภายในวัน|ครบกำหนด|เกินกำหนด|\boverdue\b|due ?date|deadline|หมดเขต|วันสุดท้าย/i,'มีกำหนดเวลา'],
+ [/กรุณา(ส่ง|ชำระ|ดำเนินการ|ยืนยัน|ตอบ|แจ้ง|จัดส่ง)|ขอให้(ส่ง|ชำระ|ดำเนินการ|จัดส่ง)|โปรด(ส่ง|ชำระ|ยืนยัน|ตอบ|ตรวจสอบ)|action required|please (send|confirm|reply|review|sign)/i,'ขอให้ดำเนินการ'],
+ [/ขออนุมัติ|รออนุมัติ|โปรดอนุมัติ|รอการอนุมัติ|approval|approve|ลงนาม|เซ็น|sign(ature)?\b/i,'รออนุมัติ · ลงนาม'],
+ [/ทวงถาม|ติดตาม(เรื่อง|เอกสาร|การชำระ)|follow ?up|reminder|แจ้งเตือน(การ|ให้)|ยังไม่ได้รับ/i,'ติดตาม · ทวงถาม'],
+ [/ตอบกลับ|reply|โปรดแจ้งกลับ|รอคำตอบ|ชี้แจง|สอบถาม/i,'รอคำตอบ']
 ];
 function _gmAction(m){
   var hay=_gmText(m);
@@ -9902,18 +9902,18 @@ function _gmWatchAuto(){
     var T=(typeof TRACKDATA!=='undefined'&&Array.isArray(TRACKDATA))?TRACKDATA:[];
     for(var i=0;i<T.length&&out.length<80;i++){
       var t=T[i];if(!t||t.done)continue;
-      push(t.proj,'open project');
-      push(t.docno,'document being chased');
+      push(t.proj,'โครงการที่ยังค้างอยู่');
+      push(t.docno,'เลขเอกสารที่กำลังตาม');
       var pr=(typeof _tkPRowList==='function')?_tkPRowList(t):[];
-      for(var j=0;j<pr.length;j++)push(pr[j].proj,'open project');
+      for(var j=0;j<pr.length;j++)push(pr[j].proj,'โครงการที่ยังค้างอยู่');
       var rw=(typeof _tkRowList==='function')?_tkRowList(t):[];
-      for(var k=0;k<rw.length;k++)push(rw[k].vno,'document being chased');
+      for(var k=0;k<rw.length;k++)push(rw[k].vno,'เลขเอกสารที่กำลังตาม');
     }
   }catch(e){}
   return out;
 }
 function _gmWatchAll(){
-  var out=_gmWatchOwn().map(function(t){return {t:t,src:'added by you'};});
+  var out=_gmWatchOwn().map(function(t){return {t:t,src:'คำที่คุณใส่เอง'};});
   var seen={};out.forEach(function(x){seen[x.t.toUpperCase()]=1;});
   _gmWatchAuto().forEach(function(x){if(!seen[x.t.toUpperCase()]){seen[x.t.toUpperCase()]=1;out.push(x);}});
   return out;
@@ -9998,11 +9998,11 @@ function _gmDocReq(m){
 /* ---- แผงสรุป ---- */
 function _gmLine(m,extra){
   var c=_gmCat(m);
-  return '<div class="gmbl" data-open="'+_eatt(m.thread)+'" title="Open in Gmail">'
+  return '<div class="gmbl" data-open="'+_eatt(m.thread)+'" title="คลิกเพื่อเปิดใน Gmail">'
     +'<span class="gmbtag" style="background:'+c[3]+';color:'+c[2]+'">'+esc(c[1])+'</span>'
     +'<span class="gmbsub">'+esc(m.subj)+'</span>'
     +'<span class="gmbfrom">'+esc(m.from)+'</span>'
-    +(m.unread?'<span class="gmnew">new</span>':'')
+    +(m.unread?'<span class="gmnew">ใหม่</span>':'')
     +'<span class="gmbdate">'+esc(_gmDate(m.ts))+'</span>'
     +(extra||'')+'</div>';
 }
@@ -10020,18 +10020,18 @@ function _gmBriefHTML(){
   /* 0 — documents we are being asked to issue */
   var req=[];
   for(i=0;i<L.length;i++){var rq=_gmDocReq(L[i]);if(rq)req.push({m:L[i],r:rq});}
-  h+='<div class="gmbsec doc"><div class="gmbh"><span class="gmbi">\uD83D\uDCC4</span>Documents requested of us'
+  if(req.length){
+  h+='<div class="gmbsec doc"><div class="gmbh"><span class="gmbi">\uD83D\uDCC4</span>เอกสารที่เขาขอให้เราออก'
     +'<span class="gmbn">'+req.length+'</span>'
-    +'<span class="gmbhint">invoice · receipt · tax invoice · WHT certificate …</span></div>';
-  if(!req.length)h+='<div class="gmbempty">No message in this period asks us to issue a document.</div>';
-  else req.slice(0,14).forEach(function(x){
+    +'<span class="gmbhint">ใบแจ้งหนี้ · ใบเสร็จ · ใบกำกับภาษี · หนังสือรับรองหัก ณ ที่จ่าย</span></div>';
+  req.slice(0,14).forEach(function(x){
     var r=x.r,m=x.m;
-    h+='<div class="gmdoc" data-open="'+_eatt(m.thread)+'" title="Open in Gmail">'
+    h+='<div class="gmdoc" data-open="'+_eatt(m.thread)+'" title="คลิกเพื่อเปิดใน Gmail">'
       +'<div class="gmdoch">'
-        +r.kinds.slice(0,3).map(function(k){return '<span class="gmdockind" style="background:'+k[4]+';color:'+k[3]+'">'+esc(k[1])+'</span>';}).join('')
-        +(r.chase?'<span class="gmdocchase">chasing us</span>':'')
+        +r.kinds.slice(0,3).map(function(k){return '<span class="gmdockind" style="background:'+k[4]+';color:'+k[3]+'" title="'+_eatt(k[1])+'">'+esc(k[2])+'</span>';}).join('')
+        +(r.chase?'<span class="gmdocchase">ตามเอกสาร</span>':'')
         +'<span class="gmbsub">'+esc(m.subj)+'</span>'
-        +(m.unread?'<span class="gmnew">new</span>':'')
+        +(m.unread?'<span class="gmnew">ใหม่</span>':'')
         +'<span class="gmbdate">'+esc(_gmDate(m.ts))+'</span>'
       +'</div>'
       +'<div class="gmdocfrom">'+esc(m.from)+' &lt;'+esc(m.email)+'&gt;'+(m.natt?(' \u00b7 \uD83D\uDCCE '+m.natt):'')+'</div>'
@@ -10041,56 +10041,56 @@ function _gmBriefHTML(){
          if(r.money.length)f.push('<span class="gmf money">\u0e3f '+esc(r.money.join(' \u00b7 '))+'</span>');
          if(r.projs.length)f.push('<span class="gmf proj">'+esc(r.projs.join(' \u00b7 '))+'</span>');
          if(r.docs.length)f.push('<span class="gmf doc">'+esc(r.docs.join(' \u00b7 '))+'</span>');
-         if(r.tax)f.push('<span class="gmf tax">Tax ID '+esc(r.tax)+'</span>');
-         if(r.due)f.push('<span class="gmf due">due '+esc(r.due)+'</span>');
+         if(r.tax)f.push('<span class="gmf tax">เลขผู้เสียภาษี '+esc(r.tax)+'</span>');
+         if(r.due)f.push('<span class="gmf due">ภายใน '+esc(r.due)+'</span>');
          return f.length?('<div class="gmdocf">'+f.join('')+'</div>'):'';
        })()
     +'</div>';});
-  if(req.length>14)h+='<div class="gmbmore">+ '+(req.length-14)+' more</div>';
-  h+='</div>';
+  if(req.length>14)h+='<div class="gmbmore">+ อีก '+(req.length-14)+' ฉบับ</div>';
+  h+='</div>';}
 
   /* 1 — เรื่องที่รออยู่ */
-  h+='<div class="gmbsec watch"><div class="gmbh"><span class="gmbi">⭐</span>What you are waiting for'
+  h+='<div class="gmbsec watch"><div class="gmbh"><span class="gmbi">⭐</span>เรื่องที่คุณรออยู่'
     +'<span class="gmbn">'+watch.length+'</span>'
-    +'<button class="gmbtn ghost" id="gmWatchCfg" type="button">⚙ Watchlist ('+W.length+')</button></div>';
+    +'<button class="gmbtn ghost" id="gmWatchCfg" type="button">⚙ คำที่เฝ้าดู ('+W.length+')</button></div>';
   if(GMCFG.watchOpen){
     h+='<div class="gmwbox">';
-    h+='<div class="gmwadd"><input class="gmin wide" id="gmWatchIn" type="text" placeholder="A term to watch for — GLI26010 · ภ.พ.30 · invoice number · a supplier name — then press Enter" autocomplete="off">'
-      +'<button class="gmbtn primary" id="gmWatchAdd" type="button">＋ Add</button></div>';
+    h+='<div class="gmwadd"><input class="gmin wide" id="gmWatchIn" type="text" placeholder="คำที่อยากให้จับ เช่น GLI26010 · ภ.พ.30 · เลขใบแจ้งหนี้ · ชื่อคู่ค้า แล้วกด Enter" autocomplete="off">'
+      +'<button class="gmbtn primary" id="gmWatchAdd" type="button">＋ เพิ่ม</button></div>';
     var own=_gmWatchOwn();
     h+='<div class="gmwchips">'+(own.length?own.map(function(t){
-        return '<span class="gmwchip">'+esc(t)+'<button class="gmwx" data-wdel="'+_eatt(t)+'" type="button" title="Remove">✕</button></span>';
-      }).join(''):'<span class="gmwnone">No terms of your own yet — the ones below are taken automatically from the work still open on the board</span>')+'</div>';
+        return '<span class="gmwchip">'+esc(t)+'<button class="gmwx" data-wdel="'+_eatt(t)+'" type="button" title="เอาออก">✕</button></span>';
+      }).join(''):'<span class="gmwnone">ยังไม่ได้ใส่คำของตัวเอง — ด้านล่างดึงจากงานที่ยังค้างบนบอร์ดให้อัตโนมัติ</span>')+'</div>';
     var auto=_gmWatchAuto();
     h+='<label class="gmchk"><input type="checkbox" id="gmWatchAuto"'+((GMCFG.watchAuto===false)?'':' checked')+'> '
-      +'Watch the project codes and document numbers of every task still open on the Tracking board ('+auto.length+')</label>';
+      +'เฝ้าดูรหัสโครงการและเลขเอกสารของงานที่ยังค้างบนบอร์ด Tracking ให้อัตโนมัติ ('+auto.length+' รายการ)</label>';
     if(auto.length)h+='<div class="gmwchips auto">'+auto.slice(0,24).map(function(x){
       return '<span class="gmwchip auto" title="'+_eatt(x.src)+'">'+esc(x.t)+'</span>';}).join('')
-      +(auto.length>24?('<span class="gmwnone">+ '+(auto.length-24)+' more</span>'):'')+'</div>';
-    h+='<div class="gmnote">These terms stay on this device — they are not synced to the cloud</div>';
+      +(auto.length>24?('<span class="gmwnone">+ อีก '+(auto.length-24)+'</span>'):'')+'</div>';
+    h+='<div class="gmnote">คำเหล่านี้เก็บไว้ในเครื่องนี้เท่านั้น ไม่ซิงค์ขึ้นคลาวด์</div>';
     h+='</div>';
   }
-  if(!W.length)h+='<div class="gmbempty">No watch terms yet — press “Watchlist” and add what you are waiting on: a project code, an invoice number, a supplier.</div>';
-  else if(!watch.length)h+='<div class="gmbempty">Nothing in this period matches your watch terms.</div>';
+  if(!W.length)h+='<div class="gmbempty">ยังไม่ได้ตั้งคำที่เฝ้าดู — กด “คำที่เฝ้าดู” แล้วใส่เรื่องที่กำลังรอ เช่น รหัสโครงการ เลขใบแจ้งหนี้ ชื่อคู่ค้า</div>';
+  else if(!watch.length)h+='<div class="gmbempty">ช่วงนี้ไม่มีอีเมลที่ตรงกับคำที่เฝ้าดู</div>';
   else watch.slice(0,12).forEach(function(x){
     h+=_gmLine(x.m,'<span class="gmbwhy">'+x.hit.slice(0,3).map(function(w){return '⭐ '+esc(w.t);}).join(' ')+'</span>');});
-  if(watch.length>12)h+='<div class="gmbmore">+ '+(watch.length-12)+' more matching your watch terms</div>';
+  if(watch.length>12)h+='<div class="gmbmore">+ อีก '+(watch.length-12)+' ฉบับที่ตรงกับคำที่เฝ้าดู</div>';
   h+='</div>';
 
   /* 2 — ต้องทำ / ต้องตอบ */
-  h+='<div class="gmbsec act"><div class="gmbh"><span class="gmbi">⏰</span>Looks like it needs action or a reply<span class="gmbn">'+act.length+'</span></div>';
-  if(!act.length)h+='<div class="gmbempty">Nothing carries a deadline or a request to act.</div>';
-  else act.slice(0,12).forEach(function(x){
+  if(act.length){
+  h+='<div class="gmbsec act"><div class="gmbh"><span class="gmbi">⏰</span>ต้องทำ หรือ ต้องตอบ<span class="gmbn">'+act.length+'</span></div>';
+  act.slice(0,12).forEach(function(x){
     h+=_gmLine(x.m,'<span class="gmbwhy act">'+x.why.slice(0,2).map(function(w){return esc(w);}).join(' · ')
       +(x.due?(' → '+esc(x.due)):'')+'</span>');});
-  if(act.length>12)h+='<div class="gmbmore">+ '+(act.length-12)+' more</div>';
-  h+='</div>';
+  if(act.length>12)h+='<div class="gmbmore">+ อีก '+(act.length-12)+' ฉบับ</div>';
+  h+='</div>';}
 
   /* 3 — สรุปรายหมวด */
   var g={},o=[];
   L.forEach(function(m){var c=_gmCat(m);if(!g[c[0]]){g[c[0]]={c:c,l:[]};o.push(c[0]);}g[c[0]].l.push(m);});
   o.sort(function(a,b){return g[b].l.length-g[a].l.length;});
-  h+='<div class="gmbsec cats"><div class="gmbh"><span class="gmbi">📊</span>What came in<span class="gmbn">'+o.length+' subjects</span></div>';
+  h+='<div class="gmbsec cats"><div class="gmbh"><span class="gmbi">📊</span>มีเรื่องอะไรเข้ามาบ้าง<span class="gmbn">'+o.length+' หมวด</span></div>';
   o.forEach(function(k){
     var G=g[k],c=G.c,un=G.l.filter(function(m){return m.unread;}).length;
     var sd={},sl=[];
@@ -10098,13 +10098,13 @@ function _gmBriefHTML(){
     sl.sort(function(a,b){return sd[b]-sd[a];});
     h+='<div class="gmbcat" style="--c:'+c[2]+';--cb:'+c[3]+'">'
       +'<div class="gmbcath"><span class="gmbcatn">'+esc(c[1])+'</span>'
-        +'<span class="gmbcatc">'+G.l.length+(G.l.length===1?' message':' messages')+(un?(' · '+un+' unread'):'')+'</span>'
-        +'<button class="gmbcatb" data-cat="'+c[0]+'" type="button">Show only this →</button></div>'
-      +'<div class="gmbcats">Top senders: '+esc(sl.slice(0,3).map(function(n){return n+' ('+sd[n]+')';}).join(' · '))+'</div>'
+        +'<span class="gmbcatc">'+G.l.length+' ฉบับ'+(un?(' · ยังไม่อ่าน '+un):'')+'</span>'
+        +'<button class="gmbcatb" data-cat="'+c[0]+'" type="button">ดูเฉพาะหมวดนี้ →</button></div>'
+      +'<div class="gmbcats">ผู้ส่งหลัก: '+esc(sl.slice(0,3).map(function(n){return n+' ('+sd[n]+')';}).join(' · '))+'</div>'
       +'<ul class="gmbul">'+G.l.slice(0,3).map(function(m){
-          return '<li data-open="'+_eatt(m.thread)+'" title="Open in Gmail">'+(m.unread?'<b>':'')+esc(m.subj)+(m.unread?'</b>':'')+'</li>';
+          return '<li data-open="'+_eatt(m.thread)+'" title="คลิกเพื่อเปิดใน Gmail">'+(m.unread?'<b>':'')+esc(m.subj)+(m.unread?'</b>':'')+'</li>';
         }).join('')+'</ul>'
-      +(G.l.length>3?('<div class="gmbmore">+ '+(G.l.length-3)+' more in this subject</div>'):'')
+      +(G.l.length>3?('<div class="gmbmore">+ อีก '+(G.l.length-3)+' ฉบับในหมวดนี้</div>'):'')
     +'</div>';
   });
   h+='</div>';
@@ -10195,16 +10195,18 @@ function renderGm(){
       var senders={},cats={};
       L.forEach(function(m){senders[m.email]=1;var c=_gmCat(m);cats[c[0]]=(cats[c[0]]||0)+1;});
       h+='<div class="gmkpi">'
-       +'<div class="gmk" style="--k:#0E5C52"><div class="gmkn">'+L.length+'</div><div class="gmkl">messages</div></div>'
-       +'<div class="gmk" style="--k:#1D4ED8"><div class="gmkn">'+un+'</div><div class="gmkl">unread</div></div>'
-       +'<div class="gmk" style="--k:#B45309"><div class="gmkn">'+Object.keys(senders).length+'</div><div class="gmkl">senders</div></div>'
-       +'<div class="gmk" style="--k:#7C3AED"><div class="gmkn">'+Object.keys(cats).length+'</div><div class="gmkl">subjects</div></div></div>';
+       +'<div class="gmk" style="--k:#0E5C52"><div class="gmkn">'+L.length+'</div><div class="gmkl">อีเมลทั้งหมด</div></div>'
+       +'<div class="gmk" style="--k:#1D4ED8"><div class="gmkn">'+un+'</div><div class="gmkl">ยังไม่อ่าน</div></div>'
+       +'<div class="gmk" style="--k:#B45309"><div class="gmkn">'+Object.keys(senders).length+'</div><div class="gmkl">ผู้ส่ง</div></div>'
+       +'<div class="gmk" style="--k:#7C3AED"><div class="gmkn">'+Object.keys(cats).length+'</div><div class="gmkl">หมวดเรื่อง</div></div></div>';
       h+='<div class="gmtool"><button class="gmbtn primary" id="gmCopy" type="button">📋 Copy for Claude to summarise ('+F.length+')</button>'
        +'<button class="gmbtn" id="gmDl" type="button">⬇ Download .txt</button>'
        +'<span class="gmnote" style="margin:0">Paste it into a Claude chat for a written summary of what came in and what to do first</span></div>';
       h+=_gmBriefHTML();
-      h+='<div class="gmbsep">All messages</div>';
-      h+='<div class="gmcatbar"><button class="gmcatb'+(_gmFC?'':' on')+'" data-cat="" type="button" style="--c:#0E5C52;--cb:#E6F0EC">All '+L.length+'</button>';
+      h+='<div class="gmbsep"><button class="gmfold" id="gmFold" type="button">'
+        +(GMCFG.showAll?'\u25BE':'\u25B8')+' รายการทั้งหมด <b>'+L.length+'</b> ฉบับ</button></div>';
+      if(!GMCFG.showAll){h+='</div>';pg.innerHTML=h;_gmBind();return;}
+      h+='<div class="gmcatbar"><button class="gmcatb'+(_gmFC?'':' on')+'" data-cat="" type="button" style="--c:#0E5C52;--cb:#E6F0EC">ทั้งหมด '+L.length+'</button>';
       GM_CAT.concat([GM_OTHER]).forEach(function(c){if(!cats[c[0]])return;
         h+='<button class="gmcatb'+(_gmFC===c[0]?' on':'')+'" data-cat="'+c[0]+'" type="button" style="--c:'+c[2]+';--cb:'+c[3]+'">'+esc(c[1])+' '+cats[c[0]]+'</button>';});
       h+='</div>';
@@ -10215,10 +10217,10 @@ function renderGm(){
         h+='<div class="gmgrp" style="--c:'+c[2]+';--cb:'+c[3]+'">'+esc(c[1])+'<span class="gmgn">'+g[k].length+'</span></div><div class="gmlist">';
         g[k].forEach(function(m){
           var ini=((m.from||'?').trim().charAt(0)||'?').toUpperCase();
-          h+='<div class="gmmsg'+(m.unread?' unread':'')+'" data-open="'+_eatt(m.thread)+'" style="--c:'+c[2]+';--cb:'+c[3]+'" title="Open in Gmail">'
+          h+='<div class="gmmsg'+(m.unread?' unread':'')+'" data-open="'+_eatt(m.thread)+'" style="--c:'+c[2]+';--cb:'+c[3]+'" title="คลิกเพื่อเปิดใน Gmail">'
            +'<span class="gmav">'+esc(ini)+'</span><div class="gmbody">'
            +'<div class="gmrow1"><span class="gmfrom">'+esc(m.from)+'</span><span class="gmmail">'+esc(m.email)+'</span>'
-           +(m.unread?'<span class="gmnew">new</span>':'')+'<span class="gmdate">'+esc(_gmDate(m.ts))+'</span></div>'
+           +(m.unread?'<span class="gmnew">ใหม่</span>':'')+'<span class="gmdate">'+esc(_gmDate(m.ts))+'</span></div>'
            +'<div class="gmsubj">'+esc(m.subj)+'</div>'
            +(m.snip?('<div class="gmsnip">'+esc(m.snip)+'</div>'):'')
            +'</div></div>';
@@ -10246,6 +10248,7 @@ function _gmBind(){
     if((b=cl('#gmCopyOrigin'))){_gmFallbackCopy(location.origin,function(){_gmNote='Copied '+location.origin;renderGm();});return;}
     if((b=cl('#gmCopy'))){_gmCopyDigest();return;}
     if((b=cl('#gmDl'))){_gmDownload();return;}
+    if((b=cl('#gmFold'))){GMCFG.showAll=!GMCFG.showAll;_gmSave();renderGm();return;}
     if((b=cl('#gmWatchCfg'))){GMCFG.watchOpen=!GMCFG.watchOpen;_gmSave();renderGm();return;}
     if((b=cl('#gmWatchAdd'))){_gmWatchAddFromInput();return;}
     if((b=cl('[data-wdel]'))){var _wd=b.getAttribute('data-wdel')||'';
@@ -34942,6 +34945,18 @@ body.sbfold .sbshow-btn{display:inline-flex}
 #page-gm .gmf.doc{background:#E7EFF8;border-color:#BBD0EA;color:#1D5FAE}
 #page-gm .gmf.tax{background:#FEF3C7;border-color:#EBD4A5;color:#8A5E12}
 #page-gm .gmf.due{background:#FBE7EA;border-color:#F1C9CF;color:#B42318}
+/* v15.3: Gmail — the fold for the full list, and a calmer brief */
+#page-gm .gmfold{font-family:inherit;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--ink2,#4A5563);background:#fff;border:1px solid var(--line,#E6E0D4);border-radius:999px;
+  padding:5px 15px;cursor:pointer;transition:.12s}
+#page-gm .gmfold:hover{border-color:var(--brand,#0E5C52);color:var(--brand-d,#0A463E)}
+#page-gm .gmfold b{font-variant-numeric:tabular-nums}
+#page-gm .gmbsep{margin:18px 0 10px}
+/* one card per section reads better with a little more air and a quieter border */
+#page-gm .gmbrief{gap:14px}
+#page-gm .gmbsec{padding:13px 15px 14px;border-radius:15px}
+#page-gm .gmbh{font-size:14px;margin-bottom:11px}
+#page-gm .gmbi{font-size:16px}
 </style>
 <script id="jvSidesJs">
 /* ===== v14.6: Joint Venture — name each side's entry table for what it holds,
